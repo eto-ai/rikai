@@ -1,0 +1,48 @@
+name: Python
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+    timeout-minutes: 15
+    steps:
+    - uses: actions/checkout@v2
+      # with:
+      #   lfs: true
+    # - name: Checkout LFS objects
+    #   run: git lfs checkout
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Pip install
+      working-directory: python
+      run: |
+        sudo apt-get -y -qq install libsnappy-dev
+        python -m pip install -q numpy wheel pylint black
+        python setup.py bdist_wheel
+        python -m pip install $(ls dist/rikai*.whl)[test]
+    - name: Python black
+      if: ${{ matrix.python-version == 3.8 }}
+      working-directory: python
+      run: black --check -t py38 rikai tests
+    - name: Python lint
+      if: ${{ matrix.python-version == 3.8 }}
+      working-directory: python
+      run: pylint rikai || true
+    - name: Run python tests
+      working-directory: python
+      run: |
+        pytest --ignore=tests/parquet/internal

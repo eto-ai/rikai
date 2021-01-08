@@ -1,0 +1,23 @@
+*.class
+*.log
+
+# Scala
+.metals
+.bloop
+**/target
+**/build
+*.egg-info
+**/dist
+__pycache__
+*.so
+
+
+notebooks/dataset
+notebooks/out
+**/.ipynb_checkpoints
+project/
+
+python/rikai/jars/
+
+.idea/
+.vscode/

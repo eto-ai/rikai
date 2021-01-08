@@ -1,4 +1,6 @@
-![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg)
+![Apache License](https://img.shields.io/github/license/eto-ai/rikai?style=for-the-badge)
+![Github Action](https://img.shields.io/github/workflow/status/eto-ai/rikai/Python?style=for-the-badge)
+![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg?style=for-the-badge)
 
 > :heavy_exclamation_mark: This repository is still experimental. No API-compatiblitly is guarenteed.
 

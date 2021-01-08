@@ -1,4 +1,5 @@
 ![Apache License](https://img.shields.io/github/license/eto-ai/rikai?style=for-the-badge)
+![Read The Doc](https://img.shields.io/readthedocs/rikai?style=for-the-badge)
 ![Github Action](https://img.shields.io/github/workflow/status/eto-ai/rikai/Python?style=for-the-badge)
 ![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg?style=for-the-badge)
 
@@ -18,42 +19,18 @@ from rikai.vision import Image, BBox
 from rikai import numpy as np
 
 df = spark.createDataFrame(
-    [
-        Row(
-            id=1,
-            mat=DenseMatrix(2, 2, range(4)),
-            image=Image(uri="s3://foo/bar/1.png"),
-            annotations=[
-                Row(
-                    label=Label("cat"),
-                    mask=np.random(size=(256, 256)),
-                    bbox=BBox(xmin=1.0, ymin=2.0, xmax=3.0, ymax=4.0),
-                ),
-                Row(
-                    label=Label("dog"),
-                    mask=np.random(size=(256, 256)),
-                    bbox=BBox(xmin=1.0, ymin=2.0, xmax=3.0, ymax=4.0),
-                ),
-            ]
-        ),
-        Row(
-            id=2,
-            mat=DenseMatrix(3, 4, range(4)),
-            image=Image(uri="s3://foo/bar/2.png"),
-            annotations=[
-                Row(
-                    label=Label("car"),
-                    mask=np.random(size=(256, 256)),
-                    bbox=BBox(xmin=1.0, ymin=2.0, xmax=3.0, ymax=4.0),
-                ),
-                Row(
-                    label=Label("flag"),
-                    mask=np.random(size=(256, 256)),
-                    bbox=BBox(xmin=1.0, ymin=2.0, xmax=3.0, ymax=4.0),
-                ),
-            ]
-        ),
-    ]
+    [{
+        "id": 1,
+        "mat": DenseMatrix(2, 2, range(4)),
+        "image": Image("s3://foo/bar/1.png"),
+        "annotations": [
+            {
+                "label": Label("cat"),
+                "mask": np.random(size=(256,256)),
+                "bbox": BBox(xmin=1.0, ymin=2.0, xmax=3.0, ymax=4.0)
+            }
+        ]
+    }]
 )
 
 df.write.format("rikai").save("s3://path/to/features")

@@ -36,7 +36,9 @@ Welcome to Rikai's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: API References:
+
+   api/modules
 
 
 

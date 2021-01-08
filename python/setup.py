@@ -43,7 +43,7 @@ setup(
         "torch": ["torch>=1.5.0", "torchvision"],
         "jupyter": ["matplotlib", "jupyterlab"],
         "aws": ["boto"],
-        "docs": ["sphinx-autoapi", "sphinx"],
+        "docs": ["sphinx"],
     },
     classifiers=[
         "License :: OSI Approved :: Apache Software License",

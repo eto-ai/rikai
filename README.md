@@ -1,3 +1,7 @@
+![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg)
+
+> :heavy_exclamation_mark: This repository is still experimental. No API-compatiblitly is guarenteed.
+
 # rikai
 
 Rikai is a `parquet` based feature store that has native Spark / Pytorch / Tensorflow support.

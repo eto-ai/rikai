@@ -19,7 +19,9 @@ package org.apache.spark.sql.rikai
   * 3-D Bounding Box
   */
 class Box3d(
-    val center: Point
+    val center: Point,
+    val orientation: Orientation
 ) {
-  override def toString: String = f"Box3d(center=$center)"
+  override def toString: String =
+    f"Box3d(center=$center, orientation=$orientation)"
 }

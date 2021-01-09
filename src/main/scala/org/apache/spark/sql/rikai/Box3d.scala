@@ -24,6 +24,8 @@ package org.apache.spark.sql.rikai
   * @param height the height of the 3D box.
   * @param length the length of the 3D box.
   * @param orientation the orientation of the 3D bounding box.
+  *
+  * @see [[https://github.com/waymo-research/waymo-open-dataset/blob/master/waymo_open_dataset/label.proto  Waymo Dataset Spec]]
   */
 class Box3d(
     val center: Point,

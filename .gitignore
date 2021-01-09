@@ -4,6 +4,7 @@
 # Scala
 .metals
 .bloop
+.bsp
 **/target
 **/build
 *.egg-info
@@ -11,6 +12,7 @@
 __pycache__
 *.so
 
+docs/_build
 
 notebooks/dataset
 notebooks/out

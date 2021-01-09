@@ -17,6 +17,9 @@ package org.apache.spark.sql.rikai
 
 /**
   * 3-D Bounding Box
+  *
+  * @param center Center point (x, y, z) of the box
+  * @param orientaorientationtion the orientation of the box
   */
 class Box3d(
     val center: Point,

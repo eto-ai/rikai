@@ -35,7 +35,7 @@ class Point(
 /**
   * User defined type for 3-D Point
   */
-private[spark] class PointType extends UserDefinedType[Point] {
+class PointType extends UserDefinedType[Point] {
 
   override def sqlType: DataType =
     StructType(
@@ -71,5 +71,6 @@ private[spark] class PointType extends UserDefinedType[Point] {
   override def defaultSize: Int = 12
 
   override def typeName: String = "Point"
-
 }
+
+case object PointType extends PointType

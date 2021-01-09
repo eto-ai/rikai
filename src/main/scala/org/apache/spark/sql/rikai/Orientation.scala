@@ -74,3 +74,5 @@ private[spark] class OrientationType extends UserDefinedType[Orientation] {
 
   override def typeName: String = "orientation"
 }
+
+case object OrientationType extends OrientationType

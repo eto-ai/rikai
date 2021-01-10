@@ -26,11 +26,13 @@ import Utils.approxEqual
   * 3-D Bounding Box
   *
   * @constructor Create a 3-D bounding box.
-  * @param center Center point of the box.
+  * @param center Center [[Point]] ''(x, y, z)'' of the bounding box.
   * @param width the width of the 3D box.
   * @param height the height of the 3D box.
   * @param length the length of the 3D box.
-  * @param orientation the orientation of the 3D bounding box.
+  * @param heading the heading of the bounding box (in radians).  The heading is the angle
+  *        required to rotate +x to the surface normal of the box front face. It is
+  *        normalized to ''[-pi, pi)''.
   *
   * @see [[https://github.com/waymo-research/waymo-open-dataset/blob/master/waymo_open_dataset/label.proto Waymo Dataset Spec]]
   */

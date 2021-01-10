@@ -35,15 +35,15 @@ from pyspark.sql.types import (
 import rikai
 from rikai.convert import PortableDataType
 from rikai.logging import logger
-from rikai.types.geometry import PointType, Box3dType
+from rikai.types.geometry import PointType, Box3dType, Box2dType
 
 __all__ = [
     "ImageType",
     "NDArrayType",
     "LabelType",
-    "BBoxType",
     "PointType",
     "Box3dType",
+    "Box2dType",
 ]
 
 
@@ -80,65 +80,6 @@ class ImageType(UserDefinedType):
 
     def simpleString(self) -> str:
         return "ImageType"
-
-
-class BBoxType(UserDefinedType):
-    """User defined type for Bounding Box"""
-
-    @classmethod
-    def sqlType(cls) -> StructType:
-        return StructType(
-            fields=[
-                StructField(
-                    "xmin",
-                    FloatType(),
-                    False,
-                ),
-                StructField(
-                    "ymin",
-                    FloatType(),
-                    False,
-                ),
-                StructField(
-                    "xmax",
-                    FloatType(),
-                    False,
-                ),
-                StructField(
-                    "ymax",
-                    FloatType(),
-                    False,
-                ),
-            ]
-        )
-
-    @classmethod
-    def module(cls) -> str:
-        return "rikai.spark.types"
-
-    @classmethod
-    def scalaUDT(cls) -> str:
-        return "org.apache.spark.sql.rikai.BBoxType"
-
-    def serialize(self, obj: "BBox"):
-        """Serialize an numpy.ndarra into Spark Row"""
-        return (
-            obj.xmin,
-            obj.ymin,
-            obj.xmax,
-            obj.ymax,
-        )
-
-    def deserialize(self, datum: Row) -> "BBox":
-        from rikai.vision import BBox
-
-        if len(datum) < 4:
-            logger.error(f"Deserialize bbox: not sufficient data: {datum}")
-
-        return BBox(datum[0], datum[1], datum[2], datum[3])
-
-    def simpleString(self) -> str:
-        return "bbox"
 
 
 class NDArrayType(UserDefinedType):

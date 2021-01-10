@@ -33,7 +33,8 @@ from pyspark.sql.types import (
 from rikai.parquet import Dataset
 from rikai.spark.types import NDArrayType
 from rikai.testing import SparkTestCase
-from rikai.vision import BBox, Image
+from rikai.vision import Image
+from rikai.types import Box2d
 
 
 class TestParquetUdt(SparkTestCase):
@@ -199,20 +200,20 @@ class TestParquetUdt(SparkTestCase):
         )
 
     def test_bbox(self):
-        df = self.spark.createDataFrame([Row(b=BBox(1, 2, 3, 4))])
+        df = self.spark.createDataFrame([Row(b=Box2d(1, 2, 3, 4))])
         df.write.mode("overwrite").format("rikai").save(self.test_dir)
 
         records = self._read_parquets(self.test_dir)
 
-        self.assertCountEqual([{"b": BBox(1, 2, 3, 4)}], records)
+        self.assertCountEqual([{"b": Box2d(1, 2, 3, 4)}], records)
 
     def test_bbox_list(self):
         df = self.spark.createDataFrame(
-            [Row(bboxes=[Row(b=BBox(1, 2, 3, 4)), Row(b=BBox(3, 4, 5, 6))])]
+            [Row(bboxes=[Row(b=Box2d(1, 2, 3, 4)), Row(b=Box2d(3, 4, 5, 6))])]
         )
         df.write.mode("overwrite").format("rikai").save(self.test_dir)
 
         records = self._read_parquets(self.test_dir)
         self.assertCountEqual(
-            [{"bboxes": [{"b": BBox(1, 2, 3, 4)}, {"b": BBox(3, 4, 5, 6)}]}], records
+            [{"bboxes": [{"b": Box2d(1, 2, 3, 4)}, {"b": Box2d(3, 4, 5, 6)}]}], records
         )

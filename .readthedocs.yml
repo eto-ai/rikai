@@ -1,12 +1,5 @@
 version: 2
 sphinx:
   configuration: docs/conf.py
-python:
-  install:
-    - method: pip
-      path: python
-      extra_requirements:
-        - docs
-        - test
-        - torch
-
+conda:
+  environment: environment.yml

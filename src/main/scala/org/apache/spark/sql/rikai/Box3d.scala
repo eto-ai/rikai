@@ -40,7 +40,7 @@ class Box3d(
     val length: Double,
     val width: Double,
     val height: Double,
-    val orientation: Orientation
+    val heading: Double
 ) {
 
   override def equals(b: Any): Boolean =
@@ -50,21 +50,18 @@ class Box3d(
           approxEqual(length, other.length) &&
           approxEqual(width, other.width) &&
           approxEqual(height, other.height) &&
-          orientation == other.orientation
+          approxEqual(heading, other.heading)
       case _ => false
     }
 
   override def toString: String =
-    f"Box3d(center=$center, l=$length, w=$width, h=$height, orientation=$orientation)"
+    f"Box3d(center=$center, l=$length, w=$width, h=$height, heading=$heading)"
 }
 
 /**
   * User defined type of 3D Bounding Box
   */
 class Box3dType extends UserDefinedType[Box3d] {
-
-  lazy val cachedPointType = new PointType()
-  lazy val cachedOrientationType = new OrientationType()
 
   override def sqlType: DataType =
     StructType(
@@ -77,11 +74,11 @@ class Box3dType extends UserDefinedType[Box3d] {
         StructField("length", DoubleType, nullable = false),
         StructField("width", DoubleType, nullable = false),
         StructField("height", DoubleType, nullable = false),
-        StructField("orientation", OrientationType.sqlType, nullable = false)
+        StructField("heading", DoubleType, nullable = false)
       )
     )
 
-  override def pyUDT: String = "rikai.spark.types.Box3dType"
+  override def pyUDT: String = "rikai.spark.types.geometry.Box3dType"
 
   override def serialize(obj: Box3d): Any = {
     val row = new GenericInternalRow(5)
@@ -89,7 +86,7 @@ class Box3dType extends UserDefinedType[Box3d] {
     row.setDouble(1, obj.length)
     row.setDouble(2, obj.width)
     row.setDouble(3, obj.height)
-    row.update(4, cachedOrientationType.serialize(obj.orientation))
+    row.setDouble(4, obj.heading)
     row
   }
 
@@ -101,16 +98,15 @@ class Box3dType extends UserDefinedType[Box3d] {
         val length = row.getDouble(1)
         val width = row.getDouble(2)
         val height = row.getDouble(3)
-        val orientationRow = row.getStruct(4, 4)
-        val orientation = cachedOrientationType.deserialize(orientationRow)
-        new Box3d(point, length, width, height, orientation)
+        val heading = row.getDouble(4)
+        new Box3d(point, length, width, height, heading)
       }
     }
   }
 
   override def userClass: Class[Box3d] = classOf[Box3d]
 
-  override def defaultSize: Int = 64
+  override def defaultSize: Int = 40
 
   override def typeName: String = "box3d"
 }

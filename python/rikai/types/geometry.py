@@ -16,7 +16,6 @@
 """
 
 import numpy as np
-
 from rikai.mixin import ToNumpy
 from rikai.spark.types.geometry import PointType
 
@@ -59,7 +58,7 @@ class Box3d(ToNumpy):
     Attributes
     ----------
     center : Point
-        Center point of the bounding box
+        Center :py:class:`Point` of the bounding box
     length : float
         The x dimention of the box
     width : float
@@ -73,7 +72,7 @@ class Box3d(ToNumpy):
 
     References
     ----------
-    .. [1] Waymo Dataset Spec https://github.com/waymo-research/waymo-open-dataset/blob/master/waymo_open_dataset/label.proto
+    * Waymo Dataset Spec https://github.com/waymo-research/waymo-open-dataset/blob/master/waymo_open_dataset/label.proto
     """
 
     def __init__(
@@ -85,10 +84,10 @@ class Box3d(ToNumpy):
         heading: float,
     ):
         self.center = center
-        self.length = length
-        self.width = width
-        self.height = height
-        self.heading = heading
+        self.length = float(length)
+        self.width = float(width)
+        self.height = float(height)
+        self.heading = float(heading)
 
     def __repr__(self) -> str:
         return f"Box3d(center={self.center}, l={self.length}, h={self.height}, w={self.weight}, heading={self.heading})"

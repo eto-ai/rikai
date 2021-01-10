@@ -32,7 +32,7 @@ class Box3dTest extends AnyFunSuite {
       new File(Files.createTempDirectory("rikai").toFile(), "dataset")
 
     val df = Seq(
-      (1, new Box3d(new Point(1, 2, 3), 1, 2, 3, new Orientation(1, 2, 3, 4))),
+      (1, new Box3d(new Point(1, 2, 3), 1, 2, 3, 2.7)),
       (
         2,
         new Box3d(
@@ -40,7 +40,7 @@ class Box3dTest extends AnyFunSuite {
           1.2,
           2.3,
           3.4,
-          new Orientation(1.2, 2.3, 3.4, 4.5)
+          2.3
         )
       )
     ).toDF()

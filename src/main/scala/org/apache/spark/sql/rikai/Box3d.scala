@@ -20,6 +20,8 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
 import org.apache.spark.sql.catalyst.InternalRow
 
+import Utils.approxEqual
+
 /**
   * 3-D Bounding Box
   *
@@ -32,6 +34,7 @@ import org.apache.spark.sql.catalyst.InternalRow
   *
   * @see [[https://github.com/waymo-research/waymo-open-dataset/blob/master/waymo_open_dataset/label.proto Waymo Dataset Spec]]
   */
+@SQLUserDefinedType(udt = classOf[Box3dType])
 class Box3d(
     val center: Point,
     val length: Double,
@@ -39,6 +42,18 @@ class Box3d(
     val height: Double,
     val orientation: Orientation
 ) {
+
+  override def equals(b: Any): Boolean =
+    b match {
+      case other: Box3d =>
+        center == other.center &&
+          approxEqual(length, other.length) &&
+          approxEqual(width, other.width) &&
+          approxEqual(height, other.height) &&
+          orientation == other.orientation
+      case _ => false
+    }
+
   override def toString: String =
     f"Box3d(center=$center, l=$length, w=$width, h=$height, orientation=$orientation)"
 }
@@ -48,21 +63,33 @@ class Box3d(
   */
 class Box3dType extends UserDefinedType[Box3d] {
 
+  lazy val cachedPointType = new PointType()
+  lazy val cachedOrientationType = new OrientationType()
+
   override def sqlType: DataType =
     StructType(
       Seq(
-        StructField("center", PointType, nullable = false),
+        StructField(
+          "center",
+          PointType.sqlType,
+          nullable = false
+        ),
         StructField("length", DoubleType, nullable = false),
         StructField("width", DoubleType, nullable = false),
         StructField("height", DoubleType, nullable = false),
-        StructField("orientation", OrientationType, nullable = false)
+        StructField("orientation", OrientationType.sqlType, nullable = false)
       )
     )
 
   override def pyUDT: String = "rikai.spark.types.Box3dType"
 
   override def serialize(obj: Box3d): Any = {
-    val row = new GenericInternalRow(4)
+    val row = new GenericInternalRow(5)
+    row.update(0, cachedPointType.serialize(obj.center))
+    row.setDouble(1, obj.length)
+    row.setDouble(2, obj.width)
+    row.setDouble(3, obj.height)
+    row.update(4, cachedOrientationType.serialize(obj.orientation))
     row
   }
 
@@ -70,12 +97,12 @@ class Box3dType extends UserDefinedType[Box3d] {
     datum match {
       case row: InternalRow => {
         val centerRow = row.getStruct(0, 3)
-        val point = new PointType().deserialize(centerRow)
+        val point = cachedPointType.deserialize(centerRow)
         val length = row.getDouble(1)
         val width = row.getDouble(2)
         val height = row.getDouble(3)
         val orientationRow = row.getStruct(4, 4)
-        val orientation = new OrientationType().deserialize(orientationRow)
+        val orientation = cachedOrientationType.deserialize(orientationRow)
         new Box3d(point, length, width, height, orientation)
       }
     }

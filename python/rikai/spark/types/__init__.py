@@ -22,7 +22,6 @@ from pyspark.sql.types import (
     ArrayType,
     BinaryType,
     DataType,
-    FloatType,
     IntegerType,
     ShortType,
     StringType,

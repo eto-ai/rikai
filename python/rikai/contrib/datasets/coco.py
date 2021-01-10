@@ -42,8 +42,9 @@ except ImportError as exc:
     raise ImportError("Please install pycocotools") from exc
 
 from rikai.spark.functions import image_copy
-from rikai.spark.types import BBoxType, ImageType, LabelType
-from rikai.vision import BBox, Image, Label
+from rikai.spark.types import ImageType, LabelType, Box2dType
+from rikai.vision import Image, Label
+from rikai.types import Box2d
 
 __all__ = ["convert"]
 
@@ -107,13 +108,7 @@ def convert(
             annotations = coco.loadAnns(ann_id)
             annos = []
             for ann in annotations:
-                ann_bbox = ann["bbox"]
-                bbox = BBox(
-                    ann_bbox[0],
-                    ann_bbox[1],
-                    ann_bbox[0] + ann_bbox[2],
-                    ann_bbox[1] + ann_bbox[3],
-                )
+                bbox = Box2d(*ann["bbox"])
                 annos.append(
                     {
                         "category_id": ann["category_id"],
@@ -151,7 +146,7 @@ def convert(
                             StructField("category_id", IntegerType()),
                             StructField("category_text", LabelType()),
                             StructField("area", FloatType()),
-                            StructField("bbox", BBoxType()),
+                            StructField("bbox", Box2dType()),
                         ]
                     )
                 ),

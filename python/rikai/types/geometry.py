@@ -92,7 +92,7 @@ class Box2d(ToNumpy):
 
     def to_numpy(self) -> np.ndarray:
         """Convert a :py:class:`Box2d` to numpy ndarray"""
-        return np.array([self.xmin, self.ymin, self.xmax, self.ymax])
+        return np.array([self.x, self.y, self.width, self.height])
 
     @property
     def xmin(self) -> float:

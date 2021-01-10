@@ -14,7 +14,6 @@
 
 """Spark User Defined Types
 """
-from typing import Tuple
 
 # Third Party
 import numpy as np

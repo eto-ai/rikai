@@ -18,6 +18,7 @@
 import numpy as np
 
 from rikai.mixin import ToNumpy
+from rikai.spark.types.geometry import PointType
 
 
 class Point(ToNumpy):
@@ -32,6 +33,8 @@ class Point(ToNumpy):
     z : float
         The Z coordinate.
     """
+
+    __UDT__ = PointType()
 
     def __init__(self, x: float, y: float, z: float):
         self.x = x

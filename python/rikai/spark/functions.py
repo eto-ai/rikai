@@ -16,10 +16,13 @@
 
 from pyspark.sql.functions import udf
 from pyspark.sql.types import FloatType, StringType
+
+# Rikai
 from rikai.io import copy as _copy
 from rikai.logging import logger
 from rikai.spark.types import ImageType, LabelType
-from rikai.vision import BBox, Image, Label
+from rikai.vision import Image, Label
+from rikai.types import Box2d
 
 __all__ = ["label", "area", "copy", "image_copy"]
 
@@ -31,7 +34,7 @@ def label(value: str) -> Label:
 
 
 @udf(returnType=FloatType())
-def area(bbox: BBox) -> float:
+def area(bbox: Box2d) -> float:
     """A UDF to calculate the area of a bounding box"""
     return bbox.area
 

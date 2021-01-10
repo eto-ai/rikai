@@ -15,4 +15,4 @@
 """Semantic types
 """
 
-from rikai.types.geometry import Point, Box3d
+from rikai.types.geometry import Point, Box3d, Box2d

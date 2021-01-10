@@ -18,8 +18,7 @@ from pyspark.sql.functions import col
 # Rikai
 from rikai.spark.functions import label
 from rikai.testing.spark import SparkTestCase
-from rikai.vision import BBox
-from rikai.types.geometry import Box3d, Point
+from rikai.types.geometry import Box3d, Box2d, Point
 
 
 class TypesTest(SparkTestCase):
@@ -36,7 +35,7 @@ class TypesTest(SparkTestCase):
 
     def test_bbox(self):
         df = self.spark.createDataFrame(
-            [Row(BBox(1, 2, 3, 4)), Row(BBox(23, 33, 44, 88))], ["bbox"]
+            [Row(Box2d(1, 2, 3, 4)), Row(Box2d(23, 33, 44, 88))], ["bbox"]
         )
         df.show()
         print(df.collect())

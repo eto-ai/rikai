@@ -37,9 +37,17 @@ class Point(ToNumpy):
     __UDT__ = PointType()
 
     def __init__(self, x: float, y: float, z: float):
-        self.x = x
-        self.y = y
-        self.z = z
+        self.x = float(x)
+        self.y = float(y)
+        self.z = float(z)
+
+    def __repr__(self) -> str:
+        return f"Point({self.x}, {self.y}, {self.z})"
+
+    def __eq__(self, o: object) -> bool:
+        return (
+            isinstance(o, Point) and self.x == o.x and self.y == o.y and self.z == o.z
+        )
 
     def to_numpy(self) -> np.ndarray:
         return np.array([self.x, self.y, self.z])

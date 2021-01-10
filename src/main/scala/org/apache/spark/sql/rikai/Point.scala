@@ -49,7 +49,7 @@ class Point(
 /**
   * User defined type for 3-D Point
   */
-private[rikai] class PointType extends UserDefinedType[Point] {
+private[spark] class PointType extends UserDefinedType[Point] {
 
   override def sqlType: DataType =
     StructType(
@@ -60,7 +60,7 @@ private[rikai] class PointType extends UserDefinedType[Point] {
       )
     )
 
-  override def pyUDT: String = "rikai.spark.types.PointType"
+  override def pyUDT: String = "rikai.spark.types.geometry.PointType"
 
   override def serialize(obj: Point): Any = {
     val row = new GenericInternalRow(3)
@@ -82,7 +82,7 @@ private[rikai] class PointType extends UserDefinedType[Point] {
 
   override def userClass: Class[Point] = classOf[Point]
 
-  override def defaultSize: Int = 12
+  override def defaultSize: Int = 24
 
   override def typeName: String = "Point"
 }

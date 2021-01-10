@@ -35,7 +35,7 @@ class PointType(UserDefinedType):
 
     @classmethod
     def module(cls) -> str:
-        return "rikai.spark.types"
+        return "rikai.spark.types.geometry"
 
     @classmethod
     def scalaUDT(cls) -> str:
@@ -43,11 +43,7 @@ class PointType(UserDefinedType):
 
     def serialize(self, obj: "Point"):
         """Serialize an numpy.ndarra into Spark Row"""
-        return (
-            obj.x,
-            obj.y,
-            obj.z,
-        )
+        return Row(x=obj.x, y=obj.y, z=obj.z)
 
     def deserialize(self, datum: Row) -> "Point":
         from rikai.types.geometry import Point
@@ -55,7 +51,7 @@ class PointType(UserDefinedType):
         if len(datum) < 3:
             logger.error(f"Deserialize Point: not sufficient data: {datum}")
 
-        return Point(datum[0], datum[1], datum[2], datum[3])
+        return Point(datum[0], datum[1], datum[2])
 
     def simpleString(self) -> str:
         return "PointType"

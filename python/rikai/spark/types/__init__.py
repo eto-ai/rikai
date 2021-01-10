@@ -35,8 +35,9 @@ from pyspark.sql.types import (
 import rikai
 from rikai.convert import PortableDataType
 from rikai.logging import logger
+from rikai.types.geometry import PointType
 
-__all__ = ["ImageType", "NDArrayType", "LabelType", "BBoxType"]
+__all__ = ["ImageType", "NDArrayType", "LabelType", "BBoxType", "PointType"]
 
 
 class ImageType(UserDefinedType):

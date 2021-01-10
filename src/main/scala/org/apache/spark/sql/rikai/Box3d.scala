@@ -85,7 +85,7 @@ class Box3dType extends UserDefinedType[Box3d] {
 
   override def serialize(obj: Box3d): Any = {
     val row = new GenericInternalRow(5)
-    row.update(0, cachedPointType.serialize(obj.center))
+    row.update(0, PointType.serialize(obj.center))
     row.setDouble(1, obj.length)
     row.setDouble(2, obj.width)
     row.setDouble(3, obj.height)
@@ -97,7 +97,7 @@ class Box3dType extends UserDefinedType[Box3d] {
     datum match {
       case row: InternalRow => {
         val centerRow = row.getStruct(0, 3)
-        val point = cachedPointType.deserialize(centerRow)
+        val point = PointType.deserialize(centerRow)
         val length = row.getDouble(1)
         val width = row.getDouble(2)
         val height = row.getDouble(3)

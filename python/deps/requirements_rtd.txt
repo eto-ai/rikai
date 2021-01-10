@@ -1,0 +1,6 @@
+numpy
+pandas
+Pillow
+pyspark>=3
+pyarrow>=2.0
+pycocotools==2.0.2

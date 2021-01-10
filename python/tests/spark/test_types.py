@@ -19,7 +19,7 @@ from pyspark.sql.functions import col
 from rikai.spark.functions import label
 from rikai.testing.spark import SparkTestCase
 from rikai.vision import BBox
-from rikai.types.geometry import Point
+from rikai.types.geometry import Box3d, Point
 
 
 class TypesTest(SparkTestCase):
@@ -54,4 +54,13 @@ class TypesTest(SparkTestCase):
 
         actual_df = self.spark.read.format("rikai").load(self.test_dir)
         actual_df.show()
+        self.assertCountEqual(df.collect(), actual_df.collect())
+
+    def test_box3d(self):
+        df = self.spark.createDataFrame([Row(Box3d(Point(1, 2, 3), 1, 2, 3, 2.5))])
+
+        df.write.mode("overwrite").format("rikai").save(self.test_dir)
+
+        actual_df = self.spark.read.format("rikai").load(self.test_dir)
+        actual_df.printSchema()
         self.assertCountEqual(df.collect(), actual_df.collect())

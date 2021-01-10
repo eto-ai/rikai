@@ -55,3 +55,41 @@ class PointType(UserDefinedType):
 
     def simpleString(self) -> str:
         return "PointType"
+
+
+class Box3dType(UserDefinedType):
+    """Spark UDT for :py:class:`~rikai.types.geometry.Box3d` class."""
+
+    @classmethod
+    def sqlType(cls) -> StructType:
+        return StructType(
+            fields=[
+                StructField("center", PointType.sqlType(), False),
+                StructField("length", DoubleType(), False),
+                StructField("width", DoubleType(), False),
+                StructField("height", DoubleType(), False),
+                StructField("heading", DoubleType(), False),
+            ]
+        )
+
+    @classmethod
+    def module(cls) -> str:
+        return "rikai.spark.types.geometry"
+
+    @classmethod
+    def scalaUDT(cls) -> str:
+        return "org.apache.spark.sql.rikai.Box3dType"
+
+    def serialize(self, obj: "Box3d"):
+        """Serialize an numpy.ndarra into Spark Row"""
+        return Row(obj.center, obj.length, obj.width, obj.height, obj.heading)
+
+    def deserialize(self, datum: Row) -> "Box3d":
+        from rikai.types.geometry import Box3d
+
+        if len(datum) < 3:
+            logger.error(f"Deserialize Point: not sufficient data: {datum}")
+        return Box3d(datum[0], datum[1], datum[2], datum[3], datum[4])
+
+    def simpleString(self) -> str:
+        return "Box3dType"

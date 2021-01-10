@@ -17,7 +17,9 @@
 
 import numpy as np
 from rikai.mixin import ToNumpy
-from rikai.spark.types.geometry import PointType
+from rikai.spark.types.geometry import PointType, Box3dType
+
+__all__ = ["Point", "Box3d"]
 
 
 class Point(ToNumpy):
@@ -75,6 +77,8 @@ class Box3d(ToNumpy):
     * Waymo Dataset Spec https://github.com/waymo-research/waymo-open-dataset/blob/master/waymo_open_dataset/label.proto
     """
 
+    __UDT__ = Box3dType()
+
     def __init__(
         self,
         center: Point,
@@ -101,3 +105,6 @@ class Box3d(ToNumpy):
             and self.height == o.height
             and self.heading == o.heading
         )
+
+    def to_numpy(self) -> np.ndarray:
+        return None

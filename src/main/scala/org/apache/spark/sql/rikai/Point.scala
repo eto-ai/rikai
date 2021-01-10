@@ -63,7 +63,7 @@ private[rikai] class PointType extends UserDefinedType[Point] {
   override def pyUDT: String = "rikai.spark.types.PointType"
 
   override def serialize(obj: Point): Any = {
-    val row = new GenericInternalRow(4)
+    val row = new GenericInternalRow(3)
     row.setDouble(0, obj.x)
     row.setDouble(1, obj.y)
     row.setDouble(2, obj.z)

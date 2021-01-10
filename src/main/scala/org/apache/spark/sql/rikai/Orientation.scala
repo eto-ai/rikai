@@ -20,6 +20,8 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
 import org.apache.spark.sql.catalyst.InternalRow
 
+import Utils._
+
 /**
   * Object orientation in the 3D space
   */
@@ -30,6 +32,16 @@ class Orientation(
     val z: Double,
     val w: Double
 ) {
+  override def equals(o: Any): Boolean =
+    o match {
+      case other: Orientation =>
+        approxEqual(x, other.x) &&
+          approxEqual(y, other.y) &&
+          approxEqual(z, other.z) &&
+          approxEqual(w, other.z)
+      case _ => false
+    }
+
   override def toString: String = s"Orientation(x=$x, y=$y, z=$z, w=$z)"
 }
 

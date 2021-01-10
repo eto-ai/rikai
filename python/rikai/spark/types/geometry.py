@@ -20,6 +20,9 @@ from pyspark.sql.types import DoubleType, StructField, StructType, UserDefinedTy
 from rikai.logging import logger
 
 
+__all__ = ["PointType", "Box3dType"]
+
+
 class PointType(UserDefinedType):
     """Spark UDT for :py:class:`rikai.types.geometry.Point` class."""
 

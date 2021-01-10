@@ -20,8 +20,12 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
 import org.apache.spark.sql.catalyst.InternalRow
 
+import Utils.approxEqual
+
 /**
-  * 3D Point
+  * A Point in 3-D space
+  *
+  * @constructor create a 3-D Point
   */
 @SQLUserDefinedType(udt = classOf[PointType])
 class Point(
@@ -29,13 +33,23 @@ class Point(
     val y: Double,
     val z: Double
 ) {
+
+  override def equals(p: Any): Boolean =
+    p match {
+      case other: Point =>
+        approxEqual(x, other.x) &&
+          approxEqual(y, other.y) &&
+          approxEqual(z, other.z)
+      case _ => false
+    }
+
   override def toString: String = f"Point($x, $y, $z)"
 }
 
 /**
   * User defined type for 3-D Point
   */
-class PointType extends UserDefinedType[Point] {
+private[rikai] class PointType extends UserDefinedType[Point] {
 
   override def sqlType: DataType =
     StructType(

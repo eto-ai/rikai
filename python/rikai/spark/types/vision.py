@@ -22,7 +22,7 @@ from pyspark.sql.types import (
     UserDefinedType,
 )
 
-__all__ = ["ImageType"]
+__all__ = ["ImageType", "LabelType", "VideoStreamType", "YouTubeVideoType"]
 
 
 class ImageType(UserDefinedType):

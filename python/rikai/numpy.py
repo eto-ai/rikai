@@ -1,4 +1,3 @@
-#  Copyright 2020 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -12,11 +11,25 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Wrappers and help functions to use numpy arrays transparently
-in Spark / Parquet / Pytorch
-"""
-from __future__ import absolute_import
+"""This module makes :py:class:`numpy.ndarray` inter-operatable with rikai
+from feature engineerings in `Spark <https://spark.apache.org/>`_ to be trained
+in Tensorflow and Pytorch.
 
+>>> # Feature Engineering in Spark
+>>> from rikai import numpy as np
+>>> df = spark.createDataFrame([Row(mask=np.array([1, 2, 3, 4]))])
+>>> df.write.format("rikai").save("s3://path/to/features")
+
+When use the rikai data in training, the serialized numpy data will be
+automatically converted into the appropriate format, i.e., :py:class:`torch.Tensor`
+in Pytorch:
+
+>>> from rikai.torch import DataLoader
+>>> data_loader = DataLoader("s3://path/to/features")
+>>> next(data_loader)
+{"mask": tensor([1, 2, 3])}
+
+"""
 
 # Third Party
 import numpy as np
@@ -61,7 +74,7 @@ def wrap(data: np.ndarray) -> np.ndarray:
 
 
 def array(obj, *args, **kwargs) -> np.ndarray:
-    """Create an numpy array
+    """Create an numpy array using the same API as :py:func:`numpy.array`.
 
     See Also
     --------

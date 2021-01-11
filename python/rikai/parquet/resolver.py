@@ -162,13 +162,16 @@ def register(scheme: str):
 
     Examples
     --------
-    # Extend Rikai with a smart feature store
-    >>> @register("smart")
-    class SmartResolver(rikai.parquet.resolver.BaseResolver):
-        def resolve(self, uri: str) -> Iterable[str]:
-            return smart_client.get_files(uri)
 
-    >>> dataset = rikai.parquet.Dataset("smart://featureA/version/1")
+    .. code-block:: python
+
+        # Extend Rikai with a smart feature store
+        @register("smart")
+        class SmartResolver(rikai.parquet.resolver.BaseResolver):
+            def resolve(self, uri: str) -> Iterable[str]:
+                return smart_client.get_files(uri)
+
+        dataset = rikai.parquet.Dataset("smart://featureA/version/1")
     """
 
     def wrap(resolver: BaseResolver):

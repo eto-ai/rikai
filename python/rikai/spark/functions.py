@@ -63,8 +63,8 @@ def copy(source: str, dest: str) -> str:
 def image_copy(image: Image, uri: str) -> Image:
     """Copy the image to a new destination, specified by the URI.
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     image : Image
         An image object
     uri : str

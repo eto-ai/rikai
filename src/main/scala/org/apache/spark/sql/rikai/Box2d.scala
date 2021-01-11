@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.spark.sql.rikai
 
 import org.apache.spark.sql.types._
@@ -22,68 +23,78 @@ import org.apache.spark.sql.catalyst.InternalRow
 import Utils.approxEqual
 
 /**
-  * A Point in 3-D space
+  * 2-D Bounding Box
   *
-  * @constructor create a 3-D Point
+  * @constructor Create a 2-D Bounding Box
+  * @param x x-coordinate of the center
+  * @param y y-coordinate of the center
+  * @param width Width of the box
+  * @param height Height of the box
   */
-@SQLUserDefinedType(udt = classOf[PointType])
-class Point(
+@SQLUserDefinedType(udt = classOf[Box2dType])
+class Box2d(
     val x: Double,
     val y: Double,
-    val z: Double
+    val width: Double,
+    val height: Double
 ) {
 
-  override def equals(p: Any): Boolean =
-    p match {
-      case other: Point =>
+  override def equals(b: Any): Boolean = {
+    b match {
+      case other: Box2d =>
         approxEqual(x, other.x) &&
           approxEqual(y, other.y) &&
-          approxEqual(z, other.z)
-      case _ => false
+          approxEqual(width, other.width) &&
+          approxEqual(height, other.height)
+      case _ => false,
     }
+  }
 
-  override def toString: String = f"Point($x, $y, $z)"
+  override def toString: String = f"Box2d(x=$x, y=$y, h=$height, w=$width)"
+
 }
 
 /**
-  * User defined type for 3-D Point
+  * User defined type of 2D Bouding Box
   */
-private[rikai] class PointType extends UserDefinedType[Point] {
+private[spark] class Box2dType extends UserDefinedType[Box2d] {
 
   override def sqlType: DataType =
     StructType(
       Seq(
         StructField("x", DoubleType, nullable = false),
         StructField("y", DoubleType, nullable = false),
-        StructField("z", DoubleType, nullable = false)
+        StructField("width", DoubleType, nullable = false),
+        StructField("height", DoubleType, nullable = false)
       )
     )
 
-  override def pyUDT: String = "rikai.spark.types.geometry.PointType"
+  override def pyUDT: String = "rikai.spark.types.geometry.Box2dType"
 
-  override def serialize(obj: Point): Any = {
-    val row = new GenericInternalRow(3)
+  override def serialize(obj: Box2d): Any = {
+    val row = new GenericInternalRow(4)
     row.setDouble(0, obj.x)
     row.setDouble(1, obj.y)
-    row.setDouble(2, obj.z)
+    row.setDouble(2, obj.width)
+    row.setDouble(3, obj.height)
     row
   }
 
-  override def deserialize(datum: Any): Point =
+  override def deserialize(datum: Any): Box2d = {
     datum match {
       case row: InternalRow => {
         val x = row.getDouble(0)
         val y = row.getDouble(1)
-        val z = row.getDouble(2)
-        new Point(x, y, z)
+        val width = row.getDouble(2)
+        val height = row.getDouble(3)
+        new Box2d(x, y, width, height)
       }
     }
+  }
 
-  override def userClass: Class[Point] = classOf[Point]
+  override def userClass: Class[Box2d] = classOf[Box2d]
 
-  override def defaultSize: Int = 24
+  override def defaultSize: Int = 32
 
-  override def typeName: String = "Point"
+  override def typeName: String = "box2d"
 }
-
-case object PointType extends PointType

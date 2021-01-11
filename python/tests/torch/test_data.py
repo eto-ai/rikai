@@ -25,7 +25,8 @@ from pyspark.sql import Row
 
 # Rikai
 from rikai.numpy import wrap
-from rikai.vision import Image, BBox
+from rikai.vision import Image
+from rikai.types.geometry import Box2d
 from rikai.testing.spark import SparkTestCase
 from rikai.torch import DataLoader
 
@@ -86,10 +87,10 @@ class TorchDataLoaderTest(SparkTestCase):
                     image=Image(image_uri),
                     annotations=[
                         Row(
-                            category_id=123, category_text="car", bbox=BBox(1, 2, 3, 4)
+                            category_id=123, category_text="car", bbox=Box2d(1, 2, 3, 4)
                         ),
                         Row(
-                            category_id=234, category_text="dog", bbox=BBox(1, 2, 3, 4)
+                            category_id=234, category_text="dog", bbox=Box2d(1, 2, 3, 4)
                         ),
                     ],
                 )

@@ -17,9 +17,9 @@
 
 import numpy as np
 from rikai.mixin import ToNumpy
-from rikai.spark.types.geometry import PointType, Box3dType
+from rikai.spark.types.geometry import PointType, Box3dType, Box2dType
 
-__all__ = ["Point", "Box3d"]
+__all__ = ["Point", "Box3d", "Box2d"]
 
 
 class Point(ToNumpy):
@@ -52,6 +52,85 @@ class Point(ToNumpy):
 
     def to_numpy(self) -> np.ndarray:
         return np.array([self.x, self.y, self.z])
+
+
+class Box2d(ToNumpy):
+    """2-D Bounding Box.
+
+    Attributes
+    ----------
+    x : float
+        X-coordinate of the center point of the box
+    y : float
+        Y-coordinate of the center point of the box
+    width : float
+        The width of the box
+    height : float
+        The height of the box
+    """
+
+    __UDT__ = Box2dType()
+
+    def __init__(self, x: float, y: float, width: float, height: float):
+
+        self.x = float(x)
+        self.y = float(y)
+        self.width = float(width)
+        self.height = float(height)
+
+    def __repr__(self) -> str:
+        return f"Box2d(x={self.x}, y={self.y}, w={self.width}, h={self.height})"
+
+    def __eq__(self, o: object) -> bool:
+        return (
+            isinstance(o, Box2d)
+            and o.x == self.x
+            and o.y == self.y
+            and o.width == self.width
+            and o.height == self.height
+        )
+
+    def to_numpy(self) -> np.ndarray:
+        """Convert a :py:class:`Box2d` to numpy ndarray"""
+        return np.array([self.x, self.y, self.width, self.height])
+
+    @property
+    def xmin(self) -> float:
+        return self.x - self.width / 2
+
+    @property
+    def xmax(self) -> float:
+        return self.x + self.width / 2
+
+    @property
+    def ymin(self) -> float:
+        return self.y - self.height / 2
+
+    @property
+    def ymax(self) -> float:
+        return self.y + self.height * 2
+
+    @property
+    def area(self) -> float:
+        """Area of the bounding box"""
+        return self.width * self.height
+
+    def iou(self, other: "Box2d") -> float:
+        """Compute intersection over union(IOU)."""
+        assert isinstance(
+            other, Box2d
+        ), f"Can only compute iou between Box2d, got {type(other)}"
+        # Find intersection
+        xmin = max(self.xmin, other.xmin)
+        ymin = max(self.ymin, other.ymin)
+        xmax = min(self.xmax, other.xmax)
+        ymax = min(self.ymax, other.ymax)
+        inter_area = max(0, xmax - xmin) * max(0, ymax - ymin)
+
+        try:
+            return inter_area / (self.area + other.area - inter_area)
+        except ZeroDivisionError:
+            return 0
 
 
 class Box3d(ToNumpy):

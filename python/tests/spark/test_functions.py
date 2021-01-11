@@ -21,7 +21,8 @@ import numpy as np
 
 from rikai.spark.functions import area, image_copy
 from rikai.testing.spark import SparkTestCase
-from rikai.vision import BBox, Image
+from rikai.vision import Image
+from rikai.types import Box2d
 
 
 class SparkFunctionsTest(SparkTestCase):
@@ -31,8 +32,8 @@ class SparkFunctionsTest(SparkTestCase):
         """Test calculating bounding box's area."""
         df = self.spark.createDataFrame(
             [
-                (BBox(1, 2, 2, 3),),
-                (BBox(10, 12, 11, 17),),
+                (Box2d(1, 2, 1.0, 1.0),),
+                (Box2d(10, 12, 1.0, 5.0),),
             ],
             ["bbox"],
         )

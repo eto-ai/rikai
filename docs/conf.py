@@ -11,6 +11,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import shutil
 import sys
 
 sys.path.insert(0, os.path.abspath("../python"))
@@ -19,6 +20,7 @@ sys.path.insert(0, os.path.abspath("../python"))
 def run_apidoc(_):
     from sphinx.ext.apidoc import main
 
+    shutil.rmtree("api")
     main(["-f", "-o", "api", "../python/rikai"])
 
 

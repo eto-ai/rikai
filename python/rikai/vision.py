@@ -14,8 +14,6 @@
 
 """Vision Related Types
 """
-
-
 from PIL import Image as PILImage
 
 import numpy as np
@@ -23,7 +21,14 @@ from rikai.mixin import Asset, ToNumpy
 from rikai.spark.types import ImageType, LabelType
 from rikai.types.geometry import Box2d
 
-__all__ = ["Image", "Label"]
+from rikai.spark.types import (
+    ImageType,
+    LabelType,
+    YouTubeVideoType,
+    VideoStreamType,
+)
+
+__all__ = ["Image", "Box2d", "Label", "YouTubeVideo", "VideoSegment", "VideoStream"]
 
 
 class Image(ToNumpy, Asset):
@@ -115,3 +120,49 @@ class Annotation(ToNumpy):
             "bbox": self.bbox.to_numpy(),
             "score": self.score,
         }
+
+
+class VideoStream:
+    """VideoStream resource"""
+
+    __UDT__ = VideoStreamType()
+
+    def __init__(self, uri: str):
+        self.uri = uri
+
+    def __repr__(self) -> str:
+        return f"VideoStream(uri={self.uri})"
+
+    def _repr_html_(self):
+        """TODO: codec"""
+        from IPython.display import Video
+
+        if pathlib.Path(self.uri).exists():
+            path = pathlib.Path(self.uri).relative_to(os.getcwd())
+            return Video(path, width=480, height=320)._repr_html_()
+        else:
+            return Video(self.uri, width=480, heigh=320)._repr_html_()
+
+    def __eq__(self, other) -> bool:
+        return isinstance(other, VideoStream) and self.uri == other.uri
+
+
+class YouTubeVideo:
+
+    __UDT__ = YouTubeVideoType()
+
+    def __init__(self, vid: str):
+        self.vid = vid
+        self.uri = "https://www.youtube.com/watch?v={0}".format(self.vid)
+        self.embed_url = "http://www.youtube.com/embed/{0}".format(self.vid)
+
+    def __repr__(self) -> str:
+        return "YouTubeVideo({0})".format(self.vid)
+
+    def _repr_html_(self):
+        from IPython.lib.display import YouTubeVideo
+
+        return YouTubeVideo(self.embed_url)._repr_html_()
+
+    def __eq__(self, other) -> bool:
+        return isinstance(other, YouTubeVideo) and self.vid == other.vid

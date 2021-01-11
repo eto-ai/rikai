@@ -14,12 +14,12 @@
 
 from pyspark.sql import Row
 from pyspark.sql.functions import col
-from pyspark.sql.types import StringType, StructField, StructType
 
 # Rikai
 from rikai.spark.functions import label
 from rikai.testing.spark import SparkTestCase
 from rikai.vision import BBox
+from rikai.types.geometry import Box3d, Point
 
 
 class TypesTest(SparkTestCase):
@@ -45,4 +45,22 @@ class TypesTest(SparkTestCase):
         df.write.mode("overwrite").format("rikai").save(self.test_dir)
 
         actual_df = self.spark.read.format("rikai").load(self.test_dir)
+        self.assertCountEqual(df.collect(), actual_df.collect())
+
+    def test_point(self):
+        df = self.spark.createDataFrame([Row(Point(1, 2, 3)), Row(Point(2, 3, 4))])
+        df.show()
+        df.write.mode("overwrite").format("rikai").save(self.test_dir)
+
+        actual_df = self.spark.read.format("rikai").load(self.test_dir)
+        actual_df.show()
+        self.assertCountEqual(df.collect(), actual_df.collect())
+
+    def test_box3d(self):
+        df = self.spark.createDataFrame([Row(Box3d(Point(1, 2, 3), 1, 2, 3, 2.5))])
+
+        df.write.mode("overwrite").format("rikai").save(self.test_dir)
+
+        actual_df = self.spark.read.format("rikai").load(self.test_dir)
+        actual_df.printSchema()
         self.assertCountEqual(df.collect(), actual_df.collect())

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Rikai authors
+ * Copyright 2021 Rikai authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,12 @@ package org.apache.spark.sql.rikai
 
 import org.apache.spark.sql.types._
 
-class NDArrayType extends UserDefinedType[NDArray] {
+@SQLUserDefinedType(udt = classOf[NDArrayType])
+class NDArray {
+  override def toString: String = s"ndarray()"
+}
+
+private[spark] class NDArrayType extends UserDefinedType[NDArray] {
 
   override def sqlType: DataType =
     StructType(
@@ -37,9 +42,4 @@ class NDArrayType extends UserDefinedType[NDArray] {
 
   override def userClass: Class[NDArray] = classOf[NDArray]
 
-}
-
-@SQLUserDefinedType(udt = classOf[NDArrayType])
-class NDArray {
-  override def toString: String = s"ndarray()"
 }

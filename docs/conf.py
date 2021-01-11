@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath("../python"))
 def run_apidoc(_):
     from sphinx.ext.apidoc import main
 
-    shutil.rmtree("api")
+    shutil.rmtree("api", ignore_errors=True)
     main(["-f", "-o", "api", "../python/rikai"])
 
 

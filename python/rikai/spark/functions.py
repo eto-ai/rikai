@@ -21,8 +21,7 @@ from pyspark.sql.types import FloatType, StringType
 from rikai.io import copy as _copy
 from rikai.logging import logger
 from rikai.spark.types import ImageType, LabelType
-from rikai.vision import Image, Label
-from rikai.types import Box2d
+from rikai.types import Box2d, Image, Label
 
 __all__ = ["label", "area", "copy", "image_copy"]
 

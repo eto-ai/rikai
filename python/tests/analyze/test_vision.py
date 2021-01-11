@@ -19,9 +19,9 @@
 from pyspark.sql import Row
 
 # Rikai
-from rikai.testing import SparkTestCase
-from rikai.vision import Label
 from rikai.analyze.vision import LabelDistributionRule
+from rikai.testing import SparkTestCase
+from rikai.types.vision import Label
 
 
 class VisionRulesTest(SparkTestCase):

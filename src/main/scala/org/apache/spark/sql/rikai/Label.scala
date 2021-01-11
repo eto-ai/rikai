@@ -26,7 +26,7 @@ private[spark] class LabelType extends UserDefinedType[Label] {
 
   override def sqlType: DataType = StringType
 
-  override def pyUDT: String = "rikai.spark.types.LabelType"
+  override def pyUDT: String = "rikai.spark.types.vision.LabelType"
 
   override def serialize(obj: Label): Any = {
     UTF8String.fromString(obj.label)

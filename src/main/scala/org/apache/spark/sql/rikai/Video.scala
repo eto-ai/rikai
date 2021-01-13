@@ -39,7 +39,7 @@ class VideoStreamType extends UserDefinedType[VideoStream] {
       )
     )
 
-  override def pyUDT: String = "rikai.spark.types.vision.VideoStreamType"
+  override def pyUDT: String = "rikai.spark.types.VideoStreamType"
 
   override def serialize(obj: VideoStream): Any = {
     val row = new GenericInternalRow(1);
@@ -80,7 +80,7 @@ class YouTubeVideoType extends UserDefinedType[YouTubeVideo] {
       )
     )
 
-  override def pyUDT: String = "rikai.spark.types.vision.YouTubeVideoType"
+  override def pyUDT: String = "rikai.spark.types.YouTubeVideoType"
 
   override def serialize(obj: YouTubeVideo): Any = {
     val row = new GenericInternalRow(1);

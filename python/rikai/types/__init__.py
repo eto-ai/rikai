@@ -15,5 +15,7 @@
 """Semantic types
 """
 
-from rikai.types.geometry import Point, Box3d, Box2d
-from rikai.types.vision import VideoStream, YouTubeVideo, Image, Label
+# __all__ is defined in these
+from rikai.types.geometry import *
+from rikai.types.vision import *
+from rikai.types.video import *

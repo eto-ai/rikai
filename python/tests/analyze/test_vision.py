@@ -21,7 +21,7 @@ from pyspark.sql import Row
 # Rikai
 from rikai.analyze.vision import LabelDistributionRule
 from rikai.testing import SparkTestCase
-from rikai.types.vision import Label
+from rikai.types import Label
 
 
 class VisionRulesTest(SparkTestCase):

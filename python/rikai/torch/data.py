@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 """Pytorch Dataset and DataLoader"""
-
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from queue import Empty, Queue
@@ -39,6 +38,7 @@ class DataLoader:
         batch_size: int = 1,
         num_workers: int = 16,
         shuffle: bool = False,
+        transform_fn: Callable = lambda x: (x,),
         collate_fn: Callable = None,
         shuffle_pool_size: int = 2 ** 16,
     ):  # pylint: disable=too-many-arguments
@@ -50,6 +50,7 @@ class DataLoader:
         self.shuffle = shuffle
         self.shuffle_pool_size = shuffle_pool_size
         self.collate_fn = collate_fn if collate_fn else lambda x: x
+        self.transform_fn = transform_fn
 
     @staticmethod
     def _convert_tensor(row):
@@ -86,9 +87,12 @@ class DataLoader:
         """
 
         def parallel_prefetch(executor, batch, q):
-            futures = [executor.submit(DataLoader._convert_tensor, e) for e in batch]
+            fn = lambda e: [
+                DataLoader._convert_tensor(x) for x in loader.transform_fn(e)
+            ]
+            futures = [executor.submit(fn, e) for e in batch]
             for fut in as_completed(futures):
-                q.put(fut.result())
+                [q.put(x) for x in fut.result()]
 
         prefetch_batch = 4 * loader.num_workers
         with ThreadPoolExecutor(loader.num_workers) as executor:
@@ -131,3 +135,60 @@ class DataLoader:
             yield self.collate_fn(batch)
         prefetch_thd.join()
         q.join()
+
+
+def make_video_sampler(sample_gen, video_column_name=None):
+    """
+    The video sampler makes it easier to directly generate sample frames
+    in the DataLoader from a Rikai dataset containing video data.
+
+    For example:
+    ```
+    data_loader = DataLoader(
+        'path/to/video_dataset',
+        batch_size=1,
+        shuffle=True,
+        transform_fn=make_video_sampler(SingleFrameGenerator())
+    )
+    for row_dict in data_loader:
+        print(row_dict['fno']) # frame number
+        print(row_dict['frame']) # frame data as np.ndarray
+    ```
+
+    Parameters
+    ----------
+    sample_gen: SampleGenerator
+        Generates VideoSampler instances
+    video_column_name: str, default None
+        Indicate the column name that contains the video. If None then looks
+        for the first column with VideoStream or YouTubeVideo data
+
+    Returns
+    -------
+    fn: Callable[Dict, List(Dict)]
+        A function that takes a row data containing a video and returns a list
+        of frames sampled from that video
+    """
+    from rikai.types.video import YouTubeVideo, VideoStream
+
+    def transform_fn(row_dict):
+        def process_sample(i, frame):
+            frame_dict = row_dict.copy()
+            frame_dict["fno"] = i
+            frame_dict["frame"] = frame
+            return frame_dict
+
+        if video_column_name is not None:
+            video = row_dict[video_column_name]
+        else:
+            for key, value in row_dict.items():
+                if isinstance(value, (VideoStream, YouTubeVideo)):
+                    video = value
+        if isinstance(video, YouTubeVideo):
+            video = video.get_stream()
+        return [
+            DataLoader._convert_tensor(process_sample(i, frame))
+            for i, frame in enumerate(sample_gen.get_sampler(video))
+        ]
+
+    return transform_fn

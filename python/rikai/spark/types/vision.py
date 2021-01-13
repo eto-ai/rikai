@@ -22,7 +22,7 @@ from pyspark.sql.types import (
     UserDefinedType,
 )
 
-__all__ = ["ImageType", "LabelType", "VideoStreamType", "YouTubeVideoType"]
+__all__ = ["ImageType", "LabelType"]
 
 
 class ImageType(UserDefinedType):
@@ -89,81 +89,3 @@ class LabelType(UserDefinedType):
 
     def simpleString(self) -> str:
         return "label"
-
-
-class VideoStreamType(UserDefinedType):
-    """VideoStreamType defines the Spark UserDefineType for
-    a given video stream
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.codec = "mp4"  # TODO allow generic code
-
-    def __repr__(self) -> str:
-        return f"VideoType(codec={self.codec})"
-
-    @classmethod
-    def sqlType(cls) -> StructType:
-        return StructType(fields=[StructField("uri", StringType(), nullable=False)])
-
-    @classmethod
-    def module(cls) -> str:
-        return "rikai.spark.types.vision"
-
-    @classmethod
-    def scalaUDT(cls) -> str:
-        return "org.apache.spark.sql.rikai.VideoStreamType"
-
-    def serialize(self, obj: "VideoStream"):
-        """Serialize a VideoStream to a Spark Row"""
-        return (obj.uri,)
-
-    def deserialize(self, datum) -> "VideoStream":
-        from rikai.types.vision import (
-            VideoStream,
-        )  # pylint: disable=import-outside-toplevel
-
-        return VideoStream(datum[0])
-
-    def simpleString(self) -> str:
-        return "VideoStreamType"
-
-
-class YouTubeVideoType(UserDefinedType):
-    """YouTubeVideoType defines the Spark UserDefineType for
-    a piece of YouTube video content (i.e., corresponds to a given
-    youtube id but can have multiple streams)
-    """
-
-    def __init__(self):
-        super().__init__()
-
-    def __repr__(self) -> str:
-        return "YouTubeVideoType"
-
-    @classmethod
-    def sqlType(cls) -> StructType:
-        return StructType(fields=[StructField("vid", StringType(), nullable=False)])
-
-    @classmethod
-    def module(cls) -> str:
-        return "rikai.spark.types.vision"
-
-    @classmethod
-    def scalaUDT(cls) -> str:
-        return "org.apache.spark.sql.rikai.YouTubeVideoType"
-
-    def serialize(self, obj: "YouTubeVideo"):
-        """Serialize an Image to a Spark Row?"""
-        return (obj.vid,)
-
-    def deserialize(self, datum) -> "YouTubeVideo":
-        from rikai.types.vision import (
-            YouTubeVideo,
-        )  # pylint: disable=import-outside-toplevel
-
-        return YouTubeVideo(datum[0])
-
-    def simpleString(self) -> str:
-        return "YouTubeVideoType"

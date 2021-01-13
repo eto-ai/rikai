@@ -18,7 +18,7 @@ from pyspark.sql.functions import col
 # Rikai
 from rikai.spark.functions import label
 from rikai.testing.spark import SparkTestCase
-from rikai.types.geometry import Box3d, Box2d, Point
+from rikai.types import Box3d, Box2d, Point
 
 
 class TypesTest(SparkTestCase):

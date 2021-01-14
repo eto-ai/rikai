@@ -32,7 +32,7 @@ private[spark] class ImageType extends UserDefinedType[Image] {
       )
     )
 
-  override def pyUDT: String = "rikai.spark.types.ImageType"
+  override def pyUDT: String = "rikai.spark.types.vision.ImageType"
 
   override def serialize(obj: Image): Any = {
     val row = new GenericInternalRow(1);

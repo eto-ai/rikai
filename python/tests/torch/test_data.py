@@ -25,7 +25,7 @@ from pyspark.sql import Row
 
 # Rikai
 from rikai.numpy import wrap
-from rikai.vision import Image
+from rikai.types.vision import Image
 from rikai.types.geometry import Box2d
 from rikai.testing.spark import SparkTestCase
 from rikai.torch import DataLoader

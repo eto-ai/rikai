@@ -1,4 +1,3 @@
-#  Copyright 2020 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -14,21 +13,20 @@
 
 """Vision Related Types
 """
+
+import os
+import pathlib
+
+# 3rd party
+import numpy as np
 from PIL import Image as PILImage
 
-import numpy as np
+# Rikai
 from rikai.mixin import Asset, ToNumpy
-from rikai.spark.types import ImageType, LabelType
+from rikai.spark.types import ImageType, LabelType, VideoStreamType, YouTubeVideoType
 from rikai.types.geometry import Box2d
 
-from rikai.spark.types import (
-    ImageType,
-    LabelType,
-    YouTubeVideoType,
-    VideoStreamType,
-)
-
-__all__ = ["Image", "Box2d", "Label", "YouTubeVideo", "VideoSegment", "VideoStream"]
+__all__ = ["Image", "Label", "YouTubeVideo", "VideoStream"]
 
 
 class Image(ToNumpy, Asset):

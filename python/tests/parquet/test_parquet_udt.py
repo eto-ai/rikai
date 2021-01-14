@@ -33,8 +33,7 @@ from pyspark.sql.types import (
 from rikai.parquet import Dataset
 from rikai.spark.types import NDArrayType
 from rikai.testing import SparkTestCase
-from rikai.vision import Image
-from rikai.types import Box2d
+from rikai.types import Box2d, Image
 
 
 class TestParquetUdt(SparkTestCase):

@@ -17,12 +17,10 @@
 import os
 
 from pyspark.sql.functions import col, lit
-import numpy as np
 
 from rikai.spark.functions import area, image_copy
 from rikai.testing.spark import SparkTestCase
-from rikai.vision import Image
-from rikai.types import Box2d
+from rikai.types import Box2d, Image
 
 
 class SparkFunctionsTest(SparkTestCase):

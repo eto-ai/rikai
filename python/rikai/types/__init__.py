@@ -16,3 +16,4 @@
 """
 
 from rikai.types.geometry import Point, Box3d, Box2d
+from rikai.types.vision import VideoStream, YouTubeVideo, Image, Label

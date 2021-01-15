@@ -19,9 +19,34 @@ import random
 class RandomShuffler:
     """Reservoir sampling-based shuffler to provide randomlized access over elements.
 
-    See Also
-    --------
-    https://en.wikipedia.org/wiki/Reservoir_sampling
+    :py:class:`RandomShuffler` maintains an internal buffer, and use `reservoir sampling`_
+    to offer randomness with uniform distribution. Therefore, the buffer ``capacity`` does
+    not affect the possibility distribution.
+
+    Set ``capacity`` to ``1`` or ``0``, makes this :py:class:`RandomShuffler` a FIFO queue.
+
+    Example
+    -------
+
+    .. code-block:: python
+
+        def __iter__(self):
+            \"\"\"Provide random access over a Stream\"\"\"
+            shuffler = RandomShuffler(128)
+            for elem in stream:
+                shuffler.append(elem)
+                # Explicit capacity control
+                while shuffler.full():
+                    yield shuffler.pop()
+            while shuffler:
+                yield shuffler.pop()
+
+    References
+    ----------
+    - `Reservoir Sampling`_
+    - Petastorm `Shuffling Buffer <https://github.com/uber/petastorm/blob/master/petastorm/reader_impl/shuffling_buffer.py>`_
+
+    .. _Reservoir Sampling: https://en.wikipedia.org/wiki/Reservoir_sampling
     """
 
     def __init__(self, capacity: int, seed: Optional[int] = None):
@@ -30,8 +55,8 @@ class RandomShuffler:
         Parameters
         ----------
         capacity : int
-            The capacity of the internal random access buffer. Note that if set this value to
-            1 or 0 make this random shuffler to a FIFO queue.
+            The capacity of the internal random access buffer. Note that setting this value to
+            1 or 0 makes this :py:class:`RandomShuffler` to a FIFO queue.
         seed : int, optional
             Random seed.
         """
@@ -51,7 +76,7 @@ class RandomShuffler:
         return len(self.buffer) > 0
 
     def full(self) -> bool:
-        """Return True if it reaches to its capacity"""
+        """Return True if this shuffler reaches to its capacity."""
         return len(self) >= self.capacity
 
     def append(self, elem: Any):
@@ -59,6 +84,13 @@ class RandomShuffler:
         self.buffer.append(elem)
 
     def pop(self) -> Any:
+        """Pop out one random element from the buffer
+
+        Raises
+        ------
+        IndexError
+            If the internal buffer is empty.
+        """
         if len(self.buffer) == 0:
             raise IndexError("Buffer is empty")
         idx = random.randrange(len(self.buffer))

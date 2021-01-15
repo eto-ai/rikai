@@ -48,13 +48,13 @@ class Dataset:
         To read only given columns
     shuffle : bool, optional
         Set to True to shuffle the results.
-    shuffler_bufsize : int
+    shuffler_capacity : int
         The size of the buffer to shuffle the examples. The size of buffer does not
         impact the distribution of possibility that an example is picked.
-    rank : int
-        The rank of this worker in all the distributed workers
     world_size : int
         Total number of distributed workers
+    rank : int
+        The rank of this worker in all the distributed workers
     """
 
     SPARK_PARQUET_ROW_METADATA = b"org.apache.spark.sql.parquet.row.metadata"
@@ -66,15 +66,15 @@ class Dataset:
         query: str,
         columns: Optional[List[str]] = None,
         shuffle: bool = False,
-        shuffle_pool_size: int = 128,
+        shuffler_capacity: int = 128,
         seed: Optional[int] = None,
-        rank: int = 0,
         world_size: int = 1,
+        rank: int = 0,
     ):
         self.uri = query
         self.columns = columns
         self.shuffle = shuffle
-        self.shuffle_pool_size = shuffle_pool_size
+        self.shuffler_capacity = shuffler_capacity
         self.seed = seed
         self.rank = rank
         self.world_size = world_size
@@ -152,7 +152,7 @@ class Dataset:
 
     def __iter__(self):
         shuffler = RandomShuffler(
-            self.shuffle_pool_size if self.shuffle else 1, self.seed
+            self.shuffler_capacity if self.shuffle else 1, self.seed
         )
         group_count = 0
         for filepath in self.files:

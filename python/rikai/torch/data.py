@@ -31,10 +31,29 @@ __all__ = ["DataLoader"]
 class DataLoader:
     """Rikai Dataset Loader in Pytorch.
 
+    Parameters
+    ----------
+    dataset : str
+        The URI of a Rikai Dataset
+    columns : list of str, optional
+        An optional list of column to load from parquet files.
+    batch_size : int
+        Batch size.
+    shuffle : bool
+        Whether to shuffle the dataset or not. Default is False.
+    num_workers : int
+        The number of workers to download asset in parallel.
+    seed : int, optional
+        Provide random seed for shuffling process
+    world_size : int
+        The total number of distributed workers. Default is ``1``.
+    rank : int
+        The rank of this worker among distributed workers. Default is ``0``.
 
-    Distributed training.
 
-    For example, DataLoader can work with distributed training framework, such as
+    **Distributed Training**
+
+    :py:class:`DataLoader` can work with distributed training framework, such as
     `Horovod <https://horovod.readthedocs.io/en/stable/pytorch.html>`_.
 
     .. code-block:: python
@@ -61,7 +80,7 @@ class DataLoader:
 
     References
     ----------
-    - `Horovod with Pytorch <https://horovod.readthedocs.io/en/stable/pytorch.html>`_
+    .. `Horovod with Pytorch <https://horovod.readthedocs.io/en/stable/pytorch.html>`_
 
     """
 
@@ -70,8 +89,8 @@ class DataLoader:
         dataset: str,
         columns: List[str] = None,
         batch_size: int = 1,
-        num_workers: int = 16,
         shuffle: bool = False,
+        num_workers: int = 16,
         transform_fn: Callable = lambda x: (x,),
         collate_fn: Callable = None,
         seed: Optional[int] = None,

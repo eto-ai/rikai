@@ -18,48 +18,49 @@ from pyspark.sql.functions import col
 # Rikai
 from rikai.spark.functions import label
 from rikai.testing.spark import SparkTestCase
-from rikai.types import Box3d, Box2d, Point
+from rikai.types import Box3d, Box2d, Point, YouTubeVideo, VideoStream, Segment
 
 
 class TypesTest(SparkTestCase):
+    def _check_roundtrip(self, df):
+        df.show()
+        df.write.mode("overwrite").format("rikai").save(self.test_dir)
+        actual_df = self.spark.read.format("rikai").load(self.test_dir)
+        self.assertCountEqual(df.collect(), actual_df.collect())
+
     def test_labels(self):
         df = self.spark.createDataFrame(
             [("a",), ("b",), ("c",)],
             ["v"],
         ).withColumn("label", label("v"))
-
-        df.write.mode("overwrite").format("rikai").save(self.test_dir)
-
-        actual_df = self.spark.read.format("rikai").load(self.test_dir)
-        self.assertCountEqual(df.collect(), actual_df.collect())
+        self._check_roundtrip(df)
 
     def test_bbox(self):
         df = self.spark.createDataFrame(
             [Row(Box2d(1, 2, 3, 4)), Row(Box2d(23, 33, 44, 88))], ["bbox"]
         )
-        df.show()
-        print(df.collect())
-        df.printSchema()
-
-        df.write.mode("overwrite").format("rikai").save(self.test_dir)
-
-        actual_df = self.spark.read.format("rikai").load(self.test_dir)
-        self.assertCountEqual(df.collect(), actual_df.collect())
+        self._check_roundtrip(df)
 
     def test_point(self):
         df = self.spark.createDataFrame([Row(Point(1, 2, 3)), Row(Point(2, 3, 4))])
-        df.show()
-        df.write.mode("overwrite").format("rikai").save(self.test_dir)
-
-        actual_df = self.spark.read.format("rikai").load(self.test_dir)
-        actual_df.show()
-        self.assertCountEqual(df.collect(), actual_df.collect())
+        self._check_roundtrip(df)
 
     def test_box3d(self):
         df = self.spark.createDataFrame([Row(Box3d(Point(1, 2, 3), 1, 2, 3, 2.5))])
+        self._check_roundtrip(df)
 
-        df.write.mode("overwrite").format("rikai").save(self.test_dir)
+    def test_youtubevideo(self):
+        df = self.spark.createDataFrame(
+            [Row(YouTubeVideo("video_id")), Row(YouTubeVideo("other_video_id"))]
+        )
+        self._check_roundtrip(df)
 
-        actual_df = self.spark.read.format("rikai").load(self.test_dir)
-        actual_df.printSchema()
-        self.assertCountEqual(df.collect(), actual_df.collect())
+    def test_videostream(self):
+        df = self.spark.createDataFrame(
+            [Row(VideoStream("uri1")), Row(VideoStream("uri2"))]
+        )
+        self._check_roundtrip(df)
+
+    def test_segment(self):
+        df = self.spark.createDataFrame([Row(Segment(0, 10)), Row(Segment(15, -1))])
+        self._check_roundtrip(df)

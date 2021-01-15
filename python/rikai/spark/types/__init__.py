@@ -34,7 +34,7 @@ from rikai.convert import PortableDataType
 from rikai.logging import logger
 from rikai.spark.types.geometry import Box2dType, Box3dType, PointType
 from rikai.spark.types.vision import ImageType, LabelType
-from rikai.spark.types.video import YouTubeVideoType, VideoStreamType
+from rikai.spark.types.video import YouTubeVideoType, VideoStreamType, SegmentType
 
 __all__ = [
     "ImageType",
@@ -45,6 +45,7 @@ __all__ = [
     "Box2dType",
     "VideoStreamType",
     "YouTubeVideoType",
+    "SegmentType",
 ]
 
 

@@ -21,10 +21,7 @@ import tempfile
 from urllib.parse import urlparse
 import youtube_dl
 
-from rikai.spark.types import (
-    YouTubeVideoType,
-    VideoStreamType,
-)
+from rikai.spark.types import YouTubeVideoType, VideoStreamType, SegmentType
 
 __all__ = [
     "YouTubeVideo",
@@ -33,6 +30,7 @@ __all__ = [
     "SamplerGenerator",
     "SingleFrameSampler",
     "SingleFrameGenerator",
+    "Segment",
 ]
 
 
@@ -148,6 +146,44 @@ class VideoStream:
 
     def __eq__(self, other) -> bool:
         return isinstance(other, VideoStream) and self.uri == other.uri
+
+
+class Segment:
+    """A video segment bounded by frame numbers"""
+
+    __UDT__ = SegmentType()
+
+    def __init__(self, start_fno: int, end_fno: int):
+        """
+
+        Parameters
+        ----------
+        start_fno: int
+            The starting frame number (0-indexed)
+        end_fno: int
+            The ending frame number. If <0 then it means end of the video
+
+        Notes
+        -----
+        `fno` terminology is chosen to be consistent with the opencv library.
+        """
+        if start_fno < 0:
+            raise ValueError("Cannot start with negative frame number")
+        if end_fno > 0 and end_fno < start_fno:
+            raise ValueError(
+                "Ending frame must be negative or larger than " "starting frame"
+            )
+        self.start_fno = start_fno
+        self.end_fno = end_fno
+
+    def __repr__(self) -> str:
+        return f"Segment(start_fno={self.start_fno}, end_fno={self.end_fno})"
+
+    def __eq__(self, other) -> bool:
+        return isinstance(other, Segment) and (self.start_fno, self.end_fno) == (
+            other.start_fno,
+            other.end_fno,
+        )
 
 
 class VideoSampler(ABC):

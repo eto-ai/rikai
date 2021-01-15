@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from pyspark.sql.types import (
+    IntegerType,
     StringType,
     StructField,
     StructType,
@@ -93,3 +94,45 @@ class YouTubeVideoType(UserDefinedType):
 
     def simpleString(self) -> str:
         return "YouTubeVideoType"
+
+
+class SegmentType(UserDefinedType):
+    """Defines the Spark UDT for a video segment
+    A video segment is defined by the starting frame number (start_fno)
+    and ending frame number (end_fno). `fno` terminology is chosen to be
+    consistent with the opencv library.
+    """
+
+    def __init__(self):
+        super().__init__()
+
+    def __repr__(self) -> str:
+        return "SegmentType"
+
+    @classmethod
+    def sqlType(cls) -> StructType:
+        return StructType(
+            fields=[
+                StructField("start_fno", IntegerType(), nullable=False),
+                StructField("end_fno", IntegerType(), nullable=False),
+            ]
+        )
+
+    @classmethod
+    def module(cls) -> str:
+        return "rikai.spark.types"
+
+    @classmethod
+    def scalaUDT(cls) -> str:
+        return "org.apache.spark.sql.rikai.SegmentType"
+
+    def serialize(self, obj: "Segment"):
+        return (obj.start_fno, obj.end_fno)
+
+    def deserialize(self, datum) -> "Segment":
+        from rikai.types import Segment  # pylint: disable=import-outside-toplevel
+
+        return Segment(datum[0], datum[1])
+
+    def simpleString(self) -> str:
+        return "SegmentType"

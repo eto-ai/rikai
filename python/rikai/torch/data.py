@@ -42,6 +42,8 @@ class DataLoader:
         collate_fn: Callable = None,
         shuffle_pool_size: int = 2 ** 10,
         seed: Optional[int] = None,
+        world_size: int = 1,
+        rank: int = 0,
     ):  # pylint: disable=too-many-arguments
         self.dataset = Dataset(
             dataset,

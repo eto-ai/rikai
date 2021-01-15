@@ -29,7 +29,41 @@ __all__ = ["DataLoader"]
 
 
 class DataLoader:
-    """Rikai Dataset Loader in Pytorch."""
+    """Rikai Dataset Loader in Pytorch.
+
+
+    Distributed training.
+
+    For example, DataLoader can work with distributed training framework, such as
+    `Horovod <https://horovod.readthedocs.io/en/stable/pytorch.html>`_.
+
+    .. code-block:: python
+
+        import torch
+        import horovod.torch as hvd
+        from rikai.torch.data import DataLoader
+
+        # Initialize Horovod
+        hvd.init()
+
+        # Partion the dataset using Horovod
+        train_loader = DataLoader(
+            "s3://dataset/train",
+            batch_size=16,
+            world_size=hvd.size(),  # Horovod cluster size
+            rank=hvd.rank())  # Local rank
+
+        # Set ups on https://horovod.readthedocs.io/en/stable/pytorch.html
+
+        for epoch in range(100):
+            for batch_idx, (data, target) in enumerate(train_loader):
+                ...
+
+    References
+    ----------
+    - `Horovod with Pytorch <https://horovod.readthedocs.io/en/stable/pytorch.html>`_
+
+    """
 
     def __init__(
         self,

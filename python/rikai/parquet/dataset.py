@@ -161,15 +161,14 @@ class Dataset:
             with fs.open_input_file(path) as fobj:
                 parquet = pg.ParquetFile(fobj)
                 for group_idx in range(parquet.num_row_groups):
-                    # A simple form of bucketing without memory overhead.
+                    # A simple form of row-group level bucketing without memory overhead.
                     # Pros:
-                    #  - It requires zero communication to set distributed policy
-                    #  - It uses little memory and no startup overhead. The overhead
-                    #    is amortized the scan.
+                    #  - It requires zero communication to initialize the distributed policy
+                    #  - It uses little memory and no startup overhead, i.e. collecting row groups.
                     # Cons:
                     #   The drawback would be if the world size is much larger than
                     #   the average number of row groups. As a result, many of the
-                    #   file open operation would be unnecessary.
+                    #   file open operations would be wasted.
                     group_count += 1
                     if group_count % self.world_size != self.rank:
                         continue

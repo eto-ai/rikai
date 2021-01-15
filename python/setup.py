@@ -33,10 +33,13 @@ setup(
     package_data={"": ["*.jar"]},
     install_requires=[
         "numpy",
+        "opencv-python",
+        "pafy",
         "pandas",
         "Pillow",
         "pyspark>=3",
         "pyarrow>=2.0",
+        "youtube_dl",
     ],
     extras_require={
         "test": ["pytest", "parameterized"],

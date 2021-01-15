@@ -57,7 +57,7 @@ class Box2d(
 /**
   * User defined type of 2D Bouding Box
   */
-private[spark] class Box2dType extends UserDefinedType[Box2d] {
+class Box2dType extends UserDefinedType[Box2d] {
 
   override def sqlType: DataType =
     StructType(

@@ -23,8 +23,6 @@ class RandomShuffler:
     to offer randomness with uniform distribution. Therefore, the buffer ``capacity`` does
     not affect the possibility distribution.
 
-    Set ``capacity`` to ``1`` or ``0``, makes this :py:class:`RandomShuffler` a FIFO queue.
-
     Example
     -------
 
@@ -40,6 +38,11 @@ class RandomShuffler:
                     yield shuffler.pop()
             while shuffler:
                 yield shuffler.pop()
+
+    Notes
+    -----
+    - Set ``capacity`` to ``1`` or ``0``, makes :py:class:`RandomShuffler` a FIFO queue.
+    - This class is not thread-safe.
 
     References
     ----------

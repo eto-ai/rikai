@@ -17,7 +17,7 @@
 
 # Standard Library
 import importlib
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 # Third Party
 import pyarrow.parquet as pg
@@ -29,6 +29,9 @@ from pyspark.sql.types import UserDefinedType
 # Rikai
 from rikai.logging import logger
 from rikai.parquet.resolver import Resolver
+from rikai.parquet.shuffler import Shuffler, DummyShuffler, RandomShuffler
+
+__all__ = ["Dataset"]
 
 
 class Dataset:
@@ -44,7 +47,7 @@ class Dataset:
     columns : List[str], optional
         To read only given columns
     shuffle : bool, optional
-        Set to true to shuffle the results.
+        Set to True to shuffle the results.
     shuffle_pool_size : int, optional
         The size of the pool for shuffling the examples.
     rank : int
@@ -60,20 +63,27 @@ class Dataset:
     def __init__(  # pylint: disable=too-many-arguments
         self,
         query: str,
-        columns: List[str] = None,
+        columns: Optional[List[str]] = None,
         shuffle: bool = False,
-        shuffle_pool_size: int = 10000,
-        rank: int = -1,
+        shuffle_pool_size: int = 2 ** 10,
+        seed: Optional[int] = None,
+        rank: int = 0,
         world_size: int = 1,
     ):
         self.uri = query
         self.columns = columns
         self.shuffle = shuffle
         self.shuffle_pool_size = shuffle_pool_size
+        self.seed = seed
         self.rank = rank
         self.world_size = world_size
+        if self.world_size > 1:
+            logger.info(
+                "Running in distributed mode, world size=%s, rank=%s", world_size, rank
+            )
 
-        self.files = Resolver.resolve(self.uri)
+        # Provide determinstic order between distributed workers.
+        self.files = sorted(Resolver.resolve(self.uri))
         logger.info("Loading parquet files: %s", self.files)
 
         self.spark_row_metadata = Resolver.get_schema(self.uri)
@@ -140,13 +150,38 @@ class Dataset:
         return converted
 
     def __iter__(self):
+        shuffler: Shuffler = (
+            RandomShuffler(self.shuffle_pool_size, self.seed)
+            if self.shuffle
+            else DummyShuffler()
+        )
+        group_count = 0
         for filepath in self.files:
             fs, path = FileSystem.from_uri(filepath)
             with fs.open_input_file(path) as fobj:
                 parquet = pg.ParquetFile(fobj)
                 for group_idx in range(parquet.num_row_groups):
+                    # A simple form of bucketing without memory overhead.
+                    # Pros:
+                    #  - It requires zero communication to set distributed policy
+                    #  - It uses little memory and no startup overhead. The overhead
+                    #    is amortized the scan.
+                    # Cons:
+                    #   The drawback would be if the world size is much larger than
+                    #   the average number of row groups. As a result, many of the
+                    #   file open operation would be unnecessary.
+                    group_count += 1
+                    if group_count % self.world_size != self.rank:
+                        continue
                     row_group = parquet.read_row_group(group_idx, columns=self.columns)
                     for batch in row_group.to_batches():  # type: RecordBatch
                         # TODO: read batches not using pandas
                         for _, row in batch.to_pandas().iterrows():
+                            shuffler.append(row)
+                        # Control the capacity inexplicitily.
+                        while shuffler.full():
+                            row = shuffler.pop()
                             yield self._convert(row.to_dict(), self.spark_row_metadata)
+        while shuffler:
+            row = shuffler.pop()
+            yield self._convert(row.to_dict(), self.spark_row_metadata)

@@ -16,7 +16,7 @@
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from queue import Empty, Queue
-from typing import Callable, Dict, Generator, List, Union
+from typing import Callable, Dict, Generator, List, Optional
 
 # Third Party
 import numpy as np
@@ -33,22 +33,27 @@ class DataLoader:
 
     def __init__(
         self,
-        dataset: Union[str, Dataset],
+        dataset: str,
         columns: List[str] = None,
         batch_size: int = 1,
         num_workers: int = 16,
         shuffle: bool = False,
         transform_fn: Callable = lambda x: (x,),
         collate_fn: Callable = None,
-        shuffle_pool_size: int = 2 ** 16,
+        shuffle_pool_size: int = 2 ** 10,
+        seed: Optional[int] = None,
     ):  # pylint: disable=too-many-arguments
-        if isinstance(dataset, str):
-            dataset = Dataset(dataset, columns=columns)
-        self.dataset = dataset
+        self.dataset = Dataset(
+            dataset,
+            columns=columns,
+            shuffle=shuffle,
+            shuffle_pool_size=shuffle_pool_size,
+            seed=seed,
+            world_size=world_size,
+            rank=rank,
+        )
         self.batch_size = batch_size
         self.num_workers = num_workers
-        self.shuffle = shuffle
-        self.shuffle_pool_size = shuffle_pool_size
         self.collate_fn = collate_fn if collate_fn else lambda x: x
         self.transform_fn = transform_fn
 

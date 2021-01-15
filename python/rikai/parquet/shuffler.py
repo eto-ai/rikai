@@ -16,6 +16,9 @@ from typing import Any, Optional
 import random
 
 
+__all__ = ["RandomShuffler"]
+
+
 class RandomShuffler:
     """Reservoir sampling-based shuffler to provide randomlized access over elements.
 
@@ -72,6 +75,7 @@ class RandomShuffler:
         return "RandomShuffler(capacity={})".format(self.capacity)
 
     def __len__(self) -> int:
+        """Returns the number of elements in the shuffler."""
         return len(self.buffer)
 
     def __bool__(self) -> bool:

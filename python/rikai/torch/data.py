@@ -65,7 +65,7 @@ class DataLoader:
         # Initialize Horovod
         hvd.init()
 
-        # Partion the dataset using Horovod
+        # Partition the dataset using Horovod primitives.
         train_loader = DataLoader(
             "s3://dataset/train",
             batch_size=16,

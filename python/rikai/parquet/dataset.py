@@ -29,7 +29,7 @@ from pyspark.sql.types import UserDefinedType
 # Rikai
 from rikai.logging import logger
 from rikai.parquet.resolver import Resolver
-from rikai.parquet.shuffler import Shuffler, DummyShuffler, RandomShuffler
+from rikai.parquet.shuffler import RandomShuffler
 
 __all__ = ["Dataset"]
 
@@ -48,8 +48,9 @@ class Dataset:
         To read only given columns
     shuffle : bool, optional
         Set to True to shuffle the results.
-    shuffle_pool_size : int, optional
-        The size of the pool for shuffling the examples.
+    shuffler_bufsize : int
+        The size of the buffer to shuffle the examples. The size of buffer does not
+        impact the distribution of possibility that an example is picked.
     rank : int
         The rank of this worker in all the distributed workers
     world_size : int
@@ -65,7 +66,7 @@ class Dataset:
         query: str,
         columns: Optional[List[str]] = None,
         shuffle: bool = False,
-        shuffle_pool_size: int = 2 ** 10,
+        shuffle_pool_size: int = 128,
         seed: Optional[int] = None,
         rank: int = 0,
         world_size: int = 1,
@@ -150,10 +151,8 @@ class Dataset:
         return converted
 
     def __iter__(self):
-        shuffler: Shuffler = (
-            RandomShuffler(self.shuffle_pool_size, self.seed)
-            if self.shuffle
-            else DummyShuffler()
+        shuffler = RandomShuffler(
+            self.shuffle_pool_size if self.shuffle else 1, self.seed
         )
         group_count = 0
         for filepath in self.files:
@@ -177,10 +176,10 @@ class Dataset:
                         # TODO: read batches not using pandas
                         for _, row in batch.to_pandas().iterrows():
                             shuffler.append(row)
-                        # Control the capacity inexplicitily.
-                        while shuffler.full():
-                            row = shuffler.pop()
-                            yield self._convert(row.to_dict(), self.spark_row_metadata)
+                            # Control the capacity inexplicitily.
+                            while shuffler.full():
+                                yield self._convert(
+                                    shuffler.pop().to_dict(), self.spark_row_metadata
+                                )
         while shuffler:
-            row = shuffler.pop()
-            yield self._convert(row.to_dict(), self.spark_row_metadata)
+            yield self._convert(shuffler.pop().to_dict(), self.spark_row_metadata)

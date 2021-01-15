@@ -12,56 +12,29 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from abc import ABC, abstractmethod
 from typing import Any, Optional
 import random
 
 
-class Shuffler(ABC):
-    """Shuffler Abstract class"""
+class RandomShuffler:
+    """Reservoir sampling-based shuffler to provide randomlized access over elements.
 
-    @abstractmethod
-    def full(self) -> bool:
-        pass
-
-    @abstractmethod
-    def append(self, elem: Any):
-        pass
-
-    @abstractmethod
-    def pop(self) -> Any:
-        pass
-
-
-class DummyShuffler(Shuffler):
-    def __init__(self) -> None:
-        super().__init__()
-        self.buffer = []
-
-    def __len__(self) -> int:
-        return len(self.buffer)
-
-    def __bool__(self) -> bool:
-        return len(self.buffer) > 0
-
-    def full(self) -> bool:
-        return len(self.buffer) > 0
-
-    def append(self, elem: Any):
-        self.buffer.append(elem)
-
-    def pop(self) -> Any:
-        return self.buffer.pop()
-
-
-class RandomShuffler(Shuffler):
-    """
-
-    Use reservoir sampling to randomlize the access elements.
+    See Also
+    --------
+    https://en.wikipedia.org/wiki/Reservoir_sampling
     """
 
     def __init__(self, capacity: int, seed: Optional[int] = None):
-        super().__init__()
+        """Construct a :py:class:`RandomShuffler`
+
+        Parameters
+        ----------
+        capacity : int
+            The capacity of the internal random access buffer. Note that if set this value to
+            1 or 0 make this random shuffler to a FIFO queue.
+        seed : int, optional
+            Random seed.
+        """
         self.capacity = capacity
         self.seed = seed
         self.buffer = []
@@ -74,18 +47,21 @@ class RandomShuffler(Shuffler):
         return len(self.buffer)
 
     def __bool__(self) -> bool:
+        """Return True if this shuffler is not empty."""
         return len(self.buffer) > 0
 
     def full(self) -> bool:
+        """Return True if it reaches to its capacity"""
         return len(self) >= self.capacity
 
     def append(self, elem: Any):
+        """Append a new element to the shuffler"""
         self.buffer.append(elem)
 
     def pop(self) -> Any:
-        if len(self) == 0:
+        if len(self.buffer) == 0:
             raise IndexError("Buffer is empty")
-        idx = random.randrange(len(self))
+        idx = random.randrange(len(self.buffer))
         item = self.buffer[idx]
         self.buffer[idx] = self.buffer[-1]
         self.buffer.pop()

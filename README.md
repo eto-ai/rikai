@@ -7,7 +7,7 @@
 
 # rikai
 
-Rikai is a `parquet` based ML  that has native Spark / Pytorch / Tensorflow support.
+Rikai is a `parquet` based ML data format that has native Spark / Pytorch / Tensorflow support.
 Additionally, it enables advanced analytic capabilties for model debuggabilty and monitoring.
 
 

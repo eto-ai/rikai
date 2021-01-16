@@ -178,7 +178,7 @@ class Dataset:
                         # TODO: read batches not using pandas
                         for _, row in batch.to_pandas().iterrows():
                             shuffler.append(row)
-                            # Control the capacity inexplicitily.
+                            # Maintain the shuffler buffer around its capacity.
                             while shuffler.full():
                                 yield self._convert(
                                     shuffler.pop().to_dict(), self.spark_row_metadata

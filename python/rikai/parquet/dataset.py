@@ -51,6 +51,8 @@ class Dataset:
     shuffler_capacity : int
         The size of the buffer to shuffle the examples. The size of buffer does not
         impact the distribution of possibility that an example is picked.
+    seed : int, optional
+        Random seed for shuffling process.
     world_size : int
         Total number of distributed workers
     rank : int

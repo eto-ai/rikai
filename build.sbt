@@ -2,7 +2,7 @@ organization := "ai.eto.rikai"
 
 name := "rikai"
 
-version := "0.0.1"
+version := IO.read(new File("VERSION")).trim
 
 scalaVersion := "2.12.11"
 

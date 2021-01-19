@@ -57,7 +57,10 @@ We can then inspect the dataset in a `Jupyter Notebook`_.
 
 .. code-block:: python
 
-    # TBD
+    df = spark.read.format("rikai").load("out")
+    df.printSchema()
+    df.show(5)
+
 
 
 Use the dataset in `pytorch`

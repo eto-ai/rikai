@@ -13,10 +13,8 @@
 
 """Vision Related Types
 """
-import os
-import pathlib
 
-# 3rd party
+# Third-party libraries
 import numpy as np
 from PIL import Image as PILImage
 

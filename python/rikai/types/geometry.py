@@ -16,6 +16,7 @@
 """
 
 import numpy as np
+
 from rikai.mixin import ToNumpy
 from rikai.spark.types.geometry import PointType, Box3dType, Box2dType
 

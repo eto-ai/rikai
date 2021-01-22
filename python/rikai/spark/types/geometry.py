@@ -48,7 +48,7 @@ class Box2dType(UserDefinedType):
         return "org.apache.spark.sql.rikai.Box2dType"
 
     def serialize(self, obj: "Box2d"):
-        """Serialize a :py:class:`rikai.types.geometry.Box2d` into Spark Row"""
+        """Serialize a :py:class:`rikai.types.geometry.Box2d` into a PySpark Row"""
         return (
             obj.x,
             obj.y,

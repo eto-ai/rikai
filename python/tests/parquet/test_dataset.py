@@ -12,12 +12,28 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+# Third Party
+from pyspark.sql import Row
+
 # Rikai
-from rikai.testing import SparkTestCase
 from rikai.parquet import Dataset
+from rikai.testing import SparkTestCase
 
 
 class DatasetTest(SparkTestCase):
     def test_select_columns(self):
-        self.assertEqual(True, False)
+        """Test reading rikai dataset with selected columns."""
+        df = self.spark.createDataFrame(
+            [Row(id=1, col1="value", col2=123), Row(id=2, col1="more", col2=456)]
+        )
+        df.write.format("rikai").save(self.test_dir)
 
+        dataset = Dataset(self.test_dir, columns=["id", "col1"])
+        actual = []
+        for example in dataset:
+            actual.append(example)
+        actual = sorted(actual, key=lambda x: x["id"])
+
+        self.assertCountEqual(
+            [{"id": 1, "col1": "value"}, {"id": 2, "col1": "more"}], actual
+        )

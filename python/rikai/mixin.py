@@ -34,6 +34,14 @@ class ToNumpy(ABC):
         """Returns the content as a numpy ndarray."""
 
 
+class Displayable(ABC):
+    """Mixin for notebook viz"""
+
+    @abstractmethod
+    def show(self, **kwargs) -> "DisplayObject":
+        """Return an IPython.display.DisplayObject"""
+
+
 class Asset(ABC):
     """cloud asset Mixin.
 

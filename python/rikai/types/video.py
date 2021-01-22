@@ -15,12 +15,11 @@
 """Video related types and utils"""
 from abc import ABC, abstractmethod
 import cv2
+import os
 import pafy
 import pathlib
-import tempfile
-from urllib.parse import urlparse
-import youtube_dl
 
+from rikai.mixin import Displayable
 from rikai.spark.types import YouTubeVideoType, VideoStreamType, SegmentType
 
 __all__ = [
@@ -34,7 +33,7 @@ __all__ = [
 ]
 
 
-class YouTubeVideo:
+class YouTubeVideo(Displayable):
     """
     Represents a YouTubeVideo, the basis of many open-source video data sets.
     This classes uses the ipython display library to integrate with jupyter
@@ -59,42 +58,53 @@ class YouTubeVideo:
     def __repr__(self) -> str:
         return "YouTubeVideo({0})".format(self.vid)
 
-    def _repr_html_(self):
-        from IPython.lib.display import YouTubeVideo
+    def show(self, **kwargs):
+        """
+        Visualization in jupyter notebook with custom options
 
-        return YouTubeVideo(self.vid)._repr_html_()
+        Parameters
+        ----------
+        kwargs: dict
+            Key-word args for IPython.display.YouTubeVideo to show in
+            Jupyter notebook
+
+        Returns
+        -------
+        v: IPython.display.YouTubeVideo
+        """
+        from IPython.display import YouTubeVideo
+
+        return YouTubeVideo(self.vid, **kwargs)
+
+    def _repr_html_(self):
+        """default visualization in jupyter notebook cell"""
+        return self.show()._repr_html_()
 
     def __eq__(self, other) -> bool:
         return isinstance(other, YouTubeVideo) and self.vid == other.vid
 
-    def get_stream(self, download: bool = False, **kwargs) -> "VideoStream":
+    def get_stream(self, ext="mp4", quality="worst") -> "VideoStream":
         """
-        Get one specific stream of this youtube video
+        Get a reference to a particular stream
 
         Parameters
         ----------
-        download: bool, default False
-            By default just return a remote https reference. If True then
-            actually download the data
-        kwargs
+        ext: str, default 'mp4'
+            The preferred extension type to get
+        quality: str, default 'worst'
+            Either 'worst' or 'best'
 
         Returns
         -------
         v: VideoStream
-            The downloaded video
+            VideoStream referencing an actual video resource
         """
-        # TODO add options to change extension and quality
-        if download:
-            with tempfile.TemporaryDirectory() as tmpdir:
-                dl_path = pathlib.Path(tmpdir) / "{}.mp4".format(self.vid)
-                opts = {"format": "worst[ext=mp4]", "outtmpl": dl_path}
-                opts.update(kwargs)
-                with youtube_dl.YoutubeDL(opts) as dl:
-                    dl.download([self.uri])
-                return VideoStream(dl_path)
-                # TODO add option to cp to s3
+        os.environ["PAFY_BACKEND"] = "internal"  # don't depend on youtube-dl
+        if quality == "worst":
+            stream = getworst(pafy.new(self.uri), preftype=ext)
         else:
-            return VideoStream(getworst(pafy.new(self.uri), preftype="mp4").url)
+            stream = pafy.new(self.uri).getbest(preftype=ext)
+        return VideoStream(stream.url)
 
 
 # Pafy hasn't had a new release with getworst yet
@@ -135,14 +145,26 @@ class VideoStream:
     def __repr__(self) -> str:
         return f"VideoStream(uri={self.uri})"
 
-    def _repr_html_(self):
-        """TODO: codec"""
+    def show(self, **kwargs):
+        """
+        Customize visualization in jupyter notebook
+
+        Parameters
+        ----------
+        kwargs: dict
+            Key-word args for IPython.display.Video
+
+        Returns
+        -------
+        v: IPython.display.Video
+        """
         from IPython.display import Video
 
-        embed = True
-        if urlparse(self.uri).scheme.lower().startswith("http"):
-            embed = False
-        return Video(self.uri, embed=embed, width=480, height=320)._repr_html_()
+        return Video(self.uri, **kwargs)
+
+    def _repr_html_(self):
+        """default visualizer for jupyter notebook"""
+        return self.show()._repr_html_()
 
     def __eq__(self, other) -> bool:
         return isinstance(other, VideoStream) and self.uri == other.uri

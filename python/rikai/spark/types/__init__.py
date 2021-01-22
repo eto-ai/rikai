@@ -31,10 +31,9 @@ from pyspark.sql.types import (
 # Rikai
 import rikai
 from rikai.convert import PortableDataType
-from rikai.logging import logger
 from rikai.spark.types.geometry import Box2dType, Box3dType, PointType
-from rikai.spark.types.vision import ImageType, LabelType
 from rikai.spark.types.video import YouTubeVideoType, VideoStreamType, SegmentType
+from rikai.spark.types.vision import ImageType, LabelType
 
 __all__ = [
     "ImageType",
@@ -52,7 +51,7 @@ __all__ = [
 class NDArrayType(UserDefinedType):
     """User define type for an arbitrary :py:class:`numpy.ndarray`.
 
-    This UDT serialize numpy.ndarray into bytes buffer.
+    This UDT serializes :py:class:`numpy.ndarray` into bytes buffer.
     """
 
     def __repr__(self) -> str:
@@ -89,7 +88,7 @@ class NDArrayType(UserDefinedType):
         return "org.apache.spark.sql.rikai.NDArrayType"
 
     def serialize(self, obj: np.ndarray):
-        """Serialize an numpy.ndarra into Spark Row"""
+        """Serialize an :py:class:`numpy.ndarray` into Spark Row"""
         return (
             PortableDataType.from_numpy(obj.dtype).value,
             list(obj.shape),

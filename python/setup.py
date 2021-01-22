@@ -39,6 +39,7 @@ setup(
         "pyspark>=3",
         "pyarrow>=2.0",
         "youtube_dl",
+        "future-annotations; python_version < '3.7'",
     ],
     extras_require={
         "test": ["pytest", "parameterized"],

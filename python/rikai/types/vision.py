@@ -11,7 +11,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Vision Related User-defined Types
+"""Vision Related User-defined Types:
 
 - :py:class:`Image`
 - :py:class:`Label`
@@ -65,9 +65,7 @@ class Image(ToNumpy, Asset):
         return PILImage.open(self.open())
 
     def to_numpy(self) -> np.ndarray:
-        """Convert this image into an :py:class:`numpy.ndarray`.
-
-        """
+        """Convert this image into an :py:class:`numpy.ndarray`."""
         if self._cached_data is None:
             with self.to_pil() as pil_img:
                 self._cached_data = np.asarray(pil_img)

@@ -27,7 +27,7 @@ jobs:
       working-directory: python
       run: |
         sudo apt-get -y -qq install libsnappy-dev
-        python -m pip install -q numpy wheel pylint black
+        python -m pip install -q wheel pylint black
         python setup.py bdist_wheel
         python -m pip install $(ls dist/rikai*.whl)[test]
     - name: Python black
@@ -58,5 +58,6 @@ jobs:
     - name: Test Pip install
       working-directory: python
       run: |
+        python -m pip install -q wheel
         python setup.py bdist_wheel
         python -m pip install $(ls dist/rikai*.whl)

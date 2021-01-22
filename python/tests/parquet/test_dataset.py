@@ -29,10 +29,7 @@ class DatasetTest(SparkTestCase):
         df.write.format("rikai").save(self.test_dir)
 
         dataset = Dataset(self.test_dir, columns=["id", "col1"])
-        actual = []
-        for example in dataset:
-            actual.append(example)
-        actual = sorted(actual, key=lambda x: x["id"])
+        actual = sorted(list(dataset), key=lambda x: x["id"])
 
         self.assertCountEqual(
             [{"id": 1, "col1": "value"}, {"id": 2, "col1": "more"}], actual

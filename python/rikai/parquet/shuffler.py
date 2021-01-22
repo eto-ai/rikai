@@ -31,7 +31,7 @@ class RandomShuffler(Generic[Elem]):
     ----------
     capacity : int, optional
         The capacity of the internal random access buffer. Note that setting this value to
-        `1` or `0` makes this :py:class:`RandomShuffler` to a FIFO queue. Default value: 32.
+        ``1`` or ``0`` makes this :py:class:`RandomShuffler` to a FIFO queue. Default value: ``32``.
     seed : int, optional
         Random seed.
 
@@ -42,10 +42,10 @@ class RandomShuffler(Generic[Elem]):
 
         def __iter__(self):
             \"\"\"Provide random access over a Stream\"\"\"
-            shuffler = RandomShuffler(128)
+            shuffler = RandomShuffler(capacity=128)
             for elem in stream:
                 shuffler.append(elem)
-                # Explicit capacity control
+                # Approximately maintain the shuffler at its capacity.
                 while shuffler.full():
                     yield shuffler.pop()
             while shuffler:
@@ -67,8 +67,7 @@ class RandomShuffler(Generic[Elem]):
     DEFAULT_CAPACITY = 32
 
     def __init__(self, capacity: int = DEFAULT_CAPACITY, seed: Optional[int] = None):
-        """Construct a :py:class:`RandomShuffler`
-        """
+        """Construct a :py:class:`RandomShuffler`"""
         self.capacity = capacity
         self.seed = seed
         self.buffer = []
@@ -94,7 +93,7 @@ class RandomShuffler(Generic[Elem]):
         self.buffer.append(elem)
 
     def pop(self) -> Elem:
-        """Pop out one random element from the buffer
+        """Pop out one random element from the shuffler.
 
         Raises
         ------

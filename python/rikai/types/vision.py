@@ -11,7 +11,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Vision Related Types
+"""Vision Related User-defined Types
+
+- :py:class:`Image`
+- :py:class:`Label`
 """
 
 # Third-party libraries
@@ -21,13 +24,18 @@ from PIL import Image as PILImage
 # Rikai
 from rikai.mixin import Asset, ToNumpy
 from rikai.spark.types import ImageType, LabelType
-from rikai.types.geometry import Box2d
 
-__all__ = ["Image", "Label", "Annotation"]
+__all__ = ["Image", "Label"]
 
 
 class Image(ToNumpy, Asset):
-    """Image resource"""
+    """An Image Asset.
+
+    Parameters
+    ----------
+    uri : str
+        The URI pointed to an Image stored on external storage.
+    """
 
     __UDT__ = ImageType()
 
@@ -57,7 +65,9 @@ class Image(ToNumpy, Asset):
         return PILImage.open(self.open())
 
     def to_numpy(self) -> np.ndarray:
-        """Convert image into an numpy array."""
+        """Convert this image into an :py:class:`numpy.ndarray`.
+
+        """
         if self._cached_data is None:
             with self.to_pil() as pil_img:
                 self._cached_data = np.asarray(pil_img)
@@ -95,23 +105,3 @@ class Label(ToNumpy):
 
     def to_numpy(self) -> np.ndarray:
         return np.array([self.label])
-
-
-class Annotation(ToNumpy):
-    """Vision detection annotation"""
-
-    __UDT__ = LabelType()
-
-    def __init__(self, label: Label, text: str, bbox: Box2d, score: float = 0.0):
-        self.label = label
-        self.text = text
-        self.bbox = bbox
-        self.score = score
-
-    def to_numpy(self) -> np.ndarray:
-        return {
-            "label": self.label.to_numpy(),
-            "text": self.text,
-            "bbox": self.bbox.to_numpy(),
-            "score": self.score,
-        }

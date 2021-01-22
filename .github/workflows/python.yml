@@ -29,7 +29,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: System package install
-      if: ${{ matrix.os == ubuntu-20.04 }}
+      if: ${{ matrix.os == 'ubuntu-20.04' }}
       run: |
         sudo apt-get -y -qq install libsnappy-dev
     - name: Pip install

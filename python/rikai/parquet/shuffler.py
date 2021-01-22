@@ -12,19 +12,28 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Optional
 import random
-
+from typing import Generic, Optional, TypeVar
 
 __all__ = ["RandomShuffler"]
 
+Elem = TypeVar("Elem")
 
-class RandomShuffler:
-    """Reservoir sampling-based shuffler to provide randomlized access over elements.
 
-    :py:class:`RandomShuffler` maintains an internal buffer, and use `reservoir sampling`_
-    to offer randomness with uniform distribution. Therefore, the buffer ``capacity`` does
+class RandomShuffler(Generic[Elem]):
+    """Reservoir sampling-based shuffler to provide randomized access over elements.
+
+    :py:class:`RandomShuffler` maintains an internal buffer, and uses `reservoir sampling`_
+    to offer randomness with uniform distribution. The buffer ``capacity`` does
     not affect the possibility distribution.
+
+    Parameters
+    ----------
+    capacity : int, optional
+        The capacity of the internal random access buffer. Note that setting this value to
+        `1` or `0` makes this :py:class:`RandomShuffler` to a FIFO queue. Default value: 32.
+    seed : int, optional
+        Random seed.
 
     Example
     -------
@@ -55,16 +64,10 @@ class RandomShuffler:
     .. _Reservoir Sampling: https://en.wikipedia.org/wiki/Reservoir_sampling
     """
 
-    def __init__(self, capacity: int, seed: Optional[int] = None):
-        """Construct a :py:class:`RandomShuffler`
+    DEFAULT_CAPACITY = 32
 
-        Parameters
-        ----------
-        capacity : int
-            The capacity of the internal random access buffer. Note that setting this value to
-            1 or 0 makes this :py:class:`RandomShuffler` to a FIFO queue.
-        seed : int, optional
-            Random seed.
+    def __init__(self, capacity: int = DEFAULT_CAPACITY, seed: Optional[int] = None):
+        """Construct a :py:class:`RandomShuffler`
         """
         self.capacity = capacity
         self.seed = seed
@@ -86,11 +89,11 @@ class RandomShuffler:
         """Return True if this shuffler reaches to its capacity."""
         return len(self) >= self.capacity
 
-    def append(self, elem: Any):
+    def append(self, elem: Elem):
         """Append a new element to the shuffler"""
         self.buffer.append(elem)
 
-    def pop(self) -> Any:
+    def pop(self) -> Elem:
         """Pop out one random element from the buffer
 
         Raises

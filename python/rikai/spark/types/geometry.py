@@ -15,12 +15,12 @@
 """Geometry User Defined Types in Spark
 """
 
-from __future__ import annotations
-
+# Third-Party
 from pyspark.sql import Row
 from pyspark.sql.types import DoubleType, StructField, StructType, UserDefinedType
-from rikai.logging import logger
 
+# Rikai
+from rikai.logging import logger
 
 __all__ = ["PointType", "Box3dType", "Box2dType"]
 
@@ -32,26 +32,10 @@ class Box2dType(UserDefinedType):
     def sqlType(cls) -> StructType:
         return StructType(
             fields=[
-                StructField(
-                    "x",
-                    DoubleType(),
-                    False,
-                ),
-                StructField(
-                    "y",
-                    DoubleType(),
-                    False,
-                ),
-                StructField(
-                    "width",
-                    DoubleType(),
-                    False,
-                ),
-                StructField(
-                    "height",
-                    DoubleType(),
-                    False,
-                ),
+                StructField("x", DoubleType(), False),
+                StructField("y", DoubleType(), False),
+                StructField("width", DoubleType(), False),
+                StructField("height", DoubleType(), False),
             ]
         )
 
@@ -63,7 +47,7 @@ class Box2dType(UserDefinedType):
     def scalaUDT(cls) -> str:
         return "org.apache.spark.sql.rikai.Box2dType"
 
-    def serialize(self, obj: rikai.types.geometry.Box2d):
+    def serialize(self, obj: "Box2d"):
         """Serialize a :py:class:`rikai.types.geometry.Box2d` into Spark Row"""
         return (
             obj.x,
@@ -72,7 +56,7 @@ class Box2dType(UserDefinedType):
             obj.height,
         )
 
-    def deserialize(self, datum: Row) -> Box2d:
+    def deserialize(self, datum: Row) -> "Box2d":
         from rikai.types.geometry import Box2d
 
         if len(datum) < 4:
@@ -151,8 +135,8 @@ class Box3dType(UserDefinedType):
     def deserialize(self, datum: Row) -> "Box3d":
         from rikai.types.geometry import Box3d
 
-        if len(datum) < 3:
-            logger.error(f"Deserialize Point: not sufficient data: {datum}")
+        if len(datum) < 5:
+            logger.error(f"Deserialize Box3d: not sufficient data: {datum}")
         return Box3d(datum[0], datum[1], datum[2], datum[3], datum[4])
 
     def simpleString(self) -> str:

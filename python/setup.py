@@ -32,11 +32,11 @@ setup(
     python_requires=">=3.6",
     package_data={"": ["*.jar"]},
     install_requires=[
+        "ipython",
         "numpy",
         "opencv-python",
         "pandas",
         "Pillow",
-        "pafy",
         "pyspark>=3",
         "pyarrow>=2.0",
     ],
@@ -46,6 +46,7 @@ setup(
         "jupyter": ["matplotlib", "jupyterlab"],
         "aws": ["boto"],
         "docs": ["sphinx"],
+        "youtube": ["pafy", "youtube_dl"],
     },
     classifiers=[
         "License :: OSI Approved :: Apache Software License",

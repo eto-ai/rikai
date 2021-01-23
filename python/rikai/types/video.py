@@ -16,7 +16,6 @@
 from abc import ABC, abstractmethod
 import cv2
 import os
-import pafy
 import pathlib
 
 from rikai.mixin import Displayable
@@ -45,7 +44,6 @@ class YouTubeVideo(Displayable):
 
     def __init__(self, vid: str):
         """
-
         Parameters
         ----------
         vid: str
@@ -58,15 +56,18 @@ class YouTubeVideo(Displayable):
     def __repr__(self) -> str:
         return "YouTubeVideo({0})".format(self.vid)
 
-    def show(self, **kwargs):
+    def show(self, width: int = 400, height: int = 300, **kwargs):
         """
         Visualization in jupyter notebook with custom options
 
         Parameters
         ----------
+        width: int, default 400
+            Width in pixels
+        height: int, default 300
+            Height in pixels
         kwargs: dict
-            Key-word args for IPython.display.YouTubeVideo to show in
-            Jupyter notebook
+            See :py:class:`IPython.display.YouTubeVideo` for other kwargs
 
         Returns
         -------
@@ -74,7 +75,7 @@ class YouTubeVideo(Displayable):
         """
         from IPython.display import YouTubeVideo
 
-        return YouTubeVideo(self.vid, **kwargs)
+        return YouTubeVideo(self.vid, width=width, height=height, **kwargs)
 
     def _repr_html_(self):
         """default visualization in jupyter notebook cell"""
@@ -83,23 +84,34 @@ class YouTubeVideo(Displayable):
     def __eq__(self, other) -> bool:
         return isinstance(other, YouTubeVideo) and self.vid == other.vid
 
-    def get_stream(self, ext="mp4", quality="worst") -> "VideoStream":
+    def get_stream(self, ext: str = "mp4", quality: str = "worst") -> "VideoStream":
         """
         Get a reference to a particular stream
 
         Parameters
         ----------
         ext: str, default 'mp4'
-            The preferred extension type to get
+            The preferred extension type to get. One of ['ogg', 'm4a', 'mp4',
+            'flv', 'webm', '3gp']
+            See: https://pythonhosted.org/Pafy/#Pafy.Stream.extension
         quality: str, default 'worst'
-            Either 'worst' or 'best'
+            Either 'worst' (lowest bitrate) or 'best' (highest bitrate)
+            See: https://pythonhosted.org/Pafy/index.html#Pafy.Pafy.getbest
 
         Returns
         -------
         v: VideoStream
             VideoStream referencing an actual video resource
         """
-        os.environ["PAFY_BACKEND"] = "internal"  # don't depend on youtube-dl
+        try:
+            import pafy
+        except ImportError as e:
+            print(
+                "Run `pip install rikai[youtube] to install pafy and "
+                "youtube_dl to work with youtube videos."
+            )
+            raise e
+        ext, quality = ext.strip().lower(), quality.strip().lower()
         if quality == "worst":
             stream = getworst(pafy.new(self.uri), preftype=ext)
         else:
@@ -145,14 +157,18 @@ class VideoStream:
     def __repr__(self) -> str:
         return f"VideoStream(uri={self.uri})"
 
-    def show(self, **kwargs):
+    def show(self, width: int = None, height: int = None, **kwargs):
         """
         Customize visualization in jupyter notebook
 
         Parameters
         ----------
+        width: int, default None
+            Width in pixels. Defaults to the original video width
+        height: int, default None
+            Height in pixels. Defaults to the original video height
         kwargs: dict
-            Key-word args for IPython.display.Video
+            See :py:class:`IPython.display.Video` doc for other kwargs
 
         Returns
         -------
@@ -160,7 +176,7 @@ class VideoStream:
         """
         from IPython.display import Video
 
-        return Video(self.uri, **kwargs)
+        return Video(self.uri, width=width, height=height, **kwargs)
 
     def _repr_html_(self):
         """default visualizer for jupyter notebook"""

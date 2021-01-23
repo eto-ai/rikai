@@ -41,3 +41,29 @@ def test_youtube_sample_stream():
     assert isinstance(v, VideoStream)
     sampler = SingleFrameGenerator().get_sampler(v)
     isinstance(next(sampler.__iter__()), np.ndarray)
+
+
+@pytest.mark.webtest
+def test_youtube_show():
+    vid = "pD1gDSao1eA"
+    yt = YouTubeVideo(vid)
+    result = yt._repr_html_()
+    assert result == yt.show()._repr_html_()
+    # TODO actually parse the html and check kwargs
+    from IPython.display import YouTubeVideo as IYT
+
+    expected = IYT(vid)._repr_html_()
+    assert result == expected
+
+
+@pytest.mark.webtest
+def test_video_show():
+    vid = "pD1gDSao1eA"
+    v = YouTubeVideo(vid).get_stream()
+    result = v._repr_html_()
+    assert result == v.show()._repr_html_()
+    # TODO actually parse the html and check kwargs
+    from IPython.display import Video as IV
+
+    expected = IV(v.uri)._repr_html_()
+    assert result == expected

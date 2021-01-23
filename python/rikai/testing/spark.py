@@ -28,10 +28,11 @@ __all__ = ["SparkTestCase"]
 class SparkTestCase(unittest.TestCase):
     """Basic class for Running Spark Tests
 
-    Tests can access an initialized spark session via `self.spark`
+    Tests can access an initialized :py:class:`SparkSession`
+    via :py:attribute:`self.spark`
     """
 
-    spark = None
+    spark: SparkSession = None
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -63,4 +64,4 @@ class SparkTestCase(unittest.TestCase):
         self.test_dir = self._tmpdir.name
 
     def tearDown(self) -> None:
-        self._tmpdir.cleanup
+        self._tmpdir.cleanup()

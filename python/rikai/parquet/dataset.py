@@ -85,11 +85,16 @@ class Dataset:
                 "Running in distributed mode, world size=%s, rank=%s", world_size, rank
             )
 
-        # Provide determinstic order between distributed workers.
+        # Provide deterministic order between distributed workers.
         self.files = sorted(Resolver.resolve(self.uri))
         logger.info("Loading parquet files: %s", self.files)
 
         self.spark_row_metadata = Resolver.get_schema(self.uri)
+
+    def __repr__(self) -> str:
+        return "Dataset(uri={}, columns={}, shuffle={})".format(
+            self.uri, self.columns if self.columns else "[*]", self.shuffle
+        )
 
     @classmethod
     def _find_udt(cls, pyclass: str) -> UserDefinedType:
@@ -122,6 +127,9 @@ class Dataset:
         converted = {}
         for field in schema["fields"]:
             name = field["name"]
+            if name not in raw_row:
+                # This column is not selected, skip
+                continue
             field_type = field["type"]
             if isinstance(field_type, dict) and field_type["type"] == "udt":
                 udt = self._find_udt(field_type["pyClass"])

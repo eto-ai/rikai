@@ -52,7 +52,7 @@ class ImageType(UserDefinedType):
         return (obj.uri,)
 
     def deserialize(self, datum) -> "Image":
-        from rikai.types.vision import Image  # pylint: disable=import-outside-toplevel
+        from rikai.types.vision import Image
 
         return Image(datum[0])
 
@@ -83,7 +83,7 @@ class LabelType(UserDefinedType):
         return obj.label
 
     def deserialize(self, datum: Row) -> "Label":
-        from rikai.types.vision import Label
+        from rikai.types.vision import Label  # pylint: disable=import-outside-toplevel
 
         return Label(datum)
 

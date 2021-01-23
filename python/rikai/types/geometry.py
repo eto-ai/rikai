@@ -16,6 +16,7 @@
 """
 
 import numpy as np
+
 from rikai.mixin import ToNumpy
 from rikai.spark.types.geometry import PointType, Box3dType, Box2dType
 
@@ -38,6 +39,7 @@ class Point(ToNumpy):
     __UDT__ = PointType()
 
     def __init__(self, x: float, y: float, z: float):
+        # pylint: disable=invalid-name
         self.x = float(x)
         self.y = float(y)
         self.z = float(z)
@@ -96,19 +98,23 @@ class Box2d(ToNumpy):
 
     @property
     def xmin(self) -> float:
+        """Minimum value on the x-axis."""
         return self.x - self.width / 2
 
     @property
     def xmax(self) -> float:
+        """Maximum value on the x-axis."""
         return self.x + self.width / 2
 
     @property
     def ymin(self) -> float:
+        """Minimum value on the y-axis."""
         return self.y - self.height / 2
 
     @property
     def ymax(self) -> float:
-        return self.y + self.height * 2
+        """Maximum value on the y-axis."""
+        return self.y + self.height / 2
 
     @property
     def area(self) -> float:

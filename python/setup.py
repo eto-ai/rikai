@@ -13,9 +13,8 @@ class BuildCommand(distutils.command.build.build):
         if os.path.exists(jars_dir):
             shutil.rmtree(jars_dir)
         os.makedirs(jars_dir)
-        sbt = "/usr/bin/sbt"
-        check_call([sbt, "clean"], cwd=os.pardir)
-        check_call([sbt, "package"], cwd=os.pardir)
+        check_call("sbt clean", cwd=os.pardir, shell=True)
+        check_call("sbt package", cwd=os.pardir, shell=True)
         for jar_file in glob.glob("../target/scala-2.12/*.jar"):
             print(f"Copying {jar_file} to {jars_dir}")
             shutil.copy(jar_file, jars_dir)

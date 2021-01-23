@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""A Dataset that supports Rikai UDT convensions
+"""Parquet-based Rikai Dataset that supports automatically UDT conversions.
 """
 
 # Standard Library
@@ -37,7 +37,14 @@ __all__ = ["Dataset"]
 class Dataset:
     """Rikai Dataset.
 
-    :py:class:`Dataset` provides read access to a Rikai dataset.
+    :py:class:`Dataset` provides read access to a Rikai dataset. It supports
+
+    - Read Rikai encoded dataset on the supported storage medias, i.e., local filesystem,
+      AWS S3 or Google GCS.
+    - Automatically deserialize data into semantic user defined types (UDT).
+    - Shuffle the dataset randomly through ``shuffle`` flag.
+    - Distributed training by setting ``world_size`` and ``rank`` parameters. When enabled,
+      parquet `row-group` level partition will be used to distribute data amount the workers.
 
     Parameters
     ----------
@@ -57,6 +64,12 @@ class Dataset:
         Total number of distributed workers
     rank : int
         The rank of this worker in all the distributed workers
+
+    Notes
+    -----
+    - Typically user should not directly use this class. Instead users are encouraged to
+      use framework-native readers, for example, using :py:class:`rikai.torch.data.DataLoader` in
+      `Pytorch <https://pytorch.org/>`_
     """
 
     SPARK_PARQUET_ROW_METADATA = b"org.apache.spark.sql.parquet.row.metadata"
@@ -85,11 +98,16 @@ class Dataset:
                 "Running in distributed mode, world size=%s, rank=%s", world_size, rank
             )
 
-        # Provide determinstic order between distributed workers.
+        # Provide deterministic order between distributed workers.
         self.files = sorted(Resolver.resolve(self.uri))
         logger.info("Loading parquet files: %s", self.files)
 
         self.spark_row_metadata = Resolver.get_schema(self.uri)
+
+    def __repr__(self) -> str:
+        return "Dataset(uri={}, columns={}, shuffle={})".format(
+            self.uri, self.columns if self.columns else "[*]", self.shuffle
+        )
 
     @classmethod
     def _find_udt(cls, pyclass: str) -> UserDefinedType:
@@ -122,6 +140,9 @@ class Dataset:
         converted = {}
         for field in schema["fields"]:
             name = field["name"]
+            if name not in raw_row:
+                # This column is not selected, skip
+                continue
             field_type = field["type"]
             if isinstance(field_type, dict) and field_type["type"] == "udt":
                 udt = self._find_udt(field_type["pyClass"])
@@ -141,7 +162,7 @@ class Dataset:
                 isinstance(field_type, dict)
                 and field_type["type"] == "array"
                 and isinstance(field_type["elementType"], dict)
-                and field_type["elementType"]["type"] in set(["struct", "udt"])
+                and field_type["elementType"]["type"] in {"struct", "udt"}
             ):
                 converted[name] = [
                     self._convert(elem, field_type["elementType"])

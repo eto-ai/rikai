@@ -15,10 +15,12 @@
 """Geometry User Defined Types in Spark
 """
 
+# Third-Party
 from pyspark.sql import Row
 from pyspark.sql.types import DoubleType, StructField, StructType, UserDefinedType
-from rikai.logging import logger
 
+# Rikai
+from rikai.logging import logger
 
 __all__ = ["PointType", "Box3dType", "Box2dType"]
 
@@ -30,26 +32,10 @@ class Box2dType(UserDefinedType):
     def sqlType(cls) -> StructType:
         return StructType(
             fields=[
-                StructField(
-                    "x",
-                    DoubleType(),
-                    False,
-                ),
-                StructField(
-                    "y",
-                    DoubleType(),
-                    False,
-                ),
-                StructField(
-                    "width",
-                    DoubleType(),
-                    False,
-                ),
-                StructField(
-                    "height",
-                    DoubleType(),
-                    False,
-                ),
+                StructField("x", DoubleType(), False),
+                StructField("y", DoubleType(), False),
+                StructField("width", DoubleType(), False),
+                StructField("height", DoubleType(), False),
             ]
         )
 
@@ -62,7 +48,7 @@ class Box2dType(UserDefinedType):
         return "org.apache.spark.sql.rikai.Box2dType"
 
     def serialize(self, obj: "Box2d"):
-        """Serialize an numpy.ndarra into Spark Row"""
+        """Serialize a :py:class:`rikai.types.geometry.Box2d` into a PySpark Row"""
         return (
             obj.x,
             obj.y,
@@ -104,7 +90,7 @@ class PointType(UserDefinedType):
         return "org.apache.spark.sql.rikai.PointType"
 
     def serialize(self, obj: "Point"):
-        """Serialize an numpy.ndarra into Spark Row"""
+        """Serialize an :py:class:`PointType` into Spark Row"""
         return Row(x=obj.x, y=obj.y, z=obj.z)
 
     def deserialize(self, datum: Row) -> "Point":
@@ -143,14 +129,14 @@ class Box3dType(UserDefinedType):
         return "org.apache.spark.sql.rikai.Box3dType"
 
     def serialize(self, obj: "Box3d"):
-        """Serialize an numpy.ndarra into Spark Row"""
+        """Serialize an :py:class:`rikai.types.geometry.Box3d` into a Spark Row"""
         return Row(obj.center, obj.length, obj.width, obj.height, obj.heading)
 
     def deserialize(self, datum: Row) -> "Box3d":
         from rikai.types.geometry import Box3d
 
-        if len(datum) < 3:
-            logger.error(f"Deserialize Point: not sufficient data: {datum}")
+        if len(datum) < 5:
+            logger.error(f"Deserialize Box3d: not sufficient data: {datum}")
         return Box3d(datum[0], datum[1], datum[2], datum[3], datum[4])
 
     def simpleString(self) -> str:

@@ -14,6 +14,7 @@
 
 """Mixins
 """
+from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import BinaryIO
@@ -38,7 +39,7 @@ class Displayable(ABC):
     """Mixin for notebook viz"""
 
     @abstractmethod
-    def show(self, **kwargs) -> "DisplayObject":
+    def show(self, **kwargs) -> "IPython.display.DisplayObject":
         """Return an IPython.display.DisplayObject"""
 
 

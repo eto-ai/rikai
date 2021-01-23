@@ -13,12 +13,15 @@
 #  limitations under the License.
 
 
+# Standard
 from os.path import basename, join
-from urllib.parse import urljoin, urlparse, ParseResult
+from urllib.parse import urlparse, ParseResult
 
+# Third Party
 from pyarrow import fs
 
-from .logging import logger
+# Rikai
+from rikai.logging import logger
 
 
 __all__ = ["copy"]

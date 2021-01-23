@@ -15,6 +15,8 @@
 """Geometry User Defined Types in Spark
 """
 
+from __future__ import annotations
+
 # Third-Party
 from pyspark.sql import Row
 from pyspark.sql.types import DoubleType, StructField, StructType, UserDefinedType
@@ -47,7 +49,7 @@ class Box2dType(UserDefinedType):
     def scalaUDT(cls) -> str:
         return "org.apache.spark.sql.rikai.Box2dType"
 
-    def serialize(self, obj: "Box2d"):
+    def serialize(self, obj: "rikai.types.geometry.Box2d"):
         """Serialize a :py:class:`rikai.types.geometry.Box2d` into a PySpark Row"""
         return (
             obj.x,
@@ -56,7 +58,7 @@ class Box2dType(UserDefinedType):
             obj.height,
         )
 
-    def deserialize(self, datum: Row) -> "Box2d":
+    def deserialize(self, datum: Row) -> "rikai.types.geometry.Box2d":
         from rikai.types.geometry import Box2d
 
         if len(datum) < 4:

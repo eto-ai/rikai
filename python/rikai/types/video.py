@@ -15,8 +15,6 @@
 """Video related types and utils"""
 from abc import ABC, abstractmethod
 import cv2
-import os
-import pathlib
 
 from rikai.mixin import Displayable
 from rikai.spark.types import YouTubeVideoType, VideoStreamType, SegmentType

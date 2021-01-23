@@ -14,7 +14,6 @@
 
 
 import unittest
-from urllib.parse import urldefrag
 
 from rikai.internal.uri_utils import uri_equal
 

@@ -27,13 +27,12 @@ jobs:
       working-directory: python
       run: |
         sudo apt-get -y -qq install libsnappy-dev
-        python -m pip install -q wheel pylint black
+        python -m pip install -q wheel pylint black flake8
         python setup.py bdist_wheel
         python -m pip install $(ls dist/rikai*.whl)[test,youtube]
-    - name: Python black
+    - name: Python black and flake8
       if: ${{ matrix.python-version == 3.8 }}
-      working-directory: python
-      run: black --check -t py38 rikai tests
+      run: make lint
     - name: Python lint
       if: ${{ matrix.python-version == 3.8 }}
       working-directory: python

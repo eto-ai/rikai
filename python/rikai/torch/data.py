@@ -145,12 +145,13 @@ class DataLoader:
         """
 
         def parallel_prefetch(executor, batch, q):
-            fn = lambda e: [
-                DataLoader._convert_tensor(x) for x in loader.transform_fn(e)
-            ]
+            def fn(e):
+                return [DataLoader._convert_tensor(x) for x in loader.transform_fn(e)]
+
             futures = [executor.submit(fn, e) for e in batch]
             for fut in as_completed(futures):
-                [q.put(x) for x in fut.result()]
+                for x in fut.result():
+                    q.put(x)
 
         prefetch_batch = 4 * loader.num_workers
         with ThreadPoolExecutor(loader.num_workers) as executor:

@@ -12,10 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-# Standard
-import glob
-import os
-
 # Third Party
 import numpy as np
 from parameterized import parameterized
@@ -33,7 +29,7 @@ from pyspark.sql.types import (
 from rikai.parquet import Dataset
 from rikai.spark.types import NDArrayType
 from rikai.testing import SparkTestCase
-from rikai.types import Box2d, Image
+from rikai.types.vision import Box2d, Image
 
 
 class TestParquetUdt(SparkTestCase):

@@ -160,7 +160,7 @@ class Box3d(ToNumpy):
     References
     ----------
     * Waymo Dataset Spec https://github.com/waymo-research/waymo-open-dataset/blob/master/waymo_open_dataset/label.proto
-    """
+    """  # noqa: E501
 
     __UDT__ = Box3dType()
 
@@ -179,7 +179,10 @@ class Box3d(ToNumpy):
         self.heading = float(heading)
 
     def __repr__(self) -> str:
-        return f"Box3d(center={self.center}, l={self.length}, h={self.height}, w={self.weight}, heading={self.heading})"
+        return (
+            f"Box3d(center={self.center}, l={self.length}, "
+            + f"h={self.height}, w={self.width}, heading={self.heading})"
+        )
 
     def __eq__(self, o: object) -> bool:
         return (

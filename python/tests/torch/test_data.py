@@ -14,18 +14,15 @@
 
 # Standard Library
 import os
-from pickle import encode_long
 
 # Third Party
 from PIL import Image as PILImage
-import PIL
 import numpy as np
-from numpy.lib.arraysetops import isin
 from pyspark.sql import Row
 
 # Rikai
 from rikai.numpy import wrap
-from rikai.types import Image, Box2d
+from rikai.types.vision import Image, Box2d
 from rikai.testing.spark import SparkTestCase
 from rikai.torch import DataLoader
 

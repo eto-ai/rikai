@@ -29,7 +29,7 @@ class SparkTestCase(unittest.TestCase):
     """Basic class for Running Spark Tests
 
     Tests can access an initialized :py:class:`SparkSession`
-    via :py:attribute:`self.spark`
+    via :py:attr:`self.spark`.
     """
 
     spark: SparkSession = None

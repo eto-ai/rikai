@@ -19,6 +19,7 @@ Lets get started from the feature engineering in `Spark`_.
 
 .. code-block:: python
 
+    from pyspark.sql import SparkSession
     from pyspark.ml.linalg import DenseMetrix
     from rikai.types import Image, Box2d
     from rikai import numpy as np
@@ -39,17 +40,17 @@ Lets get started from the feature engineering in `Spark`_.
                 "mat": DenseMatrix(2, 2, range(4)),
                 "image": Image("s3://foo/bar/1.png"),
                 "annotations": [
-                {
-                    "label": Label("cat"),
-                    "mask": np.random(size=(256,256)),
-                    "bbox": Box2d(x=1.0, y=2.0, width=3.0, height=4.0)
-                }
+                    Row(
+                        label=Label("cat"),
+                        mask=np.random(size=(256, 256)),
+                        bbox=Box2d(x=1.0, y=2.0, width=3.0, height=4.0)
+                    )
                 ]
             },
         ]
     )
 
-   df.write.format("rikai").save("s3://path/to/features")
+    df.write.format("rikai").save("dataset/out")
 
 We can then inspect the dataset in a `Jupyter Notebook`_.
 
@@ -57,7 +58,7 @@ We can then inspect the dataset in a `Jupyter Notebook`_.
 
 .. code-block:: python
 
-    df = spark.read.format("rikai").load("out")
+    df = spark.read.format("rikai").load("dataset/out")
     df.printSchema()
     df.show(5)
 
@@ -70,7 +71,7 @@ Use the dataset in `pytorch`
     from rikai.torch import DataLoader
 
     data_loader = DataLoader(
-        "s3://path/to/features",
+        "dataset/out",
         shuffle=True,
         batch=8,
     )

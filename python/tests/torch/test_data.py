@@ -16,15 +16,15 @@
 import os
 
 # Third Party
-from PIL import Image as PILImage
 import numpy as np
+from PIL import Image as PILImage
 from pyspark.sql import Row
 
 # Rikai
 from rikai.numpy import wrap
-from rikai.types.vision import Image, Box2d
 from rikai.testing.spark import SparkTestCase
 from rikai.torch import DataLoader
+from rikai.types import Box2d, Image
 
 
 class TorchDataLoaderTest(SparkTestCase):

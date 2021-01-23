@@ -1,46 +1,38 @@
-.. Rikai documentation master file, created by
-   sphinx-quickstart on Thu Jan  7 22:46:51 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
 Welcome to Rikai's documentation!
 =================================
 
-``Rikai`` is a feature store for unstructured data, i.e., video, image, or sensor data.
+``Rikai`` is `Apache Parquet <https://parquet.apache.org/>`_ based format for unstructured Machine Learning (ML) dataset,
+for example, video, image, or sensor data.
 
-.. code-block:: python
+It offers **language and framework interoperable semantic types**,
+and eliminates the tedious data conversions between the different stages in the ML life cycle.
 
-   from pyspark.ml.linalg import DenseMetrix
-   from rikai.vision import Image, BBox
-   from rikai import numpy as np
+These semantic types are natively supported in `Spark`_, `Jupyter`_, `Pytorch`_ and `Tensorflow`_.
+For example, an :py:class:`~rikai.types.vision.Image` created from Spark will:
 
-   df = spark.createDataFrame(
-      [
-         {
-            "id": 1,
-            "mat": DenseMatrix(2, 2, range(4)),
-            "image": Image("s3://foo/bar/1.png"),
-            "annotations": [
-               {
-                  "label": Label("cat"),
-                  "mask": np.random(size=(256,256)),
-                  "bbox": BBox(xmin=1.0, ymin=2.0, xmax=3.0, ymax=4.0)
-               }
-            ]
-         },
-      ]
-   )
+- Automatically converted into :py:class:`torch.Tensor` during model training if using :py:class:`rikai.torch.DataLoader`.
+- Or appropriately presented via `Jupyter Display trait <https://ipython.readthedocs.io/en/stable/api/generated/IPython.display.html>`_
+  in a Jupyter Notebook
 
-   df.write.format("rikai").save("s3://path/to/features")
 
+Additionally, the parquet-native nature of the ``rikai`` format allows such unstructured ML dataset
+being analyzed in Jupyter Notebook, `Spark`_, `Presto`_ or
+`BigQuery <https://cloud.google.com/bigquery/external-data-cloud-storage>`_.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: API References:
+   :maxdepth: 1
 
+   quickstart
+   types
    api/modules
 
 
+.. _Spark : https://spark.apache.org/
+.. _Pytorch : https://pytorch.org/
+.. _Tensorflow : https://www.tensorflow.org/
+.. _Presto : https://prestodb.io/
+.. _Jupyter : https://jupyter.org/
 
 Indices and tables
 ==================
@@ -48,3 +40,4 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+

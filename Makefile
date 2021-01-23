@@ -16,5 +16,6 @@
 all:
 
 lint:
+	flake8 python/rikai python/tests
 	black --check -t py37 python/rikai python/tests
 .PHONY: lint

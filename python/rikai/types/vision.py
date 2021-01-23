@@ -22,13 +22,13 @@ import numpy as np
 from PIL import Image as PILImage
 
 # Rikai
-from rikai.mixin import Asset, ToNumpy
+from rikai.mixin import Asset, ToNumpy, Displayable
 from rikai.spark.types import ImageType, LabelType
 
 __all__ = ["Image", "Label"]
 
 
-class Image(ToNumpy, Asset):
+class Image(ToNumpy, Asset, Displayable):
     """An Image Asset.
 
     Parameters
@@ -43,15 +43,41 @@ class Image(ToNumpy, Asset):
         super().__init__(uri)
         self._cached_data = None
 
+    def show(self, **kwargs):
+        """
+        Custom visualizer for this image in jupyter notebook
+
+        Parameters
+        ----------
+        kwargs: dict
+            Optional display arguments
+
+        Returns
+        -------
+        img: IPython.display.Image
+        """
+        from IPython.display import Image
+
+        return Image(self.uri, **kwargs)
+
     def __repr__(self) -> str:
         return f"Image(uri={self.uri})"
 
     def _repr_html_(self):
-        """Jupyter integration
+        """Default visualizer for remote ref (or local ref under cwd)"""
+        return self.show()._repr_html_()
 
-        TODO: find more appropriate way to return image in jupyter?
-        """
-        return f"<img src={self.uri} />"
+    def _repr_mimebundle_(self, include=None, exclude=None):
+        """default visualizer for embedded mime bundle"""
+        return self.show()._repr_mimebundle_(include=include, exclude=exclude)
+
+    def _repr_jpeg_(self):
+        """default visualizer for embedded jpeg"""
+        return self.show()._repr_jpeg_()
+
+    def _repr_png_(self):
+        """default visualizer for embedded png"""
+        return self.show()._repr_png_()
 
     def __eq__(self, other) -> bool:
         return isinstance(other, Image) and super().__eq__(other)

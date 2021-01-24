@@ -17,13 +17,11 @@
 
 # Third Party
 from pyspark.sql.functions import udf
-from pyspark.sql.types import FloatType, StringType
 
 # Rikai
-from rikai.logging import logger
 from rikai.io import copy as _copy
+from rikai.logging import logger
 from rikai.spark.types.vision import ImageType, LabelType
-from rikai.types.geometry import Box2d
 from rikai.types.vision import Image, Label
 
 
@@ -33,19 +31,19 @@ def label(value: str) -> Label:
     return Label(value)
 
 
-@udf(returnType=FloatType())
-def area(bbox: Box2d) -> float:
-    """A UDF to calculate the area of a bounding box"""
-    return bbox.area
+@udf(returnType=ImageType())
+def image(uri: str) -> Image:
+    """Build an :py:class:`Image` from a URI."""
+    return Image(uri)
 
 
 @udf(returnType=ImageType())
-def image_copy(image: Image, uri: str) -> Image:
+def image_copy(img: Image, uri: str) -> Image:
     """Copy the image to a new destination, specified by the URI.
 
     Parameters
     ----------
-    image : Image
+    img : Image
         An image object
     uri : str
         The base directory to copy the image to.
@@ -55,5 +53,5 @@ def image_copy(image: Image, uri: str) -> Image:
     Image
         Return a new image pointed to the new URI
     """
-    logger.info("Copying image src=%s dest=%s", image.uri, uri)
-    return Image(_copy(image.uri, uri))
+    logger.info("Copying image src=%s dest=%s", img.uri, uri)
+    return Image(_copy(img.uri, uri))

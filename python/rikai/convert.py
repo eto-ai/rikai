@@ -25,8 +25,8 @@ __all__ = ["PortableDataType"]
 class PortableDataType(IntEnum):
     """Portable identifier for data types.
 
-    Use parquet defined data type to guarantee the consistency of serialized data
-    in different languages (i.e. python and scala/java)
+    Use parquet defined data type to guarantee the consistency of serialized
+    data in different languages (i.e. python and scala/java)
 
     Note
     ----

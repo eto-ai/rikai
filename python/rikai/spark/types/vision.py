@@ -37,7 +37,9 @@ class ImageType(UserDefinedType):
 
     @classmethod
     def sqlType(cls) -> StructType:
-        return StructType(fields=[StructField("uri", StringType(), nullable=False)])
+        return StructType(
+            fields=[StructField("uri", StringType(), nullable=False)]
+        )
 
     @classmethod
     def module(cls) -> str:
@@ -83,7 +85,9 @@ class LabelType(UserDefinedType):
         return obj.label
 
     def deserialize(self, datum: Row) -> "Label":
-        from rikai.types.vision import Label  # pylint: disable=import-outside-toplevel
+        from rikai.types.vision import (
+            Label,
+        )  # pylint: disable=import-outside-toplevel
 
         return Label(datum)
 

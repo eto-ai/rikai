@@ -64,7 +64,8 @@ def convert(
 ) -> DataFrame:
     """Convert a Coco Dataset into Rikai dataset.
 
-    This function expects the COCO datasets are stored in directory with the following structure:
+    This function expects the COCO datasets are stored in directory with the
+    following structure:
 
     - dataset
         - annotations
@@ -91,15 +92,20 @@ def convert(
     DataFrame
         Returns a Spark DataFrame
     """
-    train_json = os.path.join(dataset_root, "annotations", "instances_train2017.json")
-    val_json = os.path.join(dataset_root, "annotations", "instances_val2017.json")
+    train_json = os.path.join(
+        dataset_root, "annotations", "instances_train2017.json"
+    )
+    val_json = os.path.join(
+        dataset_root, "annotations", "instances_val2017.json"
+    )
 
     categories = load_categories(train_json)
 
     examples = []
     for split, anno_file in zip(["train", "val"], [train_json, val_json]):
         coco = COCO(annotation_file=anno_file)
-        # Coco has native dependencies, so we do not distributed them to workers.
+        # Coco has native dependencies, so we do not distributed them
+        # to the workers.
         image_ids = coco.imgs
         if limit > 0:
             image_ids = islice(image_ids, limit)
@@ -112,7 +118,9 @@ def convert(
                 annos.append(
                     {
                         "category_id": ann["category_id"],
-                        "category_text": Label(categories[ann["category_id"]]["name"]),
+                        "category_text": Label(
+                            categories[ann["category_id"]]["name"]
+                        ),
                         "bbox": bbox,
                         "area": float(ann["area"]),
                     }

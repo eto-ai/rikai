@@ -13,12 +13,15 @@
 #  limitations under the License.
 
 
+# Standard
 from os.path import basename, join
-from urllib.parse import urljoin, urlparse, ParseResult
+from urllib.parse import urlparse, ParseResult
 
+# Third Party
 from pyarrow import fs
 
-from .logging import logger
+# Rikai
+from rikai.logging import logger
 
 
 __all__ = ["copy"]
@@ -44,15 +47,16 @@ def _normalize_uri(uri: str) -> str:
 
 
 def copy(source: str, dest: str) -> str:
-    """Copy a file from source to destination, and return the URI of the copied file.
+    """Copy a file from source to destination, and return the URI of
+    the copied file.
 
     Parameters
     ----------
     source : str
         The source URI to copy from
     dest : str
-        The destination uri or the destionation directory. If ``dest`` is a URI ends with a "/",
-        it represents a directory.
+        The destination uri or the destionation directory. If ``dest`` is
+        a URI ends with a "/", it represents a directory.
 
     Return
     ------

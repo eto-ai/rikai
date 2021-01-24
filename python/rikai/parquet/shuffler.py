@@ -31,7 +31,8 @@ class RandomShuffler(Generic[Elem]):
     ----------
     capacity : int, optional
         The capacity of the internal random access buffer. Note that setting this value to
-        ``1`` or ``0`` makes this :py:class:`RandomShuffler` to a FIFO queue. Default value: ``32``.
+        ``1`` or ``0`` makes this :py:class:`RandomShuffler` to a FIFO queue. Default
+        value: ``32``.
     seed : int, optional
         Random seed.
 
@@ -62,11 +63,13 @@ class RandomShuffler(Generic[Elem]):
     - Petastorm `Shuffling Buffer <https://github.com/uber/petastorm/blob/master/petastorm/reader_impl/shuffling_buffer.py>`_
 
     .. _Reservoir Sampling: https://en.wikipedia.org/wiki/Reservoir_sampling
-    """
+    """  # noqa
 
     DEFAULT_CAPACITY = 32
 
-    def __init__(self, capacity: int = DEFAULT_CAPACITY, seed: Optional[int] = None):
+    def __init__(
+        self, capacity: int = DEFAULT_CAPACITY, seed: Optional[int] = None
+    ):
         """Construct a :py:class:`RandomShuffler`"""
         self.capacity = capacity
         self.seed = seed

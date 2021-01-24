@@ -15,9 +15,16 @@
 """Geometry User Defined Types in Spark
 """
 
+from __future__ import annotations
+
 # Third-Party
 from pyspark.sql import Row
-from pyspark.sql.types import DoubleType, StructField, StructType, UserDefinedType
+from pyspark.sql.types import (
+    DoubleType,
+    StructField,
+    StructType,
+    UserDefinedType,
+)
 
 # Rikai
 from rikai.logging import logger
@@ -47,8 +54,8 @@ class Box2dType(UserDefinedType):
     def scalaUDT(cls) -> str:
         return "org.apache.spark.sql.rikai.Box2dType"
 
-    def serialize(self, obj: "Box2d"):
-        """Serialize a :py:class:`rikai.types.geometry.Box2d` into a PySpark Row"""
+    def serialize(self, obj: "rikai.types.geometry.Box2d"):
+        """Serialize a Box2d into a PySpark Row"""
         return (
             obj.x,
             obj.y,
@@ -56,7 +63,7 @@ class Box2dType(UserDefinedType):
             obj.height,
         )
 
-    def deserialize(self, datum: Row) -> "Box2d":
+    def deserialize(self, datum: Row) -> "rikai.types.geometry.Box2d":
         from rikai.types.geometry import Box2d
 
         if len(datum) < 4:
@@ -129,7 +136,7 @@ class Box3dType(UserDefinedType):
         return "org.apache.spark.sql.rikai.Box3dType"
 
     def serialize(self, obj: "Box3d"):
-        """Serialize an :py:class:`rikai.types.geometry.Box3d` into a Spark Row"""
+        """Serialize an Box3d into a Spark Row"""
         return Row(obj.center, obj.length, obj.width, obj.height, obj.heading)
 
     def deserialize(self, datum: Row) -> "Box3d":

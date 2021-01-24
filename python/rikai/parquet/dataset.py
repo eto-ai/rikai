@@ -39,25 +39,27 @@ class Dataset:
 
     :py:class:`Dataset` provides read access to a Rikai dataset. It supports
 
-    - Read Rikai encoded dataset on the supported storage medias, i.e., local filesystem,
-      AWS S3 or Google GCS.
+    - Read Rikai encoded dataset on the supported storage medias, i.e.,
+      local filesystem, AWS S3 or Google GCS.
     - Automatically deserialize data into semantic user defined types (UDT).
     - Shuffle the dataset randomly through ``shuffle`` flag.
-    - Distributed training by setting ``world_size`` and ``rank`` parameters. When enabled,
-      parquet `row-group` level partition will be used to distribute data amount the workers.
+    - Distributed training by setting ``world_size`` and ``rank`` parameters.
+      When enabled, parquet `row-group` level partition will be used to
+      distribute data amount the workers.
 
     Parameters
     ----------
     query : str
-        A SQL query "SELECT image, annotation FROM s3://foo/bar" or a dataset URI,
-        i.e., "s3://foo/bar"
+        A SQL query "SELECT image, annotation FROM s3://foo/bar" or
+        a dataset URI, i.e., "s3://foo/bar"
     columns : List[str], optional
         To read only given columns
     shuffle : bool, optional
         Set to True to shuffle the results.
     shuffler_capacity : int
-        The size of the buffer to shuffle the examples. The size of buffer does not
-        impact the distribution of possibility that an example is picked.
+        The size of the buffer to shuffle the examples. The size of buffer
+        does not impact the distribution of possibility that an example
+        is picked.
     seed : int, optional
         Random seed for shuffling process.
     world_size : int
@@ -67,8 +69,9 @@ class Dataset:
 
     Notes
     -----
-    - Typically user should not directly use this class. Instead users are encouraged to
-      use framework-native readers, for example, using :py:class:`rikai.torch.data.DataLoader` in
+    - Typically user should not directly use this class. Instead users are
+      encouraged to use framework-native readers, for example, using
+      :py:class:`rikai.torch.data.DataLoader` in
       `Pytorch <https://pytorch.org/>`_
     """
 
@@ -95,7 +98,9 @@ class Dataset:
         self.world_size = world_size
         if self.world_size > 1:
             logger.info(
-                "Running in distributed mode, world size=%s, rank=%s", world_size, rank
+                "Running in distributed mode, world size=%s, rank=%s",
+                world_size,
+                rank,
             )
 
         # Provide deterministic order between distributed workers.
@@ -119,9 +124,13 @@ class Dataset:
         module_name = ".".join(class_path[:-1])
         class_name = class_path[-1]
         try:
-            udt_class = getattr(importlib.import_module(module_name), class_name)
+            udt_class = getattr(
+                importlib.import_module(module_name), class_name
+            )
         except ImportError as err:
-            raise ImportError(f"Could not import user defind type {pyclass}") from err
+            raise ImportError(
+                f"Could not import user defind type {pyclass}"
+            ) from err
         cls._UDT_CACHE[pyclass] = udt_class()
         return cls._UDT_CACHE[pyclass]
 
@@ -154,7 +163,7 @@ class Dataset:
                     row = Row(value)
                 converted_value = udt.deserialize(row)
                 if isinstance(converted_value, (Vector, Matrix)):
-                    # For pyspark.ml.linalg.{Vector,Matrix}, we eagly to convert
+                    # For pyspark.ml.linalg.{Vector,Matrix}, we eagly convert
                     # them into numpy ndarrays.
                     converted_value = converted_value.toArray()
                 converted[name] = converted_value
@@ -183,18 +192,23 @@ class Dataset:
             with fs.open_input_file(path) as fobj:
                 parquet = pg.ParquetFile(fobj)
                 for group_idx in range(parquet.num_row_groups):
-                    # A simple form of row-group level bucketing without memory overhead.
+                    # A simple form of row-group level bucketing without
+                    # memory overhead.
                     # Pros:
-                    #  - It requires zero communication to initialize the distributed policy
-                    #  - It uses little memory and no startup overhead, i.e. collecting row groups.
+                    #  - It requires zero communication to initialize the
+                    #    distributed policy
+                    #  - It uses little memory and no startup overhead, i.e.
+                    #    collecting row groups.
                     # Cons:
-                    #   The drawback would be if the world size is much larger than
-                    #   the average number of row groups. As a result, many of the
-                    #   file open operations would be wasted.
+                    #   The drawback would be if the world size is much larger
+                    #   than the average number of row groups. As a result,
+                    #   many of the file open operations would be wasted.
                     group_count += 1
                     if group_count % self.world_size != self.rank:
                         continue
-                    row_group = parquet.read_row_group(group_idx, columns=self.columns)
+                    row_group = parquet.read_row_group(
+                        group_idx, columns=self.columns
+                    )
                     for batch in row_group.to_batches():  # type: RecordBatch
                         # TODO: read batches not using pandas
                         for _, row in batch.to_pandas().iterrows():
@@ -202,7 +216,10 @@ class Dataset:
                             # Maintain the shuffler buffer around its capacity.
                             while shuffler.full():
                                 yield self._convert(
-                                    shuffler.pop().to_dict(), self.spark_row_metadata
+                                    shuffler.pop().to_dict(),
+                                    self.spark_row_metadata,
                                 )
         while shuffler:
-            yield self._convert(shuffler.pop().to_dict(), self.spark_row_metadata)
+            yield self._convert(
+                shuffler.pop().to_dict(), self.spark_row_metadata
+            )

@@ -32,7 +32,11 @@ from pyspark.sql.types import (
 import rikai
 from rikai.convert import PortableDataType
 from rikai.spark.types.geometry import Box2dType, Box3dType, PointType
-from rikai.spark.types.video import YouTubeVideoType, VideoStreamType, SegmentType
+from rikai.spark.types.video import (
+    YouTubeVideoType,
+    VideoStreamType,
+    SegmentType,
+)
 from rikai.spark.types.vision import ImageType, LabelType
 
 __all__ = [

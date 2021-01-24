@@ -32,7 +32,8 @@ class ResolverTest(TestCase):
 
             files = Resolver.resolve(testdir)
             expected_files = [
-                "file://" + os.path.join(testdir, f"{i}.parquet") for i in range(10)
+                "file://" + os.path.join(testdir, f"{i}.parquet")
+                for i in range(10)
             ]
             self.assertCountEqual(expected_files, files)
 

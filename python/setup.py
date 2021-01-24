@@ -28,7 +28,7 @@ setup(
     author="Rikai authors",
     packages=find_packages() + ["rikai.jars"],
     include_package_data=True,
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     package_data={"": ["*.jar"]},
     install_requires=[
         "ipython",

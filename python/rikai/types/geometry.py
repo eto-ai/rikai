@@ -49,7 +49,10 @@ class Point(ToNumpy):
 
     def __eq__(self, o: object) -> bool:
         return (
-            isinstance(o, Point) and self.x == o.x and self.y == o.y and self.z == o.z
+            isinstance(o, Point)
+            and self.x == o.x
+            and self.y == o.y
+            and self.z == o.z
         )
 
     def to_numpy(self) -> np.ndarray:
@@ -81,7 +84,10 @@ class Box2d(ToNumpy):
         self.height = float(height)
 
     def __repr__(self) -> str:
-        return f"Box2d(x={self.x}, y={self.y}, w={self.width}, h={self.height})"
+        return (
+            f"Box2d(x={self.x}, y={self.y}, w={self.width}"
+            + f", h={self.height})"
+        )
 
     def __eq__(self, o: object) -> bool:
         return (
@@ -160,7 +166,7 @@ class Box3d(ToNumpy):
     References
     ----------
     * Waymo Dataset Spec https://github.com/waymo-research/waymo-open-dataset/blob/master/waymo_open_dataset/label.proto
-    """
+    """  # noqa: E501
 
     __UDT__ = Box3dType()
 
@@ -179,7 +185,10 @@ class Box3d(ToNumpy):
         self.heading = float(heading)
 
     def __repr__(self) -> str:
-        return f"Box3d(center={self.center}, l={self.length}, h={self.height}, w={self.weight}, heading={self.heading})"
+        return (
+            f"Box3d(center={self.center}, l={self.length}, "
+            + f"h={self.height}, w={self.width}, heading={self.heading})"
+        )
 
     def __eq__(self, o: object) -> bool:
         return (

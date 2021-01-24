@@ -42,16 +42,23 @@ class TypesTest(SparkTestCase):
         self._check_roundtrip(df)
 
     def test_point(self):
-        df = self.spark.createDataFrame([Row(Point(1, 2, 3)), Row(Point(2, 3, 4))])
+        df = self.spark.createDataFrame(
+            [Row(Point(1, 2, 3)), Row(Point(2, 3, 4))]
+        )
         self._check_roundtrip(df)
 
     def test_box3d(self):
-        df = self.spark.createDataFrame([Row(Box3d(Point(1, 2, 3), 1, 2, 3, 2.5))])
+        df = self.spark.createDataFrame(
+            [Row(Box3d(Point(1, 2, 3), 1, 2, 3, 2.5))]
+        )
         self._check_roundtrip(df)
 
     def test_youtubevideo(self):
         df = self.spark.createDataFrame(
-            [Row(YouTubeVideo("video_id")), Row(YouTubeVideo("other_video_id"))]
+            [
+                Row(YouTubeVideo("video_id")),
+                Row(YouTubeVideo("other_video_id")),
+            ]
         )
         self._check_roundtrip(df)
 
@@ -62,5 +69,7 @@ class TypesTest(SparkTestCase):
         self._check_roundtrip(df)
 
     def test_segment(self):
-        df = self.spark.createDataFrame([Row(Segment(0, 10)), Row(Segment(15, -1))])
+        df = self.spark.createDataFrame(
+            [Row(Segment(0, 10)), Row(Segment(15, -1))]
+        )
         self._check_roundtrip(df)

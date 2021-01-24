@@ -15,8 +15,6 @@
 """Video related types and utils"""
 from abc import ABC, abstractmethod
 import cv2
-import os
-import pathlib
 
 from rikai.mixin import Displayable
 from rikai.spark.types import YouTubeVideoType, VideoStreamType, SegmentType
@@ -84,7 +82,9 @@ class YouTubeVideo(Displayable):
     def __eq__(self, other) -> bool:
         return isinstance(other, YouTubeVideo) and self.vid == other.vid
 
-    def get_stream(self, ext: str = "mp4", quality: str = "worst") -> "VideoStream":
+    def get_stream(
+        self, ext: str = "mp4", quality: str = "worst"
+    ) -> "VideoStream":
         """
         Get a reference to a particular stream
 
@@ -209,7 +209,7 @@ class Segment:
             raise ValueError("Cannot start with negative frame number")
         if end_fno > 0 and end_fno < start_fno:
             raise ValueError(
-                "Ending frame must be negative or larger than " "starting frame"
+                "Ending frame must be negative or larger than starting frame"
             )
         self.start_fno = start_fno
         self.end_fno = end_fno
@@ -218,7 +218,10 @@ class Segment:
         return f"Segment(start_fno={self.start_fno}, end_fno={self.end_fno})"
 
     def __eq__(self, other) -> bool:
-        return isinstance(other, Segment) and (self.start_fno, self.end_fno) == (
+        return isinstance(other, Segment) and (
+            self.start_fno,
+            self.end_fno,
+        ) == (
             other.start_fno,
             other.end_fno,
         )
@@ -244,7 +247,11 @@ class SingleFrameSampler(VideoSampler):
     """
 
     def __init__(
-        self, stream: VideoStream, sample_rate: int, start_frame: int, max_samples: int
+        self,
+        stream: VideoStream,
+        sample_rate: int,
+        start_frame: int,
+        max_samples: int,
     ):
         """
         Parameters

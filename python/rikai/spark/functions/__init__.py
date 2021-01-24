@@ -15,5 +15,6 @@
 """Domain-specific Pyspark UDFs
 """
 
+from rikai.spark.functions.geometry import *
 from rikai.spark.functions.io import *
 from rikai.spark.functions.vision import *

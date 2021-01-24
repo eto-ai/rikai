@@ -16,6 +16,6 @@
 all:
 
 lint:
-	black --check -t py37 python/rikai python/tests
+	black --check python/rikai python/tests
 	pycodestyle python/rikai python/tests
 .PHONY: lint

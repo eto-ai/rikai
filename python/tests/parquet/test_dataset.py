@@ -24,7 +24,10 @@ class DatasetTest(SparkTestCase):
     def test_select_columns(self):
         """Test reading rikai dataset with selected columns."""
         df = self.spark.createDataFrame(
-            [Row(id=1, col1="value", col2=123), Row(id=2, col1="more", col2=456)]
+            [
+                Row(id=1, col1="value", col2=123),
+                Row(id=2, col1="more", col2=456),
+            ]
         )
         df.write.format("rikai").save(self.test_dir)
 

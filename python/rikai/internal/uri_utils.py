@@ -23,7 +23,9 @@ def uri_equal(uri1: str, uri2: str) -> bool:
     parsed1 = urlparse(uri1)
     parsed2 = urlparse(uri2)
     if parsed1.scheme in ["", "file"] and parsed2.scheme in ["", "file"]:
-        return parsed1.netloc == parsed2.netloc and parsed1.path == parsed2.path
+        return (
+            parsed1.netloc == parsed2.netloc and parsed1.path == parsed2.path
+        )
     return False
 
 

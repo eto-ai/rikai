@@ -42,7 +42,8 @@ class SparkTestCase(unittest.TestCase):
         rikai_jar = glob.glob(os.path.join(jar_dir, "*.jar"))
         if len(rikai_jar) == 0:
             raise ValueError(
-                f"Rikai Jar is not found on {jar_dir}, please run 'sbt package' first"
+                f"Rikai Jar is not found on {jar_dir}, "
+                "please run 'sbt package' first"
             )
         jars = ":".join(rikai_jar)
         logger.info("loading jars for spark testing: %s", jars)

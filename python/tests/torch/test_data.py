@@ -36,7 +36,9 @@ class TorchDataLoaderTest(SparkTestCase):
         expected = []
         data = []
         for i in range(1000):
-            image_data = np.random.randint(0, 128, size=(128, 128), dtype=np.uint8)
+            image_data = np.random.randint(
+                0, 128, size=(128, 128), dtype=np.uint8
+            )
             image_uri = os.path.join(asset_dir, f"{i}.png")
             PILImage.fromarray(image_data).save(image_uri)
 
@@ -72,7 +74,9 @@ class TorchDataLoaderTest(SparkTestCase):
         os.makedirs(asset_dir)
         data = []
         for i in range(10):
-            image_data = np.random.randint(0, 128, size=(128, 128), dtype=np.uint8)
+            image_data = np.random.randint(
+                0, 128, size=(128, 128), dtype=np.uint8
+            )
             image_uri = os.path.join(asset_dir, f"{i}.png")
             PILImage.fromarray(image_data).save(image_uri)
 
@@ -83,18 +87,22 @@ class TorchDataLoaderTest(SparkTestCase):
                     image=Image(image_uri),
                     annotations=[
                         Row(
-                            category_id=123, category_text="car", bbox=Box2d(1, 2, 3, 4)
+                            category_id=123,
+                            category_text="car",
+                            bbox=Box2d(1, 2, 3, 4),
                         ),
                         Row(
-                            category_id=234, category_text="dog", bbox=Box2d(1, 2, 3, 4)
+                            category_id=234,
+                            category_text="dog",
+                            bbox=Box2d(1, 2, 3, 4),
                         ),
                     ],
                 )
             )
 
-        self.spark.createDataFrame(data).write.mode("overwrite").format("rikai").save(
-            dataset_dir
-        )
+        self.spark.createDataFrame(data).write.mode("overwrite").format(
+            "rikai"
+        ).save(dataset_dir)
 
         loader = DataLoader(dataset_dir, batch_size=1)
         example = next(iter(loader))
@@ -102,5 +110,7 @@ class TorchDataLoaderTest(SparkTestCase):
         self.assertEqual(1, len(example))
         self.assertEqual(2, len(example[0]["annotations"]))
         self.assertTrue(
-            np.array_equal(np.array([1, 2, 3, 4]), example[0]["annotations"][0]["bbox"])
+            np.array_equal(
+                np.array([1, 2, 3, 4]), example[0]["annotations"][0]["bbox"]
+            )
         )

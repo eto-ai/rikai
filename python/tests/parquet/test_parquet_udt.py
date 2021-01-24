@@ -63,7 +63,8 @@ class TestParquetUdt(SparkTestCase):
             self.assertEqual(exp["name"], rec["name"])
             self.assertTrue(
                 np.array_equal(exp["vec"], rec["vec"]),
-                f"Expected {exp['vec']}({exp['vec'].dtype}) Got {rec['vec']}({rec['vec'].dtype})",
+                f"Expected {exp['vec']}({exp['vec'].dtype}) "
+                + f"Got {rec['vec']}({rec['vec'].dtype})",
             )
 
     def test_spark_ml_matrix(self):
@@ -76,11 +77,19 @@ class TestParquetUdt(SparkTestCase):
         df.write.mode("overwrite").format("rikai").save(self.test_dir)
         df.show()
 
-        records = sorted(self._read_parquets(self.test_dir), key=lambda x: x["name"])
+        records = sorted(
+            self._read_parquets(self.test_dir), key=lambda x: x["name"]
+        )
 
         expected = [
-            {"name": 1, "mat": np.array(range(4), dtype=np.float64).reshape(2, 2).T},
-            {"name": 2, "mat": np.array(range(9), dtype=np.float64).reshape(3, 3).T},
+            {
+                "name": 1,
+                "mat": np.array(range(4), dtype=np.float64).reshape(2, 2).T,
+            },
+            {
+                "name": 2,
+                "mat": np.array(range(9), dtype=np.float64).reshape(3, 3).T,
+            },
         ]
         for exp, rec in zip(expected, records):
             self.assertEqual(exp["name"], rec["name"])
@@ -100,7 +109,9 @@ class TestParquetUdt(SparkTestCase):
         df = self.spark.createDataFrame(expected)
         df.write.mode("overwrite").parquet(self.test_dir)
 
-        records = sorted(self._read_parquets(self.test_dir), key=lambda x: x["id"])
+        records = sorted(
+            self._read_parquets(self.test_dir), key=lambda x: x["id"]
+        )
         self.assertCountEqual(expected, records)
 
     @parameterized.expand(
@@ -112,13 +123,16 @@ class TestParquetUdt(SparkTestCase):
         expected = [{"n": rikai.array(range(4), dtype=data_type)}]
 
         df = self.spark.createDataFrame(
-            expected, schema=StructType([StructField("n", NDArrayType(), False)])
+            expected,
+            schema=StructType([StructField("n", NDArrayType(), False)]),
         )
         df.write.mode("overwrite").format("rikai").save(self.test_dir)
 
         records = self._read_parquets(self.test_dir)
         self.assertTrue(
-            np.array_equal(np.array(range(4), dtype=data_type), records[0]["n"])
+            np.array_equal(
+                np.array(range(4), dtype=data_type), records[0]["n"]
+            )
         )
 
     def test_list_of_structs(self):
@@ -132,7 +146,9 @@ class TestParquetUdt(SparkTestCase):
                             [
                                 StructField("label_id", IntegerType(), False),
                                 StructField("label", StringType(), False),
-                                StructField("bbox", ArrayType(IntegerType()), False),
+                                StructField(
+                                    "bbox", ArrayType(IntegerType()), False
+                                ),
                             ]
                         )
                     ),
@@ -159,7 +175,9 @@ class TestParquetUdt(SparkTestCase):
             ],
             schema=schema,
         )
-        df.repartition(1).write.mode("overwrite").format("rikai").save(self.test_dir)
+        df.repartition(1).write.mode("overwrite").format("rikai").save(
+            self.test_dir
+        )
 
         records = self._read_parquets(self.test_dir)
         self.assertTrue(
@@ -172,7 +190,11 @@ class TestParquetUdt(SparkTestCase):
                             "label_id": 1,
                             "bbox": np.array([1, 2, 3, 4]),
                         },
-                        {"label": "dog", "label_id": 2, "bbox": np.array([10, 23])},
+                        {
+                            "label": "dog",
+                            "label_id": 2,
+                            "bbox": np.array([10, 23]),
+                        },
                     ],
                 },
                 {
@@ -210,5 +232,6 @@ class TestParquetUdt(SparkTestCase):
 
         records = self._read_parquets(self.test_dir)
         self.assertCountEqual(
-            [{"bboxes": [{"b": Box2d(1, 2, 3, 4)}, {"b": Box2d(3, 4, 5, 6)}]}], records
+            [{"bboxes": [{"b": Box2d(1, 2, 3, 4)}, {"b": Box2d(3, 4, 5, 6)}]}],
+            records,
         )

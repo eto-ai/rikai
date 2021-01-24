@@ -15,4 +15,8 @@
 """Pytorch support"""
 
 
-from rikai.torch.data import Dataset, DataLoader, make_video_sampler  # noqa: F401
+from rikai.torch.data import (
+    Dataset,
+    DataLoader,
+    make_video_sampler,
+)  # noqa: F401

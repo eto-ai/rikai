@@ -39,7 +39,9 @@ class RandomShufflerTestCase(TestCase):
         self.assertEqual(expected, sorted(actual))
 
     def test_randomness_with_large_capacity(self):
-        """Test the case that the capacity is larger than total number of elements."""
+        """Test the case that the capacity is larger than total number
+        of elements.
+        """
         shuffler = RandomShuffler(128)
         expected = list(range(100))
         actual = self.shuffle_numbers(shuffler, expected)

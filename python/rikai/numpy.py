@@ -21,8 +21,8 @@ in Tensorflow and Pytorch.
 >>> df.write.format("rikai").save("s3://path/to/features")
 
 When use the rikai data in training, the serialized numpy data will be
-automatically converted into the appropriate format, i.e., :py:class:`torch.Tensor`
-in Pytorch:
+automatically converted into the appropriate format, i.e.,
+:py:class:`torch.Tensor` in Pytorch:
 
 >>> from rikai.torch import DataLoader
 >>> data_loader = DataLoader("s3://path/to/features")
@@ -42,7 +42,7 @@ __all__ = ["wrap", "array", "empty"]
 
 
 class ndarray(np.ndarray):  # pylint: disable=invalid-name
-    """This class extends numpy ndarray, with the capability to be serialized in Spark"""
+    """This class extends numpy ndarray to be serialized in Spark."""
 
     __UDT__ = NDArrayType()
 
@@ -85,9 +85,10 @@ def array(obj, *args, **kwargs) -> np.ndarray:
 
 
 def empty(shape, dtype=float, order="C") -> np.ndarray:
-    """Return a new array of giving shape and type, without initializing entries.
+    """Return an empty :py:class:`np.ndarray`.
 
-    The returned array can be directly used in a Spark :py:class:`~pyspark.sql.DataFrame`.
+    The returned array can be directly used in a Spark
+    :py:class:`~pyspark.sql.DataFrame`.
 
     See Also
     --------

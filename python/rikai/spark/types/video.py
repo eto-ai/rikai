@@ -32,11 +32,13 @@ class VideoStreamType(UserDefinedType):
         super().__init__()
 
     def __repr__(self) -> str:
-        return f"VideoType"
+        return "VideoType"
 
     @classmethod
     def sqlType(cls) -> StructType:
-        return StructType(fields=[StructField("uri", StringType(), nullable=False)])
+        return StructType(
+            fields=[StructField("uri", StringType(), nullable=False)]
+        )
 
     @classmethod
     def module(cls) -> str:
@@ -51,7 +53,9 @@ class VideoStreamType(UserDefinedType):
         return (obj.uri,)
 
     def deserialize(self, datum) -> "VideoStream":
-        from rikai.types import VideoStream  # pylint: disable=import-outside-toplevel
+        from rikai.types import (
+            VideoStream,
+        )  # pylint: disable=import-outside-toplevel
 
         return VideoStream(datum[0])
 
@@ -73,7 +77,9 @@ class YouTubeVideoType(UserDefinedType):
 
     @classmethod
     def sqlType(cls) -> StructType:
-        return StructType(fields=[StructField("vid", StringType(), nullable=False)])
+        return StructType(
+            fields=[StructField("vid", StringType(), nullable=False)]
+        )
 
     @classmethod
     def module(cls) -> str:
@@ -88,7 +94,9 @@ class YouTubeVideoType(UserDefinedType):
         return (obj.vid,)
 
     def deserialize(self, datum) -> "YouTubeVideo":
-        from rikai.types import YouTubeVideo  # pylint: disable=import-outside-toplevel
+        from rikai.types import (
+            YouTubeVideo,
+        )  # pylint: disable=import-outside-toplevel
 
         return YouTubeVideo(datum[0])
 
@@ -130,7 +138,9 @@ class SegmentType(UserDefinedType):
         return (obj.start_fno, obj.end_fno)
 
     def deserialize(self, datum) -> "Segment":
-        from rikai.types import Segment  # pylint: disable=import-outside-toplevel
+        from rikai.types import (
+            Segment,
+        )  # pylint: disable=import-outside-toplevel
 
         return Segment(datum[0], datum[1])
 

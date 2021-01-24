@@ -46,11 +46,11 @@ class Displayable(ABC):
 class Asset(ABC):
     """cloud asset Mixin.
 
-    Rikai uses asset to store certain blob on the cloud storage, to facilitate the functionality
-    like fast query, example inspections, and etc.
+    Rikai uses asset to store certain blob on the cloud storage, to facilitate
+    the functionality like fast query, example inspections, and etc.
 
-    An asset is also a cell in a DataFrame for analytics. It offers both fast query on columnar
-    format and easy tooling to access the actual data.
+    An asset is also a cell in a DataFrame for analytics. It offers both fast
+    query on columnar format and easy tooling to access the actual data.
     """
 
     def __init__(self, uri: str) -> None:

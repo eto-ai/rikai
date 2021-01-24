@@ -67,7 +67,9 @@ class RandomShuffler(Generic[Elem]):
 
     DEFAULT_CAPACITY = 32
 
-    def __init__(self, capacity: int = DEFAULT_CAPACITY, seed: Optional[int] = None):
+    def __init__(
+        self, capacity: int = DEFAULT_CAPACITY, seed: Optional[int] = None
+    ):
         """Construct a :py:class:`RandomShuffler`"""
         self.capacity = capacity
         self.seed = seed

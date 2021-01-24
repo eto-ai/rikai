@@ -49,7 +49,10 @@ class Point(ToNumpy):
 
     def __eq__(self, o: object) -> bool:
         return (
-            isinstance(o, Point) and self.x == o.x and self.y == o.y and self.z == o.z
+            isinstance(o, Point)
+            and self.x == o.x
+            and self.y == o.y
+            and self.z == o.z
         )
 
     def to_numpy(self) -> np.ndarray:
@@ -81,7 +84,10 @@ class Box2d(ToNumpy):
         self.height = float(height)
 
     def __repr__(self) -> str:
-        return f"Box2d(x={self.x}, y={self.y}, w={self.width}, h={self.height})"
+        return (
+            f"Box2d(x={self.x}, y={self.y}, w={self.width}"
+            + f", h={self.height})"
+        )
 
     def __eq__(self, o: object) -> bool:
         return (

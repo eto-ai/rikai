@@ -33,7 +33,10 @@ class BaseResolver(ABC):
 
     @abstractmethod
     def resolve(self, uri: str) -> Iterable[str]:
-        """Resolve the name of a feature dataset URI, and returns a list of parquet file URIs."""
+        """Resolve the name of a feature dataset URI, and returns a list of
+        parquet file URIs.
+
+        """
 
     @abstractmethod
     def get_schema(self, uri: str):
@@ -83,7 +86,9 @@ class DefaultResolver(BaseResolver):
         try:
             return json.loads(kv_metadata[self.SPARK_PARQUET_ROW_METADATA])
         except KeyError as exp:
-            raise ValueError(f"Parquet dataset {uri} is not created via Spark") from exp
+            raise ValueError(
+                f"Parquet dataset {uri} is not created via Spark"
+            ) from exp
 
 
 class Resolver:
@@ -101,8 +106,8 @@ class Resolver:
     @classmethod
     def register(cls, scheme: str, resolver: BaseResolver):
         """
-        Register a customize dataset resolver with given scheme, providing integration
-        with featurestore registeration.
+        Register a customize dataset resolver with given scheme, providing
+        integration with feature store registeration.
 
         Parameters
         ----------

@@ -47,8 +47,8 @@ def copy(source: str, dest: str) -> str:
     source : str
         The source URI to copy from
     dest : str
-        The destination uri or the destionation directory. If ``dest`` is a URI ends with a "/",
-        it represents a directory.
+        The destination uri or the destionation directory. If ``dest`` is
+        a URI ends with a "/", it represents a directory.
 
     Return
     ------

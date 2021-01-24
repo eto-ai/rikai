@@ -13,6 +13,8 @@
 #  limitations under the License.
 
 """Semantic types
+
+:noindex:
 """
 
 # __all__ is defined in these

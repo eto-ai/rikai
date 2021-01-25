@@ -3,13 +3,31 @@
 ![Github Action](https://img.shields.io/github/workflow/status/eto-ai/rikai/Python?style=for-the-badge)
 ![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg?style=for-the-badge)
 
-> :heavy_exclamation_mark: This repository is still experimental. No API-compatiblitly is guarenteed.
+> :heavy_exclamation_mark: This repository is still experimental. No API-compatibility is guaranteed.
 
 # rikai
 
-Rikai is a `parquet` based ML data format that has native Spark / Pytorch / Tensorflow support.
-Additionally, it enables advanced analytic capabilties for model debuggabilty and monitoring.
+Rikai is a [`parquet`](https://parquet.apache.org/) based ML data format built for working with
+unstructured data at scale. Processing large amounts of data for ML is never trivial, but that
+is especially true for images and videos often at the core of deep learning applications. We are
+building Rikai with two main goals:
+1. Enable ML engineers/researchers to have a seamless workflow from Spark to PyTorch/TF, 
+   from notebook to production.
+2. Enable advanced analytics capabilities to support much faster active learning, model debugging,
+   and monitoring in production pipelines.
 
+Current (v0.0.1) main features:
+1. Native support in Spark and PyTorch for images/videos: reduce ad-hoc type
+   conversions when moving between ETL and training.
+2. Custom functionality for working with images and videos at scale: reduce boilerplate and 
+   low-level code currently required to process images, filter/sample videos, etc.
+
+Roadmap:
+1. TensorFlow integration
+2. Versioning support built into the dataset
+3. Richer video capabilities (ffmpeg-python integration)
+4. Declarative annotation API (think vega-lite for annotating images/videos)
+5. Data-centric analytics API (think BigQuery ML)
 
 ## Example
 

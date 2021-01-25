@@ -52,7 +52,8 @@ def box2d_from_top_left(coords) -> Box2d:
     Example
     -------
 
-    `Coco dataset <https://cocodataset.org/>`_ is one public dataset that use top-left coordinates
+    `Coco dataset <https://cocodataset.org/>`_ is one public dataset that use
+    top-left coordinates
 
 
     >>> #! pyspark --packages ai.eto.rikai:rikai_2.12:0.0.1

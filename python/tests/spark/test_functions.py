@@ -30,8 +30,8 @@ class SparkFunctionsTest(SparkTestCase):
         """Test calculating bounding box's area."""
         df = self.spark.createDataFrame(
             [
-                (Box2d(1, 2, 1.0, 1.0),),
-                (Box2d(10, 12, 1.0, 5.0),),
+                (Box2d(1, 2, 2.0, 3.0),),
+                (Box2d(10, 12, 11.0, 17.0),),
             ],
             ["bbox"],
         )

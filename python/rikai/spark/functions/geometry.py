@@ -22,13 +22,25 @@ from rikai.spark.types.geometry import Box2dType
 # Rikai
 from rikai.types.geometry import Box2d
 
-__all__ = ["area", "box2d"]
+__all__ = ["area", "box2d", "box2d_from_center"]
 
 
 @udf(returnType=Box2dType())
 def box2d(coords) -> Box2d:
     """Build a Box2d from ``[xmin,ymin,xmax,ymax]`` array."""
-    return Box2d(coords[0], coords[1], coords[2], coords[3])
+    return Box2d(*coords)
+
+
+@udf(returnType=Box2dType())
+def box2d_from_center(coords) -> Box2d:
+    """Build a Box2d from center-point based coordinates,
+    ``[center_x, center_y, width, height]`` array.
+
+    See Also
+    --------
+    :py:meth:`rikai.types.geometry.Box2d.from_center`
+    """
+    return Box2d.from_center(*coords)
 
 
 @udf(returnType=FloatType())

@@ -25,32 +25,34 @@ import Utils.approxEqual
 /**
   * 2-D Bounding Box
   *
-  * @constructor Create a 2-D Bounding Box
-  * @param x x-coordinate of the center
-  * @param y y-coordinate of the center
-  * @param width Width of the box
-  * @param height Height of the box
+  * @constructor Create a 2-D Bounding Box.
+  *
+  * @param xmin x-coordinate of the center
+  * @param ymin y-coordinate of the center
+  * @param xmax Width of the box
+  * @param ymax Height of the box
   */
 @SQLUserDefinedType(udt = classOf[Box2dType])
 class Box2d(
-    val x: Double,
-    val y: Double,
-    val width: Double,
-    val height: Double
+    val xmin: Double,
+    val ymin: Double,
+    val xmax: Double,
+    val ymax: Double
 ) {
 
   override def equals(b: Any): Boolean = {
     b match {
       case other: Box2d =>
-        approxEqual(x, other.x) &&
-          approxEqual(y, other.y) &&
-          approxEqual(width, other.width) &&
-          approxEqual(height, other.height)
+        approxEqual(xmin, other.xmin) &&
+          approxEqual(ymin, other.ymin) &&
+          approxEqual(xmax, other.xmax) &&
+          approxEqual(ymax, other.ymax)
       case _ => false,
     }
   }
 
-  override def toString: String = f"Box2d(x=$x, y=$y, h=$height, w=$width)"
+  override def toString: String =
+    f"Box2d(xmin=$xmin, ymin=$ymin, xmax=$xmax, ymax=$ymax)"
 
 }
 
@@ -62,10 +64,10 @@ class Box2dType extends UserDefinedType[Box2d] {
   override def sqlType: DataType =
     StructType(
       Seq(
-        StructField("x", DoubleType, nullable = false),
-        StructField("y", DoubleType, nullable = false),
-        StructField("width", DoubleType, nullable = false),
-        StructField("height", DoubleType, nullable = false)
+        StructField("xmin", DoubleType, nullable = false),
+        StructField("ymin", DoubleType, nullable = false),
+        StructField("xmax", DoubleType, nullable = false),
+        StructField("ymax", DoubleType, nullable = false)
       )
     )
 
@@ -73,21 +75,21 @@ class Box2dType extends UserDefinedType[Box2d] {
 
   override def serialize(obj: Box2d): Any = {
     val row = new GenericInternalRow(4)
-    row.setDouble(0, obj.x)
-    row.setDouble(1, obj.y)
-    row.setDouble(2, obj.width)
-    row.setDouble(3, obj.height)
+    row.setDouble(0, obj.xmin)
+    row.setDouble(1, obj.ymin)
+    row.setDouble(2, obj.xmax)
+    row.setDouble(3, obj.ymax)
     row
   }
 
   override def deserialize(datum: Any): Box2d = {
     datum match {
       case row: InternalRow => {
-        val x = row.getDouble(0)
-        val y = row.getDouble(1)
-        val width = row.getDouble(2)
-        val height = row.getDouble(3)
-        new Box2d(x, y, width, height)
+        val xmin = row.getDouble(0)
+        val ymin = row.getDouble(1)
+        val xmax = row.getDouble(2)
+        val ymax = row.getDouble(3)
+        new Box2d(xmin, ymin, xmax, ymax)
       }
     }
   }

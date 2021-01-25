@@ -116,27 +116,6 @@ class Box2d(ToNumpy):
         )
 
     @classmethod
-    def from_center_array(cls, coords: Union[List[float], np.array]) -> Box2d:
-        """Factory method to consturct a :py:class:`Box2d` from an array with
-        of center point-based coordinates:
-        ``[center_x, center_y, width, height]``.
-
-        Parameters
-        ----------
-        coords : List[float] or :py:class:`numpy.array`
-            Center-point based coordinates in an array.
-
-        Return
-        ------
-        Box2d
-
-        See Also
-        --------
-        :py:meth:`from_center`
-        """
-        return cls.from_center(coords[0], coords[1], coords[2], coords[3])
-
-    @classmethod
     def from_top_left(
         cls, xmin: float, ymin: float, width: float, height: float
     ) -> Box2d:
@@ -167,18 +146,6 @@ class Box2d(ToNumpy):
 
         return Box2d(xmin, ymin, xmin + width, ymin + height)
 
-    @classmethod
-    def from_top_left_array(
-        cls, coords: Union[List[float], np.array]
-    ) -> Box2d:
-        """Build Box2d from ``[xmin, ymin, width, height]``
-
-        See Also
-        --------
-        :py:meth:`from_top_left`
-        """
-        return cls.from_top_left(coords[0], coords[1], coords[2], coords[3])
-
     def __repr__(self) -> str:
         return (
             f"Box2d(xmin={self.xmin}, ymin={self.ymin}, xmax={self.xmax}"
@@ -195,7 +162,7 @@ class Box2d(ToNumpy):
         ``array([xmin, ymin, xmax, ymax])``
 
         """
-        return np.array([self.xmin, self.ymin, self.xmin, self.ymax])
+        return np.array([self.xmin, self.ymin, self.xmax, self.ymax])
 
     @property
     def width(self) -> float:

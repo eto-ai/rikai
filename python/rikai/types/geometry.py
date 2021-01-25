@@ -119,7 +119,7 @@ class Box2d(ToNumpy):
     def from_top_left(
         cls, xmin: float, ymin: float, width: float, height: float
     ) -> Box2d:
-        """Factory method to construct a :py:class:`Box2d` from
+        """Construct a :py:class:`Box2d` from
         the top-left based coordinates: ``{x0, y0, width, height}``.
 
         Several public datasets, including `Coco Dataset`_, use this

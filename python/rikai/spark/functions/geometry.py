@@ -43,6 +43,18 @@ def box2d_from_center(coords) -> Box2d:
     return Box2d.from_center(*coords)
 
 
+@udf(returnType=Box2dType())
+def box2d_from_top_left(coords) -> Box2d:
+    """Build :py:class:`Box2d` from the top-left based coordinate array:
+    ``[x0, y0, width, height]``
+
+    See Also
+    --------
+    :py:meth:`rikai.types.geometry.Box2d.from_top_left`.
+    """
+    return Box2d.from_top_left(*coords)
+
+
 @udf(returnType=FloatType())
 def area(bbox: Box2d) -> float:
     """A UDF to calculate the area of a bounding box."""

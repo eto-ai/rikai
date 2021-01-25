@@ -27,6 +27,8 @@ import org.apache.spark.sql.catalyst.InternalRow
   * It will only show a array summary in "df.show()".
   * But the data is accessible from Pyspark and Pytorch / Tensorflow readers.
   *
+  * @todo consider to use arrow Array for interchangable data transfer.
+  *
   * @param dtype
   */
 @SQLUserDefinedType(udt = classOf[NDArrayType])

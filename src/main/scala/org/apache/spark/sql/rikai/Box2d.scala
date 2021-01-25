@@ -64,10 +64,10 @@ class Box2dType extends UserDefinedType[Box2d] {
   override def sqlType: DataType =
     StructType(
       Seq(
-        StructField("xmin", DoubleType, nullable = false),
-        StructField("ymin", DoubleType, nullable = false),
-        StructField("xmax", DoubleType, nullable = false),
-        StructField("ymax", DoubleType, nullable = false)
+        StructField("xmin", DoubleType, nullable = true),
+        StructField("ymin", DoubleType, nullable = true),
+        StructField("xmax", DoubleType, nullable = true),
+        StructField("ymax", DoubleType, nullable = true)
       )
     )
 

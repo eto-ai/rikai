@@ -1,17 +1,29 @@
-organization := "ai.eto.rikai"
+scalaVersion := "2.12.11"
 
 name := "rikai"
 
-version := "0.0.1"
+organization := "ai.eto"
+homepage := Some(url("https://github.com/eto-ai/rikai"))
+scmInfo := Some(ScmInfo(url("https://github.com/eto-ai/rikai"),
+                        "git@github.com:eto-ai/rikai.git"))
+licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
+developers := List(Developer("rikai", "developers", "rikai-dev@eto.ai",
+                             url("https://github.com/eto-ai/rikai")))
+publishMavenStyle := true
 
-scalaVersion := "2.12.11"
+libraryDependencies ++= {
+  val sparkVersion     = "3.0.1"
+  val awsVersion       = "2.14.12"
+  val gcpVersion       = "1.113.0"
+  val scalatestVersion = "3.2.0"
 
-libraryDependencies ++= Seq(
-  "org.apache.spark" %% "spark-sql" % "3.0.1",
-  "software.amazon.awssdk" % "s3" % "2.14.12",
-  "com.google.cloud" % "google-cloud-storage" % "1.113.0",
-  "org.scalatest" %% "scalatest-funsuite" % "3.2.0" % "test"
-)
+  Seq(
+    "org.apache.spark" %% "spark-sql" % sparkVersion,
+    "software.amazon.awssdk" % "s3" % awsVersion,
+    "com.google.cloud" % "google-cloud-storage" % gcpVersion,
+    "org.scalatest" %% "scalatest-funsuite" % scalatestVersion % "test"
+    )
+}
 
 scalacOptions ++= Seq(
   "-encoding",
@@ -25,6 +37,13 @@ scalacOptions ++= Seq(
   "-language:existentials",
   "-language:postfixOps",
   "-Xlint:unused"
-)
+  )
 
 Test / parallelExecution := false
+
+publishTo := Some(
+  if (isSnapshot.value)
+    Opts.resolver.sonatypeSnapshots
+  else
+    Opts.resolver.sonatypeStaging
+)

@@ -121,7 +121,7 @@ class Box2d(ToNumpy):
             center_x - width / 2,
             center_y - height / 2,
             center_x + width / 2,
-            center_y + width / 2,
+            center_y + height / 2,
         )
 
     @classmethod

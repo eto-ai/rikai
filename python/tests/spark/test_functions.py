@@ -17,8 +17,9 @@
 import os
 
 from pyspark.sql.functions import col, lit
+from pyspark.sql import Row
 
-from rikai.spark.functions import area, image_copy
+from rikai.spark.functions import area, image_copy, box2d, box2d_from_center
 from rikai.testing.spark import SparkTestCase
 from rikai.types import Box2d, Image
 
@@ -35,6 +36,39 @@ class SparkFunctionsTest(SparkTestCase):
             ],
             ["bbox"],
         )
+        df = df.withColumn("area", area(col("bbox")))
+        self.assertCountEqual((1.0, 5.0), df.select("area").toPandas()["area"])
+
+    def test_box2d_udfs(self):
+        df = self.spark.createDataFrame(
+            [
+                Row(values=[1.0, 2.0, 2.0, 3.0]),
+                Row(values=[10.0, 12.0, 11.0, 17.0]),
+            ],
+            ["values"],
+        ).withColumn("bbox", box2d("values"))
+        df = df.withColumn("area", area(col("bbox")))
+        self.assertCountEqual((1.0, 5.0), df.select("area").toPandas()["area"])
+
+    def test_box2d_center(self):
+        df = self.spark.createDataFrame(
+            [
+                Row(values=[1.5, 2.5, 1.0, 1.0]),
+                Row(values=[10.5, 14.5, 1.0, 5.0]),
+            ],
+            ["values"],
+        ).withColumn("bbox", box2d_from_center("values"))
+        df = df.withColumn("area", area(col("bbox")))
+        self.assertCountEqual((1.0, 5.0), df.select("area").toPandas()["area"])
+
+    def test_box2d_top_left(self):
+        df = self.spark.createDataFrame(
+            [
+                Row(values=[1.0, 2.0, 1.0, 1.0]),
+                Row(values=[10.0, 12.0, 1.0, 5.0]),
+            ],
+            ["values"],
+        ).withColumn("bbox", box2d_from_center("values"))
         df = df.withColumn("area", area(col("bbox")))
         self.assertCountEqual((1.0, 5.0), df.select("area").toPandas()["area"])
 

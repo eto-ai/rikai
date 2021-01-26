@@ -27,6 +27,6 @@ def test_spark_show_numpy(spark: SparkSession, capsys):
     df.show()
     assert np.array_equal(data, df.first().np)
     stdout = capsys.readouterr().out
-    assert "ndarray(double, ...)" in stdout
-    assert "ndarray(uint8, ...)" in stdout
     print(stdout)
+    assert "ndarray(float64" in stdout
+    assert "ndarray(uint8" in stdout

@@ -22,7 +22,7 @@ from pyspark.sql.types import (
     ArrayType,
     BinaryType,
     IntegerType,
-    ShortType,
+    StringType,
     StructField,
     StructType,
     UserDefinedType,
@@ -30,7 +30,6 @@ from pyspark.sql.types import (
 
 # Rikai
 import rikai
-from rikai.convert import PortableDataType
 from rikai.spark.types.geometry import Box2dType, Box3dType, PointType
 from rikai.spark.types.video import (
     YouTubeVideoType,
@@ -67,7 +66,7 @@ class NDArrayType(UserDefinedType):
             fields=[
                 StructField(
                     "dtype",
-                    ShortType(),
+                    StringType(),
                     False,
                 ),
                 StructField(
@@ -94,16 +93,14 @@ class NDArrayType(UserDefinedType):
     def serialize(self, obj: np.ndarray):
         """Serialize an :py:class:`numpy.ndarray` into Spark Row"""
         return (
-            PortableDataType.from_numpy(obj.dtype).value,
+            str(obj.dtype),
             list(obj.shape),
             obj.tobytes(),
         )
 
     def deserialize(self, datum: Row) -> np.ndarray:
-        pdt = PortableDataType(datum[0])
-
         return (
-            np.frombuffer(datum[2], dtype=pdt.to_numpy())
+            np.frombuffer(datum[2], dtype=np.dtype(datum[0]))
             .reshape(datum[1])
             .view(rikai.numpy.ndarray)
         )

@@ -41,7 +41,7 @@ Lets get started from the feature engineering in `Spark`_.
                 "image": Image("s3://foo/bar/1.png"),
                 "annotations": [
                     Row(
-                        label=Label("cat"),
+                        text="cat",
                         mask=np.random(size=(256, 256)),
                         bbox=Box2d(x=1.0, y=2.0, width=3.0, height=4.0)
                     )

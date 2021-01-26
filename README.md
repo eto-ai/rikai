@@ -11,7 +11,7 @@ Rikai is a [`parquet`](https://parquet.apache.org/) based ML data format built f
 unstructured data at scale. Processing large amounts of data for ML is never trivial, but that
 is especially true for images and videos often at the core of deep learning applications. We are
 building Rikai with two main goals:
-1. Enable ML engineers/researchers to have a seamless workflow from Spark to PyTorch/TF, 
+1. Enable ML engineers/researchers to have a seamless workflow from Spark to PyTorch/TF,
    from notebook to production.
 2. Enable advanced analytics capabilities to support much faster active learning, model debugging,
    and monitoring in production pipelines.
@@ -19,7 +19,7 @@ building Rikai with two main goals:
 Current (v0.0.1) main features:
 1. Native support in Spark and PyTorch for images/videos: reduce ad-hoc type
    conversions when moving between ETL and training.
-2. Custom functionality for working with images and videos at scale: reduce boilerplate and 
+2. Custom functionality for working with images and videos at scale: reduce boilerplate and
    low-level code currently required to process images, filter/sample videos, etc.
 
 Roadmap:
@@ -33,7 +33,7 @@ Roadmap:
 
 ```python
 from pyspark.ml.linalg import DenseMetrix
-from rikai.vision import Image, BBox
+from rikai.types.vision import Image, Box2d
 from rikai import numpy as np
 
 df = spark.createDataFrame(
@@ -43,9 +43,9 @@ df = spark.createDataFrame(
         "image": Image("s3://foo/bar/1.png"),
         "annotations": [
             {
-                "label": Label("cat"),
+                "label": "cat",
                 "mask": np.random(size=(256,256)),
-                "bbox": BBox(xmin=1.0, ymin=2.0, xmax=3.0, ymax=4.0)
+                "bbox": Box2d(xmin=1.0, ymin=2.0, xmax=3.0, ymax=4.0)
             }
         ]
     }]
@@ -54,13 +54,13 @@ df = spark.createDataFrame(
 df.write.format("rikai").save("s3://path/to/features")
 ```
 
-Train dataset in `pytorch`
+Train dataset in `Pytorch`
 
 ```python
 from rikai.torch import DataLoader
 
 data_loader = DataLoader(
-    "s3://foo/bar",
+    "s3://path/to/features",
     batch_size=32,
     shuffle=True,
     num_workers=8,
@@ -76,8 +76,8 @@ Currently Rikai is maintained for <a name="VersionMatrix"></a>Scala 2.12 and Pyt
 There are multiple ways to install Rikai:
 
 1. Try it using the included [Dockerfile](#Docker).
-2. OR install it via pip `pip install rikai`, with 
-   [extras for aws/gc, pytorch/tf, and others](#Extras). 
+2. OR install it via pip `pip install rikai`, with
+   [extras for aws/gc, pytorch/tf, and others](#Extras).
 3. OR install it from [source](#Source)
 
 If you want to use Rikai with pyspark, please make sure you add the right jars to the [Spark
@@ -106,16 +106,16 @@ open a browser tab and go to `localhost:8888`.
 ### <a name="Extras"></a>Install from pypi
 
 Base rikai library can be installed with just `pip install rikai`. Dependencies for supporting
-pytorch (pytorch and torchvision), aws (boto), jupyter (matplotlib and jupyterlab) are all part of 
-optional extras. Many open-source datasets also use Youtube videos so we've also added pafy and 
-youtube-dl as optional extras as well. 
+pytorch (pytorch and torchvision), aws (boto), jupyter (matplotlib and jupyterlab) are all part of
+optional extras. Many open-source datasets also use Youtube videos so we've also added pafy and
+youtube-dl as optional extras as well.
 
-For example, if you want to use pytorch in Jupyter to train models on rikai datasets in s3 
+For example, if you want to use pytorch in Jupyter to train models on rikai datasets in s3
 containing Youtube videos you would run:
 
 `pip install rikai[pytorch,aws,jupyter,youtube]`
 
-If you're not sure what you need and don't mind installing some extra dependencies, you can 
+If you're not sure what you need and don't mind installing some extra dependencies, you can
 simply install everything:
 
 `pip install rikai[all]`
@@ -145,7 +145,7 @@ Add appropriate options when creating the SparkSession:
 spark = (
    SparkSession
       .builder
-      .appName('rikai')          
+      .appName('rikai')
       .config('spark.jars.packages', 'ai.eto.rikai:rikai-core:0.0.1')
       .config("spark.driver.extraJavaOptions", "-Dcom.amazonaws.services.s3.enableV4=true")
       .config('spark.jars.packages', 'org.apache.hadoop:hadoop-aws:2.7.4')
@@ -153,19 +153,19 @@ spark = (
       .master("local[*]")
       .getOrCreate()
 )
-``` 
+```
 
 Please note that the above sample assumes your local Apache Spark comes with Hadoop 2.7. If you
 installed another version of Hadoop, please use a matching hadoop-aws jar version.
 
-As with other Spark options, there are multiple ways to specify them. 
-Please see [Spark documentation](https://spark.apache.org/docs/latest/configuration.html) for 
+As with other Spark options, there are multiple ways to specify them.
+Please see [Spark documentation](https://spark.apache.org/docs/latest/configuration.html) for
 details.
 
 ## <a Name="Databricks"></a>Databricks
 
 If you are using Databricks, you shouldn't need to manually configure the Spark options and
 classpath. Please follow [Databricks documentation](https://docs.databricks.com/libraries/index.html)
-and install both the [python package from pypi](https://pypi.org/project/rikai/) and 
+and install both the [python package from pypi](https://pypi.org/project/rikai/) and
 the [jar from maven](https://mvnrepository.com/artifact/ai.eto.rikai/rikai-core).
 

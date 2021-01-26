@@ -33,7 +33,7 @@ Roadmap:
 
 ```python
 from pyspark.ml.linalg import DenseMetrix
-from rikai.types.vision import Image, Box2d
+from rikai.types import Image, Box2d
 from rikai import numpy as np
 
 df = spark.createDataFrame(

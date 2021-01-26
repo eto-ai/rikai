@@ -12,12 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Semantic types
-
-:noindex:
+"""Domain-specific Pyspark UDFs
 """
 
-# __all__ is defined in these
-from rikai.types.geometry import *
-from rikai.types.vision import *
-from rikai.types.video import *
+from rikai.spark.functions.geometry import *
+from rikai.spark.functions.io import *
+from rikai.spark.functions.vision import *

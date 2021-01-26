@@ -15,6 +15,9 @@
 """Geometry types
 """
 
+from __future__ import annotations
+from typing import Union, List
+
 import numpy as np
 
 from rikai.mixin import ToNumpy
@@ -60,67 +63,127 @@ class Point(ToNumpy):
 
 
 class Box2d(ToNumpy):
-    """2-D Bounding Box.
+    """2-D Bounding Box, defined by ``(xmin, ymin, xmax, ymax)``
 
     Attributes
     ----------
-    x : float
-        X-coordinate of the center point of the box
-    y : float
-        Y-coordinate of the center point of the box
-    width : float
-        The width of the box
-    height : float
-        The height of the box
+    xmin : float
+        X-coordinate of the top-left point of the box.
+    ymin : float
+        Y-coordinate of the top-left point of the box.
+    xmax : float
+        X-coordinate of the bottm-right point of the box.
+    ymax : float
+        Y-coordinate of the bottm-right point of the box.
     """
 
     __UDT__ = Box2dType()
 
-    def __init__(self, x: float, y: float, width: float, height: float):
+    def __init__(self, xmin: float, ymin: float, xmax: float, ymax: float):
+        assert (
+            0 <= xmin <= xmax
+        ), f"xmin({xmin}) and xmax({xmax}) must satisfy 0 <= xmin <= xmax"
+        assert (
+            0 <= ymin <= ymax
+        ), f"ymin({ymin}) and ymax({ymax}) must satisfy 0 <= ymin <= ymax"
+        self.xmin = float(xmin)
+        self.ymin = float(ymin)
+        self.xmax = float(xmax)
+        self.ymax = float(ymax)
 
-        self.x = float(x)
-        self.y = float(y)
-        self.width = float(width)
-        self.height = float(height)
+    @classmethod
+    def from_center(
+        cls, center_x: float, center_y: float, width: float, height: float
+    ) -> Box2d:
+        """Factory method to construct a :py:class:`Box2d` from
+        the center point coordinates: ``{center_x, center_y, width, height}``.
+
+
+        Parameters
+        ----------
+        center_x : float
+            X-coordinate of the center point of the box.
+        center_y : float
+            Y-coordinate of the center point of the box.
+        width : float
+            The width of the box.
+        height : float
+            The height of the box.
+
+        Return
+        ------
+        Box2d
+        """
+        assert (
+            width >= 0 and height >= 0
+        ), f"Box2d width({width}) and height({height}) must be non-negative."
+        return Box2d(
+            center_x - width / 2,
+            center_y - height / 2,
+            center_x + width / 2,
+            center_y + height / 2,
+        )
+
+    @classmethod
+    def from_top_left(
+        cls, xmin: float, ymin: float, width: float, height: float
+    ) -> Box2d:
+        """Construct a :py:class:`Box2d` from
+        the top-left based coordinates: ``{x0, y0, width, height}``.
+
+        Top-left corner of an image / bbox is `(0, 0)`.
+
+        Several public datasets, including `Coco Dataset`_, use this
+        coordinations.
+
+        Parameters
+        ----------
+        xmin : float
+            X-coordinate of the top-left point of the box.
+        ymin : float
+            Y-coordinate of the top-left point of the box.
+        width : float
+            The width of the box.
+        height : float
+            The height of the box.
+
+
+        References
+        ----------
+        - `Coco Dataset`_
+
+        .. _Coco Dataset: https://cocodataset.org/
+        """
+        assert (
+            width >= 0 and height >= 0
+        ), f"Box2d width({width}) and height({height}) must be non-negative."
+        return Box2d(xmin, ymin, xmin + width, ymin + height)
 
     def __repr__(self) -> str:
         return (
-            f"Box2d(x={self.x}, y={self.y}, w={self.width}"
-            + f", h={self.height})"
+            f"Box2d(xmin={self.xmin}, ymin={self.ymin}, xmax={self.xmax}"
+            + f", ymax={self.ymax})"
         )
 
-    def __eq__(self, o: object) -> bool:
-        return (
-            isinstance(o, Box2d)
-            and o.x == self.x
-            and o.y == self.y
-            and o.width == self.width
-            and o.height == self.height
+    def __eq__(self, o: Box2d) -> bool:
+        return isinstance(o, Box2d) and np.array_equal(
+            self.to_numpy(), o.to_numpy()
         )
 
     def to_numpy(self) -> np.ndarray:
-        """Convert a :py:class:`Box2d` to numpy ndarray"""
-        return np.array([self.x, self.y, self.width, self.height])
+        """Convert a :py:class:`Box2d` to numpy ndarray:
+        ``array([xmin, ymin, xmax, ymax])``
+
+        """
+        return np.array([self.xmin, self.ymin, self.xmax, self.ymax])
 
     @property
-    def xmin(self) -> float:
-        """Minimum value on the x-axis."""
-        return self.x - self.width / 2
+    def width(self) -> float:
+        return self.xmax - self.xmin
 
     @property
-    def xmax(self) -> float:
-        """Maximum value on the x-axis."""
-        return self.x + self.width / 2
-
-    @property
-    def ymin(self) -> float:
-        """Minimum value on the y-axis."""
-        return self.y - self.height / 2
-
-    @property
-    def ymax(self) -> float:
-        """Maximum value on the y-axis."""
-        return self.y + self.height / 2
+    def height(self) -> float:
+        return self.ymax - self.ymin
 
     @property
     def area(self) -> float:

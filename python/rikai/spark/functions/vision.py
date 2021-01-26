@@ -1,4 +1,4 @@
-#  Copyright 2020 Rikai Authors
+#  Copyright 2021 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -12,59 +12,38 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Pyspark UDFs."""
+"""Vision-related Pyspark UDFs
+"""
 
+# Third Party
 from pyspark.sql.functions import udf
-from pyspark.sql.types import FloatType, StringType
 
 # Rikai
 from rikai.io import copy as _copy
 from rikai.logging import logger
-from rikai.spark.types import ImageType, LabelType
-from rikai.types import Box2d, Image, Label
-
-__all__ = ["label", "area", "copy", "image_copy"]
+from rikai.spark.types.vision import ImageType, LabelType
+from rikai.types.vision import Image, Label
 
 
 @udf(returnType=LabelType())
 def label(value: str) -> Label:
-    """Convert a string value into label"""
+    """Convert a string value into :py:class:`Label`."""
     return Label(value)
 
 
-@udf(returnType=FloatType())
-def area(bbox: Box2d) -> float:
-    """A UDF to calculate the area of a bounding box"""
-    return bbox.area
-
-
-@udf(returnType=StringType())
-def copy(source: str, dest: str) -> str:
-    """Copy a file from source to dest
-
-    Parameters
-    ----------
-    source : str
-        The source URI to copy from
-    dest : str
-        The destination uri or the destionation directory. If ``dest`` is
-        a URI ends with a "/", it represents a directory.
-
-    Return
-    ------
-    str
-        Return the URI of destination.
-    """
-    return _copy(source, dest)
+@udf(returnType=ImageType())
+def image(uri: str) -> Image:
+    """Build an :py:class:`Image` from a URI."""
+    return Image(uri)
 
 
 @udf(returnType=ImageType())
-def image_copy(image: Image, uri: str) -> Image:
+def image_copy(img: Image, uri: str) -> Image:
     """Copy the image to a new destination, specified by the URI.
 
     Parameters
     ----------
-    image : Image
+    img : Image
         An image object
     uri : str
         The base directory to copy the image to.
@@ -74,5 +53,5 @@ def image_copy(image: Image, uri: str) -> Image:
     Image
         Return a new image pointed to the new URI
     """
-    logger.info("Copying image src=%s dest=%s", image.uri, uri)
-    return Image(_copy(image.uri, uri))
+    logger.info("Copying image src=%s dest=%s", img.uri, uri)
+    return Image(_copy(img.uri, uri))

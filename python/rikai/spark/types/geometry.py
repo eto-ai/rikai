@@ -39,10 +39,10 @@ class Box2dType(UserDefinedType):
     def sqlType(cls) -> StructType:
         return StructType(
             fields=[
-                StructField("x", DoubleType(), False),
-                StructField("y", DoubleType(), False),
-                StructField("width", DoubleType(), False),
-                StructField("height", DoubleType(), False),
+                StructField("xmin", DoubleType(), False),
+                StructField("ymin", DoubleType(), False),
+                StructField("xmax", DoubleType(), False),
+                StructField("ymax", DoubleType(), False),
             ]
         )
 
@@ -57,10 +57,10 @@ class Box2dType(UserDefinedType):
     def serialize(self, obj: "rikai.types.geometry.Box2d"):
         """Serialize a Box2d into a PySpark Row"""
         return (
-            obj.x,
-            obj.y,
-            obj.width,
-            obj.height,
+            obj.xmin,
+            obj.ymin,
+            obj.xmax,
+            obj.ymax,
         )
 
     def deserialize(self, datum: Row) -> "rikai.types.geometry.Box2d":
@@ -69,7 +69,7 @@ class Box2dType(UserDefinedType):
         if len(datum) < 4:
             logger.error(f"Deserialize box2d: not sufficient data: {datum}")
 
-        return Box2d(datum[0], datum[1], datum[2], datum[3])
+        return Box2d(*datum[:4])
 
     def simpleString(self) -> str:
         return "box2d"

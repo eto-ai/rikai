@@ -112,5 +112,6 @@ class TorchDataLoaderTest(SparkTestCase):
         self.assertTrue(
             np.array_equal(
                 np.array([1, 2, 3, 4]), example[0]["annotations"][0]["bbox"]
-            )
+            ),
+            f"Actual annotations: {example[0]['annotations'][0]['bbox']}",
         )

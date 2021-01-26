@@ -27,10 +27,10 @@ import Utils.approxEqual
   *
   * @constructor Create a 2-D Bounding Box.
   *
-  * @param xmin x-coordinate of the center
-  * @param ymin y-coordinate of the center
-  * @param xmax Width of the box
-  * @param ymax Height of the box
+  * @param xmin x-corrdinate of the top-left of the box.
+  * @param ymin y-corrdinate of the top-left of the box.
+  * @param xmax x-corrdinate of the bottom-right of the box.
+  * @param ymax y-corrdinate of the bottom-right of the box.
   */
 @SQLUserDefinedType(udt = classOf[Box2dType])
 class Box2d(
@@ -64,10 +64,10 @@ class Box2dType extends UserDefinedType[Box2d] {
   override def sqlType: DataType =
     StructType(
       Seq(
-        StructField("xmin", DoubleType, nullable = true),
-        StructField("ymin", DoubleType, nullable = true),
-        StructField("xmax", DoubleType, nullable = true),
-        StructField("ymax", DoubleType, nullable = true)
+        StructField("xmin", DoubleType, nullable = false),
+        StructField("ymin", DoubleType, nullable = false),
+        StructField("xmax", DoubleType, nullable = false),
+        StructField("ymax", DoubleType, nullable = false)
       )
     )
 

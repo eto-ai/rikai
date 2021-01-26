@@ -80,6 +80,12 @@ class Box2d(ToNumpy):
     __UDT__ = Box2dType()
 
     def __init__(self, xmin: float, ymin: float, xmax: float, ymax: float):
+        assert (
+            0 <= xmin <= xmax
+        ), f"xmin({xmin}) and xmax({xmax}) must satisfy 0 <= xmin <= xmax"
+        assert (
+            0 <= ymin <= ymax
+        ), f"ymin({ymin}) and ymax({ymax}) must satisfy 0 <= ymin <= ymax"
         self.xmin = float(xmin)
         self.ymin = float(ymin)
         self.xmax = float(xmax)
@@ -108,6 +114,9 @@ class Box2d(ToNumpy):
         ------
         Box2d
         """
+        assert (
+            width >= 0 and height >= 0
+        ), f"Box2d width({width}) and height({height}) must be non-negative."
         return Box2d(
             center_x - width / 2,
             center_y - height / 2,
@@ -143,7 +152,9 @@ class Box2d(ToNumpy):
 
         .. _Coco Dataset: https://cocodataset.org/
         """
-
+        assert (
+            width >= 0 and height >= 0
+        ), f"Box2d width({width}) and height({height}) must be non-negative."
         return Box2d(xmin, ymin, xmin + width, ymin + height)
 
     def __repr__(self) -> str:

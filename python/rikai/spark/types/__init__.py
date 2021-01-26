@@ -36,12 +36,11 @@ from rikai.spark.types.video import (
     VideoStreamType,
     SegmentType,
 )
-from rikai.spark.types.vision import ImageType, LabelType
+from rikai.spark.types.vision import ImageType
 
 __all__ = [
     "ImageType",
     "NDArrayType",
-    "LabelType",
     "PointType",
     "Box3dType",
     "Box2dType",

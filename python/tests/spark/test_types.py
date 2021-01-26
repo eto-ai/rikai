@@ -16,7 +16,6 @@ from pyspark.sql import Row
 from pyspark.sql.functions import col
 
 # Rikai
-from rikai.spark.functions import label
 from rikai.testing.spark import SparkTestCase
 from rikai.types import Box3d, Box2d, Point, YouTubeVideo, VideoStream, Segment
 
@@ -27,13 +26,6 @@ class TypesTest(SparkTestCase):
         df.write.mode("overwrite").format("rikai").save(self.test_dir)
         actual_df = self.spark.read.format("rikai").load(self.test_dir)
         self.assertCountEqual(df.collect(), actual_df.collect())
-
-    def test_labels(self):
-        df = self.spark.createDataFrame(
-            [("a",), ("b",), ("c",)],
-            ["v"],
-        ).withColumn("label", label("v"))
-        self._check_roundtrip(df)
 
     def test_bbox(self):
         df = self.spark.createDataFrame(

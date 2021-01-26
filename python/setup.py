@@ -21,6 +21,16 @@ class BuildCommand(distutils.command.build.build):
         super().run()
 
 
+# extras
+test = ["pytest", "parameterized"]
+torch = ["torch>=1.5.0", "torchvision"]
+jupyter = ["matplotlib", "jupyterlab"]
+aws = ["boto"]
+docs = ["sphinx"]
+youtube = ["pafy", "youtube_dl"]
+all = test + torch + jupyter + aws + docs + youtube
+
+
 setup(
     name="rikai",
     version="0.0.1",
@@ -40,12 +50,13 @@ setup(
         "pyarrow>=2.0",
     ],
     extras_require={
-        "test": ["pytest", "parameterized"],
-        "torch": ["torch>=1.5.0", "torchvision"],
-        "jupyter": ["matplotlib", "jupyterlab"],
-        "aws": ["boto"],
-        "docs": ["sphinx"],
-        "youtube": ["pafy", "youtube_dl"],
+        "test": test,
+        "pytorch": torch,
+        "jupyter": jupyter,
+        "aws": aws,
+        "docs": docs,
+        "youtube": youtube,
+        "all": all,
     },
     classifiers=[
         "License :: OSI Approved :: Apache Software License",

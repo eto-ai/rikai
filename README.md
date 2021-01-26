@@ -5,7 +5,7 @@
 
 > :heavy_exclamation_mark: This repository is still experimental. No API-compatibility is guaranteed.
 
-# rikai
+# Rikai
 
 Rikai is a [`parquet`](https://parquet.apache.org/) based ML data format built for working with
 unstructured data at scale. Processing large amounts of data for ML is never trivial, but that
@@ -69,32 +69,103 @@ for example in data_loader:
     print(example)
 ```
 
+## Getting Started
 
-## Docker
+Currently Rikai is maintained for <a name="VersionMatrix"></a>Scala 2.12 and Python 3.7 and 3.8.
+
+There are multiple ways to install Rikai:
+
+1. Try it using the included [Dockerfile](#Docker).
+2. OR install it via pip `pip install rikai`, with 
+   [extras for aws/gc, pytorch/tf, and others](#Extras). 
+3. OR install it from [source](#Source)
+
+If you want to use Rikai with pyspark, please make sure you add the right jars to the [Spark
+options](#SparkSetup) at startup. Databricks users please see [setup in databricks](#Databricks) for
+details insteadf.
+
+### <a name="Docker"></a>Docker
 
 The included Dockerfile creates a standalone demo image with
 Jupyter, Pytorch, Spark, and rikai preinstalled with notebooks for you
 to play with the capabilities of the rikai feature store.
 
-### Building the image
-
-1. First build the rikai jar
-
-``` bash
-# from rikai root
-sbt publishLocal # assumes Scala 2.12 and version is 0.0.1
-```
-
-``` bash
-# from rikai root
-# if the base system is linux and you want to expose the gpu, ensure `nvidia-docker2` is installed first
+To build and run the docker image from the current directory:
+```bash
+# Clone the repo
+git clone git@github.com:eto-ai/rikai rikai
+# Build the docker image
 docker build --tag rikai --network host .
+# Run the image
+docker run -p 0.0.0.0:8888:8888/tcp rikai:latest jupyter lab -ip 0.0.0.0 --port 8888
 ```
 
-2. Running the image
+If successful, the console should then print out a clickable link to JupyterLab. You can also
+open a browser tab and go to `localhost:8888`.
 
-``` bash
-docker run -p 0.0.0.0:8888:8888/tcp rikai:latest jupyter lab --ip 0.0.0.0 --port 8888 --NotebookApp.quit_button=True --NotebookApp.custom_display_url=http://127.0.0.1:8888
+### <a name="Extras"></a>Install from pypi
+
+Base rikai library can be installed with just `pip install rikai`. Dependencies for supporting
+pytorch (pytorch and torchvision), aws (boto), jupyter (matplotlib and jupyterlab) are all part of 
+optional extras. Many open-source datasets also use Youtube videos so we've also added pafy and 
+youtube-dl as optional extras as well. 
+
+For example, if you want to use pytorch in Jupyter to train models on rikai datasets in s3 
+containing Youtube videos you would run:
+
+`pip install rikai[pytorch,aws,jupyter,youtube]`
+
+If you're not sure what you need and don't mind installing some extra dependencies, you can 
+simply install everything:
+
+`pip install rikai[all]`
+
+### <a name="Source"></a>Install from source
+
+To build from source you'll need python as well as Scala with sbt installed:
+
+```bash
+# Clone the repo
+git clone git@github.com:eto-ai/rikai rikai
+# Build the jar
+sbt publishLocal
+# Install python package
+cd python
+pip install -e . # pip install -e .[all] to install all optional extras (see "Install from pypi")
 ```
 
-The console should print out a clickable link to JupyterLab. Run the provided notebook to validate that spark standalone, pytorch, and rikai are installed correctly.
+## <a name="SparkSetup"></a>Local Spark Setup
+
+If you're running Spark locally, you'll need to add the rikai jar when creating the Spark session.
+If you want to read/write data from/to S3, you'll need to add additional options as well.
+
+Add appropriate options when creating the SparkSession:
+
+```python
+spark = (
+   SparkSession
+      .builder
+      .appName('rikai')          
+      .config('spark.jars.packages', 'ai.eto.rikai:rikai-core:0.0.1')
+      .config("spark.driver.extraJavaOptions", "-Dcom.amazonaws.services.s3.enableV4=true")
+      .config('spark.jars.packages', 'org.apache.hadoop:hadoop-aws:2.7.4')
+      # ... other options
+      .master("local[*]")
+      .getOrCreate()
+)
+``` 
+
+Please note that the above sample assumes your local Apache Spark comes with Hadoop 2.7. If you
+installed another version of Hadoop, please use a matching hadoop-aws jar version.
+
+As with other Spark options, there are multiple ways to specify them. 
+Please see [Spark documentation](https://spark.apache.org/docs/latest/configuration.html) for 
+details.
+
+## <a Name="Databricks"></a>Databricks
+
+If you are using Databricks, you shouldn't need to manually configure the Spark options and
+classpath. Please follow [Databricks documentation](https://docs.databricks.com/libraries/index.html)
+and install both the [python package from pypi](https://pypi.org/project/rikai/) and 
+the [jar from maven](https://mvnrepository.com/artifact/ai.eto.rikai/rikai-core).
+

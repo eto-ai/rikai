@@ -64,6 +64,7 @@ class NDArrayType(UserDefinedType):
     def sqlType(cls) -> StructType:
         return StructType(
             fields=[
+                # dtype field will use dictionary encoding.
                 StructField(
                     "dtype",
                     StringType(),

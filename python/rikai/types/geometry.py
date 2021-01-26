@@ -131,6 +131,8 @@ class Box2d(ToNumpy):
         """Construct a :py:class:`Box2d` from
         the top-left based coordinates: ``{x0, y0, width, height}``.
 
+        Top-left corner of an image / bbox is `(0, 0)`.
+
         Several public datasets, including `Coco Dataset`_, use this
         coordinations.
 

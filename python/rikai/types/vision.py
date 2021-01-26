@@ -14,7 +14,6 @@
 """Vision Related User-defined Types:
 
 - :py:class:`Image`
-- :py:class:`Label`
 """
 
 # Third-party libraries
@@ -23,9 +22,9 @@ from PIL import Image as PILImage
 
 # Rikai
 from rikai.mixin import Asset, ToNumpy, Displayable
-from rikai.spark.types import ImageType, LabelType
+from rikai.spark.types import ImageType
 
-__all__ = ["Image", "Label"]
+__all__ = ["Image"]
 
 
 class Image(ToNumpy, Asset, Displayable):
@@ -97,35 +96,3 @@ class Image(ToNumpy, Asset, Displayable):
                 self._cached_data = np.asarray(pil_img)
         assert self._cached_data is not None
         return self._cached_data
-
-
-class Label(ToNumpy):
-    """Text Label
-
-    A strong-typed Text label.
-    """
-
-    __UDT__ = LabelType()
-
-    def __init__(self, label: str):
-        """Label
-
-        Parameters
-        ----------
-        label : str
-            Label text
-
-        """
-        self.label = label
-
-    def __str__(self) -> str:
-        return self.label
-
-    def __repr__(self) -> str:
-        return f"label({self.label})"
-
-    def __eq__(self, other) -> bool:
-        return isinstance(other, Label) and self.label == other.label
-
-    def to_numpy(self) -> np.ndarray:
-        return np.array([self.label])

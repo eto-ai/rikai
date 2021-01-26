@@ -21,14 +21,8 @@ from pyspark.sql.functions import udf
 # Rikai
 from rikai.io import copy as _copy
 from rikai.logging import logger
-from rikai.spark.types.vision import ImageType, LabelType
-from rikai.types.vision import Image, Label
-
-
-@udf(returnType=LabelType())
-def label(value: str) -> Label:
-    """Convert a string value into :py:class:`Label`."""
-    return Label(value)
+from rikai.spark.types.vision import ImageType
+from rikai.types.vision import Image
 
 
 @udf(returnType=ImageType())

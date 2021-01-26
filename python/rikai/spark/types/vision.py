@@ -13,16 +13,14 @@
 #  limitations under the License.
 
 
-from pyspark.sql import Row
 from pyspark.sql.types import (
-    DataType,
     StringType,
     StructField,
     StructType,
     UserDefinedType,
 )
 
-__all__ = ["ImageType", "LabelType"]
+__all__ = ["ImageType"]
 
 
 class ImageType(UserDefinedType):
@@ -60,36 +58,3 @@ class ImageType(UserDefinedType):
 
     def simpleString(self) -> str:
         return "ImageType"
-
-
-class LabelType(UserDefinedType):
-    """Label type"""
-
-    def __repr__(self) -> str:
-        return "LabelType"
-
-    @classmethod
-    def sqlType(cls) -> DataType:
-        return StringType()
-
-    @classmethod
-    def module(cls) -> str:
-        return "rikai.spark.types.vision"
-
-    @classmethod
-    def scalaUDT(cls) -> str:
-        return "org.apache.spark.sql.rikai.LabelType"
-
-    def serialize(self, obj: "Label"):
-        """Serialize a label into Spark String"""
-        return obj.label
-
-    def deserialize(self, datum: Row) -> "Label":
-        from rikai.types.vision import (
-            Label,
-        )  # pylint: disable=import-outside-toplevel
-
-        return Label(datum)
-
-    def simpleString(self) -> str:
-        return "label"

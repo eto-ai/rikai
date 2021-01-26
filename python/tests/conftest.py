@@ -12,24 +12,28 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import os
+# Standard
+from pathlib import Path
 
+# Third Party
 import pytest
-import rikai
 from pyspark.sql import SparkSession
+
+# Rikai
+import rikai
 
 
 @pytest.fixture(scope="session")
 def spark() -> SparkSession:
-    # TODO: load rikai jar from "sbt publishLocal" installed version?
+    jar_dir = Path(rikai.__file__).parent / "jars"
+    jars = [
+        (jar_dir / jar_file).as_posix()
+        for jar_file in jar_dir.iterdir()
+        if jar_file.suffix == ".jar"
+    ]
     return (
         SparkSession.builder.appName("spark-test")
-        .config(
-            "spark.jars",
-            os.path.join(
-                os.path.dirname(rikai.__file__), "jars", "rikai_2.12-0.0.1.jar"
-            ),
-        )
+        .config("spark.jars", ":".join(jars))
         .master("local[2]")
         .getOrCreate()
     )

@@ -13,13 +13,10 @@
 #  limitations under the License.
 
 
-import unittest
-
 from rikai.internal.uri_utils import uri_equal
 
 
-class TestURIUtils(unittest.TestCase):
-    def test_uri_equal(self):
-        self.assertTrue(uri_equal("/abc/def", "file:///abc/def"))
-        self.assertTrue(uri_equal("s3://abc/bar", "s3://abc/bar"))
-        self.assertFalse(uri_equal("s3://foo/bar", "gs://foo/bar"))
+def test_uri_equal(self):
+    assert uri_equal("/abc/def", "file:///abc/def")
+    assert uri_equal("s3://abc/bar", "s3://abc/bar")
+    assert uri_equal("s3://foo/bar", "gs://foo/bar")

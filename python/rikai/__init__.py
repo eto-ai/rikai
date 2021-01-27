@@ -16,5 +16,6 @@
 """
 
 from rikai.numpy import array, empty, wrap
+from .__version__ import version
 
-__all__ = ["array", "empty", "wrap"]
+__all__ = ["array", "empty", "wrap", "version"]

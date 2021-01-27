@@ -56,7 +56,7 @@ def box2d_from_top_left(coords) -> Box2d:
     top-left coordinates
 
 
-    >>> #! pyspark --packages ai.eto.rikai:rikai_2.12:0.0.1
+    >>> #! pyspark --packages ai.eto:rikai_2.12:0.0.1
     >>> import json
     >>> from rikai.spark.functions.geometry import box2d_from_top_left
     >>>

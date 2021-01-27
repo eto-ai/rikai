@@ -1,4 +1,4 @@
-#  Copyright 2020 Rikai Authors
+#  Copyright 2021 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -12,4 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .asserters import *
+"""Helper functions for using :py:function:`assert` with pytests
+"""
+
+
+def assert_count_equal(first, second, msg=None):
+    """Assert ``first`` has the same elements as ``second``, regardless of its order."""
+    from unittest import TestCase
+
+    TestCase().assertCountEqual(first, second, msg=msg)

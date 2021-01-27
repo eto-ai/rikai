@@ -15,9 +15,17 @@
 """Helper functions for using :py:function:`assert` with pytests
 """
 
+from typing import Iterable
 
-def assert_count_equal(first, second, msg=None):
-    """Assert ``first`` has the same elements as ``second``, regardless of its order."""
+
+def assert_count_equal(first: Iterable, second: Iterable, msg=None):
+    """Assert ``first`` has the same elements as ``second``, regardless of
+    the order.
+
+    See Also
+    --------
+    :py:meth:`unittest.TestCase.assertCountEqual`
+    """
     from unittest import TestCase
 
     TestCase().assertCountEqual(first, second, msg=msg)

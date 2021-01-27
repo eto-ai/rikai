@@ -18,7 +18,6 @@ from rikai.testing import assert_count_equal
 
 def teardown_function(_):
     Resolver.reset()
-    print("RESET!!")
 
 
 def test_resolve_local_fs(tmp_path):

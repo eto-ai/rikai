@@ -12,56 +12,57 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from pyspark.sql import Row
+from unittest import TestCase
+from pathlib import Path
+
+from pyspark.sql import Row, SparkSession, DataFrame
 from pyspark.sql.functions import col
 
 # Rikai
-from rikai.testing.spark import SparkTestCase
 from rikai.types import Box3d, Box2d, Point, YouTubeVideo, VideoStream, Segment
 
 
-class TypesTest(SparkTestCase):
-    def _check_roundtrip(self, df):
-        df.show()
-        df.write.mode("overwrite").format("rikai").save(self.test_dir)
-        actual_df = self.spark.read.format("rikai").load(self.test_dir)
-        self.assertCountEqual(df.collect(), actual_df.collect())
+def _check_roundtrip(spark: SparkSession, df: DataFrame, tmp_path: Path):
+    df.show()
+    df.write.mode("overwrite").format("rikai").save(str(tmp_path))
+    actual_df = spark.read.format("rikai").load(str(tmp_path))
+    TestCase().assertCountEqual(df.collect(), actual_df.collect())
 
-    def test_bbox(self):
-        df = self.spark.createDataFrame(
-            [Row(Box2d(1, 2, 3, 4)), Row(Box2d(23, 33, 44, 88))], ["bbox"]
-        )
-        self._check_roundtrip(df)
 
-    def test_point(self):
-        df = self.spark.createDataFrame(
-            [Row(Point(1, 2, 3)), Row(Point(2, 3, 4))]
-        )
-        self._check_roundtrip(df)
+def test_bbox(spark, tmp_path):
+    df = spark.createDataFrame(
+        [Row(Box2d(1, 2, 3, 4)), Row(Box2d(23, 33, 44, 88))], ["bbox"]
+    )
+    _check_roundtrip(spark, df, tmp_path)
 
-    def test_box3d(self):
-        df = self.spark.createDataFrame(
-            [Row(Box3d(Point(1, 2, 3), 1, 2, 3, 2.5))]
-        )
-        self._check_roundtrip(df)
 
-    def test_youtubevideo(self):
-        df = self.spark.createDataFrame(
-            [
-                Row(YouTubeVideo("video_id")),
-                Row(YouTubeVideo("other_video_id")),
-            ]
-        )
-        self._check_roundtrip(df)
+def test_point(spark, tmpdir):
+    df = spark.createDataFrame([Row(Point(1, 2, 3)), Row(Point(2, 3, 4))])
+    _check_roundtrip(spark, df, tmpdir)
 
-    def test_videostream(self):
-        df = self.spark.createDataFrame(
-            [Row(VideoStream("uri1")), Row(VideoStream("uri2"))]
-        )
-        self._check_roundtrip(df)
 
-    def test_segment(self):
-        df = self.spark.createDataFrame(
-            [Row(Segment(0, 10)), Row(Segment(15, -1))]
-        )
-        self._check_roundtrip(df)
+def test_box3d(spark, tmpdir):
+    df = spark.createDataFrame([Row(Box3d(Point(1, 2, 3), 1, 2, 3, 2.5))])
+    _check_roundtrip(spark, df, tmpdir)
+
+
+def test_youtubevideo(spark, tmpdir):
+    df = spark.createDataFrame(
+        [
+            Row(YouTubeVideo("video_id")),
+            Row(YouTubeVideo("other_video_id")),
+        ]
+    )
+    _check_roundtrip(spark, df, tmpdir)
+
+
+def test_videostream(spark, tmpdir):
+    df = spark.createDataFrame(
+        [Row(VideoStream("uri1")), Row(VideoStream("uri2"))]
+    )
+    _check_roundtrip(spark, df, tmpdir)
+
+
+def test_segment(spark, tmpdir):
+    df = spark.createDataFrame([Row(Segment(0, 10)), Row(Segment(15, -1))])
+    _check_roundtrip(spark, df, tmpdir)

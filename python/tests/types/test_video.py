@@ -14,12 +14,7 @@
 
 import numpy as np
 import pytest
-from rikai.types import (
-    YouTubeVideo,
-    VideoStream,
-    SingleFrameSampler,
-    SingleFrameGenerator,
-)
+from rikai.types import YouTubeVideo, VideoStream, SingleFrameSampler
 
 
 def test_youtube():
@@ -39,8 +34,7 @@ def test_youtube_sample_stream():
     yt = YouTubeVideo(vid)
     v = yt.get_stream()
     assert isinstance(v, VideoStream)
-    sampler = SingleFrameGenerator().get_sampler(v)
-    isinstance(next(sampler.__iter__()), np.ndarray)
+    isinstance(next(v.__iter__()), np.ndarray)
 
 
 @pytest.mark.webtest
@@ -48,7 +42,7 @@ def test_youtube_show():
     vid = "pD1gDSao1eA"
     yt = YouTubeVideo(vid)
     result = yt._repr_html_()
-    assert result == yt.show()._repr_html_()
+    assert result == yt.display()._repr_html_()
     # TODO actually parse the html and check kwargs
     from IPython.display import YouTubeVideo as IYT
 
@@ -61,7 +55,7 @@ def test_video_show():
     vid = "pD1gDSao1eA"
     v = YouTubeVideo(vid).get_stream()
     result = v._repr_html_()
-    assert result == v.show()._repr_html_()
+    assert result == v.display()._repr_html_()
     # TODO actually parse the html and check kwargs
     from IPython.display import Video as IV
 

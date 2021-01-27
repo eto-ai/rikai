@@ -23,9 +23,7 @@ __all__ = [
     "YouTubeVideo",
     "VideoStream",
     "VideoSampler",
-    "SamplerGenerator",
     "SingleFrameSampler",
-    "SingleFrameGenerator",
     "Segment",
 ]
 
@@ -54,7 +52,7 @@ class YouTubeVideo(Displayable):
     def __repr__(self) -> str:
         return "YouTubeVideo({0})".format(self.vid)
 
-    def show(self, width: int = 400, height: int = 300, **kwargs):
+    def display(self, width: int = 400, height: int = 300, **kwargs):
         """
         Visualization in jupyter notebook with custom options
 
@@ -77,7 +75,7 @@ class YouTubeVideo(Displayable):
 
     def _repr_html_(self):
         """default visualization in jupyter notebook cell"""
-        return self.show()._repr_html_()
+        return self.display()._repr_html_()
 
     def __eq__(self, other) -> bool:
         return isinstance(other, YouTubeVideo) and self.vid == other.vid
@@ -146,7 +144,7 @@ def getworst(v_pafy, preftype="any", ftypestrict=True, vidonly=False):
     return r
 
 
-class VideoStream:
+class VideoStream(Displayable):
     """Represents a particular video stream at a given uri"""
 
     __UDT__ = VideoStreamType()
@@ -157,7 +155,7 @@ class VideoStream:
     def __repr__(self) -> str:
         return f"VideoStream(uri={self.uri})"
 
-    def show(self, width: int = None, height: int = None, **kwargs):
+    def display(self, width: int = None, height: int = None, **kwargs):
         """
         Customize visualization in jupyter notebook
 
@@ -180,10 +178,15 @@ class VideoStream:
 
     def _repr_html_(self):
         """default visualizer for jupyter notebook"""
-        return self.show()._repr_html_()
+        return self.display()._repr_html_()
 
     def __eq__(self, other) -> bool:
         return isinstance(other, VideoStream) and self.uri == other.uri
+
+    def __iter__(self):
+        """Iterate through every frame in the video"""
+        for frame in SingleFrameSampler(self):
+            yield frame
 
 
 class Segment:
@@ -249,9 +252,9 @@ class SingleFrameSampler(VideoSampler):
     def __init__(
         self,
         stream: VideoStream,
-        sample_rate: int,
-        start_frame: int,
-        max_samples: int,
+        sample_rate: int = 1,
+        start_frame: int = 0,
+        max_samples: int = -1,
     ):
         """
         Parameters
@@ -284,37 +287,3 @@ class SingleFrameSampler(VideoSampler):
             if self.max_samples > -1 and tot_samples >= self.max_samples:
                 break
             success = cap.grab()
-
-
-class SamplerGenerator(ABC):
-    @abstractmethod
-    def get_sampler(self, stream: VideoStream) -> VideoSampler:
-        pass
-
-
-class SingleFrameGenerator(SamplerGenerator):
-    """
-    Generates samplers that just returns single frames
-    """
-
-    def __init__(
-        self, sample_rate: int = 1, start_frame: int = 0, max_samples: int = -1
-    ):
-        """
-        Parameters
-        ----------
-        sample_rate: int
-            The sampling rate in number of frames
-        start_frame: int
-            Start from a specific frame (0-based indexing)
-        max_samples: int
-            Yield at most this many frames (-1 means no max)
-        """
-        self.sample_rate = sample_rate
-        self.start_frame = start_frame
-        self.max_samples = max_samples
-
-    def get_sampler(self, stream):
-        return SingleFrameSampler(
-            stream, self.sample_rate, self.start_frame, self.max_samples
-        )

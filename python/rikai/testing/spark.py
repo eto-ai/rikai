@@ -12,8 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import glob
-import os
 import tempfile
 import unittest
 
@@ -36,20 +34,9 @@ class SparkTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        import rikai
-
-        jar_dir = os.path.join(os.path.dirname(rikai.__file__), "jars")
-        rikai_jar = glob.glob(os.path.join(jar_dir, "*.jar"))
-        if len(rikai_jar) == 0:
-            raise ValueError(
-                f"Rikai Jar is not found on {jar_dir}, "
-                "please run 'sbt package' first"
-            )
-        jars = ":".join(rikai_jar)
-        logger.info("loading jars for spark testing: %s", jars)
         cls.spark = (
             SparkSession.builder.appName("spark-test")
-            .config("spark.jars", jars)
+            .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.1-SNAPSHOT")
             .master("local[2]")
             .getOrCreate()
         )

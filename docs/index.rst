@@ -7,8 +7,8 @@ unstructured data at scale. Processing large amounts of data for ML is never tri
 is especially true for images and videos often at the core of deep learning applications. We are
 building Rikai with two main goals:
 
-1. Enable ML engineers/researchers to have a seamless workflow from Feature Engineering (Spark) to Training (PyTorch/Tensorflow),
-   from notebook to production.
+1. Enable ML engineers/researchers to have a seamless workflow from feature engineering (`Spark`_)
+   to training (`PyTorch`_/`Tensorflow`_), from notebook to production.
 2. Enable advanced analytics capabilities to support much faster active learning, model debugging,
    and monitoring in production.
 

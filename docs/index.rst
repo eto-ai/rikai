@@ -26,7 +26,7 @@ being analyzed in Jupyter Notebook, `Spark`_, `Presto`_ or
    quickstart
    types
    api/modules
-
+   release
 
 .. _Spark : https://spark.apache.org/
 .. _Pytorch : https://pytorch.org/

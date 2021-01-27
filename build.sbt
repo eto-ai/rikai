@@ -1,3 +1,5 @@
+import ReleaseTransformations._
+
 scalaVersion := "2.12.11"
 
 name := "rikai"
@@ -55,3 +57,20 @@ publishTo := Some(
   else
     Opts.resolver.sonatypeStaging
 )
+
+releasePublishArtifactsAction := PgpKeys.publishSigned.value
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  releaseStepCommandAndRemaining("publishSigned"),
+  releaseStepCommand("sonatypeBundleRelease"),
+  setNextVersion,
+  commitNextVersion,
+  pushChanges
+  )
+

@@ -16,12 +16,12 @@
 
 import json
 from abc import ABC, abstractmethod
-from typing import Dict, Iterable
+from pathlib import Path
+from typing import Dict, Iterable, Union
 from urllib.parse import urlparse
 
 import pyarrow.parquet as pq
 from pyarrow.fs import FileSelector, FileSystem
-
 from rikai.internal.uri_utils import normalize_uri
 from rikai.logging import logger
 
@@ -126,8 +126,9 @@ class Resolver:
         cls._RESOLVERS[scheme] = resolver()
 
     @classmethod
-    def resolve(cls, uri: str) -> Iterable[str]:
+    def resolve(cls, uri: Union[str, Path]) -> Iterable[str]:
         """Resolve the dataset URI, and returns a list of parquet files."""
+        uri = str(uri)
         parsed = urlparse(uri)
         if parsed.scheme in cls._RESOLVERS:
             logger.debug("Use extended resolver for scheme: %s", parsed.scheme)

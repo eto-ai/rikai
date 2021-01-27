@@ -39,7 +39,7 @@ class Displayable(ABC):
     """Mixin for notebook viz"""
 
     @abstractmethod
-    def show(self, **kwargs) -> "IPython.display.DisplayObject":
+    def display(self, **kwargs) -> "IPython.display.DisplayObject":
         """Return an IPython.display.DisplayObject"""
 
 

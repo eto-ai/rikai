@@ -51,5 +51,5 @@ def test_show_remote_ref():
     uri = "https://octodex.github.com/images/original.png"
     img = Image(uri)
     # TODO check the actual content
-    assert img._repr_html_() == img.show()._repr_html_()
-    assert img.show()._repr_html_() == IPyImage(uri)._repr_html_()
+    assert img._repr_html_() == img.display()._repr_html_()
+    assert img.display()._repr_html_() == IPyImage(uri)._repr_html_()

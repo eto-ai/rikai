@@ -120,7 +120,6 @@ def test_numpy(spark: SparkSession, tmp_path, data_type):
     import rikai
 
     test_dir = str(tmp_path)
-
     expected = [{"n": rikai.array(range(4), dtype=data_type)}]
 
     df = spark.createDataFrame(

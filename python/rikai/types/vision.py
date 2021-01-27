@@ -42,7 +42,7 @@ class Image(ToNumpy, Asset, Displayable):
         super().__init__(uri)
         self._cached_data = None
 
-    def show(self, **kwargs):
+    def display(self, **kwargs):
         """
         Custom visualizer for this image in jupyter notebook
 
@@ -64,19 +64,21 @@ class Image(ToNumpy, Asset, Displayable):
 
     def _repr_html_(self):
         """Default visualizer for remote ref (or local ref under cwd)"""
-        return self.show()._repr_html_()
+        return self.display()._repr_html_()
 
     def _repr_mimebundle_(self, include=None, exclude=None):
         """default visualizer for embedded mime bundle"""
-        return self.show()._repr_mimebundle_(include=include, exclude=exclude)
+        return self.display()._repr_mimebundle_(
+            include=include, exclude=exclude
+        )
 
     def _repr_jpeg_(self):
         """default visualizer for embedded jpeg"""
-        return self.show()._repr_jpeg_()
+        return self.display()._repr_jpeg_()
 
     def _repr_png_(self):
         """default visualizer for embedded png"""
-        return self.show()._repr_png_()
+        return self.display()._repr_png_()
 
     def __eq__(self, other) -> bool:
         return isinstance(other, Image) and super().__eq__(other)

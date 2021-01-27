@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from unittest import TestCase
 from pathlib import Path
 
 from pyspark.sql import Row, SparkSession, DataFrame
@@ -20,13 +19,14 @@ from pyspark.sql.functions import col
 
 # Rikai
 from rikai.types import Box3d, Box2d, Point, YouTubeVideo, VideoStream, Segment
+from rikai.testing.asserters import assert_count_equal
 
 
 def _check_roundtrip(spark: SparkSession, df: DataFrame, tmp_path: Path):
     df.show()
     df.write.mode("overwrite").format("rikai").save(str(tmp_path))
     actual_df = spark.read.format("rikai").load(str(tmp_path))
-    TestCase().assertCountEqual(df.collect(), actual_df.collect())
+    assert_count_equal(df.collect(), actual_df.collect())
 
 
 def test_bbox(spark, tmp_path):

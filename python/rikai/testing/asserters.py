@@ -1,4 +1,4 @@
-#  Copyright 2020 Rikai Authors
+#  Copyright 2021 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -12,11 +12,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+"""Helper functions for using :py:function:`assert` with pytests
+"""
 
-from rikai.internal.uri_utils import uri_equal
+from typing import Iterable
 
 
-def test_uri_equal():
-    assert uri_equal("/abc/def", "file:///abc/def")
-    assert uri_equal("s3://abc/bar", "s3://abc/bar")
-    assert not uri_equal("s3://foo/bar", "gs://foo/bar")
+def assert_count_equal(first: Iterable, second: Iterable, msg=None):
+    """Assert ``first`` has the same elements as ``second``, regardless of
+    the order.
+
+    See Also
+    --------
+    :py:meth:`unittest.TestCase.assertCountEqual`
+    """
+    from unittest import TestCase
+
+    TestCase().assertCountEqual(first, second, msg=msg)

@@ -12,33 +12,25 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-
-import os
-import tempfile
-from unittest import TestCase
-
 from rikai.parquet.resolver import Resolver
+from rikai.testing import assert_count_equal
 
 
-class ResolverTest(TestCase):
-    def tearDown(self) -> None:
-        Resolver.reset()
+def teardown_function(_):
+    Resolver.reset()
 
-    def test_resolve_local_fs(self):
-        with tempfile.TemporaryDirectory() as testdir:
-            for i in range(10):
-                with open(os.path.join(testdir, f"{i}.parquet"), "w") as fobj:
-                    fobj.write("123")
 
-            files = Resolver.resolve(testdir)
-            expected_files = [
-                "file://" + os.path.join(testdir, f"{i}.parquet")
-                for i in range(10)
-            ]
-            self.assertCountEqual(expected_files, files)
+def test_resolve_local_fs(tmp_path):
+    for i in range(10):
+        with (tmp_path / f"{i}.parquet").open(mode="w") as fobj:
+            fobj.write("123")
 
-        with tempfile.TemporaryDirectory() as emptydir:
-            self.assertEqual([], Resolver.resolve(emptydir))
+    files = Resolver.resolve(tmp_path)
+    expected_files = [
+        "file://" + str(tmp_path / f"{i}.parquet") for i in range(10)
+    ]
+    assert_count_equal(expected_files, files)
 
-    def test_resolve_s3(self):
-        pass
+
+def test_resolve_empty_dir(tmp_path):
+    assert [] == Resolver.resolve(tmp_path)

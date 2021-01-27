@@ -12,28 +12,29 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from pathlib import Path
+
 # Third Party
-from pyspark.sql import Row
+from pyspark.sql import Row, SparkSession
 
 # Rikai
 from rikai.parquet import Dataset
-from rikai.testing import SparkTestCase
+from rikai.testing.asserters import assert_count_equal
 
 
-class DatasetTest(SparkTestCase):
-    def test_select_columns(self):
-        """Test reading rikai dataset with selected columns."""
-        df = self.spark.createDataFrame(
-            [
-                Row(id=1, col1="value", col2=123),
-                Row(id=2, col1="more", col2=456),
-            ]
-        )
-        df.write.format("rikai").save(self.test_dir)
+def test_select_columns(spark: SparkSession, tmp_path: Path):
+    """Test reading rikai dataset with selected columns."""
+    df = spark.createDataFrame(
+        [
+            Row(id=1, col1="value", col2=123),
+            Row(id=2, col1="more", col2=456),
+        ]
+    )
+    df.write.format("rikai").save(str(tmp_path))
 
-        dataset = Dataset(self.test_dir, columns=["id", "col1"])
-        actual = sorted(list(dataset), key=lambda x: x["id"])
+    dataset = Dataset(str(tmp_path), columns=["id", "col1"])
+    actual = sorted(list(dataset), key=lambda x: x["id"])
 
-        self.assertCountEqual(
-            [{"id": 1, "col1": "value"}, {"id": 2, "col1": "more"}], actual
-        )
+    assert_count_equal(
+        [{"id": 1, "col1": "value"}, {"id": 2, "col1": "more"}], actual
+    )

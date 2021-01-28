@@ -24,7 +24,7 @@ import numpy as np
 
 from rikai.internal.uri_utils import uri_equal
 
-__all__ = ["ToNumpy", "Asset"]
+__all__ = ["ToNumpy", "Asset", "Displayable"]
 
 
 class ToNumpy(ABC):

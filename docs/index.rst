@@ -8,13 +8,9 @@ is especially true for images and videos often at the core of deep learning appl
 building Rikai with two main goals:
 
 1. Enable ML engineers/researchers to have a seamless workflow from feature engineering (`Spark`_)
-   to training (`PyTorch`_/`Tensorflow`_), from notebook to production.
+   to training (`PyTorch`_/`Tensorflow`_), from notebook to production (:doc:`See details <types>`).
 2. Enable advanced analytics capabilities to support much faster active learning, model debugging,
    and monitoring in production.
-
-
-It offers **language and framework interoperable semantic types**,
-and eliminates the tedious data conversions between the different stages in the ML life cycle.
 
 .. code-block:: python
 
@@ -66,8 +62,8 @@ For more details, please read :doc:`quickstart`.
 
    quickstart
    types
-   api/modules
    release
+   api/modules
 
 .. _Spark : https://spark.apache.org/
 .. _Pytorch : https://pytorch.org/

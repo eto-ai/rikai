@@ -28,7 +28,9 @@ __all__ = ["Image"]
 
 
 class Image(ToNumpy, Asset, Displayable):
-    """An Image Asset.
+    """An external Image Asset.
+
+    It contains a reference URI to an image stored on the remote system.
 
     Parameters
     ----------
@@ -86,6 +88,8 @@ class Image(ToNumpy, Asset, Displayable):
     def to_pil(self) -> PILImage:
         """Return an PIL image.
 
+        Note
+        ----
         The caller should close the image.
         https://pillow.readthedocs.io/en/stable/reference/open_files.html#image-lifecycle
         """

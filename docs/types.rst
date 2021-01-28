@@ -23,7 +23,7 @@ Computer Vision
 ---------------
 
 :py:class:`~rikai.types.vision.Image` contains a reference to the external image.
-It is displayed natively in Jupyter notebooks, for example:
+It could be displayed natively in Jupyter notebooks, for example:
 
 .. image:: _static/image_nb.png
 

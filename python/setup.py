@@ -1,5 +1,10 @@
+import pathlib
+import re
 from setuptools import find_packages, setup
 
+about = {}
+with open(pathlib.Path("rikai") / "__version__.py", "r") as fh:
+    exec(fh.read(), about)
 
 # extras
 test = ["pytest", "parameterized"]
@@ -13,7 +18,7 @@ all = test + torch + jupyter + aws + docs + youtube
 
 setup(
     name="rikai",
-    version="0.0.1",
+    version=about["version"],
     license="Apache License, Version 2.0",
     author="Rikai authors",
     packages=find_packages(),

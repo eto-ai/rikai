@@ -146,7 +146,7 @@ spark = (
    SparkSession
       .builder
       .appName('rikai')
-      .config('spark.jars.packages', 'ai.eto.rikai:rikai-core:0.0.1')
+      .config('spark.jars.packages', 'ai.eto:rikai:0.0.1')
       .config("spark.driver.extraJavaOptions", "-Dcom.amazonaws.services.s3.enableV4=true")
       .config('spark.jars.packages', 'org.apache.hadoop:hadoop-aws:2.7.4')
       # ... other options
@@ -167,5 +167,5 @@ details.
 If you are using Databricks, you shouldn't need to manually configure the Spark options and
 classpath. Please follow [Databricks documentation](https://docs.databricks.com/libraries/index.html)
 and install both the [python package from pypi](https://pypi.org/project/rikai/) and
-the [jar from maven](https://mvnrepository.com/artifact/ai.eto.rikai/rikai-core).
+the [jar from maven](https://mvnrepository.com/artifact/ai.eto/rikai).
 

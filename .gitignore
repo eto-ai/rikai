@@ -14,6 +14,8 @@ __pycache__
 
 docs/_build
 
+notebooks/coco
+notebooks/coco_sample*
 notebooks/dataset
 notebooks/out
 **/.ipynb_checkpoints

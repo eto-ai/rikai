@@ -22,7 +22,7 @@ from pyspark.sql import SparkSession
 def spark() -> SparkSession:
     return (
         SparkSession.builder.appName("spark-test")
-        .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.1")
+        .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.2-SNAPSHOT")
         .master("local[2]")
         .getOrCreate()
     )

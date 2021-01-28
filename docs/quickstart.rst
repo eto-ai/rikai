@@ -9,7 +9,7 @@ Installation
 
 .. code-block:: bash
 
-    pip install rikai[torch]
+    pip install rikai[torch,aws]
 
 Use `Rikai` in the machine learning life cycle
 ----------------------------------------------

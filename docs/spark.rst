@@ -1,12 +1,15 @@
 .. toctree::
    :maxdepth: 1
 
+Work with Spark
+===============
+
 URI Scheme
-==========
+----------
 Remember to prefix your S3 paths with `s3a` instead of `s3` or `s3n`.
 
 Local Spark Setup
-=================
+-----------------
 If you're running Spark locally, you'll need to add the rikai jar when creating the Spark session:
 
   .. code-block:: python
@@ -47,7 +50,7 @@ Note that for hadoop 2.7.x you may need to configure the aws endpoints. See
 documentation for details.
 
 Databricks
-==========
+----------
 
 If you are using Databricks, you shouldn't need to manually configure the Spark options and
 classpath. Please follow

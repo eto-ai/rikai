@@ -1,8 +1,8 @@
 .. toctree::
    :maxdepth: 1
 
-Release
-=======
+How to Release
+==============
 This section is for package maintainers.
 It's important to note that the Spark unit test in python and demo notebooks refer to the maven
 jar so when making a release, make sure to update those references.

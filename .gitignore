@@ -13,6 +13,7 @@ __pycache__
 *.so
 
 docs/_build
+docs/api
 
 notebooks/coco
 notebooks/coco_sample*

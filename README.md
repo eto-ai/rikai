@@ -81,9 +81,7 @@ There are multiple ways to install Rikai:
    [extras for aws/gc, pytorch/tf, and others](#Extras).
 3. OR install it from [source](#Source)
 
-If you want to use Rikai with pyspark, please make sure you add the right jars to the [Spark
-options](#SparkSetup) at startup. Databricks users please see [setup in databricks](#Databricks) for
-details insteadf.
+Note: if you want to use Rikai with your own pyspark, please consult rikai documentation for tips.
 
 ### <a name="Docker"></a>Docker
 
@@ -134,54 +132,3 @@ sbt publishLocal
 cd python
 pip install -e . # pip install -e .[all] to install all optional extras (see "Install from pypi")
 ```
-
-## <a name="SparkSetup"></a>Local Spark Setup
-
-If you're running Spark locally, you'll need to add the rikai jar when creating the Spark session:
-
-```python
-spark = (
-   SparkSession
-      .builder
-      .appName('rikai-quickstart')
-      .config('spark.jars.packages', 'ai.eto:rikai:0.0.1')
-      .master("local[*]")
-      .getOrCreate()
-)
-```
-
-If you want to read/write data from/to S3, you will need additional setup:
-
-1. Setup [AWS credentials](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html)
-   or specify them directly as Spark config
-2. Add `hadoop-aws` and `aws-java-sdk` jars to your Spark classpath. Make sure you download versions 
-   that match. For example, if you have apache spark 3.0.1 with hadoop 2.7.4 setup, then you should
-   use `hadoop-aws v2.7.4`. You can then see on maven that this pairs with `aws-java-sdk v1.7.4`.
-3. Specify additional options when creating the Spark session:
-
-   ```python
-   spark = (
-       SparkSession
-       .builder
-       .appName('rikai-quickstart')
-       .config('spark.jars.packages', 'ai.eto:rikai:0.0.1')
-       .config("spark.driver.extraJavaOptions", "-Dcom.amazonaws.services.s3.enableV4=true")
-       .config("spark.executor.extraJavaOptions", "-Dcom.amazonaws.services.s3.enableV4=true")
-       .config("spark.hadoop.fs.s3a.endpoint", "s3-us-west-1.amazonaws.com") # only for hadoop 2.7x
-       .master("local[*]")
-       .getOrCreate()
-   )
-   ```
-   *Note that the s3a endpoint depends on your preferred region 
-   **As with other Spark options, there are multiple ways to specify them.
-   Please see [Spark documentation](https://spark.apache.org/docs/latest/configuration.html) for
-   details.
-   
-Finally, remember to prefix your S3 paths with `s3a` instead of `s3` or `s3n`.
-
-## <a Name="Databricks"></a>Databricks
-
-If you are using Databricks, you shouldn't need to manually configure the Spark options and
-classpath. Please follow [Databricks documentation](https://docs.databricks.com/libraries/index.html)
-and install both the [python package from pypi](https://pypi.org/project/rikai/) and
-the [jar from maven](https://mvnrepository.com/artifact/ai.eto/rikai).

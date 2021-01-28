@@ -1,5 +1,6 @@
 ![Apache License](https://img.shields.io/github/license/eto-ai/rikai?style=for-the-badge)
 [![Read The Doc](https://img.shields.io/readthedocs/rikai?style=for-the-badge)](https://rikai.readthedocs.io/)
+[![javadoc](https://javadoc.io/badge2/ai.eto/rikai_2.12/javadoc.svg?style=for-the-badge)](https://javadoc.io/doc/ai.eto/rikai_2.12)
 ![Pypi version](https://img.shields.io/pypi/v/rikai?style=for-the-badge)
 ![Github Action](https://img.shields.io/github/workflow/status/eto-ai/rikai/Python?style=for-the-badge)
 ![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg?style=for-the-badge)

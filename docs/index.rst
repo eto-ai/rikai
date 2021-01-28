@@ -62,9 +62,10 @@ For more details, please read :doc:`quickstart`.
 
    quickstart
    types
-   release
-   api/modules
    spark
+   release
+   API References <./api/modules>
+
 
 .. _Spark : https://spark.apache.org/
 .. _Pytorch : https://pytorch.org/

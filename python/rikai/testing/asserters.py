@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Helper functions for using :py:function:`assert` with pytests
+"""Helper functions for using :py:func:`assert` with pytests
 """
 
 from typing import Iterable

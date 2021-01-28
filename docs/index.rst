@@ -2,7 +2,7 @@
 Welcome to Rikai's documentation!
 =================================
 
-Rikai is a `Apache Spark`_ based ML data format built for working with
+Rikai is an `Apache Spark`_ based ML data format built for working with
 unstructured data at scale. Processing large amounts of data for ML is never trivial, but that
 is especially true for images and videos often at the core of deep learning applications. We are
 building Rikai with two main goals:

@@ -81,9 +81,7 @@ There are multiple ways to install Rikai:
    [extras for aws/gc, pytorch/tf, and others](#Extras).
 3. OR install it from [source](#Source)
 
-If you want to use Rikai with pyspark, please make sure you add the right jars to the [Spark
-options](#SparkSetup) at startup. Databricks users please see [setup in databricks](#Databricks) for
-details insteadf.
+Note: if you want to use Rikai with your own pyspark, please consult rikai documentation for tips.
 
 ### <a name="Docker"></a>Docker
 
@@ -134,39 +132,3 @@ sbt publishLocal
 cd python
 pip install -e . # pip install -e .[all] to install all optional extras (see "Install from pypi")
 ```
-
-## <a name="SparkSetup"></a>Local Spark Setup
-
-If you're running Spark locally, you'll need to add the rikai jar when creating the Spark session.
-If you want to read/write data from/to S3, you'll need to add additional options as well.
-
-Add appropriate options when creating the SparkSession:
-
-```python
-spark = (
-   SparkSession
-      .builder
-      .appName('rikai')
-      .config('spark.jars.packages', 'ai.eto:rikai:0.0.1')
-      .config("spark.driver.extraJavaOptions", "-Dcom.amazonaws.services.s3.enableV4=true")
-      .config('spark.jars.packages', 'org.apache.hadoop:hadoop-aws:2.7.4')
-      # ... other options
-      .master("local[*]")
-      .getOrCreate()
-)
-```
-
-Please note that the above sample assumes your local Apache Spark comes with Hadoop 2.7. If you
-installed another version of Hadoop, please use a matching hadoop-aws jar version.
-
-As with other Spark options, there are multiple ways to specify them.
-Please see [Spark documentation](https://spark.apache.org/docs/latest/configuration.html) for
-details.
-
-## <a Name="Databricks"></a>Databricks
-
-If you are using Databricks, you shouldn't need to manually configure the Spark options and
-classpath. Please follow [Databricks documentation](https://docs.databricks.com/libraries/index.html)
-and install both the [python package from pypi](https://pypi.org/project/rikai/) and
-the [jar from maven](https://mvnrepository.com/artifact/ai.eto/rikai).
-

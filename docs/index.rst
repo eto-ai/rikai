@@ -64,6 +64,7 @@ For more details, please read :doc:`quickstart`.
    types
    release
    api/modules
+   spark
 
 .. _Spark : https://spark.apache.org/
 .. _Pytorch : https://pytorch.org/

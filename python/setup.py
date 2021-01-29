@@ -6,6 +6,13 @@ about = {}
 with open(pathlib.Path("rikai") / "__version__.py", "r") as fh:
     exec(fh.read(), about)
 
+print(pathlib.Path(__file__).absolute().parent.parent / "README.md")
+with open(
+    pathlib.Path(__file__).absolute().parent.parent / "README.md",
+    "r",
+) as fh:
+    long_description = fh.read()
+
 # extras
 test = ["pytest", "parameterized"]
 torch = ["torch>=1.5.0", "torchvision"]
@@ -21,6 +28,10 @@ setup(
     version=about["version"],
     license="Apache License, Version 2.0",
     author="Rikai authors",
+    author_email="rikai-dev@eto.ai",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/eto-ai/rikai",
     packages=find_packages(),
     include_package_data=True,
     python_requires=">=3.7",

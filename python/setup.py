@@ -7,7 +7,7 @@ with open(pathlib.Path("rikai") / "__version__.py", "r") as fh:
     exec(fh.read(), about)
 
 # extras
-test = ["pytest", "parameterized"]
+test = ["pytest"]
 torch = ["torch>=1.5.0", "torchvision"]
 jupyter = ["matplotlib", "jupyterlab"]
 aws = ["boto"]

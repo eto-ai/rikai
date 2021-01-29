@@ -6,7 +6,6 @@ about = {}
 with open(pathlib.Path("rikai") / "__version__.py", "r") as fh:
     exec(fh.read(), about)
 
-print(pathlib.Path(__file__).absolute().parent.parent / "README.md")
 with open(
     pathlib.Path(__file__).absolute().parent.parent / "README.md",
     "r",

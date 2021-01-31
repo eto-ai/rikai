@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 """Pytorch Dataset and DataLoader"""
+
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from queue import Empty, Queue
@@ -20,12 +21,46 @@ from typing import Callable, Dict, Generator, List, Optional
 
 # Third Party
 import numpy as np
+from torch.utils.data import IterableDataset
+import torch
+
 
 # Rikai
 from rikai.mixin import ToNumpy
-from rikai.parquet.dataset import Dataset
+from rikai.parquet.dataset import Dataset as pgDataset
 
-__all__ = ["DataLoader"]
+
+__all__ = ["DataLoader", "Dataset"]
+
+
+class Dataset(IterableDataset):
+    """Rikai Pytorch Dataset.
+
+    A :py:class:`torch.utils.data.IterableDataset` that reads
+    Rikai's parquet format.
+
+
+    """
+
+    def __init__(self, uri: str, columns: List[str] = None):
+        super().__init__()
+        self.uri = uri
+        self.columns = columns
+
+    def __iter__(self):
+        worker_info = torch.utils.data.get_worker_info()
+        if worker_info is None:
+            dataset = pgDataset(self.uri, columns=self.columns)
+        else:
+            rank = worker_info.id
+            world_size = worker_info.num_workers
+            dataset = pgDataset(
+                self.uri,
+                columns=self.columns,
+                world_size=world_size,
+                rank=rank,
+            )
+        return iter(dataset)
 
 
 class DataLoader:
@@ -96,7 +131,7 @@ class DataLoader:
         world_size: int = 1,
         rank: int = 0,
     ):  # pylint: disable=too-many-arguments
-        self.dataset = Dataset(
+        self.dataset = pgDataset(
             dataset,
             columns=columns,
             shuffle=shuffle,

@@ -19,10 +19,11 @@ from pathlib import Path
 # Third Party
 import numpy as np
 from pyspark.sql import Row, SparkSession
+from torch.utils.data.dataloader import DataLoader as torchDataLoader
 
 # Rikai
 from rikai.numpy import wrap
-from rikai.torch import DataLoader
+from rikai.torch import DataLoader, Dataset
 from rikai.types import Box2d, Image
 
 
@@ -108,3 +109,32 @@ def test_coco_dataset(
     assert np.array_equal(
         np.array([1, 2, 3, 4]), example[0]["annotations"][0]["bbox"]
     ), f"Actual annotations: {example[0]['annotations'][0]['bbox']}"
+
+
+def test_torch_dataset(spark: SparkSession, tmp_path: Path):
+    dataset_dir = tmp_path / "data"
+    asset_dir = tmp_path / "asset"
+    asset_dir.mkdir()
+    data = []
+    for i in range(1000):
+        image_data = np.random.randint(0, 128, size=(128, 128), dtype=np.uint8)
+        image_uri = asset_dir / f"{i}.png"
+        PILImage.fromarray(image_data).save(image_uri)
+
+        array = wrap(np.random.random_sample((3, 4)))
+        data.append(
+            {
+                "id": i,
+                "array": array,
+                "image": Image(image_uri),
+            }
+        )
+
+    df = spark.createDataFrame(data)
+    print(str(dataset_dir))
+    df.write.mode("overwrite").format("rikai").save(str(dataset_dir))
+
+    dataset = Dataset(str(dataset_dir))
+    loader = torchDataLoader(dataset)
+    actual = list(iter(loader))
+    assert len(actual) == 1000

@@ -37,15 +37,21 @@ class Dataset(IterableDataset):
     """Rikai Pytorch Dataset.
 
     A :py:class:`torch.utils.data.IterableDataset` that reads
-    Rikai's parquet format.
-
+    Rikai's parquet format. This class works with `multi-process data loading_`
+    using :py:class:`torch.utils.data.DataLoader`.
 
     """
 
-    def __init__(self, uri: str, columns: List[str] = None):
+    def __init__(
+        self,
+        uri: str,
+        columns: List[str] = None,
+        transform: Optional[Callable] = None,
+    ):
         super().__init__()
         self.uri = uri
         self.columns = columns
+        self.transform = transform if transform else lambda x: x
 
     def __iter__(self):
         worker_info = torch.utils.data.get_worker_info()
@@ -61,7 +67,7 @@ class Dataset(IterableDataset):
                 rank=rank,
             )
         for row in dataset:
-            yield convert_tensor(row)
+            yield self.transform(convert_tensor(row))
 
 
 class DataLoader:

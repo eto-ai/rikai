@@ -18,6 +18,8 @@ from pathlib import Path
 
 # Third Party
 import numpy as np
+import pytest
+import torch
 from pyspark.sql import Row, SparkSession
 from torch.utils.data.dataloader import DataLoader as torchDataLoader
 
@@ -111,11 +113,13 @@ def test_coco_dataset(
     ), f"Actual annotations: {example[0]['annotations'][0]['bbox']}"
 
 
-def test_torch_dataset(spark: SparkSession, tmp_path: Path):
+@pytest.mark.parametrize("num_workers", [0, 4])
+def test_torch_dataset(spark: SparkSession, tmp_path: Path, num_workers):
     dataset_dir = tmp_path / "data"
     asset_dir = tmp_path / "asset"
     asset_dir.mkdir()
     data = []
+    expected = []
     for i in range(1000):
         image_data = np.random.randint(0, 128, size=(128, 128), dtype=np.uint8)
         image_uri = asset_dir / f"{i}.png"
@@ -129,12 +133,23 @@ def test_torch_dataset(spark: SparkSession, tmp_path: Path):
                 "image": Image(image_uri),
             }
         )
+        expected.append(
+            {
+                "id": i,
+                "array": torch.as_tensor(np.array([array])),
+                "image": torch.as_tensor(np.array([image_data])),
+            }
+        )
 
     df = spark.createDataFrame(data)
-    print(str(dataset_dir))
     df.write.mode("overwrite").format("rikai").save(str(dataset_dir))
 
     dataset = Dataset(str(dataset_dir))
-    loader = torchDataLoader(dataset)
-    actual = list(iter(loader))
+    loader = torchDataLoader(dataset, num_workers=num_workers)
+    actual = sorted(list(loader), key=lambda x: x["id"])
     assert len(actual) == 1000
+    for expect, act in zip(expected, actual):
+        assert torch.equal(
+            expect["array"], act["array"]
+        ), f"Expected {expect['array']} got {act['array']}"
+        assert torch.equal(expect["image"], act["image"])

@@ -60,7 +60,8 @@ class Dataset(IterableDataset):
                 world_size=world_size,
                 rank=rank,
             )
-        return iter(dataset)
+        for row in dataset:
+            yield convert_tensor(row)
 
 
 class DataLoader:

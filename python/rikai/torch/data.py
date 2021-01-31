@@ -21,14 +21,12 @@ from typing import Callable, Dict, Generator, List, Optional
 
 # Third Party
 import numpy as np
-from torch.utils.data import IterableDataset
 import torch
-
+from torch.utils.data import IterableDataset
 
 # Rikai
 from rikai.mixin import ToNumpy
 from rikai.parquet.dataset import Dataset as pgDataset
-
 
 __all__ = ["DataLoader", "Dataset"]
 
@@ -40,6 +38,14 @@ class Dataset(IterableDataset):
     Rikai's parquet format. This class works with `multi-process data loading_`
     using :py:class:`torch.utils.data.DataLoader`.
 
+    Parameters
+    ----------
+    uri : str
+        URI to the dataset
+    columns : list of str, optional
+        An optional list of column to load from parquet files.
+    transform : callable, optional
+        A function/transform that transforms one example
     """
 
     def __init__(
@@ -55,17 +61,18 @@ class Dataset(IterableDataset):
 
     def __iter__(self):
         worker_info = torch.utils.data.get_worker_info()
-        if worker_info is None:
-            dataset = pgDataset(self.uri, columns=self.columns)
-        else:
+        rank = 0
+        world_size = 1
+        if worker_info is not None:
             rank = worker_info.id
             world_size = worker_info.num_workers
-            dataset = pgDataset(
-                self.uri,
-                columns=self.columns,
-                world_size=world_size,
-                rank=rank,
-            )
+
+        dataset = pgDataset(
+            self.uri,
+            columns=self.columns,
+            world_size=world_size,
+            rank=rank,
+        )
         for row in dataset:
             yield self.transform(convert_tensor(row))
 

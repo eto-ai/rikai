@@ -35,7 +35,7 @@ class Dataset(IterableDataset):
     """Rikai Pytorch Dataset.
 
     A :py:class:`torch.utils.data.IterableDataset` that reads
-    Rikai's parquet format. This class works with `multi-process data loading_`
+    Rikai's parquet format. This class works with `multi-process data loading`_
     using :py:class:`torch.utils.data.DataLoader`.
 
     Parameters
@@ -45,8 +45,27 @@ class Dataset(IterableDataset):
     columns : list of str, optional
         An optional list of column to load from parquet files.
     transform : callable, optional
-        A function/transform that transforms one example
-    """
+        A function/transform that transforms one example.
+
+
+    Note
+    ----
+
+    Up to ``pytorch==1.7``, :py:class:`~torch.utils.data.IterableDataset`
+    does not work with :py:class:`torch.utils.data.Sampler` with
+    :py:class:`torch.utils.data.DataLoader`.
+
+    Example
+    -------
+
+    >>> from rikai.torch.data import Dataset
+    >>> from torch.utils.data import DataLoader
+    >>>
+    >>> dataset = Dataset("dataset", columns=["image", "label"])
+    >>> loader = DataLoader(dataset, num_workers=8)
+
+    .. _multi-process data loading: https://pytorch.org/docs/master/data.html#single-and-multi-process-data-loading
+    """  # noqa: E501
 
     def __init__(
         self,

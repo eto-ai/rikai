@@ -21,7 +21,7 @@ import numpy as np
 import pytest
 import torch
 from pyspark.sql import Row, SparkSession
-from torch.utils.data.dataloader import DataLoader as torchDataLoader
+from torch.utils.data import DataLoader as torchDataLoader
 
 # Rikai
 from rikai.numpy import wrap

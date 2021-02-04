@@ -187,6 +187,13 @@ class Dataset:
         shuffler = RandomShuffler(
             self.shuffler_capacity if self.shuffle else 1, self.seed
         )
+        logger.info(
+            "Start to iterate : rank=%s, world=%s, files=%s",
+            self.rank,
+            self.world_size,
+            self.files,
+        )
+
         group_count = 0
         for filepath in self.files:
             fs, path = FileSystem.from_uri(filepath)
@@ -204,9 +211,11 @@ class Dataset:
                     #   The drawback would be if the world size is much larger
                     #   than the average number of row groups. As a result,
                     #   many of the file open operations would be wasted.
-                    group_count += 1
+                    print("Lets try group count: ", group_count)
                     if group_count % self.world_size != self.rank:
+                        group_count += 1
                         continue
+                    group_count += 1
                     row_group = parquet.read_row_group(
                         group_idx, columns=self.columns
                     )

@@ -76,12 +76,13 @@ class Dataset(IterableDataset):
         super().__init__()
         self.uri = uri
         self.columns = columns
-        self.transform = transform if transform else lambda x: x
+        self.transform = transform
 
     def __iter__(self):
-        worker_info = torch.utils.data.get_worker_info()
         rank = 0
         world_size = 1
+
+        worker_info = torch.utils.data.get_worker_info()
         if worker_info is not None:
             rank = worker_info.id
             world_size = worker_info.num_workers
@@ -93,7 +94,11 @@ class Dataset(IterableDataset):
             rank=rank,
         )
         for row in dataset:
-            yield self.transform(convert_tensor(row))
+            tensor = convert_tensor(row)
+            if self.transform:
+                tensor = self.transform(tensor)
+            print("Converted tensor: ", tensor)
+            yield tensor
 
 
 class DataLoader:

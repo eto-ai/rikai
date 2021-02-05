@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 
+from random import shuffle
 from rikai.parquet.shuffler import RandomShuffler
 
 
@@ -52,3 +53,14 @@ def test_fifo():
     shuffler = RandomShuffler(capacity=1)
     returned = shuffle_numbers(shuffler, range(100))
     assert len(returned) == 100
+
+
+def test_fifo_with_single_item():
+    shuffler = RandomShuffler(capacity=1)
+    shuffler.append(1)
+    assert shuffler
+    assert shuffler.full()
+    assert len(shuffler) == 1
+    assert shuffler.pop() == 1
+
+    assert not shuffler.full()

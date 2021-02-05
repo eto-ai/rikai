@@ -113,14 +113,15 @@ def test_coco_dataset(
     ), f"Actual annotations: {example[0]['annotations'][0]['bbox']}"
 
 
-@pytest.mark.parametrize("num_workers", [0, 4])
-def test_torch_dataset(spark: SparkSession, tmp_path: Path, num_workers):
+@pytest.mark.parametrize("num_workers", [0, 2, 4])
+def test_torch_dataset(spark, tmp_path, num_workers):
+    total = 1000
     dataset_dir = tmp_path / "data"
     asset_dir = tmp_path / "asset"
-    asset_dir.mkdir()
+    asset_dir.mkdir(parents=True)
     data = []
     expected = []
-    for i in range(1000):
+    for i in range(total):
         image_data = np.random.randint(0, 128, size=(128, 128), dtype=np.uint8)
         image_uri = asset_dir / f"{i}.png"
         PILImage.fromarray(image_data).save(image_uri)
@@ -143,11 +144,15 @@ def test_torch_dataset(spark: SparkSession, tmp_path: Path, num_workers):
 
     df = spark.createDataFrame(data)
     df.write.mode("overwrite").format("rikai").save(str(dataset_dir))
-
     dataset = Dataset(str(dataset_dir))
-    loader = torchDataLoader(dataset, num_workers=num_workers)
+    print(dataset)
+    loader = torchDataLoader(
+        dataset,
+        num_workers=num_workers,
+        drop_last=True,
+    )
     actual = sorted(list(loader), key=lambda x: x["id"])
-    assert len(actual) == 1000
+    assert len(actual) == total
     for expect, act in zip(expected, actual):
         assert torch.equal(
             expect["array"], act["array"]

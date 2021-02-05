@@ -187,13 +187,6 @@ class Dataset:
         shuffler = RandomShuffler(
             self.shuffler_capacity if self.shuffle else 1, self.seed
         )
-        logger.info(
-            "Start to iterate : rank=%s, world=%s, files=%s",
-            self.rank,
-            self.world_size,
-            self.files,
-        )
-
         group_count = 0
         for filepath in self.files:
             fs, path = FileSystem.from_uri(filepath)
@@ -211,25 +204,37 @@ class Dataset:
                     #   The drawback would be if the world size is much larger
                     #   than the average number of row groups. As a result,
                     #   many of the file open operations would be wasted.
-                    print("Lets try group count: ", group_count)
-                    if group_count % self.world_size != self.rank:
-                        group_count += 1
-                        continue
                     group_count += 1
+                    if (group_count - 1) % self.world_size != self.rank:
+                        continue
                     row_group = parquet.read_row_group(
                         group_idx, columns=self.columns
                     )
-                    for batch in row_group.to_batches():  # type: RecordBatch
+                    for (
+                        batch
+                    ) in row_group.to_batches():  # type: pyarrow.RecordBatch
                         # TODO: read batches not using pandas
-                        for _, row in batch.to_pandas().iterrows():
-                            shuffler.append(row)
-                            # Maintain the shuffler buffer around its capacity.
-                            while shuffler.full():
-                                yield self._convert(
-                                    shuffler.pop().to_dict(),
-                                    self.spark_row_metadata,
-                                )
-        while shuffler:
-            yield self._convert(
-                shuffler.pop().to_dict(), self.spark_row_metadata
-            )
+                        # print("THIS BATCH: rows=", batch.num_rows)
+                        for idx, row in batch.to_pandas().iterrows():
+                            print(f"Yield row: {idx}")
+                            yield self._convert(
+                                row.to_dict(), self.spark_row_metadata
+                            )
+                            yield_count += 1
+                        #     shuffler.append(row)
+                        #     # Maintain the shuffler buffer around its capacity.
+
+                        #     while shuffler.full():
+                        #         yield self._convert(
+                        #             shuffler.pop().to_dict(),
+                        #             self.spark_row_metadata,
+                        #         )
+        # while shuffler:
+        #     yield self._convert(
+        #         shuffler.pop().to_dict(), self.spark_row_metadata
+        #     )
+        print(
+            f"XXX Finish One Dataset rank={self.rank} total={self.world_size}"
+        )
+        if not yield_count:
+            return iter([])

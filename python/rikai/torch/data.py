@@ -35,8 +35,8 @@ class Dataset(IterableDataset):
     """Rikai Pytorch Dataset.
 
     A :py:class:`torch.utils.data.IterableDataset` that reads
-    Rikai's parquet format. This class works with `multi-process data loading`_
-    using :py:class:`torch.utils.data.DataLoader`.
+    Rikai data format. This :py:class:`Dataset` works with
+    `multi-process data loading`_ using :py:class:`torch.utils.data.DataLoader`.
 
     Parameters
     ----------
@@ -44,9 +44,6 @@ class Dataset(IterableDataset):
         URI to the dataset
     columns : list of str, optional
         An optional list of column to load from parquet files.
-    transform : callable, optional
-        A function/transform that transforms one example.
-
 
     Note
     ----
@@ -55,13 +52,16 @@ class Dataset(IterableDataset):
     does not work with :py:class:`torch.utils.data.Sampler` with
     :py:class:`torch.utils.data.DataLoader`.
 
+    Use :py:class:`torch.utils.data.BufferedShuffleDataset` with the Rikai dataset.
+
     Example
     -------
 
     >>> from rikai.torch.data import Dataset
-    >>> from torch.utils.data import DataLoader
+    >>> from torch.utils.data import DataLoader, BufferedShuffleDataset
     >>>
     >>> dataset = Dataset("dataset", columns=["image", "label"])
+    >>> # dataset = BufferedShuffleDataset(dataset)
     >>> loader = DataLoader(dataset, num_workers=8)
 
     .. _multi-process data loading: https://pytorch.org/docs/master/data.html#single-and-multi-process-data-loading
@@ -71,7 +71,6 @@ class Dataset(IterableDataset):
         self,
         uri: str,
         columns: List[str] = None,
-        transform: Optional[Callable] = None,
     ):
         super().__init__()
         self.uri = uri
@@ -87,9 +86,9 @@ class Dataset(IterableDataset):
             rank = worker_info.id
             world_size = worker_info.num_workers
 
-        dataset = pgDataset(
+        for row in pgDataset(
             self.uri,
-            columns=self.columns,
+            # columns=self.columns,
             world_size=world_size,
             rank=rank,
         )

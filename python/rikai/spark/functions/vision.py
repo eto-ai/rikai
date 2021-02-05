@@ -25,6 +25,8 @@ from rikai.numpy import ndarray
 from rikai.spark.types.vision import ImageType
 from rikai.types.vision import Image
 
+__all__ = ["image", "image_copy", "numpy_to_image"]
+
 
 @udf(returnType=ImageType())
 def image(uri: str) -> Image:

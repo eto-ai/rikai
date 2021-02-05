@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Vision-related Pyspark UDFs
+"""Vision related Spark UDFs.
 """
 
 # Third Party
@@ -58,8 +58,8 @@ def numpy_to_image(array: ndarray, uri: str) -> Image:
 
     Parameters
     ----------
-    array : np.ndarray
-        An :py:class:`numpy.ndarray` containing image data.
+    array : :py:class:`numpy.ndarray`
+        Image data.
     uri : str
         The base directory to copy the image to.
 
@@ -74,8 +74,9 @@ def numpy_to_image(array: ndarray, uri: str) -> Image:
     >>> spark.createDataFrame(..).registerTempTable("df")
     >>>
     >>> spark.sql(\"\"\"SELECT numpy_to_image(
-    ...    resize(image), lit('s3://asset'))
-    ...    AS new_image FROM df\"\"\")
+    ...        resize(grayscale(image)),
+    ...        lit('s3://asset')
+    ...    ) AS new_image FROM df\"\"\")
 
     See Also
     --------

@@ -75,6 +75,7 @@ class Image(ToNumpy, Asset, Displayable):
         --------
         :py:class:`PIL.Image.fromarray`
 
+        # noqa: E501
         .. _modes: https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-modes
         """
         assert array is not None

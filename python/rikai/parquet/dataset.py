@@ -17,7 +17,8 @@
 
 # Standard Library
 import importlib
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 # Third Party
 import pyarrow.parquet as pg
@@ -81,7 +82,7 @@ class Dataset:
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        query: str,
+        query: Union[str, Path],
         columns: Optional[List[str]] = None,
         shuffle: bool = False,
         shuffler_capacity: int = 128,
@@ -89,7 +90,7 @@ class Dataset:
         world_size: int = 1,
         rank: int = 0,
     ):
-        self.uri = query
+        self.uri = str(query)
         self.columns = columns
         self.shuffle = shuffle
         self.shuffler_capacity = shuffler_capacity

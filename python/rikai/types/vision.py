@@ -16,13 +16,22 @@
 - :py:class:`Image`
 """
 
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Union
+from urllib.parse import urlparse
+from tempfile import NamedTemporaryFile
+
 # Third-party libraries
 import numpy as np
 from PIL import Image as PILImage
 
 # Rikai
-from rikai.mixin import Asset, ToNumpy, Displayable
+from rikai.internal.uri_utils import normalize_uri
+from rikai.mixin import Asset, Displayable, ToNumpy
 from rikai.spark.types import ImageType
+from rikai.io import copy
 
 __all__ = ["Image"]
 
@@ -40,9 +49,60 @@ class Image(ToNumpy, Asset, Displayable):
 
     __UDT__ = ImageType()
 
-    def __init__(self, uri: str):
+    def __init__(self, uri: Union[str, Path]):
         super().__init__(uri)
         self._cached_data = None
+
+    @classmethod
+    def from_array(
+        cls,
+        array: np.ndarray,
+        uri: Union[str, Path],
+        mode: str = None,
+    ) -> Image:
+        """Create an image in memory from numpy array.
+
+        Parameters
+        ----------
+        array : np.ndarray
+            Array data
+        uri : str or Path
+            The external URI to store the data.
+        mode : str, optional
+            The mode which PIL used to create image. See supported
+            `modes on PIL document <https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-modes>`_.
+
+        See Also
+        --------
+        :py:class:`PIL.Image.fromarray`
+        :py:func:`~rikai.spark.functions.vision.numpy_to_image`
+
+        """  # noqa: E501
+
+        assert array is not None
+        img = PILImage.fromarray(array, mode=mode)
+        return cls.from_pil(img, uri)
+
+    @staticmethod
+    def from_pil(img: PILImage, uri: Union[str, Path]) -> Image:
+        """Create an image in memory from a :py:class:`PIL.Image`.
+
+        Parameters
+        ----------
+        img : :py:class:`PIL.Image`
+            An PIL Image instance
+        uri : str or Path
+            The URI to store the image externally.
+        """
+        parsed = urlparse(normalize_uri(uri))
+        if parsed.scheme == "file":
+            img.save(uri)
+        else:
+            with NamedTemporaryFile() as fobj:
+                img.save(fobj)
+                fobj.flush()
+                copy(fobj.name, uri)
+        return Image(uri)
 
     def display(self, **kwargs):
         """

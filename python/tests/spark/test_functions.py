@@ -15,13 +15,23 @@
 """Unit tests for Rikai provided spark UDFs."""
 
 import os
+from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import pandas.testing as pdt
-from pyspark.sql.functions import col, lit
 from pyspark.sql import Row, SparkSession
+from pyspark.sql.functions import col, lit, concat
 
-from rikai.spark.functions import area, image_copy, box2d, box2d_from_center
+# Rikai
+from rikai.numpy import wrap
+from rikai.spark.functions import (
+    area,
+    box2d_from_center,
+    box2d,
+    image_copy,
+    numpy_to_image,
+)
 from rikai.types import Box2d, Image
 
 
@@ -101,3 +111,23 @@ def test_image_copy(spark: SparkSession, tmpdir):
 
     with open(os.path.join(out_file)) as fobj:
         assert fobj.read() == "abc"
+
+
+def test_numpy_to_image(spark: SparkSession, tmp_path: Path):
+    """Test upload a numpy image to the external storage,
+    and convert the data into Image asset.
+
+    """
+    df = spark.createDataFrame(
+        [Row(id=1, data=wrap(np.ones((32, 32), dtype=np.uint8)))]
+    )
+    df = df.withColumn(
+        "image",
+        numpy_to_image(
+            df.data, concat(lit(str(tmp_path)), lit("/"), df.id, lit(".png"))
+        ),
+    )
+    df.count()
+    # print(df.first().image)
+    assert Path(df.first().image.uri) == tmp_path / "1.png"
+    assert (tmp_path / "1.png").exists()

@@ -88,7 +88,7 @@ class Dataset(IterableDataset):
 
         for row in pgDataset(
             self.uri,
-            # columns=self.columns,
+            columns=self.columns,
             world_size=world_size,
             rank=rank,
         )

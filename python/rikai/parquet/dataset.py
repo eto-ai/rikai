@@ -215,26 +215,16 @@ class Dataset:
                     ) in row_group.to_batches():  # type: pyarrow.RecordBatch
                         # TODO: read batches not using pandas
                         # print("THIS BATCH: rows=", batch.num_rows)
-                        for idx, row in batch.to_pandas().iterrows():
-                            print(f"Yield row: {idx}")
-                            yield self._convert(
-                                row.to_dict(), self.spark_row_metadata
-                            )
-                            yield_count += 1
-                        #     shuffler.append(row)
-                        #     # Maintain the shuffler buffer around its capacity.
+                        for _, row in batch.to_pandas().iterrows():
+                            shuffler.append(row)
+                            # Maintain the shuffler buffer around its capacity.
 
-                        #     while shuffler.full():
-                        #         yield self._convert(
-                        #             shuffler.pop().to_dict(),
-                        #             self.spark_row_metadata,
-                        #         )
-        # while shuffler:
-        #     yield self._convert(
-        #         shuffler.pop().to_dict(), self.spark_row_metadata
-        #     )
-        print(
-            f"XXX Finish One Dataset rank={self.rank} total={self.world_size}"
-        )
-        if not yield_count:
-            return iter([])
+                            while shuffler.full():
+                                yield self._convert(
+                                    shuffler.pop().to_dict(),
+                                    self.spark_row_metadata,
+                                )
+        while shuffler:
+            yield self._convert(
+                shuffler.pop().to_dict(), self.spark_row_metadata
+            )

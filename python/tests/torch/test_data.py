@@ -28,6 +28,8 @@ from rikai.numpy import wrap
 from rikai.torch import DataLoader, Dataset
 from rikai.types import Box2d, Image
 
+torch.multiprocessing.set_sharing_strategy("file_system")
+
 
 def test_load_dataset(spark: SparkSession, tmp_path: Path):
     dataset_dir = tmp_path / "features"

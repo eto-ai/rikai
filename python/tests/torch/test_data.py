@@ -14,10 +14,10 @@
 
 # Standard Library
 import os
+from pathlib import Path
 
 # Third Party
 import numpy as np
-from PIL import Image as PILImage
 from pyspark.sql import Row, SparkSession
 
 # Rikai
@@ -26,30 +26,29 @@ from rikai.torch import DataLoader
 from rikai.types import Box2d, Image
 
 
-def test_load_dataset(spark: SparkSession, tmpdir):
-    dataset_dir = os.path.join(tmpdir, "features")
-    asset_dir = os.path.join(tmpdir, "assets")
-    os.makedirs(asset_dir)
+def test_load_dataset(spark: SparkSession, tmp_path: Path):
+    dataset_dir = tmp_path / "features"
+    asset_dir = tmp_path / "assets"
+    asset_dir.mkdir(parents=True)
 
     expected = []
     data = []
     for i in range(1000):
         image_data = np.random.randint(0, 128, size=(128, 128), dtype=np.uint8)
-        image_uri = os.path.join(asset_dir, f"{i}.png")
-        PILImage.fromarray(image_data).save(image_uri)
+        image_uri = asset_dir / f"{i}.png"
 
         array = wrap(np.random.random_sample((3, 4)))
         data.append(
             {
                 "id": i,
                 "array": array,
-                "image": Image(image_uri),
+                "image": Image.from_array(image_data, image_uri),
             }
         )
         expected.append({"id": i, "array": array, "image": image_data})
     df = spark.createDataFrame(data)
 
-    df.write.mode("overwrite").format("rikai").save(dataset_dir)
+    df.write.mode("overwrite").format("rikai").save(str(dataset_dir))
 
     loader = DataLoader(dataset_dir, batch_size=8)
     actual = []
@@ -67,22 +66,21 @@ def test_load_dataset(spark: SparkSession, tmpdir):
 
 def test_coco_dataset(
     spark: SparkSession,
-    tmpdir,
+    tmp_path: Path,
 ):
-    dataset_dir = os.path.join(tmpdir, "features")
-    asset_dir = os.path.join(tmpdir, "assets")
-    os.makedirs(asset_dir)
+    dataset_dir = tmp_path / "features"
+    asset_dir = tmp_path / "assets"
+    asset_dir.mkdir(parents=True)
     data = []
     for i in range(10):
         image_data = np.random.randint(0, 128, size=(128, 128), dtype=np.uint8)
-        image_uri = os.path.join(asset_dir, f"{i}.png")
-        PILImage.fromarray(image_data).save(image_uri)
+        image_uri = asset_dir / f"{i}.png"
 
         data.append(
             Row(
                 image_id=i,
                 split="train",
-                image=Image(image_uri),
+                image=Image.from_array(image_data, image_uri),
                 annotations=[
                     Row(
                         category_id=123,
@@ -99,7 +97,7 @@ def test_coco_dataset(
         )
 
     spark.createDataFrame(data).write.mode("overwrite").format("rikai").save(
-        dataset_dir
+        str(dataset_dir)
     )
 
     loader = DataLoader(dataset_dir, batch_size=1)

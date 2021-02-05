@@ -16,8 +16,9 @@
 """
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import BinaryIO
+from abc import ABC, abstractmethod, abstractproperty
+from pathlib import Path
+from typing import BinaryIO, Union
 from urllib.parse import urlparse
 
 import numpy as np
@@ -53,8 +54,8 @@ class Asset(ABC):
     query on columnar format and easy tooling to access the actual data.
     """
 
-    def __init__(self, uri: str) -> None:
-        self.uri = uri
+    def __init__(self, uri: Union[str, Path]) -> None:
+        self.uri = str(uri)
 
     def __eq__(self, o: object) -> bool:
         return isinstance(o, Asset) and uri_equal(self.uri, o.uri)

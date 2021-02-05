@@ -13,6 +13,8 @@
 #  limitations under the License.
 
 import os
+from pathlib import Path
+from typing import Union
 from urllib.parse import urlparse
 
 
@@ -29,13 +31,24 @@ def uri_equal(uri1: str, uri2: str) -> bool:
     return False
 
 
-def normalize_uri(uri: str) -> str:
+def normalize_uri(uri: Union[str, Path]) -> str:
     """Normalize URI
 
     Convert a file path with "file://" schema.
     Convert an relative path to absolute path
 
+    Parameters
+    ----------
+    uri : str or Path
+
+    Return
+    ------
+    str
+        Normalized URI with schema
+
     """
+    if isinstance(uri, Path):
+        uri = str(uri.absolute())
     parsed = urlparse(uri)
     if parsed.scheme == "":
         return "file://" + os.path.abspath(uri)

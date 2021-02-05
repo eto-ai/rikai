@@ -126,7 +126,7 @@ def test_torch_dataset(spark, tmp_path, num_workers):
     for i in range(total):
         image_data = np.random.randint(0, 128, size=(128, 128), dtype=np.uint8)
         image_uri = asset_dir / f"{i}.png"
-        PILImage.fromarray(image_data).save(image_uri)
+        Image.from_array(image_data, image_uri),
 
         array = wrap(np.random.random_sample((3, 4)))
         data.append(

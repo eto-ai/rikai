@@ -23,6 +23,7 @@ from rikai.io import copy as _copy
 from rikai.logging import logger
 from rikai.spark.types.vision import ImageType
 from rikai.types.vision import Image
+from rikai.numpy import ndarray
 
 
 @udf(returnType=ImageType())
@@ -49,3 +50,17 @@ def image_copy(img: Image, uri: str) -> Image:
     """
     logger.info("Copying image src=%s dest=%s", img.uri, uri)
     return Image(_copy(img.uri, uri))
+
+
+@udf(returnType=ImageType())
+def numpy_to_image(array: ndarray, uri: str) -> Image:
+    """Convert a numpy array to image, and upload to external storage.
+
+    Parameters
+    ----------
+    array : np.ndarray
+        An :py:class:`numpy.ndarray` containing image data.
+    uri : str
+        The base directory to copy the image to.
+    """
+    return Image.from_array(array, uri)

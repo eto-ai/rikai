@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 # Standard Library
-import os
 from pathlib import Path
 
 # Third Party

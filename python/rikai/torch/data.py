@@ -75,7 +75,6 @@ class Dataset(IterableDataset):
         super().__init__()
         self.uri = uri
         self.columns = columns
-        self.transform = transform
 
     def __iter__(self):
         rank = 0
@@ -91,13 +90,8 @@ class Dataset(IterableDataset):
             columns=self.columns,
             world_size=world_size,
             rank=rank,
-        )
-        for row in dataset:
-            tensor = convert_tensor(row)
-            if self.transform:
-                tensor = self.transform(tensor)
-            print("Converted tensor: ", tensor)
-            yield tensor
+        ):
+            yield convert_tensor(row)
 
 
 class DataLoader:

@@ -52,13 +52,14 @@ class Dataset(IterableDataset):
     does not work with :py:class:`torch.utils.data.Sampler` with
     :py:class:`torch.utils.data.DataLoader`.
 
-    Use :py:class:`torch.utils.data.BufferedShuffleDataset` with the Rikai dataset.
+    Use :py:class:`torch.utils.data.BufferedShuffleDataset` (torch>=1.8)
+    with the Rikai dataset for randomness.
 
     Example
     -------
 
     >>> from rikai.torch.data import Dataset
-    >>> from torch.utils.data import DataLoader, BufferedShuffleDataset
+    >>> from torch.utils.data import DataLoader
     >>>
     >>> dataset = Dataset("dataset", columns=["image", "label"])
     >>> # dataset = BufferedShuffleDataset(dataset)
@@ -75,6 +76,9 @@ class Dataset(IterableDataset):
         super().__init__()
         self.uri = uri
         self.columns = columns
+
+    def __repr__(self) -> str:
+        return f"Dataset(torch, {self.uri}, columns={self.columns})"
 
     def __iter__(self):
         rank = 0

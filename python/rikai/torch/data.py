@@ -16,8 +16,9 @@
 
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 from queue import Empty, Queue
-from typing import Callable, Dict, Generator, List, Optional
+from typing import Callable, Dict, Generator, List, Optional, Union
 
 # Third Party
 import numpy as np
@@ -70,11 +71,11 @@ class Dataset(IterableDataset):
 
     def __init__(
         self,
-        uri: str,
+        uri: Union[str, Path],
         columns: List[str] = None,
     ):
         super().__init__()
-        self.uri = uri
+        self.uri = str(uri)
         self.columns = columns
 
     def __repr__(self) -> str:

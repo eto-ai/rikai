@@ -187,7 +187,7 @@ class Dataset:
         shuffler = RandomShuffler(
             self.shuffler_capacity if self.shuffle else 1, self.seed
         )
-        group_count = 0
+        group_count = -1
         for filepath in self.files:
             fs, path = FileSystem.from_uri(filepath)
             with fs.open_input_file(path) as fobj:
@@ -205,7 +205,7 @@ class Dataset:
                     #   than the average number of row groups. As a result,
                     #   many of the file open operations would be wasted.
                     group_count += 1
-                    if (group_count - 1) % self.world_size != self.rank:
+                    if group_count % self.world_size != self.rank:
                         continue
                     row_group = parquet.read_row_group(
                         group_idx, columns=self.columns

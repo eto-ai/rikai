@@ -66,6 +66,19 @@ def numpy_to_image(array: ndarray, uri: str) -> Image:
     Return
     ------
     Image
-        Return a new image pointed to the new URI
+        Return a new image pointed to the new URI.
+
+    Example
+    -------
+
+    >>> spark.createDataFrame(..).registerTempTable("df")
+    >>>
+    >>> spark.sql(\"\"\"SELECT numpy_to_image(
+    ...    resize(image), lit('s3://asset'))
+    ...    AS new_image FROM df\"\"\")
+
+    See Also
+    --------
+    :py:meth:`rikai.types.vision.Image.from_array`
     """
     return Image.from_array(array, uri)

@@ -69,15 +69,16 @@ class Image(ToNumpy, Asset, Displayable):
         uri : str or Path
             The external URI to store the data.
         mode : str, optional
-            The mode which PIL used to create image. See supported `modes`_
+            The mode which PIL used to create image. See supported
+            `modes on PIL document <https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-modes>`_.
 
         See Also
         --------
         :py:class:`PIL.Image.fromarray`
+        :py:func:`~rikai.spark.functions.vision.numpy_to_image`
 
-        # noqa: E501
-        .. _modes: https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-modes
-        """
+        """  # noqa: E501
+
         assert array is not None
         img = PILImage.fromarray(array, mode=mode)
         return cls.from_pil(img, uri)

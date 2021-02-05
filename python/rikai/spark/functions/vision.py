@@ -62,5 +62,10 @@ def numpy_to_image(array: ndarray, uri: str) -> Image:
         An :py:class:`numpy.ndarray` containing image data.
     uri : str
         The base directory to copy the image to.
+
+    Return
+    ------
+    Image
+        Return a new image pointed to the new URI
     """
     return Image.from_array(array, uri)

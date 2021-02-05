@@ -214,7 +214,6 @@ class Dataset:
                         batch
                     ) in row_group.to_batches():  # type: pyarrow.RecordBatch
                         # TODO: read batches not using pandas
-                        # print("THIS BATCH: rows=", batch.num_rows)
                         for _, row in batch.to_pandas().iterrows():
                             shuffler.append(row)
                             # Maintain the shuffler buffer around its capacity.

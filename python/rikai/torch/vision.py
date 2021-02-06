@@ -41,7 +41,8 @@ class Dataset(rikai.torch.data.Dataset):
         The column(s) of the target
     transform : Callable, optional
         A function/transform that takes in an :py:class:`PIL.Image.Image` and
-        returns a transformed version. E.g, :py:class:`torchvision.transforms.ToTensor`
+        returns a transformed version. E.g,
+        :py:class:`torchvision.transforms.ToTensor`
     target_transform : Callable, optional
         A function/transform that takes in the target and transforms it.
 

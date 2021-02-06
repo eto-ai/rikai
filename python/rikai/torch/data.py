@@ -26,8 +26,8 @@ import torch
 from torch.utils.data import IterableDataset
 
 # Rikai
+import rikai.parquet
 from rikai.mixin import ToNumpy
-from rikai.parquet.dataset import Dataset as pqDataset
 
 __all__ = ["DataLoader", "Dataset"]
 
@@ -90,7 +90,7 @@ class Dataset(IterableDataset):
             rank = worker_info.id
             world_size = worker_info.num_workers
 
-        for row in pqDataset(
+        for row in rikai.parquet.Dataset(
             self.uri,
             columns=self.columns,
             world_size=world_size,
@@ -167,7 +167,7 @@ class DataLoader:
         world_size: int = 1,
         rank: int = 0,
     ):  # pylint: disable=too-many-arguments
-        self.dataset = pqDataset(
+        self.dataset = rikai.parquet.Dataset(
             dataset,
             columns=columns,
             shuffle=shuffle,

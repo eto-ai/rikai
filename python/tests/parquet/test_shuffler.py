@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 
-from random import shuffle
 from rikai.parquet.shuffler import RandomShuffler
 
 

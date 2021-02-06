@@ -31,7 +31,7 @@ jobs:
       run: |
         sudo apt-get -y -qq install libsnappy-dev
         python -m pip install -q wheel pylint black flake8
-        python -m pip install -e .[test,youtube]
+        python -m pip install -e .[all]
     - name: Python black and flake8
       if: ${{ matrix.python-version == 3.8 }}
       run: make lint

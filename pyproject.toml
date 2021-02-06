@@ -1,6 +1,7 @@
 [tool.black]
 line-length = 79
 target-version = ['py38']
+max-line-length = 79
 
 [tool.isort]
 known_third_party = ["torch", "pyspark", "PIL", "pytest"]

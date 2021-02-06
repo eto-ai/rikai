@@ -12,10 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import pytest
+import torch
 
-all:
 
-lint:
-	black -l 79 --check python/rikai python/tests
-	pycodestyle python/rikai python/tests
-.PHONY: lint
+@pytest.fixture(autouse=True)
+def torch_setup():
+    torch.multiprocessing.set_sharing_strategy("file_system")

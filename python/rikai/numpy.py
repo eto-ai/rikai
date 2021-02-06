@@ -36,15 +36,21 @@ import numpy as np
 
 # Rikai
 from rikai.spark.types import NDArrayType
+from rikai.mixin import ToNumpy
 
 
 __all__ = ["wrap", "array", "empty"]
 
 
-class ndarray(np.ndarray):  # pylint: disable=invalid-name
+class ndarray(np.ndarray, ToNumpy):  # pylint: disable=invalid-name
     """This class extends numpy ndarray to be serialized in Spark."""
 
     __UDT__ = NDArrayType()
+
+    def to_numpy(self) -> np.ndarray:
+        """Convert to a pure numpy array for compatibility"""
+        # TODO: optimize it for zero-copy
+        return np.copy(self)
 
 
 def wrap(data: np.ndarray) -> np.ndarray:

@@ -13,19 +13,90 @@
 #  limitations under the License.
 
 """Pytorch Dataset and DataLoader"""
+
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 from queue import Empty, Queue
-from typing import Callable, Dict, Generator, List, Optional
+from typing import Callable, Dict, Generator, List, Optional, Union
 
 # Third Party
 import numpy as np
+import torch
+from torch.utils.data import IterableDataset
 
 # Rikai
+import rikai.parquet
 from rikai.mixin import ToNumpy
-from rikai.parquet.dataset import Dataset
 
-__all__ = ["DataLoader"]
+__all__ = ["DataLoader", "Dataset"]
+
+
+class Dataset(IterableDataset):
+    """Rikai Pytorch Dataset.
+
+    A :py:class:`torch.utils.data.IterableDataset` that reads
+    Rikai data format. This :py:class:`Dataset` works with
+    `multi-process data loading`_ using :py:class:`torch.utils.data.DataLoader`.
+
+    Parameters
+    ----------
+    uri : str
+        URI to the dataset
+    columns : list of str, optional
+        An optional list of column to load from parquet files.
+
+    Note
+    ----
+
+    Up to ``pytorch==1.7``, :py:class:`~torch.utils.data.IterableDataset`
+    does not work with :py:class:`torch.utils.data.Sampler` with
+    :py:class:`torch.utils.data.DataLoader`.
+
+    Use :py:class:`torch.utils.data.BufferedShuffleDataset` (torch>=1.8)
+    with the Rikai dataset for randomness.
+
+    Example
+    -------
+
+    >>> from rikai.torch.data import Dataset
+    >>> from torch.utils.data import DataLoader
+    >>>
+    >>> dataset = Dataset("dataset", columns=["image", "label"])
+    >>> # dataset = BufferedShuffleDataset(dataset)
+    >>> loader = DataLoader(dataset, num_workers=8)
+
+    .. _multi-process data loading: https://pytorch.org/docs/master/data.html#single-and-multi-process-data-loading
+    """  # noqa: E501
+
+    def __init__(
+        self,
+        uri: Union[str, Path],
+        columns: List[str] = None,
+    ):
+        super().__init__()
+        self.uri = str(uri)
+        self.columns = columns
+
+    def __repr__(self) -> str:
+        return f"Dataset(torch, {self.uri}, columns={self.columns})"
+
+    def __iter__(self):
+        rank = 0
+        world_size = 1
+
+        worker_info = torch.utils.data.get_worker_info()
+        if worker_info is not None:
+            rank = worker_info.id
+            world_size = worker_info.num_workers
+
+        for row in rikai.parquet.Dataset(
+            self.uri,
+            columns=self.columns,
+            world_size=world_size,
+            rank=rank,
+        ):
+            yield convert_tensor(row)
 
 
 class DataLoader:
@@ -96,7 +167,7 @@ class DataLoader:
         world_size: int = 1,
         rank: int = 0,
     ):  # pylint: disable=too-many-arguments
-        self.dataset = Dataset(
+        self.dataset = rikai.parquet.Dataset(
             dataset,
             columns=columns,
             shuffle=shuffle,

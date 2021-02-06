@@ -187,7 +187,7 @@ class Dataset:
         shuffler = RandomShuffler(
             self.shuffler_capacity if self.shuffle else 1, self.seed
         )
-        group_count = 0
+        group_count = -1
         for filepath in self.files:
             fs, path = FileSystem.from_uri(filepath)
             with fs.open_input_file(path) as fobj:
@@ -210,11 +210,14 @@ class Dataset:
                     row_group = parquet.read_row_group(
                         group_idx, columns=self.columns
                     )
-                    for batch in row_group.to_batches():  # type: RecordBatch
+                    for (
+                        batch
+                    ) in row_group.to_batches():  # type: pyarrow.RecordBatch
                         # TODO: read batches not using pandas
                         for _, row in batch.to_pandas().iterrows():
                             shuffler.append(row)
                             # Maintain the shuffler buffer around its capacity.
+
                             while shuffler.full():
                                 yield self._convert(
                                     shuffler.pop().to_dict(),

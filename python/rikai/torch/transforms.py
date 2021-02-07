@@ -18,7 +18,7 @@ import numpy as np
 
 from rikai.mixin import ToNumpy, ToPIL
 
-__all__ = ["ToTorchTensor"]
+__all__ = ["RikaiToTensor"]
 
 
 def convert_tensor(row, use_pil: bool = False):

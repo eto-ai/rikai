@@ -24,6 +24,7 @@ from typing import Any, Callable, List, Optional, Tuple, Union
 import PIL
 
 import rikai.torch.data
+from rikai.torch.transforms import RikaiToTensor
 
 __all__ = ["Dataset"]
 
@@ -36,9 +37,9 @@ class Dataset(rikai.torch.data.Dataset):
     uri : str or Path
         URI to the dataset
     image_column : str
-        The column of the image.
+        The column name for the image data.
     target_column : str or list[str]
-        The column(s) of the target
+        The column(s) of the target / label.
     transform : Callable, optional
         A function/transform that takes in an :py:class:`PIL.Image.Image` and
         returns a transformed version. E.g,
@@ -70,7 +71,11 @@ class Dataset(rikai.torch.data.Dataset):
             if isinstance(target_column, str)
             else target_column
         )
-        super().__init__(uri, [self.image_column] + self.target_columns)
+        super().__init__(
+            uri,
+            [self.image_column] + self.target_columns,
+            transform=RikaiToTensor(use_pil=True),
+        )
 
         self.transform = transform if transform else lambda x: x
         self.target_transform = (
@@ -78,7 +83,7 @@ class Dataset(rikai.torch.data.Dataset):
         )
 
     def __repr__(self) -> str:
-        return f"RikaiVisionDataset({self.uri})"
+        return f"RikaiDataset({self.uri})"
 
     def __iter__(self) -> Tuple[PIL.Image.Image, Any]:
         for row in super().__iter__():

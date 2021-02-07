@@ -61,3 +61,4 @@ def test_vision_dataset(spark: SparkSession, tmp_path: Path):
     assert first_data["label"] == target
     assert torch.equal(transform(first_data["image"].to_pil()), img)
     assert isinstance(img, torch.Tensor)
+    assert len(list(dataset)) == 100

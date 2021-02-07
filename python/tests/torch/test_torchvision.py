@@ -17,7 +17,8 @@ import random
 from pathlib import Path
 
 import numpy as np
-from pyspark.sql import SparkSession, Row
+import torch
+from pyspark.sql import Row, SparkSession
 from torchvision import transforms
 
 from rikai.torch.vision import Dataset
@@ -55,5 +56,8 @@ def test_vision_dataset(spark: SparkSession, tmp_path: Path):
         ]
     )
     dataset = Dataset(dataset_dir, "image", "label", transform=transform)
-    first = next(iter(dataset))
-    print(first)
+    first_data = data[0]
+    img, target = next(iter(dataset))
+    assert first_data["label"] == target
+    assert torch.equal(transform(first_data["image"].to_pil()), img)
+    assert isinstance(img, torch.Tensor)

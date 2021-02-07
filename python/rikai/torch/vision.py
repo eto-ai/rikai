@@ -55,6 +55,24 @@ class Dataset(rikai.torch.data.Dataset):
     --------
     `Torchvision Dataset <https://pytorch.org/vision/stable/datasets.html#>`_
 
+    Examples
+    --------
+    >>> from torchvision import transforms
+    >>> from rikai.torch.vision import Dataset
+    >>> transform = transforms.Compose(
+    ...     transforms=[
+    ...         transforms.Resize(128),
+    ...         transforms.ToTensor(),
+    ...         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+    ...     ])
+    >>> dataset = Dataset("out", "image", ["label"], transform=transform)
+    >>> next(iter(dataset))
+    ... tensor([[[-1.8610, -0.8678, -0.4226,  ..., -1.7583,  0.0569, -0.6794],
+         [-1.5870, -1.8782, -1.7069,  ..., -1.1075, -1.1760, -1.8782],
+         [-2.1179, -0.5253, -1.7925,  ..., -0.3712, -1.4843, -1.2959],
+         ...,
+         [-1.1073, -0.3927, -0.8110,  ..., -0.9853,  0.1128, -1.0027]]]) dog
+
     """
 
     def __init__(

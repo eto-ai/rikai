@@ -50,7 +50,7 @@ def test_vision_dataset(spark: SparkSession, tmp_path: Path):
 
     transform = transforms.Compose(
         transforms=[
-            transforms.CenterCrop(32),
+            transforms.Resize(64),
             transforms.ToTensor(),
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
         ]
@@ -58,6 +58,7 @@ def test_vision_dataset(spark: SparkSession, tmp_path: Path):
     dataset = Dataset(dataset_dir, "image", "label", transform=transform)
     first_data = data[0]
     img, target = next(iter(dataset))
+    print(img, target)
     assert first_data["label"] == target
     assert torch.equal(transform(first_data["image"].to_pil()), img)
     assert isinstance(img, torch.Tensor)

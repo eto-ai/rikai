@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.apache.spark.sql.ml.catalog
+package ai.eto.rikai.sql.catalog
 
 import org.apache.spark.sql.Dataset
 
 import java.net.URI
-
 
 /**
   * Catalog for SQL ML.
@@ -29,15 +28,15 @@ trait MLCatalog {
   /**
     * Create a ML Model that can be used in SQL ML in the current database.
     */
-  def createModel(uri: URI) : Model
+  def createModel(uri: URI): Model
 
   /**
     * Return a list of models registered in the current database.
     */
-  def listModels() : Dataset[Model]
+  def listModels(): Dataset[Model]
 
   /** Drop the model, specified by the name. */
-  def dropModel(name: String) : Boolean
+  def dropModel(name: String): Boolean
 
-  def getModel(name: String) : Option[Model]
+  def getModel(name: String): Option[Model]
 }

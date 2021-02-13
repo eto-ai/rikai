@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.apache.spark.sql.ml.catalog
+package ai.eto.rikai.sql.catalog
 
 import org.scalatest.funsuite.AnyFunSuite
 

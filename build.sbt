@@ -27,7 +27,7 @@ libraryDependencies ++= {
   val sparkVersion = "3.0.1"
   val awsVersion = "2.15.69"
   val circeYamlVersion = "0.13.1"
-  val snappyVersion = "1.1.8.4"
+  val snappyVersion = "1.1.8.4"  // Temporarily support Apple Silicon build
   val scalatestVersion = "3.2.0"
 
   Seq(

@@ -29,6 +29,7 @@ import org.apache.spark.sql.catalyst.expressions.ExpressionInfo
   * {{{
   *   ML_PREDICT({ model_name | model_uri }, col [, col ...])
   * }}}
+  *
   */
 object Predict {
   /** Function name in SQL query */

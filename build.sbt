@@ -73,3 +73,5 @@ releaseProcess := Seq[ReleaseStep](
   pushChanges
   )
 
+enablePlugins(Antlr4Plugin)
+

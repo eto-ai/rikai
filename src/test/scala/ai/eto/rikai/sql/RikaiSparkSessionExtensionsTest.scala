@@ -34,12 +34,11 @@ class RikaiSparkSessionExtensionsTest extends AnyFunSuite with SparkTestSession 
     spark.udf.register("foo", (s: Int) => s + 2)
 
     val df = Seq.range(1, 10).toDF("id")
-    df.show()
     df.createTempView("df")
 
     val scores =
       spark.sql("SELECT id, ML_PREDICT(model.`//foo`, id) AS score FROM df")
-    scores.show()
+    // scores.show()
 
     val plus_two = udf((v: Int) => v + 2)
     val expected = df.withColumn("score", plus_two(col("id")))
@@ -55,7 +54,7 @@ class RikaiSparkSessionExtensionsTest extends AnyFunSuite with SparkTestSession 
     val predicted = spark.sql(
       "SELECT a + b as s, ML_PREDICT(model.`multi_col`, a, b) AS c FROM multi_df"
     )
-    predicted.show()
+//    predicted.show()
 
     val expected = Seq((3, 2), (7, 12), (30, 200), (35, 306)).toDF("s", "c")
     assertDfEqual(predicted, expected)

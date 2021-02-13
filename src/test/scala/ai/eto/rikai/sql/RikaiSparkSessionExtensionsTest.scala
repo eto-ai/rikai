@@ -14,30 +14,20 @@
  * limitations under the License.
  */
 
-package org.apache.spark.sql.catalog
+package ai.eto.rikai.sql
 
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.SparkSession
+import org.scalatest.funsuite.AnyFunSuite
 
-import java.net.URI
+class RikaiSparkSessionExtensionsTest extends AnyFunSuite {
 
-
-/**
-  * Catalog for SQL ML.
-  */
-trait MLCatalog {
-
-  /**
-    * Create a ML Model that can be used in SQL ML in the current database.
-    */
-  def createModel(uri: URI) : Model
-
-  /**
-    * Return a list of models registered in the current database.
-    */
-  def listModels() : Dataset[Model]
-
-  /** Drop the model, specified by the name. */
-  def dropModel(name: String) : Boolean
-
-  def getModel(name: String) : Option[Model]
+  lazy val spark = SparkSession.builder
+    .config(
+      "spark.sql.extensions",
+      "ai.eto.rikai.sql.RikaiSparkSessionExtensions"
+    )
+    .master("local[*]")
+    .getOrCreate()
+  
+  test("Test parse ML_PREDICT expression") {}
 }

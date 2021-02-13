@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.apache.spark.sql.ml.catalog
+package ai.eto.rikai.sql.catalog
 
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.UnresolvedFunction
@@ -23,7 +23,7 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 import java.net.URI
 import java.nio.file.Paths
 
-private[ml] class Model(
+class Model(
     val name: String,
     val uri: String = "",
     var Options: Map[String, String] = Map.empty
@@ -51,7 +51,7 @@ private[ml] class Model(
   }
 }
 
-private[ml] object Model {
+object Model {
 
   private val pathPrefix = "model."
 

@@ -21,7 +21,7 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.parser.ParserUtils.withOrigin
 import org.apache.spark.sql.catalyst.parser.SqlBaseParser.FunctionCallContext
 import org.apache.spark.sql.catalyst.parser.{AstBuilder, ParseException}
-import org.apache.spark.sql.ml.catalog.Model
+import ai.eto.rikai.sql.catalog.Model
 import org.apache.spark.sql.ml.expressions.Predict
 
 import java.util.Locale

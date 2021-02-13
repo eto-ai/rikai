@@ -12,6 +12,7 @@
  * the License.
  */
 
+// Grammar for Rikai-extensions.
 grammar RikaiSqlBase;
 
 singleStatement: statement EOF;

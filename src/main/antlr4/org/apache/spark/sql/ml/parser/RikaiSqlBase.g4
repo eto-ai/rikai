@@ -20,8 +20,8 @@ singleStatement: statement EOF;
 statement:
 	CREATE (OR REPLACE)? MODEL model = qualifiedName (
 		OPTIONS '(' ')'
-	) AS (uri = qualifiedName | table = qualifiedName)	# createModel
-	| .*?												# passThrough;
+	) AS (path = STRING | table = qualifiedName)	# createModel
+	| .*?											# passThrough;
 
 qualifiedName: identifier ('.' identifier)*;
 
@@ -40,6 +40,11 @@ MODEL: 'MODEL';
 OPTIONS: 'OPTIONS';
 OR: 'OR';
 REPLACE: 'REPLACE';
+
+STRING
+    : '\'' ( ~('\''|'\\') | ('\\' .) )* '\''
+    | '"' ( ~('"'|'\\') | ('\\' .) )* '"'
+    ;
 
 IDENTIFIER
     : (LETTER | DIGIT | '_')+

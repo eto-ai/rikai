@@ -16,62 +16,65 @@
 
 package ai.eto.rikai.sql.parser
 
+import ai.eto.rikai.sql.execution.CreateModelCommand
 import ai.eto.rikai.sql.parser.RikaiSqlBaseParser._
-import org.antlr.v4.runtime.tree.{ErrorNode, ParseTree, RuleNode, TerminalNode}
-import org.apache.spark.sql.catalyst.parser.ParserUtils.withOrigin
+import org.apache.spark.sql.catalyst.TableIdentifier
+import org.apache.spark.sql.catalyst.parser.ParseException
+import org.apache.spark.sql.catalyst.parser.ParserUtils.{string, withOrigin}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
+
+import scala.collection.JavaConverters.asScalaBufferConverter
 
 /**
   * ```AstBuilder``` for Rikai Spark SQL extensions.
   */
-class RikaiExtAstBuilder extends RikaiSqlBaseVisitor[AnyRef] {
+class RikaiExtAstBuilder extends RikaiSqlBaseBaseVisitor[AnyRef] {
 
+  protected def visitTableIdentfier(
+      ctx: QualifiedNameContext
+  ): TableIdentifier =
+    withOrigin(ctx) {
+      ctx.identifier.asScala match {
+        case Seq(tbl)     => TableIdentifier(tbl.getText)
+        case Seq(db, tbl) => TableIdentifier(tbl.getText, Some(db.getText))
+        case _ =>
+          throw new ParseException(s"Illegal table name ${ctx.getText}", ctx)
+      }
+    }
+
+  /**
+    * Visit a parse tree produced by {@link RikaiSqlBaseParser#   singleStatement}.
+    *
+    * @param ctx the parse tree
+    * @return the visitor result
+    */
   override def visitSingleStatement(ctx: SingleStatementContext): LogicalPlan =
     withOrigin(ctx) {
       visit(ctx.statement).asInstanceOf[LogicalPlan]
     }
 
-  override def visit(tree: ParseTree): AnyRef = ???
-
   override def visitCreateModel(ctx: CreateModelContext): LogicalPlan = {
-    null
+    CreateModelCommand(
+      ctx.model.getText,
+      Option(ctx.path).map(string),
+      Option(ctx.table).map(visitTableIdentfier),
+      replace = false,
+      options = Map.empty
+    )
   }
 
-  override def visitPassThrough(ctx: PassThroughContext): LogicalPlan = null
+  override def visitPassThrough(ctx: PassThroughContext): AnyRef = null
 
   override def visitQualifiedName(ctx: QualifiedNameContext): AnyRef = ???
 
+  override def visitUnquotedIdentifier(ctx: UnquotedIdentifierContext): AnyRef =
+    ???
+
+  override def visitQuotedIdentifierAlternative(
+      ctx: QuotedIdentifierAlternativeContext
+  ): AnyRef = ???
+
   override def visitQuotedIdentifier(ctx: QuotedIdentifierContext): AnyRef = ???
 
-  /**
-    * Visit a parse tree produced by {@link RikaiSqlBaseParser# nonReserved}.
-    *
-    * @param ctx the parse tree
-    * @return the visitor result
-    */
   override def visitNonReserved(ctx: NonReservedContext): AnyRef = ???
-
-  override def visitChildren(node: RuleNode): AnyRef = ???
-
-  override def visitTerminal(node: TerminalNode): AnyRef = ???
-
-  override def visitErrorNode(node: ErrorNode): AnyRef = ???
-
-  /**
-    * Visit a parse tree produced by the {@code unquotedIdentifier}
-    * labeled alternative in {@link RikaiSqlBaseParser#   identifier}.
-    *
-    * @param ctx the parse tree
-    * @return the visitor result
-    */
-  override def visitUnquotedIdentifier(ctx: UnquotedIdentifierContext): AnyRef = ???
-
-  /**
-    * Visit a parse tree produced by the {@code quotedIdentifierAlternative}
-    * labeled alternative in {@link RikaiSqlBaseParser# identifier}.
-    *
-    * @param ctx the parse tree
-    * @return the visitor result
-    */
-  override def visitQuotedIdentifierAlternative(ctx: QuotedIdentifierAlternativeContext): AnyRef = ???
 }

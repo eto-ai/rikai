@@ -16,13 +16,14 @@
 
 package ai.eto.rikai.sql.execution
 
+import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.execution.command.RunnableCommand
 import org.apache.spark.sql.{Row, SparkSession}
 
 case class CreateModelCommand(
     name: String,
     path: Option[String],
-    table: Option[String],
+    table: Option[TableIdentifier],
     replace: Boolean,
     options: Map[String, String]
 ) extends RunnableCommand {

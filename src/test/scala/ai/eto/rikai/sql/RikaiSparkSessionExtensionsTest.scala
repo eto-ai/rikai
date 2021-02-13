@@ -46,7 +46,7 @@ class RikaiSparkSessionExtensionsTest extends AnyFunSuite with SparkTestSession 
     assertDfEqual(scores, expected)
   }
 
-  test("Test parse ML_PREDICT with multiple columns") {
+  test("Test parse ML_PREDICT on multiple columns") {
     spark.udf.register("multi_col", (a: Int, b: Int) => a * b)
 
     val df = Seq((1, 2), (3, 4), (10, 20), (17, 18)).toDF("a", "b")

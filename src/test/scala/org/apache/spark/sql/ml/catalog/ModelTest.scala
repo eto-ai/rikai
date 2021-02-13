@@ -28,7 +28,13 @@ class ModelTest extends AnyFunSuite {
 
   test("Parsing URLs") {
     val m = Model.fromName("model.//abc").get
-    assert (m.name == "abc")
+    assert(m.name == "abc")
+
+    val httpModel = Model.fromName("model.http://a/b/c/def").get
+    assert(httpModel.name == "def")
+
+    val mlflowModel = Model.fromName("model.mlflow://run/1/abc/2").get
+    assert(mlflowModel.name == "2")
   }
 
   test("Parse from local file") {}

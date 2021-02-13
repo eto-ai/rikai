@@ -29,9 +29,9 @@ import scala.collection.JavaConverters.asScalaBufferConverter
 
 /**
   * Extends Spark's `AstBuilder` to process the `Expression` within
-  * SQL Select Clause.
+  * Spark SQL Select/Where/OrderBy clauses.
   */
-class RikaiSparkAstBuilder extends AstBuilder {
+private[parser] class RikaiSparkAstBuilder extends AstBuilder {
 
   override def visitFunctionCall(ctx: FunctionCallContext): Expression =
     withOrigin(ctx) {
@@ -41,6 +41,9 @@ class RikaiSparkAstBuilder extends AstBuilder {
       }
     }
 
+  /**
+    * Process `ML_PREDICT` Expression.
+    */
   def visitMlPredictFunction(ctx: FunctionCallContext): Expression =
     withOrigin(ctx) {
       val arguments = ctx.argument.asScala.map(expression)

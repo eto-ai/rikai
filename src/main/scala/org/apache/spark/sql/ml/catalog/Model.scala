@@ -42,7 +42,6 @@ class Model(
     // TODO: use a resolver / planner to provide plugins to offer different
     // Execution method.
     // But for now, it has the simplest form.
-    println("MY name is: " + name)
     UnresolvedFunction(
       new FunctionIdentifier(s"${name}"),
       arguments,
@@ -60,7 +59,6 @@ object Model {
     if (name.startsWith(pathPrefix)) {
       val uri = new URI(name.substring(pathPrefix.length))
       val filename = Paths.get(uri.toString).getFileName.toString
-      println("XXX: " + filename)
       Some(new Model(filename, uri.toString))
     } else {
       None

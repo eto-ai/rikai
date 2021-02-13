@@ -20,13 +20,13 @@ import org.apache.spark.sql.SparkSession
 
 trait SparkTestSession {
 
-  lazy val spark = SparkSession.builder
+  lazy val spark: SparkSession = SparkSession.builder
     .config(
       "spark.sql.extensions",
       "ai.eto.rikai.sql.RikaiSparkSessionExtensions"
     )
     .master("local[*]")
-    .getOrCreate()
+    .getOrCreate
 
   spark.sparkContext.setLogLevel("WARN")
 }

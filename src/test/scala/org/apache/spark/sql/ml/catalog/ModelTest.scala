@@ -1,4 +1,6 @@
 /*
+ * Copyright 2021 Rikai authors
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,19 +14,20 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql
+package org.apache.spark.sql.ml.catalog
 
-import org.apache.spark.sql.SparkSessionExtensions
-import org.apache.spark.sql.ml.expressions.Predict
-import org.apache.spark.sql.ml.parser.RikaiSparkSQLParser
+import org.scalatest.funsuite.AnyFunSuite
 
-class RikaiSparkSessionExtensions extends (SparkSessionExtensions => Unit) {
+class ModelTest extends AnyFunSuite {
 
-  override def apply(extensions: SparkSessionExtensions): Unit = {
+  test("create models") {
+    val m = new Model("foo", uri = "https://to/foo")
+    assert(m.name == "foo")
+    assert(m.uri == "https://to/foo")
+  }
 
-    extensions.injectParser((session, parser) =>
-      new RikaiSparkSQLParser(session, parser)
-    )
-    extensions.injectFunction(Predict.functionDescriptor)
+  test("Parsing URLs") {
+    val m = Model.fromName("model.//abc").get
+    assert (m.name == "abc")
   }
 }

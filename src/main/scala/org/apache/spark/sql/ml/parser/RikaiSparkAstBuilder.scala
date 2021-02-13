@@ -53,16 +53,18 @@ private[parser] class RikaiSparkAstBuilder extends AstBuilder {
           ctx
         )
       }
-      val name = arguments(0) match {
+      val name = arguments.head match {
         case arg: UnresolvedAttribute => arg.name
         case _ =>
           throw new ParseException(
-            s"Can not recognize model name ${arguments(0)}", ctx
+            s"Can not recognize model name ${arguments.head}",
+            ctx
           )
       }
       val model = Model.fromName(name) match {
         case Some(m) => m
-        case None => throw new ParseException(s"Could not find model ${name}", ctx)
+        case None =>
+          throw new ParseException(s"Could not find model ${name}", ctx)
       }
       model.expression(arguments.drop(1))
     }

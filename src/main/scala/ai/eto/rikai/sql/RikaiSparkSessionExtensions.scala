@@ -25,6 +25,7 @@ class RikaiSparkSessionExtensions extends (SparkSessionExtensions => Unit) {
     extensions.injectParser((session, parser) =>
       new RikaiSparkSQLParser(session, parser)
     )
+
     extensions.injectFunction(Predict.functionDescriptor)
   }
 }

@@ -30,4 +30,8 @@ class ModelTest extends AnyFunSuite {
     val m = Model.fromName("model.//abc").get
     assert (m.name == "abc")
   }
+
+  test("Parse from local file") {}
+
+  test("Parse from model name") {}
 }

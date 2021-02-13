@@ -16,24 +16,22 @@
 
 package ai.eto.rikai.sql
 
-import org.apache.spark.sql.SparkSession
+import ai.eto.rikai.SparkTestSession
+import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{col, udf}
 import org.scalatest.funsuite.AnyFunSuite
 
-class RikaiSparkSessionExtensionsTest extends AnyFunSuite {
-
-  lazy val spark = SparkSession.builder
-    .config(
-      "spark.sql.extensions",
-      "ai.eto.rikai.sql.RikaiSparkSessionExtensions"
-    )
-    .master("local[*]")
-    .getOrCreate()
+class RikaiSparkSessionExtensionsTest extends AnyFunSuite with SparkTestSession {
 
   import spark.implicits._
 
+  def assertDfEqual(actual: DataFrame, expected: DataFrame): Unit = {
+    assert(actual.count() == expected.count())
+    assert(actual.exceptAll(expected).isEmpty)
+  }
+
   test("Test parse ML_PREDICT expression") {
-    spark.udf.register("foo_udf", (s: Int) => s + 2)
+    spark.udf.register("foo", (s: Int) => s + 2)
 
     val df = Seq.range(1, 10).toDF("id")
     df.show()
@@ -45,7 +43,21 @@ class RikaiSparkSessionExtensionsTest extends AnyFunSuite {
 
     val plus_two = udf((v: Int) => v + 2)
     val expected = df.withColumn("score", plus_two(col("id")))
-    assert(expected.count() == scores.count())
-    assert(expected.exceptAll(scores).isEmpty)
+    assertDfEqual(scores, expected)
+  }
+
+  test("Test parse ML_PREDICT with multiple columns") {
+    spark.udf.register("multi_col", (a: Int, b: Int) => a * b)
+
+    val df = Seq((1, 2), (3, 4), (10, 20), (17, 18)).toDF("a", "b")
+    df.createTempView("multi_df")
+
+    val predicted = spark.sql(
+      "SELECT a + b as s, ML_PREDICT(model.`multi_col`, a, b) AS c FROM multi_df"
+    )
+    predicted.show()
+
+    val expected = Seq((3, 2), (7, 12), (30, 200), (35, 306)).toDF("s", "c")
+    assertDfEqual(predicted, expected)
   }
 }

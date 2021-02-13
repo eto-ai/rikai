@@ -17,18 +17,14 @@
 
 package ai.eto.rikai
 
+import org.scalatest.funsuite.AnyFunSuite
+
 import java.io.File
 import java.nio.file.Files
 
-import org.apache.spark.sql.SparkSession
-import org.scalatest.funsuite.AnyFunSuite
+class RikaiRelationTest extends AnyFunSuite with SparkTestSession {
 
-class RikaiRelationTest extends AnyFunSuite {
-
-  lazy val spark = SparkSession.builder().master("local[1]").getOrCreate()
   import spark.implicits._
-
-  spark.sparkContext.setLogLevel("WARN")
 
   test("Use rikai registered as the sink of spark") {
     val examples = Seq(

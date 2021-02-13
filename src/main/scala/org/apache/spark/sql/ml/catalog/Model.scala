@@ -55,6 +55,11 @@ object Model {
 
   private val pathPrefix = "model."
 
+  /**
+    * Create a model from a model name or model URL.
+    * @param name name or model URI
+    * @return A created [[Model]]
+    */
   def fromName(name: String): Option[Model] = {
     if (name.startsWith(pathPrefix)) {
       val uri = new URI(name.substring(pathPrefix.length))

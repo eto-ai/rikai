@@ -24,6 +24,13 @@ import org.apache.spark.sql.catalyst.parser.{
 }
 import org.apache.spark.sql.internal.SQLConf
 
+/**
+  * Rikai-extended Spark SQL Parser
+  *
+  * @param session Live Spark Session
+  * @param delegate the delegated Spark SQL parser.
+  *
+  */
 class RikaiSparkSQLParser(session: SparkSession, delegate: ParserInterface)
     extends AbstractSqlParser(SQLConf.getFallbackConf) {
 

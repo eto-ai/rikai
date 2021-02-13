@@ -1,4 +1,6 @@
 /*
+ * Copyright 2021 Rikai authors
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,13 +14,30 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql
+package org.apache.spark.sql.ml.catalog
 
-import org.apache.spark.sql.SparkSessionExtensions
+import org.apache.spark.sql.Dataset
 
-class RikaiSparkSessionExtensions extends (SparkSessionExtensions => Unit) {
+import java.net.URI
 
-  override def apply(v1: SparkSessionExtensions): Unit = {
 
-  }
+/**
+  * Catalog for SQL ML.
+  */
+trait MLCatalog {
+
+  /**
+    * Create a ML Model that can be used in SQL ML in the current database.
+    */
+  def createModel(uri: URI) : Model
+
+  /**
+    * Return a list of models registered in the current database.
+    */
+  def listModels() : Dataset[Model]
+
+  /** Drop the model, specified by the name. */
+  def dropModel(name: String) : Boolean
+
+  def getModel(name: String) : Option[Model]
 }

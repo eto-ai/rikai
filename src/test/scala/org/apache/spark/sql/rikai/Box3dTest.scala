@@ -16,14 +16,14 @@
 
 package org.apache.spark.sql.rikai
 
+import ai.eto.rikai.SparkTestSession
 import org.scalatest.funsuite.AnyFunSuite
-import org.apache.spark.sql.SparkSession
+
 import java.io.File
 import java.nio.file.Files
 import scala.reflect.io.Directory
 
-class Box3dTest extends AnyFunSuite {
-  lazy val spark = SparkSession.builder().master("local[1]").getOrCreate()
+class Box3dTest extends AnyFunSuite with SparkTestSession{
 
   import spark.implicits._
 

@@ -44,7 +44,7 @@ class Model(
     // But for now, it has the simplest form.
     println("MY name is: " + name)
     UnresolvedFunction(
-      new FunctionIdentifier(s"${name}_udf"),
+      new FunctionIdentifier(s"${name}"),
       arguments,
       false,
       Option.empty

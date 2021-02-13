@@ -23,7 +23,7 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 import java.net.URI
 import java.nio.file.Paths
 
-class Model(
+private[ml] class Model(
     val name: String,
     val uri: String = "",
     var Options: Map[String, String] = Map.empty
@@ -45,13 +45,13 @@ class Model(
     UnresolvedFunction(
       new FunctionIdentifier(s"${name}"),
       arguments,
-      false,
+      isDistinct = false,
       Option.empty
     )
   }
 }
 
-object Model {
+private[ml] object Model {
 
   private val pathPrefix = "model."
 

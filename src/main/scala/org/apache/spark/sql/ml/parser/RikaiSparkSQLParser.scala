@@ -1,4 +1,6 @@
 /*
+ * Copyright 2021 Rikai authors
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,19 +14,18 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql
+package org.apache.spark.sql.ml.parser
 
-import org.apache.spark.sql.SparkSessionExtensions
-import org.apache.spark.sql.ml.expressions.Predict
-import org.apache.spark.sql.ml.parser.RikaiSparkSQLParser
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.catalyst.parser.{
+  AbstractSqlParser,
+  AstBuilder,
+  ParserInterface
+}
+import org.apache.spark.sql.internal.SQLConf
 
-class RikaiSparkSessionExtensions extends (SparkSessionExtensions => Unit) {
+class RikaiSparkSQLParser(session: SparkSession, delegate: ParserInterface)
+    extends AbstractSqlParser(SQLConf.getFallbackConf) {
 
-  override def apply(extensions: SparkSessionExtensions): Unit = {
-
-    extensions.injectParser((session, parser) =>
-      new RikaiSparkSQLParser(session, parser)
-    )
-    extensions.injectFunction(Predict.functionDescriptor)
-  }
+  override protected def astBuilder: AstBuilder = new RikaiSparkAstBuilder()
 }

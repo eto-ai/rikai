@@ -17,6 +17,7 @@
 package ai.eto.rikai.sql
 
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions.{col, udf}
 import org.scalatest.funsuite.AnyFunSuite
 
 class RikaiSparkSessionExtensionsTest extends AnyFunSuite {
@@ -28,6 +29,23 @@ class RikaiSparkSessionExtensionsTest extends AnyFunSuite {
     )
     .master("local[*]")
     .getOrCreate()
-  
-  test("Test parse ML_PREDICT expression") {}
+
+  import spark.implicits._
+
+  test("Test parse ML_PREDICT expression") {
+    spark.udf.register("foo_udf", (s: Int) => s + 2)
+
+    val df = Seq.range(1, 10).toDF("id")
+    df.show()
+    df.createTempView("df")
+
+    val scores =
+      spark.sql("SELECT id, ML_PREDICT(model.`//foo`, id) AS score FROM df")
+    scores.show()
+
+    val plus_two = udf((v: Int) => v + 2)
+    val expected = df.withColumn("score", plus_two(col("id")))
+    assert(expected.count() == scores.count())
+    assert(expected.exceptAll(scores).isEmpty)
+  }
 }

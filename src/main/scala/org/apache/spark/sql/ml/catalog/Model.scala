@@ -20,9 +20,12 @@ import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.UnresolvedFunction
 import org.apache.spark.sql.catalyst.expressions.Expression
 
+import java.net.URI
+import java.nio.file.Paths
+
 class Model(
-    name: String = "",
-    uri: String = "",
+    val name: String,
+    val uri: String = "",
     var Options: Map[String, String] = Map.empty
 ) {
 
@@ -39,6 +42,7 @@ class Model(
     // TODO: use a resolver / planner to provide plugins to offer different
     // Execution method.
     // But for now, it has the simplest form.
+    println("MY name is: " + name)
     UnresolvedFunction(
       new FunctionIdentifier(s"${name}_udf"),
       arguments,
@@ -50,7 +54,16 @@ class Model(
 
 object Model {
 
+  private val pathPrefix = "model."
+
   def fromName(name: String): Option[Model] = {
-    Some(new Model(name))
+    if (name.startsWith(pathPrefix)) {
+      val uri = new URI(name.substring(pathPrefix.length))
+      val filename = Paths.get(uri.toString).getFileName.toString
+      println("XXX: " + filename)
+      Some(new Model(filename, uri.toString))
+    } else {
+      None
+    }
   }
 }

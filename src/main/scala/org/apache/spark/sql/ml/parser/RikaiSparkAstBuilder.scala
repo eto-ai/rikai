@@ -28,7 +28,7 @@ import java.util.Locale
 import scala.collection.JavaConverters.asScalaBufferConverter
 
 /**
-  * Extends Spark's [[AstBuilder]] to process the [[Expression]] within
+  * Extends Spark's `AstBuilder` to process the `Expression` within
   * SQL Select Clause.
   */
 class RikaiSparkAstBuilder extends AstBuilder {

@@ -30,13 +30,13 @@ class Model(
 ) {
 
   /**
-    * Convert the Model inference code into [[Expression]].
+    * Convert the Model inference code into Spark Expression.
     *
-    * The concrete [[Expression]], typically a UDF, will be actually executed.
+    * The concrete Spark Catalyst Express, typically a UDF, will be actually executed.
     *
     * @param arguments the remained arguments passed to the model.
     *
-    * @return Spark catalyst [[Expression]] to run model inference.
+    * @return Spark catalyst Expression to run model inference.
     */
   def expression(arguments: Seq[Expression]): Expression = {
     // TODO: use a resolver / planner to provide plugins to offer different

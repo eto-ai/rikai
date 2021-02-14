@@ -13,35 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package ai.eto.rikai.sql.catalog
 
-import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.Dataset
 
 /**
-  * Catalog for SQL ML.
+  * An Simple ML-Catalog
   */
-trait MLCatalog {
+class SimpleMLCatalog extends MLCatalog {
+
+  private var models: Map[String, Model] = Map.empty
 
   /**
     * Create a ML Model that can be used in SQL ML in the current database.
+    *
+    * @param model The model to create.
     */
-  def createModel(model: Model): Model
+  override def createModel(model: Model): Model = {
+    models += (model.name -> model)
+    model
+  }
 
   /**
     * Return a list of models registered in the current database.
     */
-  def listModels(): Dataset[Model]
+  override def listModels(): Dataset[Model] = ???
 
   /** Drop the model, specified by the name. */
-  def dropModel(name: String): Boolean
+  override def dropModel(name: String): Boolean = {
+    val contains = models.contains(name)
+    models -= name
+    contains
+  }
 
-  def getModel(name: String): Option[Model]
-}
-
-object MLCatalog {
-
-  private lazy val catalog: MLCatalog = new SimpleMLCatalog()
-
-  def get(session: SparkSession) = catalog
+  override def getModel(name: String): Option[Model] = {
+    models get name
+  }
 }

@@ -25,7 +25,7 @@ import java.nio.file.Paths
 
 class Model(
     val name: String,
-    val uri: String = "",
+    val path: String = "",
     var Options: Map[String, String] = Map.empty
 ) {
 
@@ -49,6 +49,8 @@ class Model(
       Option.empty
     )
   }
+
+  override def toString: String = s"Model(${name}, path=${path})"
 }
 
 object Model {

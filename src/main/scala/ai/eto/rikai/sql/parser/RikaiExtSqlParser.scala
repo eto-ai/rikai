@@ -19,6 +19,8 @@ package ai.eto.rikai.sql.parser
 import org.antlr.v4.runtime._
 import org.antlr.v4.runtime.atn.PredictionMode
 import org.antlr.v4.runtime.misc.{Interval, ParseCancellationException}
+import org.apache.spark.internal.Logging
+import org.apache.spark.sql.AnalysisException
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.parser.{
   ParseErrorListener,
@@ -30,22 +32,24 @@ import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.catalyst.trees.Origin
 import org.apache.spark.sql.catalyst.{FunctionIdentifier, TableIdentifier}
 import org.apache.spark.sql.types.{DataType, StructType}
-import org.apache.spark.sql.{AnalysisException, SparkSession}
 
 class RikaiExtSqlParser(
-    val session: SparkSession,
     val delegate: ParserInterface
-) extends ParserInterface {
+) extends ParserInterface
+    with Logging {
 
   private val builder = new RikaiExtAstBuilder
 
-  override def parsePlan(sqlText: String): LogicalPlan =
+  override def parsePlan(sqlText: String): LogicalPlan = {
     parse(sqlText) { parser =>
-      builder.visit(parser.singleStatement) match {
-        case plan: LogicalPlan => plan
-        case _                 => delegate.parsePlan(sqlText)
+      {
+        builder.visit(parser.singleStatement) match {
+          case plan: LogicalPlan => plan
+          case _                 => delegate.parsePlan(sqlText)
+        }
       }
     }
+  }
 
   protected def parse[T](
       command: String

@@ -42,12 +42,6 @@ class RikaiExtAstBuilder extends RikaiSqlBaseBaseVisitor[AnyRef] {
       }
     }
 
-  /**
-    * Visit a parse tree produced by {@link RikaiSqlBaseParser#   singleStatement}.
-    *
-    * @param ctx the parse tree
-    * @return the visitor result
-    */
   override def visitSingleStatement(ctx: SingleStatementContext): LogicalPlan =
     withOrigin(ctx) {
       visit(ctx.statement).asInstanceOf[LogicalPlan]
@@ -65,16 +59,24 @@ class RikaiExtAstBuilder extends RikaiSqlBaseBaseVisitor[AnyRef] {
 
   override def visitPassThrough(ctx: PassThroughContext): AnyRef = null
 
-  override def visitQualifiedName(ctx: QualifiedNameContext): AnyRef = ???
+  override def visitQualifiedName(ctx: QualifiedNameContext): String = {
+    println(s"Qualified name: ${ctx}")
+    ctx.getText
+  }
 
-  override def visitUnquotedIdentifier(ctx: UnquotedIdentifierContext): AnyRef =
-    ???
+  override def visitUnquotedIdentifier(
+      ctx: UnquotedIdentifierContext
+  ): String = {
+    println(s"UnquotedIdentifier: ${ctx}")
+    ctx.getText
+  }
 
   override def visitQuotedIdentifierAlternative(
       ctx: QuotedIdentifierAlternativeContext
-  ): AnyRef = ???
+  ): String = ctx.getText
 
-  override def visitQuotedIdentifier(ctx: QuotedIdentifierContext): AnyRef = ???
+  override def visitQuotedIdentifier(ctx: QuotedIdentifierContext): String =
+    ctx.getText
 
   override def visitNonReserved(ctx: NonReservedContext): AnyRef = ???
 }

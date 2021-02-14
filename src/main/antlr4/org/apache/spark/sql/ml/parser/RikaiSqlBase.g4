@@ -15,24 +15,31 @@
 // Grammar for Rikai-extensions.
 grammar RikaiSqlBase;
 
-singleStatement: statement EOF;
+singleStatement
+    : statement ';'* EOF
+    ;
 
 statement:
-	CREATE (OR REPLACE)? MODEL model = qualifiedName (
-		OPTIONS '(' ')'
-	) AS (path = STRING | table = qualifiedName)	# createModel
-	| .*?											# passThrough;
+	CREATE (OR REPLACE)? MODEL model=qualifiedName
+	(OPTIONS '(' ')')?
+	(AS table=qualifiedName | USING path=STRING)	# createModel
+	| .*?									        # passThrough
+	;
 
 qualifiedName: identifier ('.' identifier)*;
 
 identifier:
 	IDENTIFIER			# unquotedIdentifier
 	| quotedIdentifier	# quotedIdentifierAlternative
-	| nonReserved		# unquotedIdentifier;
+	| nonReserved		# unquotedIdentifier
+	;
 
-quotedIdentifier: BACKQUOTED_IDENTIFIER;
+quotedIdentifier:
+    BACKQUOTED_IDENTIFIER
+    ;
 
-nonReserved:;
+nonReserved:
+    ;
 
 AS: 'AS';
 CREATE: 'CREATE';
@@ -40,6 +47,7 @@ MODEL: 'MODEL';
 OPTIONS: 'OPTIONS';
 OR: 'OR';
 REPLACE: 'REPLACE';
+USING: 'USING';
 
 STRING
     : '\'' ( ~('\''|'\\') | ('\\' .) )* '\''

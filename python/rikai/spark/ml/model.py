@@ -12,21 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-
-# Third Party
-import pytest
-from pyspark.sql import SparkSession
+from pathlib import Path
+from typing import Union
 
 
-@pytest.fixture(scope="session")
-def spark() -> SparkSession:
-    return (
-        SparkSession.builder.appName("spark-test")
-        .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.2-SNAPSHOT")
-        .config(
-            "spark.sql.extensions",
-            "ai.eto.rikai.sql.RikaiSparkSessionExtensions",
-        )
-        .master("local[2]")
-        .getOrCreate()
-    )
+class ModelLoader:
+    def __init__(self, spark: SparkSession):
+        pass
+
+    def load_model(self, path: str) -> str:
+        return path
+

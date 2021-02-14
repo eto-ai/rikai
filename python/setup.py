@@ -34,6 +34,7 @@ setup(
     include_package_data=True,
     python_requires=">=3.7",
     install_requires=[
+        "Pillow",
         "ipython",
         "numpy",
         "opencv-python",
@@ -42,6 +43,7 @@ setup(
         "pyarrow>=2.0",
         "pyspark>=3",
         "requests",
+        "pyyaml",
     ],
     extras_require={
         "test": test,

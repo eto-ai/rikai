@@ -66,9 +66,15 @@ class RikaiSparkSessionExtensionsTest
     spark.udf.register("model_foo", (a: Int, b: Int) => a * b)
 
     val df = Seq((1, 2), (3, 4), (10, 20), (17, 18)).toDF("a", "b")
-    df.createTempView("create_model")
+    df.createTempView("create_model_data")
 
     spark.sql("CREATE MODEL model_foo USING 'model.path_to_somewhere'").count()
     df.show()
+    val actual = spark.sql(
+      "SELECT a + b as s, ML_PREDICT(model_foo, a, b) AS c FROM create_model_data"
+    )
+    actual.show()
+    val expected = Seq((3, 2), (7, 12), (30, 200), (35, 306)).toDF("s", "c")
+    assertDfEqual(actual, expected)
   }
 }

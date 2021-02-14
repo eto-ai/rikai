@@ -21,7 +21,9 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{col, udf}
 import org.scalatest.funsuite.AnyFunSuite
 
-class RikaiSparkSessionExtensionsTest extends AnyFunSuite with SparkTestSession {
+class RikaiSparkSessionExtensionsTest
+    extends AnyFunSuite
+    with SparkTestSession {
 
   import spark.implicits._
 
@@ -58,5 +60,15 @@ class RikaiSparkSessionExtensionsTest extends AnyFunSuite with SparkTestSession 
 
     val expected = Seq((3, 2), (7, 12), (30, 200), (35, 306)).toDF("s", "c")
     assertDfEqual(predicted, expected)
+  }
+
+  test("Create model") {
+    spark.udf.register("model_foo", (a: Int, b: Int) => a * b)
+
+    val df = Seq((1, 2), (3, 4), (10, 20), (17, 18)).toDF("a", "b")
+    df.createTempView("create_model")
+
+    spark.sql("CREATE MODEL model_foo USING 'model.path_to_somewhere'").count()
+    df.show()
   }
 }

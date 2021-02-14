@@ -21,9 +21,9 @@ import org.scalatest.funsuite.AnyFunSuite
 class ModelTest extends AnyFunSuite {
 
   test("create models") {
-    val m = new Model("foo", uri = "https://to/foo")
+    val m = new Model("foo", path = "https://to/foo")
     assert(m.name == "foo")
-    assert(m.uri == "https://to/foo")
+    assert(m.path == "https://to/foo")
   }
 
   test("Parsing URLs") {

@@ -24,7 +24,7 @@ class RikaiSparkSessionExtensions extends (SparkSessionExtensions => Unit) {
   override def apply(extensions: SparkSessionExtensions): Unit = {
 
     extensions.injectParser((session, parser) => {
-      new RikaiExtSqlParser(session, new RikaiSparkSQLParser(session, parser))
+      new RikaiExtSqlParser(new RikaiSparkSQLParser(session, parser))
     })
 
     extensions.injectFunction(Predict.functionDescriptor)

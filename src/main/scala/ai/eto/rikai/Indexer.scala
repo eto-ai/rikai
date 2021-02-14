@@ -29,5 +29,5 @@ trait Indexer {
     * @param uri the URI of the feature dataset.
     * @param df the live DataFrame
     */
-  def build(uri: String, df: DataFrame);
+  def build(uri: String, df: DataFrame): Unit;
 }

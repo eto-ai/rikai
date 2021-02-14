@@ -16,8 +16,11 @@
 
 package ai.eto.rikai.sql.execution
 
+import ai.eto.rikai.sql.catalog.{MLCatalog, Model}
 import org.apache.spark.sql.catalyst.TableIdentifier
+import org.apache.spark.sql.catalyst.expressions.{Attribute, AttributeReference}
 import org.apache.spark.sql.execution.command.RunnableCommand
+import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{Row, SparkSession}
 
 case class CreateModelCommand(
@@ -28,7 +31,17 @@ case class CreateModelCommand(
     options: Map[String, String]
 ) extends RunnableCommand {
 
+  override val output: Seq[Attribute] = Seq(
+    AttributeReference("path", StringType, nullable = true)()
+  )
+
   override def run(spark: SparkSession): Seq[Row] = {
-    Seq.empty
+    val catalog = MLCatalog.get(spark)
+    val model = new Model(name, path.getOrElse(""), options)
+    catalog.createModel(model)
+    Seq(Row(name))
   }
+
+  override def toString(): String =
+    s"CreateModel(${name}, path=${path}, table=${table}"
 }

@@ -1,4 +1,6 @@
 /*
+ * Copyright 2021 Rikai authors
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,18 +14,14 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql
+package ai.eto.rikai.sql;
 
-abstract class ModelLoader {
+/**
+ * Interface to Python Codebase to implement Dynamic Model Loading.
+ *
+ * It must to be a java interface to pass py4j boundry.
+ */
+public interface ModelLoader {
 
-  def load_model(path: String): String;
-}
-
-object ModelLoader {
-
-  var loader: ModelLoader = null;
-
-  def register(modelLoader: ModelLoader): Unit = {
-    loader = modelLoader
-  }
+    String load(String uri);
 }

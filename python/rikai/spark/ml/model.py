@@ -12,14 +12,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from pathlib import Path
-from typing import Union
+
+from pyspark.sql import SparkSession
 
 
 class ModelLoader:
     def __init__(self, spark: SparkSession):
-        pass
+        self.spark = spark
 
-    def load_model(self, path: str) -> str:
+    def load(self, path):
+        print("LEMME TRY TO LOAD MODEL")
         return path
 
+    class Java:
+        implements = ["ai.eto.rikai.sql.ModelLoader"]

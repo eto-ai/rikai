@@ -22,6 +22,7 @@ import org.apache.spark.sql.catalyst.parser.ParserUtils.withOrigin
 import org.apache.spark.sql.catalyst.parser.SqlBaseParser.FunctionCallContext
 import org.apache.spark.sql.catalyst.parser.{AstBuilder, ParseException}
 import ai.eto.rikai.sql.catalog.Model
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.ml.expressions.Predict
 
 import java.util.Locale
@@ -31,7 +32,8 @@ import scala.collection.JavaConverters.asScalaBufferConverter
   * Extends Spark's `AstBuilder` to process the `Expression` within
   * Spark SQL Select/Where/OrderBy clauses.
   */
-private[parser] class RikaiSparkAstBuilder extends AstBuilder {
+private[parser] class RikaiSparkAstBuilder(session: SparkSession)
+    extends AstBuilder {
 
   override def visitFunctionCall(ctx: FunctionCallContext): Expression =
     withOrigin(ctx) {
@@ -61,10 +63,10 @@ private[parser] class RikaiSparkAstBuilder extends AstBuilder {
             ctx
           )
       }
-      val model = Model.fromName(name) match {
+      val model = Model.fromName(session, name) match {
         case Some(m) => m
         case None =>
-          throw new ParseException(s"Could not find model ${name}", ctx)
+          throw new ParseException(s"can not find model ${name}", ctx)
       }
       model.expression(arguments.drop(1))
     }

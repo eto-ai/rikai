@@ -16,9 +16,10 @@
 
 package ai.eto.rikai.sql.catalog
 
+import ai.eto.rikai.SparkTestSession
 import org.scalatest.funsuite.AnyFunSuite
 
-class ModelTest extends AnyFunSuite {
+class ModelTest extends AnyFunSuite with SparkTestSession {
 
   test("create models") {
     val m = new Model("foo", path = "https://to/foo")
@@ -27,13 +28,13 @@ class ModelTest extends AnyFunSuite {
   }
 
   test("Parsing URLs") {
-    val m = Model.fromName("model.//abc").get
+    val m = Model.fromName(spark, "model.//abc").get
     assert(m.name == "abc")
 
-    val httpModel = Model.fromName("model.http://a/b/c/def").get
+    val httpModel = Model.fromName(spark, "model.http://a/b/c/def").get
     assert(httpModel.name == "def")
 
-    val mlflowModel = Model.fromName("model.mlflow://run/1/abc/2").get
+    val mlflowModel = Model.fromName(spark, "model.mlflow://run/1/abc/2").get
     assert(mlflowModel.name == "2")
   }
 

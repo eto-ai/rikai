@@ -16,6 +16,7 @@
 
 package ai.eto.rikai.sql.catalog
 
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.UnresolvedFunction
 import org.apache.spark.sql.catalyst.expressions.Expression
@@ -62,13 +63,13 @@ object Model {
     * @param name name or model URI
     * @return A created [[Model]]
     */
-  def fromName(name: String): Option[Model] = {
+  def fromName(session: SparkSession, name: String): Option[Model] = {
     if (name.startsWith(pathPrefix)) {
       val uri = new URI(name.substring(pathPrefix.length))
       val filename = Paths.get(uri.toString).getFileName.toString
       Some(new Model(filename, uri.toString))
     } else {
-      None
+      MLCatalog.get(session).getModel(name)
     }
   }
 }

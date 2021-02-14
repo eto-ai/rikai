@@ -29,10 +29,10 @@ import org.apache.spark.sql.internal.SQLConf
   *
   * @param session Live Spark Session
   * @param delegate the delegated Spark SQL parser.
-  *
   */
 class RikaiSparkSQLParser(session: SparkSession, delegate: ParserInterface)
     extends AbstractSqlParser(SQLConf.getFallbackConf) {
 
-  override protected def astBuilder: AstBuilder = new RikaiSparkAstBuilder()
+  override protected def astBuilder: AstBuilder =
+    new RikaiSparkAstBuilder(session)
 }

@@ -34,6 +34,9 @@ def _init(spark: SparkSession):
     """
     assert spark is not None
     jvm = spark.sparkContext._jvm
+    spark.sparkContext._gateway.start_callback_server()
 
     # TODO: use jvm to register a callback
-    jvm.ai.eto.rikai.sql.ModelLoader.register(ModelLoader(spark))
+    jvm.ai.eto.rikai.sql.ModelLoaderRegistry.register(ModelLoader(jvm))
+
+    # spark.sparkContext._gateway.shutdown_callback_server()

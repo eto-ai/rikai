@@ -82,3 +82,12 @@ Compile / doc / scalacOptions ++= Seq(
   "-skip-packages",
   "ai.eto.rikai.sql.parser"
 )
+
+javaOptions in Test ++= Seq(
+  "-Dspark.ui.enabled=false",
+  "-Dspark.ui.showConsoleProgress=false",
+  "-Dspark.sql.shuffle.partitions=5",
+  "-Ddelta.log.cacheSize=3",
+  "-Dspark.sql.sources.parallelPartitionDiscovery.parallelism=5",
+  "-Xmx1024m"
+)

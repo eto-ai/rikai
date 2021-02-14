@@ -20,8 +20,11 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 
 /**
   * Catalog for SQL ML.
+  *
+  * Similar to ``org.apache.spark.sql.catalog.Catalog``, this abstract class will be
+  * used in Java for extension as well.
   */
-trait MLCatalog {
+abstract class MLCatalog {
 
   /**
     * Create a ML Model that can be used in SQL ML in the current database.
@@ -36,6 +39,13 @@ trait MLCatalog {
   /** Drop the model, specified by the name. */
   def dropModel(name: String): Boolean
 
+  /**
+    * Get [[Model]] by name.
+    *
+    * @param name model name
+    *
+    * @return the model specified by the name.
+    */
   def getModel(name: String): Option[Model]
 }
 
@@ -43,5 +53,11 @@ object MLCatalog {
 
   private lazy val catalog: MLCatalog = new SimpleMLCatalog()
 
+  /**
+    * Get the singleton of [[MLCatalog]].
+    *
+    * @param session
+    * @return
+    */
   def get(session: SparkSession) = catalog
 }

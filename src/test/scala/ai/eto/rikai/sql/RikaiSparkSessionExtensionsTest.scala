@@ -62,7 +62,7 @@ class RikaiSparkSessionExtensionsTest
     assertDfEqual(predicted, expected)
   }
 
-  test("Create model") {
+  test("ML_PREDICT uses model catalog") {
     spark.udf.register("model_foo", (a: Int, b: Int) => a * b)
 
     val df = Seq((1, 2), (3, 4), (10, 20), (17, 18)).toDF("a", "b")

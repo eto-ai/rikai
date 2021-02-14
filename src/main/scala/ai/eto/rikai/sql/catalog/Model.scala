@@ -24,6 +24,13 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 import java.net.URI
 import java.nio.file.Paths
 
+/**
+  * A Machine Learning Model
+  *
+  * @param name the model name
+  * @param path the path / URI of the model registry
+  * @param Options Model options.
+  */
 class Model(
     val name: String,
     val path: String = "",
@@ -61,8 +68,10 @@ object Model {
 
   /**
     * Create a model from a model name or model URL.
+    *
     * @param name name or model URI
-    * @return A created [[Model]]
+    *
+    * @return A created [[Model]]. Return `None` if not found.
     */
   def fromName(session: SparkSession, name: String): Option[Model] = {
     if (name.startsWith(pathPrefix)) {

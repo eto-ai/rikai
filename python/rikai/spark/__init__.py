@@ -11,3 +11,18 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+from pyspark.sql import SparkSession
+
+
+def init(spark: SparkSession):
+    """Extra set up with Spark
+
+    Parameters
+    ----------
+    spark : SparkSession
+        A live :py:class:`SparkSession`
+
+    """
+    import rikai.spark.ml
+    ml._init(spark)

@@ -33,7 +33,8 @@ class Model(
   /**
     * Convert the Model inference code into Spark Expression.
     *
-    * The concrete Spark Catalyst Express, typically a UDF, will be actually executed.
+    * The concrete Spark Catalyst Expression, typically a Function call to a UDF,
+    * will be actually executed.
     *
     * @param arguments the remained arguments passed to the model.
     *

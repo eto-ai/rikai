@@ -38,4 +38,5 @@ def spark() -> SparkSession:
 
     yield session
 
+    # TODO: register shutdown to spark Shutdown Hook.
     session.sparkContext._gateway.shutdown_callback_server()

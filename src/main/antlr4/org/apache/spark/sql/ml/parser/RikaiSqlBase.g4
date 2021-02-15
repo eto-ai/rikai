@@ -25,6 +25,7 @@ statement:
 	(AS table=qualifiedName | USING path=STRING)	# createModel
 	| (DESC | DESCRIBE) MODEL model=qualifiedName   # describeModel
 	| SHOW MODELS (LIKE? pattern=STRING)?           # showModels
+	| DROP MODEL model=qualifiedName                # dropModel
 	| .*?									        # passThrough
 	;
 
@@ -47,6 +48,7 @@ AS: 'AS';
 CREATE: 'CREATE';
 DESC : 'DESC';
 DESCRIBE : 'DESCRIBE';
+DROP: 'DROP';
 FALSE: 'FALSE';
 LIKE: 'LIKE';
 MODEL: 'MODEL';

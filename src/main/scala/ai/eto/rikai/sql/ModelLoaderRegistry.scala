@@ -16,14 +16,20 @@ package ai.eto.rikai.sql
 
 import org.apache.spark.internal.Logging
 
+/**
+  * [[ModelLoader]] registry.
+  */
 object ModelLoaderRegistry extends Logging {
 
-  var loader: ModelLoader = null;
+  private var loader: ModelLoader = null;
 
   def register(l: ModelLoader): Unit = {
     assert(loader == null)
     assert(l != null, "Registering null ModelLoader")
     logInfo("Loading ModelLoader")
+    l.load("abc")
     loader = l
   }
+
+  def get = loader
 }

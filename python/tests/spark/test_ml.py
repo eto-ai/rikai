@@ -13,5 +13,7 @@
 #  limitations under the License.
 
 from pyspark.sql import SparkSession
+
+
 def test_load_model(spark: SparkSession):
     pass

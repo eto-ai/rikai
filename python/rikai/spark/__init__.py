@@ -25,4 +25,5 @@ def init(spark: SparkSession):
 
     """
     import rikai.spark.ml
+
     ml._init(spark)

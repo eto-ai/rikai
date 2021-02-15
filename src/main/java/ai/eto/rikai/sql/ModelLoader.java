@@ -23,5 +23,10 @@ package ai.eto.rikai.sql;
  */
 public interface ModelLoader {
 
+    /**
+     * Load a model from a URI
+     *
+     * @param URI
+     */
     String load(String uri);
 }

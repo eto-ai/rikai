@@ -21,8 +21,10 @@ singleStatement
 
 statement:
 	CREATE (OR REPLACE)? MODEL model=qualifiedName
-	(OPTIONS '(' ')')?
+	(OPTIONS optionList)?
 	(AS table=qualifiedName | USING path=STRING)	# createModel
+	| (DESC | DESCRIBE) MODEL model=qualifiedName   # describeModel
+	| SHOW MODELS (LIKE? pattern=STRING)?           # showModels
 	| .*?									        # passThrough
 	;
 
@@ -43,11 +45,20 @@ nonReserved:
 
 AS: 'AS';
 CREATE: 'CREATE';
+DESC : 'DESC';
+DESCRIBE : 'DESCRIBE';
+FALSE: 'FALSE';
+LIKE: 'LIKE';
 MODEL: 'MODEL';
+MODELS: 'MODELS';
 OPTIONS: 'OPTIONS';
 OR: 'OR';
 REPLACE: 'REPLACE';
+SHOW: 'SHOW';
+TRUE: 'TRUE';
 USING: 'USING';
+
+EQ: '=' | '==';
 
 STRING
     : '\'' ( ~('\''|'\\') | ('\\' .) )* '\''
@@ -60,6 +71,35 @@ IDENTIFIER
 
 BACKQUOTED_IDENTIFIER
     : '`' ( ~'`' | '``' )* '`'
+    ;
+
+optionList: '(' option (',' option)* ')';
+
+option
+    : key=optionKey (EQ? value=optionValue)?
+    ;
+
+optionKey
+    : STRING
+    ;
+
+optionValue
+    : INTEGER_VALUE
+    | DECIMAL_VALUE
+    | BOOLEAN_VALUE
+    | STRING
+    ;
+
+INTEGER_VALUE
+    : DIGIT+
+    ;
+
+DECIMAL_VALUE
+    : DECIMAL_DIGITS
+    ;
+
+BOOLEAN_VALUE
+    : TRUE | FALSE
     ;
 
 fragment DECIMAL_DIGITS

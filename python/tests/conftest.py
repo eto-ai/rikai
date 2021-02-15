@@ -22,9 +22,13 @@ from rikai.spark import init
 
 @pytest.fixture(scope="session")
 def spark() -> SparkSession:
+    packages = [
+        "org.xerial.snappy:snappy-java:1.1.8.4",
+        "ai.eto:rikai_2.12:0.0.2-SNAPSHOT",
+    ]
     session = (
         SparkSession.builder.appName("spark-test")
-        .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.2-SNAPSHOT")
+        .config("spark.jars.packages", ",".join(packages))
         .config(
             "spark.sql.extensions",
             "ai.eto.rikai.sql.RikaiSparkSessionExtensions",

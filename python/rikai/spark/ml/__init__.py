@@ -37,6 +37,4 @@ def _init(spark: SparkSession):
     spark.sparkContext._gateway.start_callback_server()
 
     # TODO: use jvm to register a callback
-    jvm.ai.eto.rikai.sql.ModelLoaderRegistry.register(ModelLoader(jvm))
-
-    # spark.sparkContext._gateway.shutdown_callback_server()
+    jvm.ai.eto.rikai.sql.ModelLoaderRegistry.register(ModelLoader(spark))

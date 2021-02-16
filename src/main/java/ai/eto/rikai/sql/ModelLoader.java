@@ -17,16 +17,16 @@
 package ai.eto.rikai.sql;
 
 /**
- * Interface to Python Codebase to implement Dynamic Model Loading.
+ * Interface to Python implement Dynamic Model Loading.
  *
- * It must to be a java interface to pass py4j boundry.
+ * It must to be a java interface to pass py4j boundary.
  */
 public interface ModelLoader {
 
     /**
      * Load a model from a URI
      *
-     * @param URI
+     * @param URI model URI
      */
     String load(String uri);
 }

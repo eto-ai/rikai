@@ -19,26 +19,26 @@ singleStatement
     : statement ';'* EOF
     ;
 
-statement:
-	CREATE (OR REPLACE)? MODEL model=qualifiedName
-	(OPTIONS optionList)?
-	(AS table=qualifiedName | USING path=STRING)	# createModel
+statement
+    : CREATE (OR REPLACE)? MODEL model=qualifiedName
+	  (OPTIONS optionList)?
+	  (AS table=qualifiedName | USING path=STRING)	# createModel
 	| (DESC | DESCRIBE) MODEL model=qualifiedName   # describeModel
-	| SHOW MODELS (LIKE? pattern=STRING)?           # showModels
+	| SHOW MODELS                                   # showModels
 	| DROP MODEL model=qualifiedName                # dropModel
 	| .*?									        # passThrough
 	;
 
 qualifiedName: identifier ('.' identifier)*;
 
-identifier:
-	IDENTIFIER			# unquotedIdentifier
+identifier
+    : IDENTIFIER		# unquotedIdentifier
 	| quotedIdentifier	# quotedIdentifierAlternative
 	| nonReserved		# unquotedIdentifier
 	;
 
-quotedIdentifier:
-    BACKQUOTED_IDENTIFIER
+quotedIdentifier
+    : BACKQUOTED_IDENTIFIER
     ;
 
 nonReserved:

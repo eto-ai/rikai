@@ -78,7 +78,7 @@ BACKQUOTED_IDENTIFIER
 optionList: '(' option (',' option)* ')';
 
 option
-    : key=optionKey (EQ? value=optionValue)?
+    : key=optionKey EQ value=optionValue
     ;
 
 optionKey

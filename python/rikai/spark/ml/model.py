@@ -17,10 +17,23 @@ from pyspark.sql import SparkSession
 
 
 class ModelLoader:
+    """Python Callback of Model Loader from Spark SQL engine.
+
+    See Also
+    --------
+    ``public interface ai.eto.rikai.sql.ModelLoader`` in java
+    """
     def __init__(self, spark: SparkSession):
         self.spark = spark
 
-    def load(self, path):
+    def load(self, uri: str):
+        """Dynamically load a model specified by ``uri``
+
+        Parameters
+        ----------
+        uri : str
+            URI for the model.
+        """
         print("LEMME TRY TO LOAD MODEL")
         return path
 

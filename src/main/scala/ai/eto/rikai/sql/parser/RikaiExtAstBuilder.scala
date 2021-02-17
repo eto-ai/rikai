@@ -24,6 +24,7 @@ import org.apache.spark.sql.catalyst.parser.ParserUtils.{string, withOrigin}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 
 import scala.collection.JavaConverters.asScalaBufferConverter
+import ai.eto.rikai.sql.execution.ShowModelsCommand
 
 /**
   * ```AstBuilder``` for Rikai Spark SQL extensions.
@@ -55,6 +56,10 @@ class RikaiExtAstBuilder extends RikaiSqlBaseBaseVisitor[AnyRef] {
       replace = false,
       options = Map.empty
     )
+  }
+
+  override def visitShowModels(ctx: ShowModelsContext): LogicalPlan = {
+    ShowModelsCommand()
   }
 
   override def visitPassThrough(ctx: PassThroughContext): AnyRef = null

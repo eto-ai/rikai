@@ -15,8 +15,6 @@
  */
 package ai.eto.rikai.sql.catalog
 
-import org.apache.spark.sql.Dataset
-
 /**
   * An Simple ML-Catalog
   */
@@ -37,7 +35,7 @@ class SimpleMLCatalog extends MLCatalog {
   /**
     * Return a list of models registered in the current database.
     */
-  override def listModels(): Dataset[Model] = ???
+  override def listModels(): Seq[Model] = ???
 
   /** Drop the model, specified by the name. */
   override def dropModel(name: String): Boolean = {

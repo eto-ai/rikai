@@ -35,7 +35,9 @@ class SimpleMLCatalog extends MLCatalog {
   /**
     * Return a list of models registered in the current database.
     */
-  override def listModels(): Seq[Model] = ???
+  override def listModels(): Seq[Model] = {
+    models.values.toSeq
+  }
 
   /** Drop the model, specified by the name. */
   override def dropModel(name: String): Boolean = {

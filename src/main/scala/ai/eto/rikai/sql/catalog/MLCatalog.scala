@@ -51,7 +51,7 @@ abstract class MLCatalog {
 
 object MLCatalog {
 
-  private lazy val catalog: MLCatalog = new SimpleMLCatalog()
+  private var catalog: MLCatalog = new SimpleMLCatalog()
 
   /**
     * Get the singleton of [[MLCatalog]].
@@ -60,4 +60,11 @@ object MLCatalog {
     * @return
     */
   def get(session: SparkSession) = catalog
+
+  /**
+   * Clear the catalog. Test use only.
+   */
+  def clear(session: SparkSession): Unit = {
+    catalog = new SimpleMLCatalog()
+  }
 }

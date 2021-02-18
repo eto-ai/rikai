@@ -16,17 +16,25 @@
 
 package ai.eto.rikai
 
+import ai.eto.rikai.sql.catalog.MLCatalog
 import org.apache.spark.sql.SparkSession
+import org.scalatest.{BeforeAndAfterEach, Suite}
 
-trait SparkTestSession {
+trait SparkTestSession extends BeforeAndAfterEach {
 
-  lazy val spark: SparkSession = SparkSession.builder
-    .config(
-      "spark.sql.extensions",
-      "ai.eto.rikai.sql.RikaiSparkSessionExtensions"
-    )
-    .master("local[*]")
-    .getOrCreate
+  this: Suite =>
+    lazy val spark: SparkSession = SparkSession.builder
+      .config(
+        "spark.sql.extensions",
+        "ai.eto.rikai.sql.RikaiSparkSessionExtensions"
+      )
+      .master("local[*]")
+      .getOrCreate
 
-  spark.sparkContext.setLogLevel("WARN")
+    spark.sparkContext.setLogLevel("WARN")
+
+  override def afterEach() {
+    try super.afterEach() // To be stackable, must call super.afterEach
+    finally MLCatalog.clear(spark)
+  }
 }

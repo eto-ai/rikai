@@ -35,7 +35,7 @@ class ModelLoader:
         uri : str
             URI for the model.
         """
-        print("LEMME TRY TO LOAD MODEL")
+        print(f"LEMME TRY TO LOAD MODEL from {uri}")
         return uri
 
     class Java:

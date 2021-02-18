@@ -23,6 +23,7 @@ class ModelLoader:
     --------
     ``public interface ai.eto.rikai.sql.ModelLoader`` in java
     """
+
     def __init__(self, spark: SparkSession):
         self.spark = spark
 
@@ -35,7 +36,7 @@ class ModelLoader:
             URI for the model.
         """
         print("LEMME TRY TO LOAD MODEL")
-        return path
+        return uri
 
     class Java:
         implements = ["ai.eto.rikai.sql.ModelLoader"]

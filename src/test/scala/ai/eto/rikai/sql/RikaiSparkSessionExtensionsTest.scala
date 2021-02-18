@@ -68,8 +68,7 @@ class RikaiSparkSessionExtensionsTest
     val df = Seq((1, 2), (3, 4), (10, 20), (17, 18)).toDF("a", "b")
     df.createTempView("create_model_data")
 
-    val counts = spark.sql("CREATE MODEL model_foo USING 'model.path_to_somewhere'").count()
-    assert(counts == 1)
+    spark.sql("CREATE MODEL model_foo USING 'model.path_to_somewhere'").count()
     df.show()
     val actual = spark.sql(
       "SELECT a + b as s, ML_PREDICT(model_foo, a, b) AS c FROM create_model_data"

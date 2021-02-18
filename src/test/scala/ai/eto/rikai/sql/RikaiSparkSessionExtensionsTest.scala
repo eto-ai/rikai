@@ -77,4 +77,11 @@ class RikaiSparkSessionExtensionsTest
     val expected = Seq((3, 2), (7, 12), (30, 200), (35, 306)).toDF("s", "c")
     assertDfEqual(actual, expected)
   }
+
+  test("Show Models") {
+    spark.sql("CREATE MODEL model_foo USING 'model.path_to_somewhere'")
+    val models = spark.sql("SHOW MODELS")
+    val expected = Seq(("model_foo", "model.path_to_somewhere")).toDF()
+    assertDfEqual(models, expected)
+  }
 }

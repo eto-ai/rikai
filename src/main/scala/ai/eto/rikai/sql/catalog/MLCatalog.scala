@@ -16,7 +16,7 @@
 
 package ai.eto.rikai.sql.catalog
 
-import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.SparkSession
 
 /**
   * Catalog for SQL ML.
@@ -34,7 +34,7 @@ abstract class MLCatalog {
   /**
     * Return a list of models registered in the current database.
     */
-  def listModels(): Dataset[Model]
+  def listModels(): Seq[Model]
 
   /** Drop the model, specified by the name. */
   def dropModel(name: String): Boolean

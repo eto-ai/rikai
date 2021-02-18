@@ -36,7 +36,7 @@ class ModelLoader:
             URI for the model.
         """
         print("LEMME TRY TO LOAD MODEL")
-        return path
+        return uri
 
     class Java:
         implements = ["ai.eto.rikai.sql.ModelLoader"]

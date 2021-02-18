@@ -16,7 +16,7 @@
 
 package ai.eto.rikai.sql.parser
 
-import ai.eto.rikai.sql.execution.CreateModelCommand
+import ai.eto.rikai.sql.execution.{CreateModelCommand,ShowModelsCommand}
 import ai.eto.rikai.sql.parser.RikaiSqlBaseParser._
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.catalyst.parser.ParseException
@@ -55,6 +55,10 @@ class RikaiExtAstBuilder extends RikaiSqlBaseBaseVisitor[AnyRef] {
       replace = false,
       options = Map.empty
     )
+  }
+
+  override def visitShowModels(ctx: ShowModelsContext): LogicalPlan = {
+    ShowModelsCommand()
   }
 
   override def visitPassThrough(ctx: PassThroughContext): AnyRef = null

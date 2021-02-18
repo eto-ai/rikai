@@ -16,7 +16,7 @@
 
 package ai.eto.rikai.sql.parser
 
-import ai.eto.rikai.sql.execution.CreateModelCommand
+import ai.eto.rikai.sql.execution.{CreateModelCommand,ShowModelsCommand}
 import ai.eto.rikai.sql.parser.RikaiSqlBaseParser._
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.catalyst.parser.ParseException
@@ -24,7 +24,6 @@ import org.apache.spark.sql.catalyst.parser.ParserUtils.{string, withOrigin}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 
 import scala.collection.JavaConverters.asScalaBufferConverter
-import ai.eto.rikai.sql.execution.ShowModelsCommand
 
 /**
   * ```AstBuilder``` for Rikai Spark SQL extensions.

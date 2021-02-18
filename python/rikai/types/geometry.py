@@ -170,6 +170,45 @@ class Box2d(ToNumpy):
             self.to_numpy(), o.to_numpy()
         )
 
+    def __div__(self, scale) -> Box2d:
+        # TODO: add assert for number or 2 element tuple
+        if isinstance(scale, (tuple, list)):
+            if len(scale) != 2:
+                raise ValueError("Only support two dimensional scale")
+            x_scale, y_scale = scale
+            return Box2d(
+                xmin=self.xmin / x_scale,
+                xmax=self.xmax / x_scale,
+                ymin=self.ymin / y_scale,
+                ymax=self.ymax / y_scale,
+            )
+        else:
+            return Box2d(
+                xmin=self.xmin / scale,
+                xmax=self.xmax / scale,
+                ymin=self.ymin / scale,
+                ymax=self.ymax / scale,
+            )
+
+    def __mul__(self, scale):
+        if isinstance(scale, (tuple, list)):
+            if len(scale) != 2:
+                raise ValueError("Only support two dimensional scale")
+            x_scale, y_scale = scale
+            return Box2d(
+                xmin=self.xmin * x_scale,
+                xmax=self.xmax * x_scale,
+                ymin=self.ymin * y_scale,
+                ymax=self.ymax * y_scale,
+            )
+        else:
+            return Box2d(
+                xmin=self.xmin * scale,
+                xmax=self.xmax * scale,
+                ymin=self.ymin * scale,
+                ymax=self.ymax * scale,
+            )
+
     def to_numpy(self) -> np.ndarray:
         """Convert a :py:class:`Box2d` to numpy ndarray:
         ``array([xmin, ymin, xmax, ymax])``

@@ -16,18 +16,41 @@
 
 package ai.eto.rikai.sql.catalog
 
+import org.apache.spark.sql.SparkSession
+
 /**
- * Model Resolver trait.
- *
- * Resolve a Model from a thrid party model registry.
- */
+  * Model Resolver trait.
+  *
+  * Resolve a Model from a thrid party model registry.
+  */
 trait ModelResolver {
 
   /**
-   * Resolve a Model from a URI.
-   *
-   * @param uri Model URI
-   * @return a resolved model.
-   */
-  def resolve(uri: String) : Option[Model]
+    * Resolve a Model from a URI.
+    *
+    * @param uri Model URI
+    * @return a resolved model.
+    */
+  def resolve(uri: String): Option[Model]
+}
+
+object ModelResolver {
+
+  val MODEL_RESOLVER_IMPL_KEY = "rikai.sql.model_resolver.impl"
+
+  private var resolver: Option[ModelResolver] = None
+
+  def get(session: SparkSession): ModelResolver = {
+    synchronized(
+      if (resolver.isEmpty) {
+        resolver = Some(Class
+          .forName(session.conf.get(MODEL_RESOLVER_IMPL_KEY))
+          .getDeclaredConstructor()
+          .newInstance()
+          .asInstanceOf[ModelResolver]
+        )
+      }
+    )
+    resolver.get
+  }
 }

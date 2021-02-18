@@ -19,11 +19,13 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import BinaryIO, Union
-from urllib.parse import urlparse
 
+# Third Party
 import numpy as np
 
+# Rikai
 from rikai.internal.uri_utils import uri_equal
+from rikai.io import open_uri
 
 __all__ = ["ToNumpy", "Asset", "Displayable"]
 
@@ -62,12 +64,4 @@ class Asset(ABC):
 
     def open(self, mode="rb") -> BinaryIO:
         """Open the asset and returned as random-accessible file object."""
-        from pyarrow import fs
-
-        parsed_uri = urlparse(self.uri)
-        uri = self.uri
-        if not parsed_uri.scheme:
-            return open(uri, mode=mode)
-
-        filesystem, path = fs.FileSystem.from_uri(uri)
-        return filesystem.open_input_file(path)
+        return open_uri(self.uri, mode=mode)

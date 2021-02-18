@@ -7,8 +7,7 @@ with open(pathlib.Path("rikai") / "__version__.py", "r") as fh:
     exec(fh.read(), about)
 
 with open(
-    pathlib.Path(__file__).absolute().parent.parent / "README.md",
-    "r",
+    pathlib.Path(__file__).absolute().parent.parent / "README.md", "r",
 ) as fh:
     long_description = fh.read()
 
@@ -40,8 +39,9 @@ setup(
         "opencv-python",
         "pandas",
         "Pillow",
-        "pyspark>=3",
         "pyarrow>=2.0",
+        "pyspark>=3",
+        "requests",
     ],
     extras_require={
         "test": test,

@@ -12,19 +12,22 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-
 # Standard
+from io import BytesIO
 from os.path import basename, join
-from urllib.parse import urlparse, ParseResult
+from pathlib import Path
+from typing import BinaryIO, Union
+from urllib.parse import ParseResult, urlparse
+
 
 # Third Party
+import requests
 from pyarrow import fs
 
 # Rikai
 from rikai.logging import logger
 
-
-__all__ = ["copy"]
+__all__ = ["copy", "open_uri"]
 
 _BUFSIZE = 8 * (2 ** 20)  # 8MB
 
@@ -90,3 +93,37 @@ def copy(source: str, dest: str) -> str:
                     break
                 out_stream.write(buf)
     return dest
+
+
+def open_uri(uri: Union[str, Path], mode="rb") -> BinaryIO:
+    """Open URI for read.
+
+    It supports the following URI pattens:
+
+    - File System: ``/path/to/file`` or ``file:///path/to/file``
+    - AWS S3: ``s3://``
+    - Google Cloud Storage: ``gs://``
+    - Http(s): ``http://`` or ``https://``
+
+    Parameters
+    ----------
+    uri : str or :py:class:`~pathlib.Path`
+        URI of the object
+
+    Return
+    ------
+    File
+        A file-like object for sequential read.
+    """
+    if isinstance(uri, Path):
+        return uri.open()
+    parsed_uri = urlparse(uri)
+    if not parsed_uri.scheme:
+        # This is a local file
+        return open(uri, mode=mode)
+    elif parsed_uri.scheme in ("http", "https"):
+        resp = requests.get(uri)
+        return BytesIO(resp.content)
+    else:
+        filesystem, path = fs.FileSystem.from_uri(uri)
+        return filesystem.open_input_file(path)

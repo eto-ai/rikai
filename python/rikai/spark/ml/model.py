@@ -23,6 +23,7 @@ class ModelLoader:
     --------
     ``public interface ai.eto.rikai.sql.ModelLoader`` in java
     """
+
     def __init__(self, spark: SparkSession):
         self.spark = spark
 

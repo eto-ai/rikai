@@ -21,6 +21,8 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class FakeModelResolver extends ModelResolver {
   override def resolve(uri: String): Option[Model] = ???
+
+  override def toString: String = s"Fake Model Resolver"
 }
 
 class ModelResolverTest extends AnyFunSuite {
@@ -36,7 +38,6 @@ class ModelResolverTest extends AnyFunSuite {
       .getOrCreate())
 
     val resolver = ModelResolver.get(spark)
-    print(resolver)
     assert(resolver.isInstanceOf[FakeModelResolver])
   }
 }

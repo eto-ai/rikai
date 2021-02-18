@@ -15,7 +15,7 @@
 """Geometry types
 """
 
-from __future__ import annotations
+from __future__ import annotations, division
 from typing import Union, List
 
 import numpy as np
@@ -189,6 +189,9 @@ class Box2d(ToNumpy):
                 ymin=self.ymin / scale,
                 ymax=self.ymax / scale,
             )
+
+    def __truediv__(self, scale) -> Box2d:
+        return self.__div__(scale)
 
     def __mul__(self, scale):
         if isinstance(scale, (tuple, list)):

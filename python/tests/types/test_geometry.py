@@ -20,3 +20,6 @@ def test_scaling_box2d():
     assert (Box2d(0.5, 1.0, 1.5, 2.0) == box / 2)
     assert (Box2d(0.5, 1.0, 1.5, 2.0) == box / 2.0)
     assert (Box2d(0.5, 0.5, 1.5, 1.0) == box / (2, 4))
+
+    assert (Box2d(3.0, 6.0, 9.0, 12.0) == box * 3)
+    assert (Box2d(3.0, 10.0, 9.0, 20.0) == box * (3, 5))

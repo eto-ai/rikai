@@ -16,7 +16,7 @@
 
 package ai.eto.rikai.sql.parser
 
-import ai.eto.rikai.sql.execution.CreateModelCommand
+import ai.eto.rikai.sql.execution.{CreateModelCommand, ShowModelsCommand}
 import org.apache.spark.sql.ml.parser.RikaiSparkSQLParser
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -45,6 +45,14 @@ class RikaiExtSqlParserTest extends AnyFunSuite {
       parser
         .parsePlan("CreaTe ModEL foo UsinG 'a/b/c.zip'")
         .isInstanceOf[CreateModelCommand]
+    )
+  }
+
+  test("Test parse SHOW MODELS") {
+    assert(
+      parser
+       .parsePlan("SHOW MODELS")
+       .isInstanceOf[ShowModelsCommand]
     )
   }
 }

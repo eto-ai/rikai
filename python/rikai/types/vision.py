@@ -55,10 +55,7 @@ class Image(ToNumpy, Asset, Displayable):
 
     @classmethod
     def from_array(
-        cls,
-        array: np.ndarray,
-        uri: Union[str, Path],
-        mode: str = None,
+        cls, array: np.ndarray, uri: Union[str, Path], mode: str = None,
     ) -> Image:
         """Create an image in memory from numpy array.
 
@@ -119,7 +116,8 @@ class Image(ToNumpy, Asset, Displayable):
         """
         from IPython.display import Image
 
-        return Image(self.uri, **kwargs)
+        with self.open() as fobj:
+            return Image(fobj.read(), **kwargs)
 
     def __repr__(self) -> str:
         return f"Image(uri={self.uri})"

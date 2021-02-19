@@ -55,7 +55,10 @@ class Image(ToNumpy, Asset, Displayable):
 
     @classmethod
     def from_array(
-        cls, array: np.ndarray, uri: Union[str, Path], mode: str = None,
+        cls,
+        array: np.ndarray,
+        uri: Union[str, Path],
+        mode: str = None,
     ) -> Image:
         """Create an image in memory from numpy array.
 

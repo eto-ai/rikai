@@ -249,6 +249,24 @@ class Box2d(ToNumpy):
         except ZeroDivisionError:
             return 0
 
+    def draw(
+        self,
+        draw: "PIL.ImageDraw.Draw",
+        outline=None,
+        width=2,
+        text=None,
+        text_fill=2,
+        text_offset=(5, -10),
+    ) -> "PIL.ImageDraw.Draw":
+        draw.rectangle(self.to_numpy(), outline=outline, width=width)
+        if text:
+            draw.text(
+                [self.xmin + text_offset[0], self.ymin + text_offset[1]],
+                str(text),
+                fill=text_fill,
+            )
+        return draw
+
 
 class Box3d(ToNumpy):
     """A 3-D bounding box

@@ -77,6 +77,15 @@ class Box2d(ToNumpy):
         X-coordinate of the bottm-right point of the box.
     ymax : float
         Y-coordinate of the bottm-right point of the box.
+
+    Example
+    -------
+
+    >>> box = Box2d(1, 2, 3, 4)
+    >>> box / 2
+    Box2d(xmin=0.5, ymin=1.0, xmax=1.5, ymax=2.0)
+    >>> box * 3.5
+    Box2d(xmin=3.5, ymin=7.0, xmax=10.5, ymax=14.0)
     """
 
     __UDT__ = Box2dType()
@@ -199,6 +208,7 @@ class Box2d(ToNumpy):
         ------
         Box2d
             The scaled-down Box2d.
+
         """
         x_scale, y_scale = self._verified_scale(scale)
         return Box2d(

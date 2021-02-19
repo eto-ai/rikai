@@ -170,6 +170,12 @@ class Box2d(ToNumpy):
             self.to_numpy(), o.to_numpy()
         )
 
+    def __len__(self):
+        return 4
+
+    def __getitem__(self, key):
+        return self.to_numpy()[key]
+
     def __div__(self, scale) -> Box2d:
         # TODO: add assert for number or 2 element tuple
         if isinstance(scale, (tuple, list)):

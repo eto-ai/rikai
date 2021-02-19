@@ -17,8 +17,8 @@
 
 from __future__ import annotations
 
-from typing import List, Tuple, Union
-from numbers import Number, Real
+from typing import List, Sequence, Tuple, Union
+from numbers import Real
 
 import numpy as np
 
@@ -64,7 +64,7 @@ class Point(ToNumpy):
         return np.array([self.x, self.y, self.z])
 
 
-class Box2d(ToNumpy):
+class Box2d(ToNumpy, Sequence):
     """2-D Bounding Box, defined by ``(xmin, ymin, xmax, ymax)``
 
     Attributes
@@ -180,6 +180,12 @@ class Box2d(ToNumpy):
         return isinstance(o, Box2d) and np.array_equal(
             self.to_numpy(), o.to_numpy()
         )
+
+    def __len__(self) -> int:
+        return 4
+
+    def __getitem__(self, key: int) -> float:
+        return [self.xmin, self.ymin, self.xmax, self.ymax][key]
 
     @staticmethod
     def _verified_scale(

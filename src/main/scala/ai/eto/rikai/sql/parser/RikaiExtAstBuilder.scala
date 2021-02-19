@@ -25,10 +25,6 @@ import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 
 import scala.collection.JavaConverters.asScalaBufferConverter
 
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/lei/sql_ml
 /**
   * ```AstBuilder``` for Rikai Spark SQL extensions.
   */

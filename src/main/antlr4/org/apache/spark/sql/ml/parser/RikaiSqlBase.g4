@@ -65,7 +65,6 @@ EQ: '=' | '==';
 STRING
     : '\'' ( ~('\''|'\\') | ('\\' .) )* '\''
     | '"' ( ~('"'|'\\') | ('\\' .) )* '"'
-    {setText(getText().substring(1, getText().length()-1));}
     ;
 
 IDENTIFIER

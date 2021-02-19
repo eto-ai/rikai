@@ -65,6 +65,7 @@ EQ: '=' | '==';
 STRING
     : '\'' ( ~('\''|'\\') | ('\\' .) )* '\''
     | '"' ( ~('"'|'\\') | ('\\' .) )* '"'
+    {setText(getText().substring(1, getText().length()-1));}
     ;
 
 IDENTIFIER
@@ -83,6 +84,7 @@ option
 
 optionKey
     : STRING
+    | IDENTIFIER
     ;
 
 optionValue

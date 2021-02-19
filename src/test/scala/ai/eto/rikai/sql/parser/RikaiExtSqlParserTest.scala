@@ -25,11 +25,12 @@ class RikaiExtSqlParserTest extends AnyFunSuite {
   val parser = new RikaiExtSqlParser(new RikaiSparkSQLParser(null, null))
 
   test("Test parse CREATE MODEL using external URL") {
-    val plan = parser.parsePlan("CREATE MODEL foo USING 'model://foo/bar'")
+    val plan = parser.parsePlan("CREATE MODEL foo OPTIONS (device='gpu',min_score=0.2) USING 'model://foo/bar'")
     plan match {
       case cmd: CreateModelCommand => {
         assert(cmd.name == "foo")
         assert(cmd.path.get == "model://foo/bar")
+        assert(cmd.options == Map("device" ->  "gpu", "min_score" -> 0.2))
       }
       case _ => {
         assert(

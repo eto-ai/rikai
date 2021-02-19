@@ -25,6 +25,7 @@ import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 
 import scala.collection.JavaConverters.asScalaBufferConverter
 
+
 /**
   * ```AstBuilder``` for Rikai Spark SQL extensions.
   */
@@ -42,6 +43,11 @@ class RikaiExtAstBuilder extends RikaiSqlBaseBaseVisitor[AnyRef] {
       }
     }
 
+  protected def parseOptionList(ctx: OptionListContext): Map[String, String] =
+    withOrigin(ctx) {
+      ctx.option().asScala.map(option => (option.key.getText, option.value.getText)).toMap
+    }
+
   override def visitSingleStatement(ctx: SingleStatementContext): LogicalPlan =
     withOrigin(ctx) {
       visit(ctx.statement).asInstanceOf[LogicalPlan]
@@ -53,7 +59,7 @@ class RikaiExtAstBuilder extends RikaiSqlBaseBaseVisitor[AnyRef] {
       Option(ctx.path).map(string),
       Option(ctx.table).map(visitTableIdentfier),
       replace = false,
-      options = Map.empty
+      options = parseOptionList(ctx.optionList())
     )
   }
 

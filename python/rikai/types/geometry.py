@@ -18,7 +18,7 @@
 from __future__ import annotations
 
 from typing import List, Tuple, Union
-from numbers import Number
+from numbers import Number, Real
 
 import numpy as np
 
@@ -183,14 +183,14 @@ class Box2d(ToNumpy):
 
     @staticmethod
     def _verified_scale(
-        scale: Union[int, float, Tuple]
-    ) -> Tuple[Number, Number]:
-        if isinstance(scale, Number):
+        scale: Union[Real, Tuple[float, float]]
+    ) -> Tuple[float, float]:
+        if isinstance(scale, Real):
             assert scale > 0, f"scale must be positive, got {scale}"
             return scale, scale
         assert (
             type(scale) == tuple and len(scale) == 2
-        ), "scale must be either a number or a 2-element tuple"
+        ), f"scale must be either a number or a 2-element tuple, got {scale}"
         assert (
             scale[0] > 0 and scale[1] > 0
         ), f"scale must be positive, got {scale}"

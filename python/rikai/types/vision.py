@@ -51,7 +51,6 @@ class Image(ToNumpy, Asset, Displayable):
 
     def __init__(self, uri: Union[str, Path]):
         super().__init__(uri)
-        self._cached_data = None
 
     @classmethod
     def from_array(
@@ -145,6 +144,11 @@ class Image(ToNumpy, Asset, Displayable):
     def __eq__(self, other) -> bool:
         return isinstance(other, Image) and super().__eq__(other)
 
+    def draw(self, **kwargs) -> "PIL.ImageDraw.Draw":
+        from PIL import ImageDraw
+
+        return ImageDraw.Draw(self.to_pil())
+
     def to_pil(self) -> PILImage:
         """Return an PIL image.
 
@@ -157,8 +161,6 @@ class Image(ToNumpy, Asset, Displayable):
 
     def to_numpy(self) -> np.ndarray:
         """Convert this image into an :py:class:`numpy.ndarray`."""
-        if self._cached_data is None:
-            with self.to_pil() as pil_img:
-                self._cached_data = np.asarray(pil_img)
-        assert self._cached_data is not None
-        return self._cached_data
+        with self.to_pil() as pil_img:
+           return np.asarray(pil_img)
+

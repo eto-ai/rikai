@@ -42,7 +42,7 @@ private[spark] class ImageType extends UserDefinedType[Image] {
 
   override def deserialize(datum: Any): Image =
     datum match {
-      case row: InternalRow => new Image(row.getString(0).toString())
+      case row: InternalRow => new Image(row.getString(0))
     }
 
   override def userClass: Class[Image] = classOf[Image]

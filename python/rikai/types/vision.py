@@ -119,7 +119,8 @@ class Image(ToNumpy, Asset, Displayable):
         """
         from IPython.display import Image
 
-        return Image(self.uri, **kwargs)
+        with self.open() as fobj:
+            return Image(fobj.read(), **kwargs)
 
     def __repr__(self) -> str:
         return f"Image(uri={self.uri})"

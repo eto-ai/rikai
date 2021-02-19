@@ -86,6 +86,9 @@ class Box2d(ToNumpy, Sequence):
     Box2d(xmin=0.5, ymin=1.0, xmax=1.5, ymax=2.0)
     >>> box * (3.5, 5)
     Box2d(xmin=3.5, ymin=10.0, xmax=10.5, ymax=20.0)
+    >>> # Box2d can be used directly with PIL.ImageDraw
+    >>> draw = PIL.ImageDraw.Draw(img)
+    >>> draw.rectangle(box, fill="green", width=2)
     """
 
     __UDT__ = Box2dType()

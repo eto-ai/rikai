@@ -16,12 +16,14 @@
 """
 
 from __future__ import annotations
-from typing import Union, List
+
+from typing import List, Tuple, Union
+from numbers import Number, Real
 
 import numpy as np
 
 from rikai.mixin import ToNumpy
-from rikai.spark.types.geometry import PointType, Box3dType, Box2dType
+from rikai.spark.types.geometry import Box2dType, Box3dType, PointType
 
 __all__ = ["Point", "Box3d", "Box2d"]
 
@@ -75,6 +77,15 @@ class Box2d(ToNumpy):
         X-coordinate of the bottm-right point of the box.
     ymax : float
         Y-coordinate of the bottm-right point of the box.
+
+    Example
+    -------
+
+    >>> box = Box2d(1, 2, 3, 4)
+    >>> box / 2
+    Box2d(xmin=0.5, ymin=1.0, xmax=1.5, ymax=2.0)
+    >>> box * (3.5, 5)
+    Box2d(xmin=3.5, ymin=10.0, xmax=10.5, ymax=20.0)
     """
 
     __UDT__ = Box2dType()
@@ -169,6 +180,59 @@ class Box2d(ToNumpy):
         return isinstance(o, Box2d) and np.array_equal(
             self.to_numpy(), o.to_numpy()
         )
+
+    @staticmethod
+    def _verified_scale(
+        scale: Union[Real, Tuple[float, float]]
+    ) -> Tuple[float, float]:
+        if isinstance(scale, Real):
+            assert scale > 0, f"scale must be positive, got {scale}"
+            return scale, scale
+        assert (
+            type(scale) == tuple and len(scale) == 2
+        ), f"scale must be either a number or a 2-element tuple, got {scale}"
+        assert (
+            scale[0] > 0 and scale[1] > 0
+        ), f"scale must be positive, got {scale}"
+        return scale
+
+    def __truediv__(self, scale: Union[int, float, Tuple]) -> Box2d:
+        """Scale down :py:class:`Box2d`
+
+        Parameters
+        ----------
+        scale : number or a 2-element tuple/list
+            Scale the Box2d by this amount.
+
+        Return
+        ------
+        Box2d
+            The scaled-down Box2d.
+
+        """
+        x_scale, y_scale = self._verified_scale(scale)
+        return Box2d(
+            xmin=self.xmin / x_scale,
+            ymin=self.ymin / y_scale,
+            xmax=self.xmax / x_scale,
+            ymax=self.ymax / y_scale,
+        )
+
+    def __mul__(self, scale: Union[int, float, Tuple]) -> Box2d:
+        """Scale up :py:class:`Box2d`
+
+        Parameters
+        ----------
+        scale : number or a 2-element tuple/list
+            Scale the Box2d by this amount.
+
+        Return
+        ------
+        Box2d
+            The scaled-up Box2d.
+        """
+        x_scale, y_scale = self._verified_scale(scale)
+        return self / (1.0 / x_scale, 1.0 / y_scale)
 
     def to_numpy(self) -> np.ndarray:
         """Convert a :py:class:`Box2d` to numpy ndarray:

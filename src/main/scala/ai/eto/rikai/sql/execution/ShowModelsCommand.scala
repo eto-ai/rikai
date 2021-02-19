@@ -6,6 +6,7 @@ import ai.eto.rikai.sql.catalog.{MLCatalog, Model}
 import org.apache.spark.sql.catalyst.expressions.{Attribute, AttributeReference}
 import org.apache.spark.sql.types.StringType
 
+
 import org.json4s._
 import org.json4s.jackson.Serialization
 import org.json4s.jackson.Serialization.write

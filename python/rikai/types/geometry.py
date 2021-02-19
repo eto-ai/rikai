@@ -84,8 +84,8 @@ class Box2d(ToNumpy):
     >>> box = Box2d(1, 2, 3, 4)
     >>> box / 2
     Box2d(xmin=0.5, ymin=1.0, xmax=1.5, ymax=2.0)
-    >>> box * 3.5
-    Box2d(xmin=3.5, ymin=7.0, xmax=10.5, ymax=14.0)
+    >>> box * (3.5, 5)
+    Box2d(xmin=3.5, ymin=10.0, xmax=10.5, ymax=20.0)
     """
 
     __UDT__ = Box2dType()

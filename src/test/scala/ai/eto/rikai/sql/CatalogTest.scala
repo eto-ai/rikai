@@ -16,6 +16,29 @@
 
 package ai.eto.rikai.sql
 
+import org.apache.spark.sql.catalyst.expressions.Expression
 import org.scalatest.funsuite.AnyFunSuite
 
-class CatalogTest extends AnyFunSuite {}
+class FakeModel(override val name: String, override val uri: String)
+    extends Model {
+
+  /**
+    * Generate Spark SQL ``Expression`` to run Model Inference.
+    *
+    * @param arguments the list of arguments passed into the model inference code.
+    * @return The generated Expression
+    */
+  override def expr(arguments: Seq[Expression]): Expression = ???
+}
+
+class CatalogTest extends AnyFunSuite {
+
+  test("Test simple catalog") {
+
+    val catalog = Catalog.testing
+    assert(!catalog.modelExists("foo"))
+    val created = catalog.createModel(new FakeModel("foo", "bar"))
+    assert (created.name == "foo")
+    assert (created.uri == "bar")
+  }
+}

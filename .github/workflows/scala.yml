@@ -21,7 +21,7 @@ jobs:
       with:
         java-version: 11
     - name: Run style check
-      run: sbt scalafmtSbtCheck scalafmtCheck
+      run: sbt scalafmtCheckAll
     - name: Run Scala tests
       run: sbt test
     - name: Build Scala Jar

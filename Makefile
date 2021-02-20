@@ -16,6 +16,7 @@
 all:
 
 lint:
+	sbt scalafmtCheckAll
 	black -l 79 --check python/rikai python/tests
 	pycodestyle python/rikai python/tests
 .PHONY: lint

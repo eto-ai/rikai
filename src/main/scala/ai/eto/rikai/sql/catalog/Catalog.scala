@@ -14,51 +14,37 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql
+package ai.eto.rikai.sql.catalog
 
 /**
-  * A Simple Catalog in memory. Used for local testing only.
+  * Catalog for SQL ML.
   */
-case class SimpleCatalog() extends Catalog {
-
-  private var models: Map[String, Model] = Map.empty
+trait Catalog {
 
   /**
     * Create a ML Model that can be used in SQL ML in the current database.
     */
-  override def createModel(model: Model): Model = {
-    synchronized {
-      models += (model.name -> model)
-    }
-    model
-  }
+  def createModel(model: Model): Model
 
   /**
     * Return a list of models available for all Sessions
     */
-  override def listModels(): Seq[Model] =
-    synchronized {
-      models.values.toSeq
-    }
+  def listModels(): Seq[Model]
 
   /**
     * Check a model with the specified name exists.
     *
     * @param name is the name of the model.
     */
-  override def modelExists(name: String): Boolean =
-    synchronized { models.contains(name) }
+  def modelExists(name: String): Boolean
 
   /**
     * Get the model with a specific name.
     *
     * @param name is a qualified name pointed to a Model.
-    * @return the model
+    *  @return the model
     */
-  override def getModel(name: String): Option[Model] =
-    synchronized {
-      models get name
-    }
+  def getModel(name: String): Option[Model]
 
   /**
     * Drops a model with a specific name
@@ -66,10 +52,13 @@ case class SimpleCatalog() extends Catalog {
     * @param name the model name
     * @return true of the model is dropped successfully. False otherwise.
     */
-  override def dropModel(name: String): Boolean =
-    synchronized {
-      val contains = models.contains(name)
-      models -= name
-      contains
-    }
+  def dropModel(name: String): Boolean
+}
+
+object Catalog {
+
+  val SPARK_SQL_ML_CATALOG_IMPL_KEY = "rikai.spark.sql.ml.catalog.impl"
+
+  /** A Catalog for local testing. */
+  def testing: Catalog = SimpleCatalog()
 }

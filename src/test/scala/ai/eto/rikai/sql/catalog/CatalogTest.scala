@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql
+package ai.eto.rikai.sql.catalog
 
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.scalatest.funsuite.AnyFunSuite

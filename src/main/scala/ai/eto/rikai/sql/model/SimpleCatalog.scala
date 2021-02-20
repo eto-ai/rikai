@@ -19,7 +19,7 @@ package ai.eto.rikai.sql.model
 /**
   * A Simple Catalog in memory. Used for local testing only.
   */
-case class SimpleCatalog() extends Catalog {
+class SimpleCatalog extends Catalog {
 
   private var models: Map[String, Model] = Map.empty
 
@@ -72,4 +72,10 @@ case class SimpleCatalog() extends Catalog {
       models -= name
       contains
     }
+
+  def clear(): Unit = {
+    synchronized {
+      models = Map.empty
+    }
+  }
 }

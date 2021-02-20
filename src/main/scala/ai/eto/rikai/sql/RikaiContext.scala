@@ -1,6 +1,4 @@
 /*
- * Copyright 2021 Rikai authors
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,34 +12,17 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql.model
+package ai.eto.rikai.sql
+
+import ai.eto.rikai.sql.model.Catalog
 
 /**
-  * A Machine Learning Model in Rikai Catalog.
+  * Runtime context for Rikai SQL-ML.
   */
-trait Model {
+private[sql] class RikaiContext(catalogClass: String) {
 
-  /** Model Name */
-  var name: String
-
-  /** Model URI in the registry */
-  val uri: String
-
-  /** The model registry object.
-    */
-  val registry: Registry
+  val catalog: Catalog =
+    Catalog.getOrCreate(catalogClass)
 }
 
-object Model {
-
-  /**
-    */
-  val namePattern = """[a-zA-Z]\w{0,255}""".r
-}
-
-object Model {
-
-  /**
-    */
-  val namePattern = """[a-zA-Z]\w{0,255}""".r
-}
+private[sql] object RikaiContext {}

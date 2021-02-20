@@ -17,7 +17,7 @@
 package ai.eto.rikai.sql.model
 
 /**
-  * Model Registry Integration.
+  * Model Registry Integrations.
   */
 trait Registry {
 
@@ -35,12 +35,24 @@ object Registry {
 
   val MODEL_REGISTRY_IMPL_KEY = "rikai.sql.ml.model_registry.impl"
 
+  private var registry: Registry = null
+
   /** Get a ModelRegistry from its class name. */
-  def get(className: String): Registry = {
-    Class
-      .forName(className)
-      .getDeclaredConstructor()
-      .newInstance()
-      .asInstanceOf[Registry]
+  def getOrCreate(className: String): Registry = {
+    if (registry == null) {
+      registry = Class
+        .forName(className)
+        .getDeclaredConstructor()
+        .newInstance()
+        .asInstanceOf[Registry]
+    }
+    registry
+  }
+
+  /** Used in testing to reset the registry */
+  private[sql] def reset = {
+    registry = null
   }
 }
+
+class ModelRegistryResolveException(message: String) extends Exception(message);

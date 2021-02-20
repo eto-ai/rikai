@@ -22,7 +22,7 @@ singleStatement
 statement
     : CREATE (OR REPLACE)? MODEL model=qualifiedName
       (OPTIONS optionList)?
-      (USING path=STRING)	                        # createModel
+      (USING uri=STRING)	                        # createModel
     | (DESC | DESCRIBE) MODEL model=qualifiedName   # describeModel
     | SHOW MODELS                                   # showModels
     | DROP MODEL model=qualifiedName                # dropModel

@@ -14,34 +14,14 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql.model
+package ai.eto.rikai.sql.spark
 
-/**
-  * A Machine Learning Model in Rikai Catalog.
-  */
-trait Model {
+import ai.eto.rikai.sql.model.Model
+import org.apache.spark.sql.catalyst.expressions.Expression
 
-  /** Model Name */
-  var name: String
+class Translator {
 
-  /** Model URI in the registry */
-  val uri: String
-
-  /** The model registry object.
-    */
-  val registry: Registry
-}
-
-object Model {
-
-  /**
-    */
-  val namePattern = """[a-zA-Z]\w{0,255}""".r
-}
-
-object Model {
-
-  /**
-    */
-  val namePattern = """[a-zA-Z]\w{0,255}""".r
+  def translate(model: Model, args: Seq[Expression]): Expression = {
+    null
+  }
 }

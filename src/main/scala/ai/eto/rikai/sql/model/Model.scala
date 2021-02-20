@@ -57,3 +57,10 @@ trait Model {
   def expr(arguments: Seq[Expression]): Expression
 
 }
+
+object Model {
+
+  /**
+    */
+  val namePattern = """[a-zA-Z]\w{0,255}""".r
+}

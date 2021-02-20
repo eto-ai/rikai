@@ -42,7 +42,7 @@ trait Catalog {
     * Get the model with a specific name.
     *
     * @param name is a qualified name pointed to a Model.
-    *  @return the model
+    * @return the model
     */
   def getModel(name: String): Option[Model]
 

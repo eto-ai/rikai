@@ -16,6 +16,9 @@
 
 package ai.eto.rikai.sql
 
+/**
+  * A Simple Catalog in memory. Used for local testing only.
+  */
 case class SimpleCatalog() extends Catalog {
 
   private var models: Map[String, Model] = Map.empty
@@ -24,23 +27,27 @@ case class SimpleCatalog() extends Catalog {
     * Create a ML Model that can be used in SQL ML in the current database.
     */
   override def createModel(model: Model): Model = {
-    models += (model.name -> model)
+    synchronized {
+      models += (model.name -> model)
+    }
     model
   }
 
   /**
     * Return a list of models available for all Sessions
     */
-  override def listModels(): Seq[Model] = {
-    models.values.toSeq
-  }
+  override def listModels(): Seq[Model] =
+    synchronized {
+      models.values.toSeq
+    }
 
   /**
     * Check a model with the specified name exists.
     *
     * @param name is the name of the model.
     */
-  override def modelExists(name: String): Boolean = models.contains(name)
+  override def modelExists(name: String): Boolean =
+    synchronized { models.contains(name) }
 
   /**
     * Get the model with a specific name.
@@ -48,9 +55,10 @@ case class SimpleCatalog() extends Catalog {
     * @param name is a qualified name pointed to a Model.
     * @return the model
     */
-  override def getModel(name: String): Option[Model] = {
-    models get name
-  }
+  override def getModel(name: String): Option[Model] =
+    synchronized {
+      models get name
+    }
 
   /**
     * Drops a model with a specific name
@@ -58,9 +66,10 @@ case class SimpleCatalog() extends Catalog {
     * @param name the model name
     * @return true of the model is dropped successfully. False otherwise.
     */
-  override def dropModel(name: String): Boolean = {
-    val contains = models.contains(name)
-    models -= name
-    contains
-  }
+  override def dropModel(name: String): Boolean =
+    synchronized {
+      val contains = models.contains(name)
+      models -= name
+      contains
+    }
 }

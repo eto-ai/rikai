@@ -58,4 +58,7 @@ trait Catalog {
 object Catalog {
 
   val SPARK_SQL_ML_CATALOG_IMPL_KEY = "rikai.spark.sql.ml.catalog.impl"
+
+  /** A Catalog for local testing. */
+  def testing: Catalog = SimpleCatalog()
 }

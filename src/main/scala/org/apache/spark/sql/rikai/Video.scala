@@ -38,8 +38,8 @@ class YouTubeVideoType extends UserDefinedType[YouTubeVideo] {
     StructType(
       Seq(
         StructField("vid", StringType, false)
-        )
       )
+    )
 
   override def pyUDT: String = "rikai.spark.types.YouTubeVideoType"
 
@@ -114,9 +114,13 @@ class VideoStreamType extends UserDefinedType[VideoStream] {
 @SQLUserDefinedType(udt = classOf[SegmentType])
 class Segment(val start_fno: Int, val end_fno: Int) {
   require(start_fno >= 0, "Start frame number must be non-negative")
-  require(end_fno >= start_fno || end_fno < 0, "End frame number non-neg but smaller than start")
+  require(
+    end_fno >= start_fno || end_fno < 0,
+    "End frame number non-neg but smaller than start"
+  )
 
-  override def toString: String = s"Segment(start_fno=$start_fno, end_fno=$end_fno)"
+  override def toString: String =
+    s"Segment(start_fno=$start_fno, end_fno=$end_fno)"
 }
 
 class SegmentType extends UserDefinedType[Segment] {

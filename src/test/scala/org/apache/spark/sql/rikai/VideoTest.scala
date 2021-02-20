@@ -23,7 +23,6 @@ import java.nio.file.Files
 import org.apache.spark.sql.SparkSession
 import org.scalatest.funsuite.AnyFunSuite
 
-
 class VideoTest extends AnyFunSuite {
   lazy val spark = SparkSession.builder().master("local[1]").getOrCreate()
 
@@ -34,9 +33,19 @@ class VideoTest extends AnyFunSuite {
       new File(Files.createTempDirectory("rikai").toFile(), "video_dataset")
 
     val df = Seq(
-      (1, new Segment(10, 253), new YouTubeVideo("vid"), new VideoStream("uri")),
-      (2, new Segment(57934, 5812952), new YouTubeVideo("vid"), new VideoStream("uri"))
-      ).toDF()
+      (
+        1,
+        new Segment(10, 253),
+        new YouTubeVideo("vid"),
+        new VideoStream("uri")
+      ),
+      (
+        2,
+        new Segment(57934, 5812952),
+        new YouTubeVideo("vid"),
+        new VideoStream("uri")
+      )
+    ).toDF()
 
     df.write.format("rikai").save(testDir.toString())
 

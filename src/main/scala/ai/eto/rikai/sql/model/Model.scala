@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql.catalog
+package ai.eto.rikai.sql.model
 
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.types.DataType
@@ -27,14 +27,14 @@ trait Model {
   /** Model Name */
   val name: String
 
-  /** Model registry URI */
+  /** Model URI in the registry */
   val uri: String
 
   /** The output schema of the model. */
   def schema: DataType
 
-  /** The name of model registry */
-  def registry: String
+  /** The model registry object */
+  def registry: Registry
 
   /**
     * Generate Spark SQL ``Expression`` to run Model Inference.

@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql.catalog
+package ai.eto.rikai.sql.model
 
 import org.apache.spark.sql.catalyst.expressions.Expression
-import org.scalatest.funsuite.AnyFunSuite
+import org.apache.spark.sql.types.DataType
 
+/** a FakeModel for testing */
 class FakeModel(val name: String, val uri: String) extends Model {
 
   override def expr(arguments: Seq[Expression]): Expression = ???
-}
 
-class CatalogTest extends AnyFunSuite {
+  /** The output schema of the model. */
+  override def schema: DataType = null
 
-  test("Test simple catalog") {
-    val catalog = Catalog.testing
-    assert(!catalog.modelExists("foo"))
-    val created = catalog.createModel(new FakeModel("foo", "bar"))
-    assert(created.name == "foo")
-    assert(created.uri == "bar")
-    assert(catalog.modelExists("foo"))
-  }
+  /** The model registry */
+  override def registry: Registry = ???
 }

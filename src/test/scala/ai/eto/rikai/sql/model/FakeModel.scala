@@ -40,3 +40,14 @@ class FakeModel(val name: String, val uri: String, val funcName: String)
   /** The model registry */
   override def registry: Registry = ???
 }
+
+class FakeRegistry extends Registry {
+
+  /**
+    * Resolve a Model from the specific URI.
+    *
+    * @param uri is the model registry URI
+    * @return [[Model]] if found, ``None`` otherwise.
+    */
+  override def resolve(uri: String): Option[Model] = ???
+}

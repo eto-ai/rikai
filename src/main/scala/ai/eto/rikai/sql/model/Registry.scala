@@ -16,6 +16,8 @@
 
 package ai.eto.rikai.sql.model
 
+import org.apache.spark.sql.SparkSession
+
 /**
   * Model Registry
   */
@@ -28,4 +30,17 @@ trait Registry {
     * @return [[Model]] if found, ``None`` otherwise.
     */
   def resolve(uri: String): Option[Model]
+}
+
+object Registry {
+
+  val MODEL_REGISTRY_IMPL_KEY = "rikai.spark.sql.ml.model_registry.impl"
+
+  def get(session: SparkSession): Registry = {
+    Class
+      .forName(session.conf.get(MODEL_REGISTRY_IMPL_KEY))
+      .getDeclaredConstructor()
+      .newInstance()
+      .asInstanceOf[Registry]
+  }
 }

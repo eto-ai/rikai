@@ -25,7 +25,7 @@ trait Registry {
     * Resolve a Model from the specific URI.
     *
     * @param uri is the model registry URI
-    * @return [[Model]] if found, [[None]] otherwise.
+    * @return [[Model]] if found, ``None`` otherwise.
     */
   def resolve(uri: String): Option[Model]
 }

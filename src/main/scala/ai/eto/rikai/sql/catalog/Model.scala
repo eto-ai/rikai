@@ -17,6 +17,7 @@
 package ai.eto.rikai.sql.catalog
 
 import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.types.DataType
 
 /**
   * A Machine Learning Model in Rikai Catalog.
@@ -29,11 +30,30 @@ trait Model {
   /** Model registry URI */
   val uri: String
 
+  /** The output schema of the model. */
+  def schema: DataType
+
+  /** The name of model registry */
+  def registry: String
+
   /**
     * Generate Spark SQL ``Expression`` to run Model Inference.
+    *
+    *  For a query:
+    *
+    *  {{{
+    *    SELECT ML_PREDICT(model_zoo, col1, col2, col3) FROM t1
+    *  }}}
+    *
+    *  It generates a LogicalPlan that is equivalent to
+    *
+    *  {{{
+    *    SELECT <Model(model_zoo).expr(col1, col2, col3)> FROM t1
+    *  }}}
     *
     * @param arguments the list of arguments passed into the model inference code.
     * @return The generated Expression
     */
   def expr(arguments: Seq[Expression]): Expression
+
 }

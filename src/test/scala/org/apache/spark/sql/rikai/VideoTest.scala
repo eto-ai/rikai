@@ -16,21 +16,19 @@
 
 package org.apache.spark.sql.rikai
 
-import scala.reflect.io.Directory
-import java.io.File
-import java.nio.file.Files
-
-import org.apache.spark.sql.SparkSession
+import ai.eto.rikai.SparkTestSession
 import org.scalatest.funsuite.AnyFunSuite
 
-class VideoTest extends AnyFunSuite {
-  lazy val spark = SparkSession.builder().master("local[1]").getOrCreate()
+import java.io.File
+import java.nio.file.Files
+import scala.reflect.io.Directory
 
+class VideoTest extends AnyFunSuite with SparkTestSession {
   import spark.implicits._
 
   test("test video serde") {
     val testDir =
-      new File(Files.createTempDirectory("rikai").toFile(), "video_dataset")
+      new File(Files.createTempDirectory("rikai").toFile, "video_dataset")
 
     val df = Seq(
       (

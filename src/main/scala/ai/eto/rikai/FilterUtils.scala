@@ -30,7 +30,6 @@ import org.apache.spark.sql.sources.LessThanOrEqual
 object FilterUtils {
 
   /** Apply a spark Filter to a DataFrame
-    *
     */
   def apply(df: DataFrame, filter: Filter): DataFrame = {
     filter match {

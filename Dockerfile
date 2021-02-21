@@ -1,8 +1,7 @@
 # ------------------------- 1. builder -------------------------
-FROM nvidia/cuda:11.0-runtime-ubuntu20.04 AS builder
-CMD nvidia-smi
-
-LABEL maintainer="sophon<sophon@eto.ai>"
+FROM ubuntu:20.04 AS builder
+LABEL stage=builder
+LABEL maintainer="rikai developers<rikai-dev@eto.ai>"
 LABEL description="Demo Image"
 
 ARG NB_USER="eto"
@@ -133,25 +132,19 @@ COPY ./conf/spark-defaults.conf $SPARK_HOME/conf/spark-defaults.conf
 ENV SCALA_VERSION=${SCALA_VERSION}
 ENV RIKAI_VERSION=${RIKAI_VERSION}
 
-RUN mkdir -p $HOME/rikai/jars
-
-COPY target/scala-${SCALA_VERSION}/rikai_${SCALA_VERSION}-${RIKAI_VERSION}.jar ${HOME}/rikai/jars
-
-ADD ./python $HOME/rikai/python
-RUN chmod 777 $HOME/rikai/python && \
-    chown -R $NB_USER:$NB_USER $HOME/rikai/python
-
-WORKDIR $HOME/rikai/python
 USER $NB_UID
-RUN pip install -e .
+RUN pip install rikai[all]==${RIKAI_VERSION}
 USER root
 
 # -----------------
 # Install notebooks
 # -----------------
-ADD ./notebooks $HOME/rikai/notebooks
-RUN chmod 777 $HOME/rikai/notebooks && \
+RUN mkdir -p $HOME/rikai/notebooks && \
+    chmod 777 $HOME/rikai/notebooks && \
     chown -R $NB_USER:$NB_USER $HOME/rikai/notebooks
+
+COPY ./notebooks/*.ipynb $HOME/rikai/notebooks/
+COPY ./notebooks/wordcount.txt $HOME/rikai/notebooks/
 
 # ----------
 # User setup
@@ -175,8 +168,9 @@ RUN conda clean -tipy && \
 #RUN python -c "import torch;torch.cuda.get_device_name(0)"
 
 # ------------------------- 3. Remove intermediates -------------------------
-FROM nvidia/cuda:11.0-runtime-ubuntu20.04 AS output
-CMD nvidia-smi
+FROM ubuntu:20.04 AS output
+LABEL maintainer="rikai developers<rikai-dev@eto.ai>"
+LABEL description="Demo Image"
 
 ARG NB_USER="eto"
 ARG NB_UID="1000"
@@ -248,7 +242,6 @@ ENV PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-${py4j_versio
 # ------------------
 # Launch Jupyter Lab
 # ------------------
-#RUN python -c "import torch;torch.cuda.get_device_name(0)"
 
 WORKDIR ${HOME}/rikai/notebooks
 EXPOSE 8888

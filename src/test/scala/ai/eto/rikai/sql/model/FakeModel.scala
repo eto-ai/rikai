@@ -17,13 +17,15 @@
 package ai.eto.rikai.sql.model
 
 /** a FakeModel for testing */
-class FakeModel(val name: String, val uri: String, val funcName: String)
-    extends Model {
+class FakeModel(
+    val name: String,
+    val uri: String,
+    funcName: String,
+    val registry: Registry
+) extends Model {
 
-  def this(name: String, uri: String) = this(name, uri, name)
-
-  /** The model registry */
-  override def registry: Registry = ???
+  def this(name: String, uri: String, registry: Registry) =
+    this(name, uri, name, registry)
 }
 
 class FakeRegistry extends Registry {

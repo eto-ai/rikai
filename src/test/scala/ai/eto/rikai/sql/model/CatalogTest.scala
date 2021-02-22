@@ -23,7 +23,7 @@ class CatalogTest extends AnyFunSuite {
   test("Test simple catalog") {
     val catalog = Catalog.testing
     assert(!catalog.modelExists("foo"))
-    val created = catalog.createModel(new FakeModel("foo", "bar"))
+    val created = catalog.createModel(new FakeModel("foo", "bar", null))
     assert(created.name == "foo")
     assert(created.uri == "bar")
     assert(catalog.modelExists("foo"))

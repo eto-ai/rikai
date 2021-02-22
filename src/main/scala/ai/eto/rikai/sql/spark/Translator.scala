@@ -21,5 +21,7 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 
 class Translator {
 
-  def translate(model: Model): Expression = {}
+  def translate(model: Model, args: Seq[Expression]): Expression = {
+    null
+  }
 }

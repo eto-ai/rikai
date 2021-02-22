@@ -16,26 +16,11 @@
 
 package ai.eto.rikai.sql.model
 
-import org.apache.spark.sql.catalyst.FunctionIdentifier
-import org.apache.spark.sql.catalyst.analysis.UnresolvedFunction
-import org.apache.spark.sql.catalyst.expressions.Expression
-import org.apache.spark.sql.types.DataType
-
 /** a FakeModel for testing */
 class FakeModel(val name: String, val uri: String, val funcName: String)
     extends Model {
 
   def this(name: String, uri: String) = this(name, uri, name)
-
-  override def expr(arguments: Seq[Expression]): Expression =
-    UnresolvedFunction(
-      new FunctionIdentifier(funcName),
-      arguments,
-      isDistinct = false
-    )
-
-  /** The output schema of the model. */
-  override def schema: DataType = null
 
   /** The model registry */
   override def registry: Registry = ???

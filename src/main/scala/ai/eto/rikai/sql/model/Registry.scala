@@ -16,8 +16,6 @@
 
 package ai.eto.rikai.sql.model
 
-import org.apache.spark.sql.SparkSession
-
 /**
   * Model Registry Integration.
   */
@@ -37,9 +35,10 @@ object Registry {
 
   val MODEL_REGISTRY_IMPL_KEY = "rikai.sql.ml.model_registry.impl"
 
-  def get(session: SparkSession): Registry = {
+  /** Get a ModelRegistry from its class name. */
+  def get(className: String): Registry = {
     Class
-      .forName(session.conf.get(MODEL_REGISTRY_IMPL_KEY))
+      .forName(className)
       .getDeclaredConstructor()
       .newInstance()
       .asInstanceOf[Registry]

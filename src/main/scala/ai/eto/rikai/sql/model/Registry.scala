@@ -34,7 +34,7 @@ trait Registry {
 
 object Registry {
 
-  val MODEL_REGISTRY_IMPL_KEY = "rikai.spark.sql.ml.model_registry.impl"
+  val MODEL_REGISTRY_IMPL_KEY = "rikai.sql.ml.model_registry.impl"
 
   def get(session: SparkSession): Registry = {
     Class

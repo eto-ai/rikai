@@ -17,8 +17,8 @@
 
 from __future__ import annotations
 
-from typing import List, Tuple, Union
-from numbers import Number, Real
+from typing import List, Sequence, Tuple, Union
+from numbers import Real
 
 import numpy as np
 
@@ -64,7 +64,7 @@ class Point(ToNumpy):
         return np.array([self.x, self.y, self.z])
 
 
-class Box2d(ToNumpy):
+class Box2d(ToNumpy, Sequence):
     """2-D Bounding Box, defined by ``(xmin, ymin, xmax, ymax)``
 
     Attributes
@@ -86,6 +86,9 @@ class Box2d(ToNumpy):
     Box2d(xmin=0.5, ymin=1.0, xmax=1.5, ymax=2.0)
     >>> box * (3.5, 5)
     Box2d(xmin=3.5, ymin=10.0, xmax=10.5, ymax=20.0)
+    >>> # Box2d can be used directly with PIL.ImageDraw
+    >>> draw = PIL.ImageDraw.Draw(img)
+    >>> draw.rectangle(box, fill="green", width=2)
     """
 
     __UDT__ = Box2dType()
@@ -180,6 +183,12 @@ class Box2d(ToNumpy):
         return isinstance(o, Box2d) and np.array_equal(
             self.to_numpy(), o.to_numpy()
         )
+
+    def __len__(self) -> int:
+        return 4
+
+    def __getitem__(self, key: int) -> float:
+        return [self.xmin, self.ymin, self.xmax, self.ymax][key]
 
     @staticmethod
     def _verified_scale(

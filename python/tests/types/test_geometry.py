@@ -12,7 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import Sequence
+
 import numpy as np
+from PIL import Image, ImageDraw
 
 from rikai.types import Box2d
 
@@ -27,3 +30,18 @@ def test_scale_box2d():
     assert Box2d(0.5, 0.5, 1.5, 1.0) == box / (2, 4)
     assert Box2d(0.5, 0.25, 1.5, 0.5) == box / (2.0, 8.0)
     assert Box2d(10.0, 15.0, 30.0, 30.0) == box * (10, 7.5)
+
+
+def test_box2d_as_list():
+    box = Box2d(1.0, 2.0, 3.0, 4.0)
+
+    assert [1.0, 2.0, 3.0, 4.0] == list(box)
+
+    img = Image.fromarray(
+        np.random.randint(0, 128, size=(32, 32), dtype=np.uint8)
+    )
+    draw = ImageDraw.Draw(img)
+    # Check that the box works with draw.
+    draw.rectangle(box)
+
+    assert isinstance(box, Sequence)

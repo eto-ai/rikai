@@ -1,9 +1,9 @@
 package ai.eto.rikai
 
 /**
-  * Rikai Spark SQL-ML extension.
+  * Rikai SQL-ML extension.
   *
-  * Rikai extends Spark DDL to support ML Models:
+  * Rikai offers DDL to manipulate ML Models:
   *
   * {{{
   *   CREATE MODEL model_name

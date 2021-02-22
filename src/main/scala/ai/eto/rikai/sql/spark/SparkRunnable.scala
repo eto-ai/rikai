@@ -21,7 +21,7 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 /**
   * Make [[ai.eto.rikai.sql.model.Model]] runnable on Spark.
   *
-  *  For a '''ML_PREDICT''' expression in Spark SQL,
+  * For a '''ML_PREDICT''' expression in Spark SQL,
   *
   *  {{{
   *    SELECT ML_PREDICT(model_zoo, col1, col2, col3) FROM t1
@@ -32,6 +32,11 @@ import org.apache.spark.sql.catalyst.expressions.Expression
   *  {{{
   *    SELECT <Model{model_zoo}.asSpark(col1, col2, col3)> FROM t1
   *  }}}
+  *
+  * @note
+  *
+  * It is the [[ai.eto.rikai.sql.model.Registry]]'s responsibility to implement a
+  * Model that runs with Spark SQL.
   *
   * @example
   *

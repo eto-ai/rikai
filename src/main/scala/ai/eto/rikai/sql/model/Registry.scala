@@ -19,14 +19,15 @@ package ai.eto.rikai.sql.model
 import org.apache.spark.sql.SparkSession
 
 /**
-  * Model Registry
+  * Model Registry Integration.
   */
 trait Registry {
 
   /**
     * Resolve a Model from the specific URI.
     *
-    * @param uri is the model registry URI
+    * @param uri is the model registry URI.
+    *
     * @return [[Model]] if found, ``None`` otherwise.
     */
   def resolve(uri: String): Option[Model]

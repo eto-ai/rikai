@@ -27,9 +27,9 @@ trait Model {
   /** Model URI in the registry */
   val uri: String
 
-  /** The model registry object */
-  def registry: Registry
-
+  /** The model registry object.
+    */
+  val registry: Registry
 }
 
 object Model {

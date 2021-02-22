@@ -21,7 +21,26 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 
 class Translator {
 
-  def translate(model: Model, args: Seq[Expression]): Expression = {
+  /**
+    * Generate Spark SQL ``Expression`` to run Model Inference.
+    *
+    *  For a query:
+    *
+    *  {{{
+    *    SELECT ML_PREDICT(model_zoo, col1, col2, col3) FROM t1
+    *  }}}
+    *
+    *  It generates a LogicalPlan that is equivalent to
+    *
+    *  {{{
+    *    SELECT <Model(model_zoo).expr(col1, col2, col3)> FROM t1
+    *  }}}
+    *
+    * @param model the ML model to run inference on.
+    * @param arguments the list of arguments passed into the model inference code.
+    * @return The generated Expression
+    */
+  def translate(model: Model, arguments: Seq[Expression]): Expression = {
     null
   }
 }

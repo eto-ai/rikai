@@ -22,7 +22,7 @@ package ai.eto.rikai.sql.model
 trait Model {
 
   /** Model Name */
-  var name: String
+  val name: String
 
   /** Model URI in the registry */
   val uri: String

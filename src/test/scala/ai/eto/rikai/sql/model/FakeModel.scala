@@ -26,7 +26,7 @@ import java.net.URI
 
 /** a FakeModel for testing */
 class FakeModel(
-    var name: String,
+    val name: String,
     val uri: String,
     funcName: String,
     val registry: Registry
@@ -63,14 +63,18 @@ class FakeRegistry(conf: Map[String, String]) extends Registry {
     * @return [[Model]] if found, ``None`` otherwise.
     */
   @throws[ModelNotFoundException]
-  override def resolve(uri: String): Model = {
+  override def resolve(uri: String, name: Option[String] = None): Model = {
     val parsed = URI.create(uri)
     parsed.getScheme match {
       case "fake" => {
-        val name = new File(
-          parsed.getAuthority + "/" + parsed.getPath
-        ).getName
-        new FakeModel(name, uri, this)
+        val model_name = name match {
+          case Some(name) => name
+          case None =>
+            new File(
+              parsed.getAuthority + "/" + parsed.getPath
+            ).getName
+        }
+        new FakeModel(model_name, uri, this)
       }
       case _ => throw new ModelNotFoundException(s"Fake model ${uri} not found")
     }

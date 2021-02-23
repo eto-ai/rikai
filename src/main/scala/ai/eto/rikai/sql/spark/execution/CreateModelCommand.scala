@@ -38,13 +38,12 @@ case class CreateModelCommand(
         )
       )
     val model = uri match {
-      case Some(u) => Registry.resolve(u)
+      case Some(u) => Registry.resolve(u, Some(name))
       case None =>
         throw new ModelResolveException(
           "Must provide URI to CREATE MODEL (for now)"
         )
     }
-    model.name = name
     catalog.createModel(model)
     Seq.empty
   }

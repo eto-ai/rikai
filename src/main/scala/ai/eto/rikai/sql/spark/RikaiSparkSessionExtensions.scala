@@ -32,8 +32,8 @@ class RikaiSparkSessionExtensions extends (SparkSessionExtensions => Unit) {
       )
     })
 
-    // We just do a placeholder so that later we can compile a `ML_PREDICT` statement
-    // to using Models.
+    // We just use a placeholder so that later we can compile a `ML_PREDICT` expression
+    // to use Models.
     extensions.injectFunction(Predict.functionDescriptor)
   }
 }

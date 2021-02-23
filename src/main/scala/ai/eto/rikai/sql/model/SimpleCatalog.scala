@@ -73,6 +73,7 @@ class SimpleCatalog extends Catalog {
       contains
     }
 
+  /** Clear the catalog. Used in tests. */
   def clear(): Unit = {
     synchronized {
       models = Map.empty

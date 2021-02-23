@@ -14,7 +14,7 @@
 
 package ai.eto.rikai.sql.spark
 
-import ai.eto.rikai.sql.expressions.Predict
+import ai.eto.rikai.sql.spark.expressions.Predict
 import ai.eto.rikai.sql.spark.parser.{RikaiExtSqlParser, RikaiSparkSQLParser}
 import org.apache.spark.sql.SparkSessionExtensions
 
@@ -26,7 +26,10 @@ class RikaiSparkSessionExtensions extends (SparkSessionExtensions => Unit) {
   override def apply(extensions: SparkSessionExtensions): Unit = {
 
     extensions.injectParser((session, parser) => {
-      new RikaiExtSqlParser(session, new RikaiSparkSQLParser(session, parser))
+      new RikaiExtSqlParser(
+        session,
+        new RikaiSparkSQLParser(session, parser)
+      )
     })
 
     // We just do a placeholder so that later we can compile a `ML_PREDICT` statement

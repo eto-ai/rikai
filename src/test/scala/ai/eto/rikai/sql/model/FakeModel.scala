@@ -36,7 +36,8 @@ class FakeModel(
   def this(name: String, uri: String, registry: Registry) =
     this(name, uri, name, registry)
 
-  /** Convert a [[ai.eto.rikai.sql.model.Model]] to a Spark Expression in Spark SQL's logical plan.
+  /**
+    * Convert a [[ai.eto.rikai.sql.model.Model]] to a Spark Expression in Spark SQL's logical plan.
     */
   override def asSpark(args: Seq[Expression]): Expression = {
     new UnresolvedFunction(
@@ -52,7 +53,7 @@ class FakeModel(
   *
   * A valid model URI is: "model://hostname/model_name"
   */
-class FakeRegistry extends Registry {
+class FakeRegistry(conf: Map[String, String]) extends Registry {
 
   /**
     * Resolve a Model from the specific URI.
@@ -61,16 +62,17 @@ class FakeRegistry extends Registry {
     *
     * @return [[Model]] if found, ``None`` otherwise.
     */
-  override def resolve(uri: String): Option[Model] = {
+  @throws[ModelNotFoundException]
+  override def resolve(uri: String): Model = {
     val parsed = URI.create(uri)
     parsed.getScheme match {
-      case "model" => {
+      case "fake" => {
         val name = new File(
           parsed.getAuthority + "/" + parsed.getPath
         ).getName
-        Some(new FakeModel(name, uri, this))
+        new FakeModel(name, uri, this)
       }
-      case _ => None
+      case _ => throw new ModelNotFoundException(s"Fake model ${uri} not found")
     }
   }
 }

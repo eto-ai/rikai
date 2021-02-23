@@ -61,8 +61,9 @@ object Catalog {
   val SQL_ML_CATALOG_IMPL_DEFAULT = "ai.eto.rikai.sql.model.SimpleCatalog"
 
   /** A Catalog for local testing. */
-  private[rikai] def testing: SimpleCatalog =
+  private[rikai] def testing: SimpleCatalog = {
     getOrCreate(SQL_ML_CATALOG_IMPL_DEFAULT).asInstanceOf[SimpleCatalog]
+  }
 
   private var catalog: Catalog = null
 

@@ -34,14 +34,6 @@ trait Model {
 
 object Model {
 
-  /**
-    */
-  val namePattern = """[a-zA-Z]\w{0,255}""".r
-}
-
-object Model {
-
-  /**
-    */
+  /** Model Name Pattern */
   val namePattern = """[a-zA-Z]\w{0,255}""".r
 }

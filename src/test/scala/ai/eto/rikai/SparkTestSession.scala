@@ -29,7 +29,7 @@ trait SparkTestSession extends BeforeAndAfterEach {
       "ai.eto.rikai.sql.spark.RikaiSparkSessionExtensions"
     )
     .config(
-      Registry.MODEL_REGISTRY_IMPL_KEY,
+      Registry.REGISTRY_IMPL_PREFIX + "fake.impl",
       "ai.eto.rikai.sql.model.FakeRegistry"
     )
     .master("local[*]")

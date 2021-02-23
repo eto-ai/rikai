@@ -17,7 +17,6 @@
 package ai.eto.rikai.sql.spark.parser
 
 import ai.eto.rikai.SparkTestSession
-import ai.eto.rikai.sql.model.{Catalog, FakeModel, Registry}
 import org.apache.spark.sql.functions.{col, udf}
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -25,14 +24,14 @@ class RikaiSparkSQLParserTest extends AnyFunSuite with SparkTestSession {
 
   import spark.implicits._
 
+  val df = Seq.range(1, 10).toDF("id")
+  df.createOrReplaceTempView("df")
+
   test("Test parse ML_PREDICT expression") {
     spark.udf.register("foo", (s: Int) => s + 2)
 
-    val df = Seq.range(1, 10).toDF("id")
-    df.createTempView("df")
-
     val scores =
-      spark.sql("SELECT id, ML_PREDICT('model://foo', id) AS score FROM df")
+      spark.sql("SELECT id, ML_PREDICT('fake://host/foo', id) AS score FROM df")
 
     val plus_two = udf((v: Int) => v + 2)
     val expected = df.withColumn("score", plus_two(col("id")))
@@ -40,12 +39,13 @@ class RikaiSparkSQLParserTest extends AnyFunSuite with SparkTestSession {
   }
 
   test("Test parse ML_PREDICT with catalog") {
-    Catalog.testing.createModel(
-      new FakeModel(
-        "foo",
-        "model://host/foo",
-        Registry.get(Registry.MODEL_REGISTRY_IM)
-      )
-    )
+    spark.sql("CREATE MODEL foo USING 'fake://host/foo'").show()
+
+    val scores =
+      spark.sql("SELECT id, ML_PREDICT('fake://host/foo', id) AS score FROM df")
+
+    val plus_two = udf((v: Int) => v + 2)
+    val expected = df.withColumn("score", plus_two(col("id")))
+    assertEqual(scores, expected)
   }
 }

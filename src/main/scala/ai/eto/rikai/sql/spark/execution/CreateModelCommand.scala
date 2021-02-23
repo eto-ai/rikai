@@ -16,7 +16,7 @@
 
 package ai.eto.rikai.sql.spark.execution
 
-import ai.eto.rikai.sql.model.{Catalog, ModelRegistryResolveException, Registry}
+import ai.eto.rikai.sql.model.{Catalog, ModelResolveException, Registry}
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.execution.command.RunnableCommand
 import org.apache.spark.sql.{Row, SparkSession}
@@ -37,13 +37,11 @@ case class CreateModelCommand(
           Catalog.SQL_ML_CATALOG_IMPL_DEFAULT
         )
       )
-    val registry =
-      Registry.get(spark.conf.get(Registry.MODEL_REGISTRY_IMPL_KEY))
-    val model = registry.resolve(uri.getOrElse("")) match {
-      case Some(m) => m
+    val model = uri match {
+      case Some(u) => Registry.resolve(u)
       case None =>
-        throw new ModelRegistryResolveException(
-          s"Can not resolve model ${name} from URI: ${uri}"
+        throw new ModelResolveException(
+          "Must provide URI to CREATE MODEL (for now)"
         )
     }
     model.name = name

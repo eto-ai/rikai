@@ -16,9 +16,9 @@
 
 package ai.eto.rikai.sql.spark.parser
 
-import ai.eto.rikai.sql.expressions.Predict
 import ai.eto.rikai.sql.model.{Catalog, Registry}
 import ai.eto.rikai.sql.spark.SparkRunnable
+import ai.eto.rikai.sql.spark.expressions.Predict
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.analysis.UnresolvedAttribute
 import org.apache.spark.sql.catalyst.expressions.{Expression, Literal}
@@ -44,10 +44,6 @@ private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
       )
     )
 
-  val registry: Registry = Registry.get(
-    session.conf.get(Registry.MODEL_REGISTRY_IMPL_KEY)
-  )
-
   override def visitFunctionCall(ctx: FunctionCallContext): Expression =
     withOrigin(ctx) {
       ctx.functionName.getText.toLowerCase(Locale.ROOT) match {
@@ -69,29 +65,27 @@ private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
         )
       }
 
-      val model = arguments.head match {
+      val model_name = arguments.head
+      val model = model_name match {
         case arg: UnresolvedAttribute => catalog.getModel(arg.name)
-        case arg: Literal             => registry.resolve(arg.toString)
+        case arg: Literal             => Registry.resolve(arg.toString)
         case _ =>
           throw new ParseException(
-            s"Can not recognize model name ${arguments.head}, class=${arguments.head.getClass}",
+            s"Can not recognize model name ${model_name}",
             ctx
           )
       }
 
       model match {
-        case Some(runnable) =>
-          runnable match {
-            case r: SparkRunnable => r.asSpark(arguments.drop(1))
-            case _ =>
-              throw new ParseException(
-                s"Model ${model} is not runnable in Spark",
-                ctx
-              )
-          }
+        case r: SparkRunnable => r.asSpark(arguments.drop(1))
         case None =>
           throw new ParseException(
             s"Model ${arguments.head} does not exist",
+            ctx
+          )
+        case _ =>
+          throw new ParseException(
+            s"Model ${model_name} is not runnable in Spark",
             ctx
           )
       }

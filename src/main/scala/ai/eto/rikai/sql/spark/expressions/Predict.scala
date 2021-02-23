@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql.expressions
+package ai.eto.rikai.sql.spark.expressions
 
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder

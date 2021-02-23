@@ -16,6 +16,7 @@
 
 package ai.eto.rikai.sql.spark.parser
 
+import ai.eto.rikai.sql.model.Registry
 import org.antlr.v4.runtime._
 import org.antlr.v4.runtime.atn.PredictionMode
 import org.antlr.v4.runtime.misc.{Interval, ParseCancellationException}
@@ -49,7 +50,14 @@ private[sql] class RikaiExtSqlParser(
 
   private val builder = new RikaiExtAstBuilder()
 
+  private lazy val registyInitialized = {
+    Registry.registerAll(session.conf.getAll); true
+  }
+
   override def parsePlan(sqlText: String): LogicalPlan = {
+    if (!registyInitialized) {
+      // not suppose to be here?
+    }
     parse(sqlText) { parser =>
       {
         builder.visit(parser.singleStatement) match {

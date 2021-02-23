@@ -82,8 +82,7 @@ option
     ;
 
 optionKey
-    : STRING
-    | IDENTIFIER
+    : IDENTIFIER
     ;
 
 optionValue

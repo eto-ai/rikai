@@ -30,7 +30,7 @@ class RikaiExtSqlParserTest extends AnyFunSuite {
       case cmd: CreateModelCommand => {
         assert(cmd.name == "foo")
         assert(cmd.path.get == "model://foo/bar")
-        assert(cmd.options == Map("device" ->  "gpu", "min_score" -> 0.2))
+        assert(cmd.options == Map("device" ->  "'gpu'", "min_score" -> "0.2"))
       }
       case _ => {
         assert(

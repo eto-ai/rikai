@@ -16,7 +16,7 @@
 
 package ai.eto.rikai.sql.parser
 
-import ai.eto.rikai.sql.execution.{CreateModelCommand,ShowModelsCommand}
+import ai.eto.rikai.sql.execution.{CreateModelCommand, ShowModelsCommand}
 import ai.eto.rikai.sql.parser.RikaiSqlBaseParser._
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.catalyst.parser.ParseException
@@ -42,10 +42,15 @@ class RikaiExtAstBuilder extends RikaiSqlBaseBaseVisitor[AnyRef] {
       }
     }
 
-  protected def parseOptionList(ctx: OptionListContext): Map[String, String] =
-    withOrigin(ctx) {
-      ctx.option().asScala.map(option => (option.key.getText, option.value.getText)).toMap
+  protected def parseOptionList(ctx: OptionListContext): Map[String, String] = {
+    if (ctx != null) {
+      withOrigin(ctx) {
+        ctx.option().asScala.map(option => (option.key.getText, option.value.getText)).toMap
+      }
+    } else {
+      Map.empty
     }
+  }
 
   override def visitSingleStatement(ctx: SingleStatementContext): LogicalPlan =
     withOrigin(ctx) {

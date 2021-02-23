@@ -13,6 +13,9 @@ import org.json4s.jackson.Serialization.write
 
 
 case class ShowModelsCommand() extends RunnableCommand {
+
+    implicit val formats = Serialization.formats(NoTypeHints)
+
     override val output: Seq[Attribute] = Seq(
         AttributeReference("Model Name", StringType, nullable = false)(),
         AttributeReference("Model Path", StringType, nullable = false)(),
@@ -25,7 +28,6 @@ case class ShowModelsCommand() extends RunnableCommand {
         models.map { modelIdent: Model =>
             val name = modelIdent.name
             val path = modelIdent.path
-            implicit val formats = Serialization.formats(NoTypeHints)
             val option = write(modelIdent.Options)
             Row(name, path, option)
         }

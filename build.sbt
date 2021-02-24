@@ -26,11 +26,13 @@ publishMavenStyle := true
 libraryDependencies ++= {
   val sparkVersion = "3.0.1"
   val awsVersion = "2.15.69"
+  val log4jVersion = "11.0"
   val scalatestVersion = "3.2.0"
 
   Seq(
     "org.apache.spark" %% "spark-sql" % sparkVersion % "provided",
     "software.amazon.awssdk" % "s3" % awsVersion % "provided",
+    "org.apache.logging.log4j" %% "log4j-api-scala" % log4jVersion,
     "org.scalatest" %% "scalatest-funsuite" % scalatestVersion % "test"
   )
 }

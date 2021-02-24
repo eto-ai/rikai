@@ -16,6 +16,8 @@
 
 package ai.eto.rikai.sql.model
 
+import org.apache.log4j.Logger
+
 import java.net.URI
 
 /**
@@ -39,6 +41,8 @@ trait Registry {
 }
 
 object Registry {
+
+  private val logger = Logger.getLogger(Registry.getClass)
 
   val REGISTRY_IMPL_PREFIX = "rikai.sql.ml.registry."
   val REGISTRY_IMPL_SUFFIX = ".impl"
@@ -84,7 +88,9 @@ object Registry {
             .getDeclaredConstructor(classOf[Map[String, String]])
             .newInstance(conf)
             .asInstanceOf[Registry])
+        logger.debug(s"Model Registry ${schema} registered to: ${value}")
       }
+
     }
   }
 

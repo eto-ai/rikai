@@ -26,11 +26,13 @@ publishMavenStyle := true
 libraryDependencies ++= {
   val sparkVersion = "3.0.1"
   val awsVersion = "2.15.69"
+  val log4jVersion = "11.0"
   val scalatestVersion = "3.2.0"
 
   Seq(
     "org.apache.spark" %% "spark-sql" % sparkVersion % "provided",
     "software.amazon.awssdk" % "s3" % awsVersion % "provided",
+    "org.apache.logging.log4j" %% "log4j-api-scala" % log4jVersion,
     "org.scalatest" %% "scalatest-funsuite" % scalatestVersion % "test"
   )
 }
@@ -69,12 +71,12 @@ releaseProcess := Seq[ReleaseStep](
   pushChanges
 )
 
-antlr4PackageName in Antlr4 := Some("ai.eto.rikai.sql.parser")
+antlr4PackageName in Antlr4 := Some("ai.eto.rikai.sql.spark.parser")
 antlr4GenVisitor in Antlr4 := true
 
 enablePlugins(Antlr4Plugin)
 
 Compile / doc / scalacOptions ++= Seq(
   "-skip-packages",
-  "ai.eto.rikai.sql.parser"
+  "ai.eto.rikai.sql.spark.parser"
 )

@@ -58,7 +58,23 @@ trait Catalog {
 object Catalog {
 
   val SQL_ML_CATALOG_IMPL_KEY = "rikai.sql.ml.catalog.impl"
+  val SQL_ML_CATALOG_IMPL_DEFAULT = "ai.eto.rikai.sql.model.SimpleCatalog"
 
   /** A Catalog for local testing. */
-  def testing: Catalog = SimpleCatalog()
+  private[rikai] def testing: SimpleCatalog = {
+    getOrCreate(SQL_ML_CATALOG_IMPL_DEFAULT).asInstanceOf[SimpleCatalog]
+  }
+
+  private var catalog: Catalog = null
+
+  def getOrCreate(className: String): Catalog = {
+    if (catalog == null) {
+      catalog = Class
+        .forName(className)
+        .getDeclaredConstructor()
+        .newInstance()
+        .asInstanceOf[Catalog]
+    }
+    catalog
+  }
 }

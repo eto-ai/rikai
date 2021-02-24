@@ -35,5 +35,9 @@ package ai.eto.rikai
   *   # Drop a Model
   *   DROP MODEL model_name
   * }}}
+  *
+  * A `ML_PREDICT` function is implemented to run model inference.
+  *
+  * {{{ SELECT id, ML_PREDICT(model_name, col1, col2, col3) as predicted FROM table }}}
   */
 package object sql {}

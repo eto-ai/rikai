@@ -16,8 +16,12 @@
 
 package ai.eto.rikai.sql.model
 
+import org.apache.log4j.Logger
+
+import java.net.URI
+
 /**
-  * Model Registry Integration.
+  * Model Registry Integrations.
   */
 trait Registry {
 
@@ -25,22 +29,108 @@ trait Registry {
     * Resolve a Model from the specific URI.
     *
     * @param uri is the model registry URI.
+    * @param name is an optional model name. If provided,
+    *             will create the [[Model]] with this name.
     *
-    * @return [[Model]] if found, ``None`` otherwise.
+    * @throws ModelNotFoundException if the model does not exist on the registry.
+    *
+    * @return [[Model]] if found.
     */
-  def resolve(uri: String): Option[Model]
+  @throws[ModelNotFoundException]
+  def resolve(uri: String, name: Option[String] = None): Model
 }
 
 object Registry {
 
-  val MODEL_REGISTRY_IMPL_KEY = "rikai.sql.ml.model_registry.impl"
+  private val logger = Logger.getLogger(Registry.getClass)
 
-  /** Get a ModelRegistry from its class name. */
-  def get(className: String): Registry = {
-    Class
-      .forName(className)
-      .getDeclaredConstructor()
-      .newInstance()
-      .asInstanceOf[Registry]
+  val REGISTRY_IMPL_PREFIX = "rikai.sql.ml.registry."
+  val REGISTRY_IMPL_SUFFIX = ".impl"
+
+  /** Mapping from Model URI schema to the registry. */
+  private var registryMap: Map[String, Registry] = Map.empty
+
+  @throws[ModelResolveException]
+  private def verifySchema(schema: String): Unit = {
+    val schemaRegex = """[a-zA-Z][\w\+]{0,255}"""
+    if (!schema.matches(schemaRegex)) {
+      throw new ModelResolveException(
+        s"Schema '${schema}' does not match '${schemaRegex}'"
+      )
+    }
+  }
+
+  /**
+    * Register all registry implementations.
+    *
+    * @param conf a mapping of (key, value) pairs
+    */
+  def registerAll(conf: Map[String, String]): Unit = {
+    for ((key, value) <- conf) {
+      if (
+        key.startsWith(REGISTRY_IMPL_PREFIX) &&
+        key.endsWith(REGISTRY_IMPL_SUFFIX)
+      ) {
+        val schema =
+          key.substring(
+            REGISTRY_IMPL_PREFIX.length,
+            key.length - REGISTRY_IMPL_SUFFIX.length
+          )
+        verifySchema(schema)
+        if (registryMap.contains(schema)) {
+          throw new ModelRegistryAlreadyExistException(
+            s"ModelRegistry(${schema}) exists"
+          )
+        }
+        registryMap += (schema ->
+          Class
+            .forName(value)
+            .getDeclaredConstructor(classOf[Map[String, String]])
+            .newInstance(conf)
+            .asInstanceOf[Registry])
+        logger.debug(s"Model Registry ${schema} registered to: ${value}")
+      }
+
+    }
+  }
+
+  /**
+    * Resolve a [[Model]] from a model registry URI.
+    *
+    * Internally it uses model registry URI to find the appropriated [[Registry]] to run
+    * [[Registry.resolve]].
+    *
+    * @param uri the model registry URI
+    * @param name optionally, model name
+    *
+    * @throws ModelNotFoundException if the model not found on the registry.
+    * @throws ModelResolveException can not resolve the model due to system issues.
+    *
+    * @return the resolved [[Model]]
+    */
+  @throws[ModelResolveException]
+  @throws[ModelNotFoundException]
+  def resolve(uri: String, name: Option[String] = None): Model = {
+    val parsedUri = new URI(uri)
+    val schema = parsedUri.getScheme
+    registryMap.get(schema) match {
+      case Some(registry) => registry.resolve(uri, name = name)
+      case None =>
+        throw new ModelResolveException(
+          s"Model registry schema '${schema}' is not supported"
+        )
+    }
+  }
+
+  /** Used in testing to reset the registry */
+  private[sql] def reset: Unit = {
+    registryMap = Map.empty
   }
 }
+
+class ModelResolveException(message: String) extends Exception(message)
+
+class ModelNotFoundException(message: String) extends Exception(message)
+
+class ModelRegistryAlreadyExistException(message: String)
+    extends Exception(message)

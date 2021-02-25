@@ -17,7 +17,7 @@
 package ai.eto.rikai.sql.spark.execution
 
 import ai.eto.rikai.SparkTestSession
-import ai.eto.rikai.sql.model.{Catalog, FakeModel}
+import ai.eto.rikai.sql.model.{Catalog, FakeModel, ModelNotFoundException}
 import org.scalatest.funsuite.AnyFunSuite
 
 class DescribeModelCommandTest extends AnyFunSuite with SparkTestSession {
@@ -31,5 +31,11 @@ class DescribeModelCommandTest extends AnyFunSuite with SparkTestSession {
     val expected = Seq(("model_foo", "uri://model/foo")).toDF("model", "uri")
     assertEqual(spark.sql("DESCRIBE MODEL model_foo"), expected)
     assertEqual(spark.sql("DESC MODEL model_foo"), expected)
+  }
+
+  test("describe non-exist model") {
+    assertThrows[ModelNotFoundException] {
+      spark.sql("DESCRIBE MODEL not_exist")
+    }
   }
 }

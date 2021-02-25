@@ -16,29 +16,21 @@
 
 package ai.eto.rikai.sql.spark.execution
 
-import ai.eto.rikai.sql.model.{ModelResolveException, Registry}
-import org.apache.spark.sql.catalyst.TableIdentifier
+import ai.eto.rikai.sql.model.ModelNotFoundException
+import org.apache.spark.sql.catalyst.expressions.Attribute
 import org.apache.spark.sql.{Row, SparkSession}
 
-case class CreateModelCommand(
-    name: String,
-    uri: Option[String],
-    table: Option[TableIdentifier],
-    replace: Boolean,
-    options: Map[String, String]
-) extends ModelCommand {
+case class DescribeModelCommand(name: String) extends ModelCommand {
 
-  override def run(spark: SparkSession): Seq[Row] = {
-    val model = uri match {
-      case Some(u) => Registry.resolve(u, Some(name))
+  override val output: Seq[Attribute] = ModelCommand.output
+
+  override def run(session: SparkSession): Seq[Row] = {
+    catalog(session).getModel(name) match {
+      case Some(model) => Seq(Row(model.name, model.uri))
       case None =>
-        throw new ModelResolveException(
-          "Must provide URI to CREATE MODEL (for now)"
-        )
+        throw new ModelNotFoundException(s"Model '${name}' not found")
     }
-    catalog(spark).createModel(model)
-    Seq.empty
   }
 
-  override def toString(): String = s"CreateModelCommand(${name}, uri=${uri})"
+  override def toString: String = s"DescribeModelCommand(${name})"
 }

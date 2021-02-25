@@ -37,9 +37,8 @@ trait SparkTestSession extends BeforeAndAfterEach {
 
   spark.sparkContext.setLogLevel("WARN")
 
-  override def beforeEach(): Unit = {
+  override def beforeEach(): Unit =
     Catalog.testing.clear()
-  }
 
   def assertEqual(actual: DataFrame, expected: DataFrame): Unit = {
     assert(actual.count() == expected.count())

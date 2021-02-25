@@ -16,7 +16,10 @@
 
 package ai.eto.rikai.sql.spark.parser
 
-import ai.eto.rikai.sql.spark.execution.CreateModelCommand
+import ai.eto.rikai.sql.spark.execution.{
+  CreateModelCommand,
+  DescribeModelCommand
+}
 import ai.eto.rikai.sql.spark.parser.RikaiExtSqlBaseParser._
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.catalyst.parser.ParseException
@@ -46,6 +49,10 @@ private[parser] class RikaiExtAstBuilder
       replace = false,
       options = Map.empty
     )
+  }
+
+  override def visitDescribeModel(ctx: DescribeModelContext): LogicalPlan = {
+    DescribeModelCommand(ctx.model.getText)
   }
 
   override def visitQualifiedName(ctx: QualifiedNameContext): String =

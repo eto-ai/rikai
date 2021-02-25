@@ -41,7 +41,8 @@ quotedIdentifier
     : BACKQUOTED_IDENTIFIER
     ;
 
-nonReserved:
+nonReserved
+    : CREATE | DESC | DESCRIBE | MODEL | MODELS | OPTIONS | REPLACE
     ;
 
 AS: 'AS';

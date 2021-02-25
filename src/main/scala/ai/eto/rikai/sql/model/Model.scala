@@ -36,4 +36,13 @@ object Model {
 
   /** Model Name Pattern */
   val namePattern = """[a-zA-Z]\w{0,255}""".r
+
+  @throws[ModelNameException]
+  def verifyName(name: String): Unit = {
+    if (!name.matches(namePattern.regex)) {
+      throw new ModelNameException(s"Model name '${name}' is not valid")
+    }
+  }
 }
+
+class ModelNameException(message: String) extends Exception(message);

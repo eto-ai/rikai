@@ -16,23 +16,15 @@
 
 package ai.eto.rikai.sql.spark.execution
 
-import ai.eto.rikai.sql.model.{Catalog, ModelNotFoundException}
-import org.apache.spark.sql.execution.command.RunnableCommand
+import ai.eto.rikai.sql.model.ModelNotFoundException
 import org.apache.spark.sql.{Row, SparkSession}
 
 case class DropModelCommand(
     name: String
-) extends RunnableCommand {
+) extends ModelCommand {
 
   override def run(session: SparkSession): Seq[Row] = {
-    val catalog =
-      Catalog.getOrCreate(
-        session.conf.get(
-          Catalog.SQL_ML_CATALOG_IMPL_KEY,
-          Catalog.SQL_ML_CATALOG_IMPL_DEFAULT
-        )
-      )
-    if (!catalog.dropModel(name))
+    if (!catalog(session).dropModel(name))
       throw new ModelNotFoundException(s"Model not found: ${name}")
     Seq.empty
   }

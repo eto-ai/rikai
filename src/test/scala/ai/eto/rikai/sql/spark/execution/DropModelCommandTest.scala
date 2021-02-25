@@ -20,6 +20,7 @@ import ai.eto.rikai.SparkTestSession
 import ai.eto.rikai.sql.model.{
   Catalog,
   FakeModel,
+  ModelNameException,
   ModelNotFoundException,
   SimpleCatalog
 }
@@ -47,6 +48,12 @@ class DropModelCommandTest extends AnyFunSuite with SparkTestSession {
   test("drop not exist table") {
     assertThrows[ModelNotFoundException] {
       spark.sql("DROP MODEL not_exist").show()
+    }
+  }
+
+  test("drop table bad name") {
+    assertThrows[ModelNameException] {
+      spark.sql("DROP MODEL").count()
     }
   }
 }

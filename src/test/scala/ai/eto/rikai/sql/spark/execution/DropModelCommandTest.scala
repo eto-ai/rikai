@@ -20,11 +20,11 @@ import ai.eto.rikai.SparkTestSession
 import ai.eto.rikai.sql.model.{
   Catalog,
   FakeModel,
-  ModelNameException,
   ModelNotFoundException,
   SimpleCatalog
 }
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.catalyst.parser.ParseException
 import org.scalatest.funsuite.AnyFunSuite
 
 class DropModelCommandTest extends AnyFunSuite with SparkTestSession {
@@ -52,7 +52,7 @@ class DropModelCommandTest extends AnyFunSuite with SparkTestSession {
   }
 
   test("drop table bad name") {
-    assertThrows[ModelNameException] {
+    assertThrows[ParseException] {
       spark.sql("DROP MODEL").count()
     }
   }

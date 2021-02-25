@@ -16,9 +16,9 @@
 
 package ai.eto.rikai.sql.spark.execution
 
-import ai.eto.rikai.sql.model.Catalog
-import org.apache.spark.sql.{Row, SparkSession}
+import ai.eto.rikai.sql.model.{Catalog, ModelNotFoundException}
 import org.apache.spark.sql.execution.command.RunnableCommand
+import org.apache.spark.sql.{Row, SparkSession}
 
 case class DropModelCommand(
     name: String
@@ -32,7 +32,8 @@ case class DropModelCommand(
           Catalog.SQL_ML_CATALOG_IMPL_DEFAULT
         )
       )
-    catalog.dropModel(name)
+    if (!catalog.dropModel(name))
+      throw new ModelNotFoundException(s"Model not found: ${name}")
     Seq.empty
   }
 }

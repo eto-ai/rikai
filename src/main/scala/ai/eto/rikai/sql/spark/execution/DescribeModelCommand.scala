@@ -17,16 +17,12 @@
 package ai.eto.rikai.sql.spark.execution
 
 import ai.eto.rikai.sql.model.ModelNotFoundException
-import org.apache.spark.sql.catalyst.expressions.{Attribute, AttributeReference}
-import org.apache.spark.sql.types.StringType
+import org.apache.spark.sql.catalyst.expressions.Attribute
 import org.apache.spark.sql.{Row, SparkSession}
 
 case class DescribeModelCommand(name: String) extends ModelCommand {
 
-  override val output: Seq[Attribute] = Seq(
-    AttributeReference("name", StringType, nullable = false)(),
-    AttributeReference("uri", StringType, nullable = false)()
-  )
+  override val output: Seq[Attribute] = ModelCommand.output
 
   override def run(session: SparkSession): Seq[Row] = {
     catalog(session).getModel(name) match {

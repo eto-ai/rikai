@@ -29,6 +29,10 @@ trait SparkTestSession extends BeforeAndAfterEach {
       "ai.eto.rikai.sql.spark.RikaiSparkSessionExtensions"
     )
     .config(
+      Catalog.SQL_ML_CATALOG_IMPL_KEY,
+      Catalog.SQL_ML_CATALOG_IMPL_DEFAULT
+    )
+    .config(
       Registry.REGISTRY_IMPL_PREFIX + "fake.impl",
       "ai.eto.rikai.sql.model.FakeRegistry"
     )

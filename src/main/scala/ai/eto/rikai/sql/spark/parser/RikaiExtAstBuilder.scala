@@ -16,10 +16,14 @@
 
 package ai.eto.rikai.sql.spark.parser
 
+<<<<<<< HEAD
 import ai.eto.rikai.sql.spark.execution.{
   CreateModelCommand,
   DescribeModelCommand
 }
+=======
+import ai.eto.rikai.sql.spark.execution.{CreateModelCommand, DropModelCommand}
+>>>>>>> add support for drop model statement, and tests
 import ai.eto.rikai.sql.spark.parser.RikaiExtSqlBaseParser._
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.catalyst.parser.ParseException
@@ -53,6 +57,12 @@ private[parser] class RikaiExtAstBuilder
 
   override def visitDescribeModel(ctx: DescribeModelContext): LogicalPlan = {
     DescribeModelCommand(ctx.model.getText)
+  }
+  
+  override def visitDropModel(ctx: DropModelContext): LogicalPlan = {
+    DropModelCommand(
+      ctx.model.getText
+    )
   }
 
   override def visitQualifiedName(ctx: QualifiedNameContext): String =

@@ -16,9 +16,8 @@
 
 package ai.eto.rikai.sql.spark.execution
 
-import ai.eto.rikai.sql.model.{Catalog, ModelResolveException, Registry}
+import ai.eto.rikai.sql.model.{ModelResolveException, Registry}
 import org.apache.spark.sql.catalyst.TableIdentifier
-import org.apache.spark.sql.execution.command.RunnableCommand
 import org.apache.spark.sql.{Row, SparkSession}
 
 case class CreateModelCommand(
@@ -27,16 +26,9 @@ case class CreateModelCommand(
     table: Option[TableIdentifier],
     replace: Boolean,
     options: Map[String, String]
-) extends RunnableCommand {
+) extends ModelCommand {
 
   override def run(spark: SparkSession): Seq[Row] = {
-    val catalog =
-      Catalog.getOrCreate(
-        spark.conf.get(
-          Catalog.SQL_ML_CATALOG_IMPL_KEY,
-          Catalog.SQL_ML_CATALOG_IMPL_DEFAULT
-        )
-      )
     val model = uri match {
       case Some(u) => Registry.resolve(u, Some(name))
       case None =>
@@ -44,7 +36,7 @@ case class CreateModelCommand(
           "Must provide URI to CREATE MODEL (for now)"
         )
     }
-    catalog.createModel(model)
+    catalog(spark).createModel(model)
     Seq.empty
   }
 

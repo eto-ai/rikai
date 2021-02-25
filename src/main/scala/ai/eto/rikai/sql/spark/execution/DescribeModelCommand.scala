@@ -35,4 +35,6 @@ case class DescribeModelCommand(name: String) extends ModelCommand {
         throw new ModelNotFoundException(s"Model '${name}' not found")
     }
   }
+
+  override def toString: String = s"DescribeModelCommand(${name})"
 }

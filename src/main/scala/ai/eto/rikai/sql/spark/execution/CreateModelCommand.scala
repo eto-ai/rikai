@@ -36,6 +36,7 @@ case class CreateModelCommand(
           "Must provide URI to CREATE MODEL (for now)"
         )
     }
+    model.options ++= options
     catalog(spark).createModel(model)
     Seq.empty
   }

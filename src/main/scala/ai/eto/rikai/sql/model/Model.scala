@@ -31,7 +31,7 @@ trait Model {
   val registry: Registry
 
   /** Model Options. */
-  val options: Map[String, String] = Map.empty
+  var options: Map[String, String] = Map.empty
 }
 
 object Model {

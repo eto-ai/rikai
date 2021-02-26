@@ -72,8 +72,20 @@ private[parser] class RikaiExtAstBuilder
       case _    => ctx.option().asScala.map(visitOption).toMap
     }
 
-  override def visitOption(ctx: OptionContext): (String, String) =
-    ctx.key.getText -> ctx.value.getText
+  override def visitOption(ctx: OptionContext): (String, String) = {
+    // TODO: find a more scala way?
+    val value = if (ctx.value.BOOLEAN_VALUE() != null) {
+      ctx.value.BOOLEAN_VALUE().getSymbol.getText
+    } else if (ctx.value.DECIMAL_VALUE() != null) {
+      ctx.value.DECIMAL_VALUE().getSymbol.getText
+    } else if (ctx.value.INTEGER_VALUE() != null) {
+      ctx.value.INTEGER_VALUE().getSymbol.getText
+    } else {
+      val strVal = ctx.value.STRING().getSymbol.getText
+      strVal.substring(1, strVal.length - 1)
+    }
+    ctx.key.getText -> value
+  }
 
   override def visitQualifiedName(ctx: QualifiedNameContext): String =
     ctx.getText

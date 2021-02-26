@@ -83,7 +83,7 @@ option
     ;
 
 optionKey
-    : STRING
+    : identifier
     ;
 
 optionValue

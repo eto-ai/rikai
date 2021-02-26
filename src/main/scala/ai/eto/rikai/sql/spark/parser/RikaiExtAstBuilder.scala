@@ -50,7 +50,7 @@ private[parser] class RikaiExtAstBuilder
       uri = Option(ctx.uri).map(string),
       table = None,
       replace = false,
-      options = Map.empty
+      options = visitOptionList(ctx.optionList())
     )
   }
 
@@ -64,6 +64,30 @@ private[parser] class RikaiExtAstBuilder
     DropModelCommand(
       ctx.model.getText
     )
+  }
+
+  override def visitOptionList(ctx: OptionListContext): Map[String, String] =
+    ctx match {
+      case null => Map.empty
+      case _    => ctx.option().asScala.map(visitOption).toMap
+    }
+
+  override def visitOption(ctx: OptionContext): (String, String) = {
+    // TODO: find a more scala way?
+    val value: String = if (ctx.value.booleanValue() != null) {
+      if (ctx.value.booleanValue().TRUE() != null)
+        "true"
+      else {
+        "false"
+      }
+    } else if (ctx.value.DECIMAL_VALUE() != null) {
+      ctx.value.DECIMAL_VALUE.getSymbol.getText
+    } else if (ctx.value.INTEGER_VALUE() != null) {
+      ctx.value.INTEGER_VALUE.getSymbol.getText
+    } else {
+      string(ctx.value.STRING)
+    }
+    ctx.key.getText -> value
   }
 
   override def visitQualifiedName(ctx: QualifiedNameContext): String =

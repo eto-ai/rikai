@@ -27,9 +27,11 @@ trait Model {
   /** Model URI in the registry */
   val uri: String
 
-  /** The model registry object.
-    */
+  /** The model registry object. */
   val registry: Registry
+
+  /** Model Options. */
+  var options: Map[String, String] = Map.empty
 }
 
 object Model {

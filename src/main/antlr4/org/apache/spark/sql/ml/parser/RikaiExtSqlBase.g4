@@ -83,13 +83,13 @@ option
     ;
 
 optionKey
-    : STRING
+    : identifier
     ;
 
 optionValue
     : INTEGER_VALUE
     | DECIMAL_VALUE
-    | BOOLEAN_VALUE
+    | booleanValue
     | STRING
     ;
 
@@ -101,7 +101,7 @@ DECIMAL_VALUE
     : DECIMAL_DIGITS
     ;
 
-BOOLEAN_VALUE
+booleanValue
     : TRUE | FALSE
     ;
 

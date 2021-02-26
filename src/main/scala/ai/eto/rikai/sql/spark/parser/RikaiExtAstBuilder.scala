@@ -50,7 +50,7 @@ private[parser] class RikaiExtAstBuilder
       uri = Option(ctx.uri).map(string),
       table = None,
       replace = false,
-      options = Map.empty
+      options = visitOptionList(ctx.optionList())
     )
   }
 
@@ -65,6 +65,15 @@ private[parser] class RikaiExtAstBuilder
       ctx.model.getText
     )
   }
+
+  override def visitOptionList(ctx: OptionListContext): Map[String, String] =
+    ctx match {
+      case null => Map.empty
+      case _    => ctx.option().asScala.map(visitOption).toMap
+    }
+
+  override def visitOption(ctx: OptionContext): (String, String) =
+    ctx.key.getText -> ctx.value.getText
 
   override def visitQualifiedName(ctx: QualifiedNameContext): String =
     ctx.getText

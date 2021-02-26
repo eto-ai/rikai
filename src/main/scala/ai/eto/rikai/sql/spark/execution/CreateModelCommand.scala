@@ -16,6 +16,7 @@
 
 package ai.eto.rikai.sql.spark.execution
 
+import org.apache.logging.log4j.scala.Logging
 import ai.eto.rikai.sql.model.{ModelResolveException, Registry}
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.{Row, SparkSession}
@@ -26,7 +27,8 @@ case class CreateModelCommand(
     table: Option[TableIdentifier],
     replace: Boolean,
     options: Map[String, String]
-) extends ModelCommand {
+) extends ModelCommand
+    with Logging {
 
   override def run(spark: SparkSession): Seq[Row] = {
     val model = uri match {
@@ -38,6 +40,7 @@ case class CreateModelCommand(
     }
     model.options ++= options
     catalog(spark).createModel(model)
+    logger.info(s"Model ${model} created")
     Seq.empty
   }
 

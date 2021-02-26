@@ -74,19 +74,18 @@ private[parser] class RikaiExtAstBuilder
 
   override def visitOption(ctx: OptionContext): (String, String) = {
     // TODO: find a more scala way?
-    val value = if (ctx.value.booleanValue() != null) {
+    val value: String = if (ctx.value.booleanValue() != null) {
       if (ctx.value.booleanValue().TRUE() != null)
         "true"
       else {
         "false"
       }
     } else if (ctx.value.DECIMAL_VALUE() != null) {
-      ctx.value.DECIMAL_VALUE().getSymbol.getText
+      ctx.value.DECIMAL_VALUE.getSymbol.getText
     } else if (ctx.value.INTEGER_VALUE() != null) {
-      ctx.value.INTEGER_VALUE().getSymbol.getText
+      ctx.value.INTEGER_VALUE.getSymbol.getText
     } else {
-      val strVal = ctx.value.STRING().getSymbol.getText
-      strVal.substring(1, strVal.length - 1)
+      string(ctx.value.STRING)
     }
     ctx.key.getText -> value
   }

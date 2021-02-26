@@ -28,6 +28,11 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
       .sql("CREATE MODEL model_created USING 'fake://model/created/from/uri'")
       .count()
     assert(Catalog.testing.modelExists("model_created"))
+
+    val model = Catalog.testing.getModel("model_created").get
+    assert(model.name == "model_created")
+    assert(model.uri == "fake://model/created/from/uri")
+    assert(model.options.isEmpty)
   }
 
   test("create model with options") {

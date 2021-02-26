@@ -42,7 +42,7 @@ import org.apache.spark.sql.{AnalysisException, SparkSession}
   * @param session SparkSession
   * @param delegate the fallback parser if this can not recognize the statement.
   */
-private[sql] class RikaiExtSqlParser(
+private[spark] class RikaiExtSqlParser(
     val session: SparkSession,
     val delegate: ParserInterface
 ) extends ParserInterface

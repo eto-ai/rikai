@@ -33,11 +33,17 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
   test("create model with options") {
     spark
       .sql(
-        "CREATE MODEL model_options OPTIONS (foo='bar',num=1.2) USING 'fake://foo'"
+        "CREATE MODEL model_options OPTIONS (foo='bar',num=1.2,flag=True) USING 'fake://foo'"
       )
       .count()
 
     val model = Catalog.testing.getModel("model_options").get
-    assert(model.options == Seq("foo" -> "bar", "num" -> "1.2").toMap)
+    assert(
+      model.options == Seq(
+        "foo" -> "bar",
+        "num" -> "1.2",
+        "flag" -> "true"
+      ).toMap
+    )
   }
 }

@@ -26,7 +26,8 @@ publishMavenStyle := true
 libraryDependencies ++= {
   val sparkVersion = "3.0.1"
   val awsVersion = "2.15.69"
-  val log4jVersion = "11.0"
+  val log4jScalaVersion = "12.0"
+  val log4jVersion = "2.13.0"
   val snappyVersion = "1.1.8.4" // Support Apple Silicon
   val scalatestVersion = "3.2.0"
 
@@ -34,7 +35,8 @@ libraryDependencies ++= {
     "org.apache.spark" %% "spark-sql" % sparkVersion % "provided",
     "software.amazon.awssdk" % "s3" % awsVersion % "provided",
     "org.xerial.snappy" % "snappy-java" % snappyVersion,
-    "org.apache.logging.log4j" %% "log4j-api-scala" % log4jVersion,
+    "org.apache.logging.log4j" %% "log4j-api-scala" % log4jScalaVersion,
+    "org.apache.logging.log4j" % "log4j-core" % log4jVersion % Runtime,
     "org.scalatest" %% "scalatest-funsuite" % scalatestVersion % "test"
   )
 }

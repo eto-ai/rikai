@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql.model
+package ai.eto.rikai.sql.model.testing
 
+import ai.eto.rikai.sql.model.{Model, Registry}
 import ai.eto.rikai.sql.spark.SparkRunnable
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.UnresolvedFunction
 import org.apache.spark.sql.catalyst.expressions.Expression
 
-import java.io.File
-import java.net.URI
-
-/** a FakeModel for testing */
-class FakeModel(
+/** a [[TestModel]] for testing */
+class TestModel(
     val name: String,
     val uri: String,
     funcName: String,
@@ -36,6 +34,8 @@ class FakeModel(
   def this(name: String, uri: String, registry: Registry) =
     this(name, uri, name, registry)
 
+  override def toString: String = s"TestModel(${name}, uri=${uri})"
+
   /**
     * Convert a [[ai.eto.rikai.sql.model.Model]] to a Spark Expression in Spark SQL's logical plan.
     */
@@ -45,38 +45,5 @@ class FakeModel(
       arguments = args,
       isDistinct = false
     )
-  }
-}
-
-/**
-  * FakeRegistry for the testing purpose.
-  *
-  * A valid model URI is: "model://hostname/model_name"
-  */
-class FakeRegistry(conf: Map[String, String]) extends Registry {
-
-  /**
-    * Resolve a Model from the specific URI.
-    *
-    * @param uri is the model registry URI.
-    *
-    * @return [[Model]] if found, ``None`` otherwise.
-    */
-  @throws[ModelNotFoundException]
-  override def resolve(uri: String, name: Option[String] = None): Model = {
-    val parsed = URI.create(uri)
-    parsed.getScheme match {
-      case "fake" => {
-        val model_name = name match {
-          case Some(name) => name
-          case None =>
-            new File(
-              parsed.getAuthority + "/" + parsed.getPath
-            ).getName
-        }
-        new FakeModel(model_name, uri, this)
-      }
-      case _ => throw new ModelNotFoundException(s"Fake model ${uri} not found")
-    }
   }
 }

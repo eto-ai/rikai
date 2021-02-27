@@ -34,8 +34,8 @@ trait SparkTestSession extends BeforeAndAfterEach {
       Catalog.SQL_ML_CATALOG_IMPL_DEFAULT
     )
     .config(
-      Registry.REGISTRY_IMPL_PREFIX + "fake.impl",
-      "ai.eto.rikai.sql.model.FakeRegistry"
+      Registry.REGISTRY_IMPL_PREFIX + "test.impl",
+      "ai.eto.rikai.sql.model.testing.TestRegistry"
     )
     .master("local[*]")
     .getOrCreate

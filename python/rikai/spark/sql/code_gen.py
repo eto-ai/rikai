@@ -34,8 +34,9 @@ class ModelCodeGen(object):
     def __repr__(self):
         return "ModelResolver"
 
-    def resolve(self, uri: str, options: Dict[str, str]):
-        pass
+    def generate(self, model):
+        print(model.toString())
+        print(model.options)
 
     def register(self):
         jvm = self.spark.sparkContext._jvm

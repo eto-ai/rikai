@@ -24,6 +24,14 @@ def spark() -> SparkSession:
     return (
         SparkSession.builder.appName("spark-test")
         .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.2-SNAPSHOT")
+        .config(
+            "spark.sql.extensions",
+            "ai.eto.rikai.sql.spark.RikaiSparkSessionExtensions"
+        )
+        .config(
+            "rikai.sql.ml.registry.test.impl",
+            "ai.eto.rikai.sql.model.testing.TestRegistry"
+        )
         .master("local[2]")
         .getOrCreate()
     )

@@ -22,7 +22,7 @@ def test_model_codegen_registered(spark: SparkSession):
         session.start()
 
         spark.sql(
-            """CREATE MODEL foo OPTIONS (foo="str",bar=True) USING 'test://modke/a/b/c'"""
+            """CREATE MODEL foo OPTIONS (foo="str",bar=True,max_score=1.23) USING 'test://model/a/b/c'"""
         ).count()
     finally:
         session.stop()

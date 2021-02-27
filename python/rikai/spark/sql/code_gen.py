@@ -1,4 +1,4 @@
-#  Copyright 2020 Rikai Authors
+#  Copyright 2021 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -12,29 +12,38 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import Dict
+
 from pyspark.sql import SparkSession
 
-from rikai.spark.sql.code_gen import ModelCodeGen
 from rikai.logging import logger
 
-__all__ = ["RikaiSession"]
+__all__ = ["ModelCodeGen"]
 
 
-class RikaiSession:
-    """Rikai session maintains the connection and callback server from Spark JVM.
+class ModelCodeGen(object):
+    """ModelCodeGen generate python code for a Model.
+
+    Notes
+    -----
+    Internal use only
     """
-
     def __init__(self, spark: SparkSession):
-        assert spark != None
         self.spark = spark
-        self.model_resolver = ModelCodeGen(spark)
 
-    def start(self):
-        self.spark.sparkContext._gateway.start_callback_server()
-        logger.info("Spark callback server stopped")
+    def __repr__(self):
+        return "ModelResolver"
 
-        self.model_resolver.register()
+    def resolve(self, uri: str, options: Dict[str, str]):
+        pass
 
-    def stop(self):
-        self.spark.sparkContext._gateway.shutdown_callback_server()
-        logger.info("Spark callback server stopped")
+    def register(self):
+        jvm = self.spark.sparkContext._jvm
+        jvm.ai.eto.rikai.sql.spark.ModelCodeGen.register(self)
+        logger.info("Rikai ModelCodeGen(py) is registered to SparkSession")
+
+    def toString(self):
+        return repr(self)
+
+    class Java:
+        implements = ["ai.eto.rikai.sql.spark.ModelCodeGen"]

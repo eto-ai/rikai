@@ -17,6 +17,7 @@
 package ai.eto.rikai
 
 import ai.eto.rikai.sql.model.{Catalog, Registry}
+import ai.eto.rikai.sql.spark.{ModelCodeGen, TestModelCodeGen}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterEach, Suite}
 
@@ -41,8 +42,10 @@ trait SparkTestSession extends BeforeAndAfterEach {
 
   spark.sparkContext.setLogLevel("WARN")
 
-  override def beforeEach(): Unit =
+  override def beforeEach(): Unit = {
     Catalog.testing.clear()
+    ModelCodeGen.register(new TestModelCodeGen)
+  }
 
   def assertEqual(actual: DataFrame, expected: DataFrame): Unit = {
     assert(actual.count() == expected.count())

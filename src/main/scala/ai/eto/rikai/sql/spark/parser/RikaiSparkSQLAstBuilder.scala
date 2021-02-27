@@ -17,7 +17,7 @@
 package ai.eto.rikai.sql.spark.parser
 
 import ai.eto.rikai.sql.model.{Catalog, Registry}
-import ai.eto.rikai.sql.spark.SparkRunnable
+import ai.eto.rikai.sql.spark.{ModelCodeGen, SparkRunnable}
 import ai.eto.rikai.sql.spark.expressions.Predict
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.analysis.UnresolvedAttribute
@@ -68,7 +68,11 @@ private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
       val model_name = arguments.head
       val model = model_name match {
         case arg: UnresolvedAttribute => catalog.getModel(arg.name)
-        case arg: Literal             => Registry.resolve(arg.toString)
+        case arg: Literal => {
+          val model = Registry.resolve(arg.toString)
+          ModelCodeGen.generateCode(model)
+          model
+        }
         case _ =>
           throw new ParseException(
             s"Can not recognize model name ${model_name}",

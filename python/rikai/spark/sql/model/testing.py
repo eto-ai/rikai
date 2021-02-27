@@ -11,16 +11,5 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 
-from pyspark.sql.session import SparkSession
-
-from rikai.spark.sql import RikaiSession
-
-
-def test_model_codegen_registered(spark: SparkSession):
-    session = RikaiSession(spark)
-    try:
-        session.start()
-
-        spark.sql("""CREATE MODEL foo OPTIONS (foo="str",bar=True) USING 'test://modke/a/b/c'""").count()
-    finally:
-        session.stop()
+class TestModel:
+    pass

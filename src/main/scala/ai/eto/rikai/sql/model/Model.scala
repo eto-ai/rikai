@@ -35,7 +35,9 @@ trait Model {
   /** Model Options. */
   var options: Map[String, String] = Map.empty
 
-  def javaOptions: java.util.Map[String, String] = mapAsJavaMap(options)
+  final def javaOptions: java.util.Map[String, String] = mapAsJavaMap(options)
+
+  def pyClass: String = ""
 }
 
 object Model {

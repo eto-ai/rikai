@@ -8,7 +8,7 @@ import ai.eto.rikai.sql.model.Model
 trait ModelCodeGen {
 
   /** Generate code for Model */
-  def generate(model: Model): Unit
+  def generate(model: Model, temporary: Boolean): Unit
 }
 
 object ModelCodeGen {
@@ -26,8 +26,8 @@ object ModelCodeGen {
     }
   }
 
-  def generateCode(model: Model): Unit = {
+  def generateCode(model: Model, temporary: Boolean = true): Unit = {
     checkRegistered
-    codeGenerator.get.generate(model)
+    codeGenerator.get.generate(model, temporary)
   }
 }

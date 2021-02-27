@@ -33,10 +33,11 @@ class ModelCodeGen(object):
     def __repr__(self):
         return "ModelResolver"
 
-    def generate(self, model):
+    def generate(self, model, temporary):
         opt = model.javaOptions()
         options = {key: opt[key] for key in opt}
-        print(model.toString(), options)
+        py_class = model.pyClass()
+        print(model.toString(), options, model.pyClass())
 
     def register(self):
         jvm = self.spark.sparkContext._jvm

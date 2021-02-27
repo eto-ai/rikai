@@ -34,7 +34,7 @@ class CallbackService(object):
     def __repr__(self):
         return "PythonCbService"
 
-    def generate(self, model, temporary):
+    def codegen(self, model, temporary: bool):
         opt = model.javaOptions()
         options = {key: opt[key] for key in opt}
         py_class = model.pyClass()
@@ -42,7 +42,7 @@ class CallbackService(object):
 
     def register(self):
         jvm = self.spark.sparkContext._jvm
-        jvm.ai.eto.rikai.sql.spark.ModelCodeGen.register(self)
+        jvm.ai.eto.rikai.sql.spark.Python.register(self)
         logger.info(
             "Rikai Python CallbackService is registered to SparkSession"
         )

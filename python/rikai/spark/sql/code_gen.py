@@ -12,8 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Dict
-
 from pyspark.sql import SparkSession
 
 from rikai.logging import logger
@@ -22,12 +20,13 @@ __all__ = ["ModelCodeGen"]
 
 
 class ModelCodeGen(object):
-    """ModelCodeGen generate python code for a Model.
+    """ModelCodeGen does JIT in python code for a Model.
 
     Notes
     -----
     Internal use only
     """
+
     def __init__(self, spark: SparkSession):
         self.spark = spark
 
@@ -35,8 +34,9 @@ class ModelCodeGen(object):
         return "ModelResolver"
 
     def generate(self, model):
-        print(model.toString())
-        print(model.options)
+        opt = model.javaOptions()
+        options = {key: opt[key] for key in opt}
+        print(model.toString(), options)
 
     def register(self):
         jvm = self.spark.sparkContext._jvm

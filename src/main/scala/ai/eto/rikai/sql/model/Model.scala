@@ -16,6 +16,8 @@
 
 package ai.eto.rikai.sql.model
 
+import scala.collection.JavaConverters.mapAsJavaMap
+
 /**
   * A Machine Learning Model in Rikai Catalog.
   */
@@ -32,6 +34,8 @@ trait Model {
 
   /** Model Options. */
   var options: Map[String, String] = Map.empty
+
+  def javaOptions: java.util.Map[String, String] = mapAsJavaMap(options)
 }
 
 object Model {

@@ -8,6 +8,6 @@ def test_model_resolver_register(spark: SparkSession):
     try:
         session.start()
 
-        spark.sql("""CREATE MODEL foo USING 'test://modke/a/b/c'""").count()
+        spark.sql("""CREATE MODEL foo OPTIONS (foo="str",bar=True) USING 'test://modke/a/b/c'""").count()
     finally:
         session.stop()

@@ -36,7 +36,7 @@ class TestModel(
 
   override def toString: String = s"TestModel(${name}, uri=${uri})"
 
-  override def pyClass: String = "rikai.spark.sql.model.testing.TestModel"
+  override def pyClass: String = "rikai.spark.sql.codegen.testing.TestModel"
 
   /**
     * Convert a [[ai.eto.rikai.sql.model.Model]] to a Spark Expression in Spark SQL's logical plan.

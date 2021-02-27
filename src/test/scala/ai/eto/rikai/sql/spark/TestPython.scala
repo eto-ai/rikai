@@ -19,7 +19,7 @@ package ai.eto.rikai.sql.spark
 import ai.eto.rikai.sql.model.Model
 
 /**
-  * [[Python]] for unit testing
+  * [[Python]] callback service for unit testing
   */
 class TestPython extends Python {
 

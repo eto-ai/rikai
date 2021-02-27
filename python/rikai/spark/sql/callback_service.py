@@ -42,8 +42,9 @@ class CallbackService(object):
         model : jvm Model class
             The model to generate python code.
         temporary : bool
-            Set true of the generated code will only be used once. Temporary code generation
-            will be used when we use `ML_PREDICT` directly with a model URI.
+            Set true of the generated code will only be used once. Temporary
+            code generation will be used when we use `ML_PREDICT` directly
+            with a model URI.
         """
         opt = model.javaOptions()
         options = {key: opt[key] for key in opt}

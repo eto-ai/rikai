@@ -21,10 +21,11 @@ __all__ = ["RikaiSession"]
 
 
 class RikaiSession:
-    """Rikai session maintains the connection and callback server from Spark JVM."""
+    """Rikai session maintains the connection and callback server from Spark
+    JVM."""
 
     def __init__(self, spark: SparkSession):
-        assert spark != None
+        assert spark is not None
         self.spark = spark
         self.callback_service = CallbackService(spark)
         self.started = False

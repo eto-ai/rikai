@@ -38,7 +38,7 @@ class CallbackService(object):
         opt = model.javaOptions()
         options = {key: opt[key] for key in opt}
         py_class = model.pyClass()
-        print(model.toString(), options, model.pyClass())
+        print(model.toString(), options, py_class)
 
     def register(self):
         jvm = self.spark.sparkContext._jvm

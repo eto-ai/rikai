@@ -11,6 +11,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 
+from typing import Dict
+
 
 class TestModel:
-    pass
+    def __init__(self, name: str, uri: str, options: Dict[str, str]):
+        self.name = name
+        self.uri = uri
+        self.options = options
+

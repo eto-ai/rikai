@@ -21,6 +21,8 @@ def test_model_codegen_registered(spark: SparkSession):
     try:
         session.start()
 
-        spark.sql("""CREATE MODEL foo OPTIONS (foo="str",bar=True) USING 'test://modke/a/b/c'""").count()
+        spark.sql(
+            """CREATE MODEL foo OPTIONS (foo="str",bar=True) USING 'test://modke/a/b/c'"""
+        ).count()
     finally:
         session.stop()

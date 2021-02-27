@@ -18,6 +18,10 @@ package ai.eto.rikai.sql.spark
 
 import ai.eto.rikai.sql.model.Model
 
+/**
+  * [[ModelCodeGen]] for unit testing
+  */
 class TestModelCodeGen extends ModelCodeGen {
-  override def generate(model: Model): Unit = {}
+
+  override def generate(model: Model, temporary: Boolean): Unit = {}
 }

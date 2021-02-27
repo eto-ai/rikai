@@ -21,8 +21,7 @@ __all__ = ["RikaiSession"]
 
 
 class RikaiSession:
-    """Rikai session maintains the connection and callback server from Spark JVM.
-    """
+    """Rikai session maintains the connection and callback server from Spark JVM."""
 
     def __init__(self, spark: SparkSession):
         assert spark != None

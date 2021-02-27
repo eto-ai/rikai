@@ -14,8 +14,8 @@
 
 from pyspark.sql import SparkSession
 
-from rikai.spark.sql.code_gen import ModelCodeGen
 from rikai.logging import logger
+from rikai.spark.sql.callback_service import CallbackService
 
 __all__ = ["RikaiSession"]
 
@@ -27,13 +27,24 @@ class RikaiSession:
     def __init__(self, spark: SparkSession):
         assert spark != None
         self.spark = spark
-        self.model_resolver = ModelCodeGen(spark)
+        self.callback_service = CallbackService(spark)
+        self.started = False
+
+    def __enter__(self):
+        if not self.started:
+            self.start()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.started:
+            self.stop()
 
     def start(self):
         self.spark.sparkContext._gateway.start_callback_server()
-        logger.info("Spark callback server stopped")
+        logger.info("Spark callback server started")
 
-        self.model_resolver.register()
+        self.callback_service.register()
+        logger.info("Rikai Python callback service registered")
+        self.started = True
 
     def stop(self):
         self.spark.sparkContext._gateway.shutdown_callback_server()

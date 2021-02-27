@@ -16,11 +16,12 @@ from pyspark.sql import SparkSession
 
 from rikai.logging import logger
 
-__all__ = ["ModelCodeGen"]
+__all__ = ["CallbackService"]
 
 
-class ModelCodeGen(object):
-    """ModelCodeGen does JIT in python code for a Model.
+class CallbackService(object):
+    """:py:class:`CallbackService` allows SparkSessions' JVM to run
+    arbitrary code in SparkSession's python interpreter.
 
     Notes
     -----
@@ -31,7 +32,7 @@ class ModelCodeGen(object):
         self.spark = spark
 
     def __repr__(self):
-        return "ModelResolver"
+        return "PythonCbService"
 
     def generate(self, model, temporary):
         opt = model.javaOptions()
@@ -42,10 +43,12 @@ class ModelCodeGen(object):
     def register(self):
         jvm = self.spark.sparkContext._jvm
         jvm.ai.eto.rikai.sql.spark.ModelCodeGen.register(self)
-        logger.info("Rikai ModelCodeGen(py) is registered to SparkSession")
+        logger.info(
+            "Rikai Python CallbackService is registered to SparkSession"
+        )
 
     def toString(self):
         return repr(self)
 
     class Java:
-        implements = ["ai.eto.rikai.sql.spark.ModelCodeGen"]
+        implements = ["ai.eto.rikai.sql.spark.Python"]

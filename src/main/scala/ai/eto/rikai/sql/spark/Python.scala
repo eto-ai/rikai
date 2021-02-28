@@ -29,14 +29,14 @@ trait Python {
 }
 
 object Python {
-  private var codeGenerator: Option[Python] = None
+  private var python: Option[Python] = None
 
   def register(mr: Python): Unit =
-    codeGenerator = Some(mr)
+    python = Some(mr)
 
   @throws[RuntimeException]
   def checkRegistered: Unit = {
-    if (codeGenerator.isEmpty) {
+    if (python.isEmpty) {
       throw new RuntimeException("""ModelResolved has not been initialized.
           |Please make sure "rikai.spark.sql.RikaiSession" has started.
           |""".stripMargin)
@@ -45,6 +45,6 @@ object Python {
 
   def generateCode(model: Model, temporary: Boolean = true): Unit = {
     checkRegistered
-    codeGenerator.get.codegen(model, temporary)
+    python.get.codegen(model, temporary)
   }
 }

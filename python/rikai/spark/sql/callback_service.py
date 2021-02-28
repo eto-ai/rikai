@@ -49,7 +49,7 @@ class CallbackService(object):
         opt = model.javaOptions()
         options = {key: opt[key] for key in opt}
         py_class = model.pyClass()
-        print(model.toString(), options, py_class)
+        print(model.toString(), options, py_class, temporary)
 
     def register(self):
         """Register this :py:class:`CallbackService` to SparkSession's JVM."""

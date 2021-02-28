@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from py4j.java_gateway import CallbackServerParameters
 from pyspark.sql import SparkSession
 
 from rikai.logging import logger
@@ -39,7 +40,13 @@ class RikaiSession:
             self.stop()
 
     def start(self):
-        self.spark.sparkContext._gateway.start_callback_server()
+        jvm = self.spark.sparkContext._gateway
+        params = CallbackServerParameters(
+            daemonize=True,
+            daemonize_connections=True,
+            auth_token=jvm.gateway_parameters.auth_token,
+        )
+        jvm.start_callback_server(callback_server_parameters=params)
         logger.info("Spark callback server started")
 
         self.callback_service.register()
@@ -47,5 +54,5 @@ class RikaiSession:
         self.started = True
 
     def stop(self):
-        self.spark.sparkContext._gateway.shutdown_callback_server()
+        # self.spark.sparkContext._gateway.shutdown_callback_server()
         logger.info("Spark callback server stopped")

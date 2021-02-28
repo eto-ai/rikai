@@ -20,5 +20,18 @@ __all__ = ["init"]
 
 
 def init(spark: SparkSession):
-    """Initialize SQL-ML services."""
+    """Initialize SQL-ML services.
+
+    .. code-block:: python
+
+        # To start use Rikai SQL-ML in Spark
+        from rikai.spark.sql import init
+
+        spark = (
+            SparkSession
+            ...
+            .getOrCreate)
+        init(spark)
+
+    """
     init_cb_service(spark)

@@ -66,8 +66,10 @@ class CallbackService:
         opt = model.javaOptions()
         options = {key: opt[key] for key in opt}
         py_class = model.pyClass()
-        logger.debug(f"Code generation for model={model.toString()}, options={options}"
-                     f", pyClass=${py_class}, temporary=${temporary}")
+        logger.debug(
+            f"Code generation for model={model.toString()}, options={options}"
+            f", pyClass=${py_class}, temporary=${temporary}"
+        )
 
     def register(self):
         """Register this :py:class:`CallbackService` to SparkSession's JVM."""

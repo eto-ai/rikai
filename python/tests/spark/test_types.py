@@ -16,10 +16,12 @@ from pathlib import Path
 
 from pyspark.sql import Row, SparkSession, DataFrame
 from pyspark.sql.functions import col
+from pyspark.sql.types import ArrayType, StructField, StructType, IntegerType
 
 # Rikai
 from rikai.types import Box3d, Box2d, Point, YouTubeVideo, VideoStream, Segment
 from rikai.testing.asserters import assert_count_equal
+from rikai.spark.types import Box2dType, PointType, NDArrayType
 
 
 def _check_roundtrip(spark: SparkSession, df: DataFrame, tmp_path: Path):
@@ -66,3 +68,21 @@ def test_videostream(spark, tmpdir):
 def test_segment(spark, tmpdir):
     df = spark.createDataFrame([Row(Segment(0, 10)), Row(Segment(15, -1))])
     _check_roundtrip(spark, df, tmpdir)
+
+
+def test_schema_ddl():
+    schema = StructType(
+        [
+            StructField("box", Box2dType(), False),
+            StructField("num", IntegerType(), False),
+            StructField("points", ArrayType(PointType()), False),
+            StructField(
+                "nested",
+                StructType([StructField("score", IntegerType(), False)]),
+                False,
+            ),
+            StructField("mask", NDArrayType(), False),
+        ]
+    )
+    print(dir(schema))
+    print(schema.simpleString())

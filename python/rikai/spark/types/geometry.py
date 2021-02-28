@@ -109,7 +109,7 @@ class PointType(UserDefinedType):
         return Point(datum[0], datum[1], datum[2])
 
     def simpleString(self) -> str:
-        return "PointType"
+        return "point"
 
 
 class Box3dType(UserDefinedType):

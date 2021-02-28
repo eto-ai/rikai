@@ -99,4 +99,8 @@ class Box2dType extends UserDefinedType[Box2d] {
   override def defaultSize: Int = 32
 
   override def typeName: String = "box2d"
+
+  override def simpleString: String = "box2d"
+
+  override def toString: String = "Box2dType"
 }

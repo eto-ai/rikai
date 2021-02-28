@@ -21,10 +21,12 @@ import ai.eto.rikai.sql.model.{Catalog, FakeModel, Model}
 import org.scalatest.funsuite.AnyFunSuite
 
 class ShowModelsCommandTest extends AnyFunSuite with SparkTestSession {
+
   import spark.implicits._
 
   test("show empty") {
-    val expected = Seq.empty[(String, String, String)].toDF("name", "uri", "options")
+    val expected =
+      Seq.empty[(String, String, String)].toDF("name", "uri", "options")
     assertEqual(spark.sql("SHOW MODELS"), expected)
   }
 
@@ -33,7 +35,8 @@ class ShowModelsCommandTest extends AnyFunSuite with SparkTestSession {
       new FakeModel("model_foo", "uri://model/foo", null)
     )
 
-    val expected = Seq(("model_foo", "uri://model/foo", "{}")).toDF("name", "uri", "options")
+    val expected =
+      Seq(("model_foo", "uri://model/foo", "{}")).toDF("name", "uri", "options")
     val result = spark.sql("SHOW MODELS")
     assertEqual(result, expected)
   }
@@ -49,17 +52,23 @@ class ShowModelsCommandTest extends AnyFunSuite with SparkTestSession {
       "num" -> "1.2",
       "flag" -> "true"
     ).toMap
-    val expected = Seq(("model_options", "fake://foo", Model.serializeOptions(expected_options))).toDF("name", "uri", "options")
+    val expected = Seq(
+      ("model_options", "fake://foo", Model.serializeOptions(expected_options))
+    ).toDF("name", "uri", "options")
     assertEqual(spark.sql("SHOW MODELS"), expected)
   }
 
   test("show multiple models") {
     spark
-      .sql("CREATE MODEL model_foo OPTIONS (foo='bar',num=1.2,flag=True) USING 'fake://foo'")
+      .sql(
+        "CREATE MODEL model_foo OPTIONS (foo='bar',num=1.2,flag=True) USING 'fake://foo'"
+      )
     assert(spark.sql("SHOW MODELS").count() == 1)
 
     spark
-      .sql("CREATE MODEL model_bar OPTIONS (foo='bar',num=1.2,flag=True) USING 'fake://bar'")
+      .sql(
+        "CREATE MODEL model_bar OPTIONS (foo='bar',num=1.2,flag=True) USING 'fake://bar'"
+      )
     assert(spark.sql("SHOW MODELS").count() == 2)
 
     // same name

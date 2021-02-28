@@ -27,7 +27,8 @@ case class DescribeModelCommand(name: String) extends ModelCommand {
 
   override def run(session: SparkSession): Seq[Row] = {
     catalog(session).getModel(name) match {
-      case Some(model) => Seq(Row(model.name, model.uri, Model.serializeOptions(model.options)))
+      case Some(model) =>
+        Seq(Row(model.name, model.uri, Model.serializeOptions(model.options)))
       case None =>
         throw new ModelNotFoundException(s"Model '${name}' not found")
     }

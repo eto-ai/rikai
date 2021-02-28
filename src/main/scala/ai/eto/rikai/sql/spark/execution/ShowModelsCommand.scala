@@ -20,7 +20,6 @@ import org.apache.spark.sql.{Row, SparkSession}
 import ai.eto.rikai.sql.model.Model
 import org.apache.spark.sql.catalyst.expressions.Attribute
 
-
 case class ShowModelsCommand() extends ModelCommand {
 
   override val output: Seq[Attribute] = ModelCommand.output
@@ -30,8 +29,8 @@ case class ShowModelsCommand() extends ModelCommand {
 
     if (models.isEmpty) Seq.empty
     else {
-      models.map {
-        model: Model => Row(model.name, model.uri, Model.serializeOptions(model.options))
+      models.map { model: Model =>
+        Row(model.name, model.uri, Model.serializeOptions(model.options))
       }
     }
   }

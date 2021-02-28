@@ -16,6 +16,8 @@
 
 package ai.eto.rikai.sql.model
 
+import scala.collection.JavaConverters.mapAsJavaMap
+
 /**
   * A Machine Learning Model in Rikai Catalog.
   */
@@ -32,6 +34,13 @@ trait Model {
 
   /** Model Options. */
   var options: Map[String, String] = Map.empty
+
+  /** python class if this model has a python counterpart. */
+  def pyClass: String = ""
+
+  /** Return options as java Map, so that it is easily accessible in Python via py4j. */
+  final def javaOptions: java.util.Map[String, String] = mapAsJavaMap(options)
+
 }
 
 object Model {

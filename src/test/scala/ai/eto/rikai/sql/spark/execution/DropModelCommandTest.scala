@@ -17,12 +17,8 @@
 package ai.eto.rikai.sql.spark.execution
 
 import ai.eto.rikai.SparkTestSession
-import ai.eto.rikai.sql.model.{
-  Catalog,
-  FakeModel,
-  ModelNotFoundException,
-  SimpleCatalog
-}
+import ai.eto.rikai.sql.model.testing.TestModel
+import ai.eto.rikai.sql.model.{Catalog, ModelNotFoundException, SimpleCatalog}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.parser.ParseException
 import org.scalatest.funsuite.AnyFunSuite
@@ -38,7 +34,7 @@ class DropModelCommandTest extends AnyFunSuite with SparkTestSession {
     val catalog = getCatalog(spark)
     assert(!catalog.modelExists("dropped_model"))
 
-    catalog.createModel(new FakeModel("dropped_model", "uri", null))
+    catalog.createModel(new TestModel("dropped_model", "uri", null))
     assert(catalog.modelExists("dropped_model"))
 
     spark.sql("DROP MODEL dropped_model").show()

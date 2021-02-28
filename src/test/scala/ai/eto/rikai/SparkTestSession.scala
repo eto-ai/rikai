@@ -17,6 +17,7 @@
 package ai.eto.rikai
 
 import ai.eto.rikai.sql.model.{Catalog, Registry}
+import ai.eto.rikai.sql.spark.{Python, TestPython}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterEach, Suite}
 
@@ -33,16 +34,18 @@ trait SparkTestSession extends BeforeAndAfterEach {
       Catalog.SQL_ML_CATALOG_IMPL_DEFAULT
     )
     .config(
-      Registry.REGISTRY_IMPL_PREFIX + "fake.impl",
-      "ai.eto.rikai.sql.model.FakeRegistry"
+      Registry.REGISTRY_IMPL_PREFIX + "test.impl",
+      "ai.eto.rikai.sql.model.testing.TestRegistry"
     )
     .master("local[*]")
     .getOrCreate
 
   spark.sparkContext.setLogLevel("WARN")
 
-  override def beforeEach(): Unit =
+  override def beforeEach(): Unit = {
     Catalog.testing.clear()
+    Python.register(new TestPython)
+  }
 
   def assertEqual(actual: DataFrame, expected: DataFrame): Unit = {
     assert(actual.count() == expected.count())

@@ -39,7 +39,7 @@ class SchemaUtilsTest extends AnyFunSuite {
     assert("struct<id:int,box:box2d>" == schema.simpleString)
   }
 
-  test("parse with array") {
+  test("parse with nested array") {
     RikaiTypeRegisters.loadUDTs("org.apache.spark.sql")
 
     val schema = StructType(

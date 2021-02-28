@@ -12,11 +12,27 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from py4j.java_gateway import CallbackServerParameters
 from pyspark.sql import SparkSession
 
 from rikai.logging import logger
 
-__all__ = ["CallbackService"]
+__all__ = ["init_cb_service"]
+
+
+def init_cb_service(spark: SparkSession):
+    jvm = spark.sparkContext._gateway
+    params = CallbackServerParameters(
+        daemonize=True,
+        daemonize_connections=True,
+        auth_token=jvm.gateway_parameters.auth_token,
+    )
+    jvm.start_callback_server(callback_server_parameters=params)
+    logger.info("Spark callback server started")
+
+    cb = CallbackService(spark)
+    cb.register()
+    logger.info("Rikai Python callback service registered")
 
 
 class CallbackService(object):

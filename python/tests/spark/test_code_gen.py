@@ -13,17 +13,13 @@
 
 from pyspark.sql.session import SparkSession
 
-from rikai.spark.sql import RikaiSession
+from rikai.spark.sql import init
 
 
 def test_model_codegen_registered(spark: SparkSession):
-    session = RikaiSession(spark)
-    try:
-        session.start()
+    init(spark)
 
-        spark.sql(
-            """CREATE MODEL foo OPTIONS (foo="str",bar=True,max_score=1.23)
-             USING 'test://model/a/b/c'"""
-        ).count()
-    finally:
-        session.stop()
+    spark.sql(
+        """CREATE MODEL foo OPTIONS (foo="str",bar=True,max_score=1.23)
+         USING 'test://model/a/b/c'"""
+    ).count()

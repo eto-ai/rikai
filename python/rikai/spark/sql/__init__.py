@@ -12,4 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from rikai.spark.sql.session import RikaiSession
+from pyspark.sql import SparkSession
+
+from rikai.spark.sql.callback_service import init_cb_service
+
+__all__ = ["init"]
+
+
+def init(spark: SparkSession):
+    """Initialize SQL-ML services."""
+    init_cb_service(spark)

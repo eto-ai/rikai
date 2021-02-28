@@ -23,17 +23,17 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 /**
   * FileSystem-based [[Model]].
   *
-  * It supports the following
+  * It covers the model stored on a file system or cloud storage.
   *
-  * @param name model name
-  * @param uri model uri
-  * @param registry
+  * @param name model name.
+  * @param uri model URI. It can be a `.yml` file, a tar ball or a directory.
+  * @param registry model registry instance.
   */
 class FileSystemModel(val name: String, val uri: String, val registry: Registry)
     extends Model
     with SparkRunnable {
 
-  /** Convert a [[ai.eto.rikai.sql.model.Model]] to a Spark Expression in Spark SQL's logical plan. */
+  /** Convert a [[Model]] to a Spark Expression in Spark SQL's logical plan. */
   override def asSpark(args: Seq[Expression]): Expression = {
     null
   }

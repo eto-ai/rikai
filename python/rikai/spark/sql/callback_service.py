@@ -36,7 +36,7 @@ def init_cb_service(spark: SparkSession):
     logger.info("Rikai Python callback service registered")
 
 
-class CallbackService(object):
+class CallbackService:
     """:py:class:`CallbackService` allows SparkSessions' JVM to run
     arbitrary code in SparkSession's python interpreter.
 
@@ -66,7 +66,8 @@ class CallbackService(object):
         opt = model.javaOptions()
         options = {key: opt[key] for key in opt}
         py_class = model.pyClass()
-        print(model.toString(), options, py_class, temporary)
+        logger.debug(f"Code generation for model={model.toString()}, options={options}"
+                     f", pyClass=${py_class}, temporary=${temporary}")
 
     def register(self):
         """Register this :py:class:`CallbackService` to SparkSession's JVM."""

@@ -16,6 +16,10 @@
 
 package ai.eto.rikai.sql.model
 
+import org.json4s._
+import org.json4s.jackson.Serialization
+import org.json4s.jackson.Serialization.write
+
 /**
   * A Machine Learning Model in Rikai Catalog.
   */
@@ -38,12 +42,17 @@ object Model {
 
   /** Model Name Pattern */
   val namePattern = """[a-zA-Z]\w{0,255}""".r
+  implicit val formats = Serialization.formats(NoTypeHints)
 
   @throws[ModelNameException]
   def verifyName(name: String): Unit = {
     if (!name.matches(namePattern.regex)) {
       throw new ModelNameException(s"Model name '${name}' is not valid")
     }
+  }
+
+  def serializeOptions(options: Map[String, String]): String = {
+    write(options)
   }
 }
 

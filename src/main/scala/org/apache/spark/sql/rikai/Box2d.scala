@@ -19,7 +19,6 @@ package org.apache.spark.sql.rikai
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
 import org.apache.spark.sql.catalyst.InternalRow
-
 import Utils.approxEqual
 
 /**

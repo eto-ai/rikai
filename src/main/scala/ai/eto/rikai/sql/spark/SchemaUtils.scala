@@ -29,16 +29,8 @@ import ai.eto.rikai.sql.spark.parser.{
 }
 import org.antlr.v4.runtime.atn.PredictionMode
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
-import org.apache.spark.sql.rikai.Box2dType
-import org.apache.spark.sql.types.{
-  DataType,
-  DoubleType,
-  FloatType,
-  IntegerType,
-  LongType,
-  StructField,
-  StructType
-}
+import org.apache.spark.sql.rikai.RikaiTypeRegisters
+import org.apache.spark.sql.types._
 
 import scala.collection.JavaConverters.iterableAsScalaIterableConverter
 
@@ -70,8 +62,13 @@ class RikaiModelSchemaBuilder extends RikaiModelSchemaBaseVisitor[AnyRef] {
       case "long"   => LongType
       case "float"  => FloatType
       case "double" => DoubleType
-      case "box2d"  => new Box2dType()
-      case "box3d"  => new Box2dType()
+      case _ => {
+        RikaiTypeRegisters.get(typeName) match {
+          case Some(dt) => dt.getDeclaredConstructor().newInstance()
+          case None =>
+            throw new UnrecognizedSchema(s"Dose not recognize ${typeName}")
+        }
+      }
     }
   }
 }
@@ -102,3 +99,5 @@ object SchemaUtils {
     toResult(parser)
   }
 }
+
+class UnrecognizedSchema(message: String) extends Exception(message)

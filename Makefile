@@ -16,6 +16,7 @@
 all: antlr
 
 antlr: python/rikai/spark/sql/generated/RikaiModelSchemaParser.py
+.PHONY: antlr
 
 python/rikai/spark/sql/generated/RikaiModelSchemaParser.py: src/main/antlr4/org/apache/spark/sql/ml/parser/RikaiModelSchema.g4
 	antlr -Dlanguage=Python3 \
@@ -28,3 +29,8 @@ lint:
 	black -l 79 --check python/rikai python/tests
 	pycodestyle --exclude generated python/rikai python/tests
 .PHONY: lint
+
+fix:
+	sbt scalafmt
+	black -l 79 python/rikai python/tests
+.PHONY: fix

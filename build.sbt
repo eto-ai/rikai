@@ -37,6 +37,7 @@ libraryDependencies ++= {
     "org.xerial.snappy" % "snappy-java" % snappyVersion,
     "org.apache.logging.log4j" %% "log4j-api-scala" % log4jScalaVersion,
     "org.apache.logging.log4j" % "log4j-core" % log4jVersion % Runtime,
+    "org.reflections" % "reflections" % "0.9.12",
     "org.scalatest" %% "scalatest-funsuite" % scalatestVersion % "test"
   )
 }

@@ -38,7 +38,7 @@ object Python {
   def checkRegistered: Unit = {
     if (python.isEmpty) {
       throw new RuntimeException("""ModelResolved has not been initialized.
-          |Please make sure "rikai.spark.sql.RikaiSession" has started.
+          |Please make sure "rikai.spark.sql.init" has been called.
           |""".stripMargin)
     }
   }

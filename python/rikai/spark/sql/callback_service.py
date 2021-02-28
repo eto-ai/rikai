@@ -25,6 +25,7 @@ def init_cb_service(spark: SparkSession):
     params = CallbackServerParameters(
         daemonize=True,
         daemonize_connections=True,
+        # Re-use the auth-token from the main java/spark process
         auth_token=jvm.gateway_parameters.auth_token,
     )
     jvm.start_callback_server(callback_server_parameters=params)

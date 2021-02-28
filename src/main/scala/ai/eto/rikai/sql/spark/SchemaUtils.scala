@@ -16,17 +16,8 @@
 
 package ai.eto.rikai.sql.spark
 
-import ai.eto.rikai.sql.spark.parser.RikaiModelSchemaParser.{
-  PlainFieldTypeContext,
-  SchemaContext,
-  StructFieldContext,
-  StructTypeContext
-}
-import ai.eto.rikai.sql.spark.parser.{
-  RikaiModelSchemaBaseVisitor,
-  RikaiModelSchemaLexer,
-  RikaiModelSchemaParser
-}
+import ai.eto.rikai.sql.spark.parser.RikaiModelSchemaParser.{ArrayTypeContext, PlainFieldTypeContext, SchemaContext, StructFieldContext, StructTypeContext}
+import ai.eto.rikai.sql.spark.parser.{RikaiModelSchemaBaseVisitor, RikaiModelSchemaLexer, RikaiModelSchemaParser}
 import org.antlr.v4.runtime.atn.PredictionMode
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
 import org.apache.spark.sql.rikai.RikaiTypeRegisters
@@ -42,7 +33,6 @@ class RikaiModelSchemaBuilder extends RikaiModelSchemaBaseVisitor[AnyRef] {
   }
 
   override def visitStructType(ctx: StructTypeContext): StructType = {
-    println(s"STRUCT TYPE ${ctx}")
     new StructType(
       ctx.field.asScala.map(visit).map(v => v.asInstanceOf[StructField]).toArray
     )
@@ -55,11 +45,15 @@ class RikaiModelSchemaBuilder extends RikaiModelSchemaBaseVisitor[AnyRef] {
     )
   }
 
+  override def visitArrayType(ctx: ArrayTypeContext): ArrayType = {
+    ArrayType(visit(ctx.fieldType()).asInstanceOf[DataType])
+  }
+
   override def visitPlainFieldType(ctx: PlainFieldTypeContext): DataType = {
     val typeName = ctx.identifier().getText
     typeName.toLowerCase match {
       case "int"    => IntegerType
-      case "long"   => LongType
+      case "long" | "bigint"  => LongType
       case "float"  => FloatType
       case "double" => DoubleType
       case _ => {
@@ -77,6 +71,7 @@ object SchemaUtils {
 
   private val builder = new RikaiModelSchemaBuilder()
 
+  /** Parse a schema simpleString with UDTs */
   def parse(schema: String): DataType = {
     parseSchema(schema) { parser =>
       {

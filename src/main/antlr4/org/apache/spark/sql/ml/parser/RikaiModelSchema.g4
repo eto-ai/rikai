@@ -14,7 +14,8 @@
 
 grammar RikaiModelSchema;
 
-schema: struct;
+schema
+    : struct;
 
 identifier
     : IDENTIFIER		# unquotedIdentifier
@@ -24,8 +25,13 @@ struct
     : STRUCT '<' field (',' field)* '>'  # structType
     ;
 
+array
+    : ARRAY '<' fieldType '>'  # arrayType
+    ;
+
 fieldType
     : struct # nestedStructType
+    | array  # nestedArrayType
     | identifier  # plainFieldType
     ;
 
@@ -33,9 +39,7 @@ field
     : name=identifier ':' fieldType   # structField
     ;
 
-array
-    : ARRAY '<' fieldType '>'  # arrayType
-    ;
+
 
 STRUCT: 'struct';
 ARRAY: 'array';

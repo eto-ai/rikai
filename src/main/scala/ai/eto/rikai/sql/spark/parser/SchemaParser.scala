@@ -24,7 +24,7 @@ import ai.eto.rikai.sql.spark.parser.RikaiModelSchemaParser.{
 }
 import org.antlr.v4.runtime.atn.PredictionMode
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
-import org.apache.spark.sql.rikai.RikaiTypeRegisters
+import org.apache.spark.sql.rikai.UDTCollection
 import org.apache.spark.sql.types._
 
 import scala.collection.JavaConverters.iterableAsScalaIterableConverter
@@ -73,7 +73,7 @@ private class SchemaBuilder extends RikaiModelSchemaBaseVisitor[AnyRef] {
       case "string"             => StringType
       case "binary"             => BinaryType
       case _ => {
-        RikaiTypeRegisters.get(typeName) match {
+        UDTCollection.get(typeName) match {
           case Some(dt) => dt.getDeclaredConstructor().newInstance()
           case None =>
             throw new SchemaParseException(s"Dose not recognize ${typeName}")

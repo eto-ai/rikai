@@ -22,7 +22,7 @@ import org.apache.spark.sql.rikai.{
   Box3dType,
   NDArrayType,
   PointType,
-  RikaiTypeRegisters,
+  UDTCollection,
   SegmentType,
   VideoStreamType,
   YouTubeVideoType
@@ -48,7 +48,7 @@ class SchemaParserTest extends AnyFunSuite with BeforeAndAfterAll {
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-    RikaiTypeRegisters.loadUDTs("org.apache.spark.sql")
+    UDTCollection.loadUDTs("org.apache.spark.sql")
   }
 
   test("parse schema") {

@@ -16,8 +16,18 @@
 
 package ai.eto.rikai.sql.spark
 
-import ai.eto.rikai.sql.spark.parser.RikaiModelSchemaParser.{ArrayTypeContext, PlainFieldTypeContext, SchemaContext, StructFieldContext, StructTypeContext}
-import ai.eto.rikai.sql.spark.parser.{RikaiModelSchemaBaseVisitor, RikaiModelSchemaLexer, RikaiModelSchemaParser}
+import ai.eto.rikai.sql.spark.parser.RikaiModelSchemaParser.{
+  ArrayTypeContext,
+  PlainFieldTypeContext,
+  SchemaContext,
+  StructFieldContext,
+  StructTypeContext
+}
+import ai.eto.rikai.sql.spark.parser.{
+  RikaiModelSchemaBaseVisitor,
+  RikaiModelSchemaLexer,
+  RikaiModelSchemaParser
+}
 import org.antlr.v4.runtime.atn.PredictionMode
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
 import org.apache.spark.sql.rikai.RikaiTypeRegisters
@@ -52,10 +62,10 @@ class RikaiModelSchemaBuilder extends RikaiModelSchemaBaseVisitor[AnyRef] {
   override def visitPlainFieldType(ctx: PlainFieldTypeContext): DataType = {
     val typeName = ctx.identifier().getText
     typeName.toLowerCase match {
-      case "int"    => IntegerType
-      case "long" | "bigint"  => LongType
-      case "float"  => FloatType
-      case "double" => DoubleType
+      case "int"             => IntegerType
+      case "long" | "bigint" => LongType
+      case "float"           => FloatType
+      case "double"          => DoubleType
       case _ => {
         RikaiTypeRegisters.get(typeName) match {
           case Some(dt) => dt.getDeclaredConstructor().newInstance()

@@ -103,3 +103,5 @@ class Box2dType extends UserDefinedType[Box2d] {
 
   override def toString: String = "Box2dType"
 }
+
+case object Box2dType extends Box2dType

@@ -83,7 +83,7 @@ private[rikai] class PointType extends UserDefinedType[Point] {
 
   override def defaultSize: Int = 24
 
-  override def typeName: String = "Point"
+  override def typeName: String = "point"
 }
 
 case object PointType extends PointType

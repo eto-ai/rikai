@@ -17,12 +17,6 @@
 package org.apache.spark.sql.rikai
 
 import ai.eto.rikai.SparkTestSession
-import org.apache.spark.sql.types.{
-  ArrayType,
-  IntegerType,
-  StructField,
-  StructType
-}
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.io.File
@@ -53,19 +47,5 @@ class PointTest extends AnyFunSuite with SparkTestSession {
     assert(df.collect() sameElements actualDf.collect())
 
     new Directory(testDir).deleteRecursively()
-  }
-
-  test("DDL schema") {
-    val schema = StructType(
-      Seq(
-        StructField("id", IntegerType),
-        StructField(
-          "detect",
-          ArrayType(StructType(Seq(StructField("box", new Box2dType()))))
-        )
-      )
-    )
-    println(s"SCHEMA: ${schema.toDDL}")
-    println(s"simple: ${schema.simpleString}")
   }
 }

@@ -17,7 +17,16 @@
 package ai.eto.rikai.sql.spark
 
 import ai.eto.rikai.sql.spark.parser.SchemaParser
-import org.apache.spark.sql.rikai.{Box2dType, RikaiTypeRegisters}
+import org.apache.spark.sql.rikai.{
+  Box2dType,
+  Box3dType,
+  NDArrayType,
+  PointType,
+  RikaiTypeRegisters,
+  SegmentType,
+  VideoStreamType,
+  YouTubeVideoType
+}
 import org.apache.spark.sql.types.{
   ArrayType,
   BinaryType,
@@ -47,7 +56,7 @@ class SchemaParserTest extends AnyFunSuite with BeforeAndAfterAll {
     val schema = StructType(
       Seq(
         StructField("id", IntegerType),
-        StructField("box", new Box2dType())
+        StructField("box", Box2dType)
       )
     )
 
@@ -106,5 +115,15 @@ class SchemaParserTest extends AnyFunSuite with BeforeAndAfterAll {
 
     assert("binary" == BinaryType.simpleString)
     assert(SchemaParser.parse("binary") == BinaryType)
+  }
+
+  test("parse rikai semantic types") {
+    assert(SchemaParser.parse("ndarray") == NDArrayType)
+    assert(SchemaParser.parse("box2d") == Box2dType)
+    assert(SchemaParser.parse("box3d") == Box3dType)
+    assert(SchemaParser.parse("point") == PointType)
+    assert(SchemaParser.parse("segment") == SegmentType)
+    assert(SchemaParser.parse("videoStream") == VideoStreamType)
+    assert(SchemaParser.parse("youTubeVideo") == YouTubeVideoType)
   }
 }

@@ -68,4 +68,3 @@ def test_videostream(spark, tmpdir):
 def test_segment(spark, tmpdir):
     df = spark.createDataFrame([Row(Segment(0, 10)), Row(Segment(15, -1))])
     _check_roundtrip(spark, df, tmpdir)
-

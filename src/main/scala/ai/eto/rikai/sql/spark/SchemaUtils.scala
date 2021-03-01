@@ -19,7 +19,6 @@ package ai.eto.rikai.sql.spark
 import ai.eto.rikai.sql.spark.parser.RikaiModelSchemaParser.{
   ArrayTypeContext,
   PlainFieldTypeContext,
-  SchemaContext,
   StructFieldContext,
   StructTypeContext
 }
@@ -35,12 +34,7 @@ import org.apache.spark.sql.types._
 
 import scala.collection.JavaConverters.iterableAsScalaIterableConverter
 
-class RikaiModelSchemaBuilder extends RikaiModelSchemaBaseVisitor[AnyRef] {
-  override def visitSchema(
-      ctx: SchemaContext
-  ): DataType = {
-    visit(ctx.struct).asInstanceOf[DataType]
-  }
+class SchemaBuilder extends RikaiModelSchemaBaseVisitor[AnyRef] {
 
   override def visitStructType(ctx: StructTypeContext): StructType = {
     new StructType(
@@ -70,7 +64,7 @@ class RikaiModelSchemaBuilder extends RikaiModelSchemaBaseVisitor[AnyRef] {
         RikaiTypeRegisters.get(typeName) match {
           case Some(dt) => dt.getDeclaredConstructor().newInstance()
           case None =>
-            throw new UnrecognizedSchema(s"Dose not recognize ${typeName}")
+            throw new SchemaParseException(s"Dose not recognize ${typeName}")
         }
       }
     }
@@ -79,16 +73,18 @@ class RikaiModelSchemaBuilder extends RikaiModelSchemaBaseVisitor[AnyRef] {
 
 object SchemaUtils {
 
-  private val builder = new RikaiModelSchemaBuilder()
+  private val builder = new SchemaBuilder()
 
   /** Parse a schema simpleString with UDTs */
   def parse(schema: String): DataType = {
     parseSchema(schema) { parser =>
       {
-        builder.visitSchema(parser.schema()) match {
+        builder.visit(parser.schema()) match {
           case dataType: DataType => dataType
           case _ =>
-            throw new RuntimeException(s"does not recognize schema: ${schema}")
+            throw new SchemaParseException(
+              s"does not recognize schema: ${schema}"
+            )
         }
       }
     }
@@ -105,4 +101,4 @@ object SchemaUtils {
   }
 }
 
-class UnrecognizedSchema(message: String) extends Exception(message)
+class SchemaParseException(message: String) extends Exception(message)

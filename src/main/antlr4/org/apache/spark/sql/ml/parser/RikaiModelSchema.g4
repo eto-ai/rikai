@@ -15,7 +15,9 @@
 grammar RikaiModelSchema;
 
 schema
-    : struct;
+    : struct
+    | array
+    ;
 
 identifier
     : IDENTIFIER		# unquotedIdentifier

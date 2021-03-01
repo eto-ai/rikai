@@ -17,13 +17,25 @@
 package ai.eto.rikai.sql.spark
 
 import org.apache.spark.sql.rikai.{Box2dType, RikaiTypeRegisters}
-import org.apache.spark.sql.types.{ArrayType, IntegerType, LongType, StructField, StructType}
+import org.apache.spark.sql.types.{
+  ArrayType,
+  FloatType,
+  IntegerType,
+  LongType,
+  StructField,
+  StructType
+}
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 
-class SchemaUtilsTest extends AnyFunSuite {
+class SchemaUtilsTest extends AnyFunSuite with BeforeAndAfterAll {
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    RikaiTypeRegisters.loadUDTs("org.apache.spark.sql")
+  }
 
   test("parse schema") {
-    RikaiTypeRegisters.loadUDTs("org.apache.spark.sql")
 
     val schema = StructType(
       Seq(
@@ -40,8 +52,6 @@ class SchemaUtilsTest extends AnyFunSuite {
   }
 
   test("parse with nested array") {
-    RikaiTypeRegisters.loadUDTs("org.apache.spark.sql")
-
     val schema = StructType(
       Seq(
         StructField("id", IntegerType),
@@ -54,5 +64,16 @@ class SchemaUtilsTest extends AnyFunSuite {
     assert(actual == schema)
     assert(actual.simpleString == schema.simpleString)
     assert("struct<id:int,scores:array<bigint>>" == schema.simpleString)
+
+    // using long also works
+    assert(SchemaUtils.parse("struct<id:int,scores:array<long>>") == schema)
+  }
+
+  test("parse array of floats") {
+    val schema = ArrayType(FloatType)
+    val schemaText = schema.simpleString
+    val actual = SchemaUtils.parse(schemaText)
+
+    assert(schema == actual)
   }
 }

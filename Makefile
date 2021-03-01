@@ -30,6 +30,7 @@ lint:
 	pycodestyle --exclude generated python/rikai python/tests
 .PHONY: lint
 
+# Fix code style
 fix:
 	sbt scalafmt
 	black -l 79 python/rikai python/tests

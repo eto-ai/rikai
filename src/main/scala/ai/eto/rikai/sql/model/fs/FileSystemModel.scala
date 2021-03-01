@@ -33,6 +33,8 @@ class FileSystemModel(val name: String, val uri: String, val registry: Registry)
     extends Model
     with SparkRunnable {
 
+  override def pyClass: String = "rikai.spark.sql.codegen.fs.FileSystemModel"
+
   /** Convert a [[Model]] to a Spark Expression in Spark SQL's logical plan. */
   override def asSpark(args: Seq[Expression]): Expression = {
     null

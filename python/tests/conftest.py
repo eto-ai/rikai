@@ -19,9 +19,12 @@ from torch.utils.data import DataLoader  # Prevent DataLoader hangs
 from pyspark.sql import SparkSession
 
 
+from rikai.spark.sql import init
+
+
 @pytest.fixture(scope="session")
 def spark() -> SparkSession:
-    return (
+    session = (
         SparkSession.builder.appName("spark-test")
         .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.2-SNAPSHOT")
         .config(
@@ -35,3 +38,5 @@ def spark() -> SparkSession:
         .master("local[2]")
         .getOrCreate()
     )
+    init(session)
+    return session

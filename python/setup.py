@@ -44,6 +44,7 @@ setup(
         "pyspark>=3.1,<3.2",
         "requests",
         "antlr4-python3-runtime",
+        "pyyaml",
     ],
     extras_require={
         "test": test,

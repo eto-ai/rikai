@@ -20,10 +20,15 @@ import ai.eto.rikai.sql.spark.parser.SchemaParser
 import org.apache.spark.sql.rikai.{Box2dType, RikaiTypeRegisters}
 import org.apache.spark.sql.types.{
   ArrayType,
+  BinaryType,
+  BooleanType,
+  ByteType,
   DoubleType,
   FloatType,
   IntegerType,
   LongType,
+  ShortType,
+  StringType,
   StructField,
   StructType
 }
@@ -79,7 +84,27 @@ class SchemaParserTest extends AnyFunSuite with BeforeAndAfterAll {
     assert(schema == actual)
   }
 
-  test("parse primitive value") {
+  test("parse primitive types") {
+    assert(BooleanType.simpleString == "boolean")
+    assert(SchemaParser.parse("bool") == BooleanType)
+    assert(SchemaParser.parse("boolean") == BooleanType)
+
+    assert("tinyint" == ByteType.simpleString)
+    assert(SchemaParser.parse("byte") == ByteType)
+    assert(SchemaParser.parse("tinyint") == ByteType)
+
+    assert("smallint" == ShortType.simpleString)
+    assert(SchemaParser.parse("smallint") == ShortType)
+    assert(SchemaParser.parse("short") == ShortType)
+
+    assert(SchemaParser.parse("int") == IntegerType)
+
     assert(SchemaParser.parse("double") == DoubleType)
+
+    assert("string" == StringType.simpleString)
+    assert(SchemaParser.parse("string") == StringType)
+
+    assert("binary" == BinaryType.simpleString)
+    assert(SchemaParser.parse("binary") == BinaryType)
   }
 }

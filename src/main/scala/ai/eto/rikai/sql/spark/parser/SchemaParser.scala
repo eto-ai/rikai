@@ -63,10 +63,15 @@ private class SchemaBuilder extends RikaiModelSchemaBaseVisitor[AnyRef] {
   override def visitPlainFieldType(ctx: PlainFieldTypeContext): DataType = {
     val typeName = ctx.identifier().getText
     typeName.toLowerCase match {
-      case "int"             => IntegerType
-      case "long" | "bigint" => LongType
-      case "float"           => FloatType
-      case "double"          => DoubleType
+      case "boolean" | "bool"   => BooleanType
+      case "byte" | "tinyint"   => ByteType
+      case "short" | "smallint" => ShortType
+      case "int"                => IntegerType
+      case "long" | "bigint"    => LongType
+      case "float"              => FloatType
+      case "double"             => DoubleType
+      case "string"             => StringType
+      case "binary"             => BinaryType
       case _ => {
         RikaiTypeRegisters.get(typeName) match {
           case Some(dt) => dt.getDeclaredConstructor().newInstance()

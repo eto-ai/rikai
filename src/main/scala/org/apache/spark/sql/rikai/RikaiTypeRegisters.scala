@@ -1,5 +1,6 @@
 package org.apache.spark.sql.rikai
 
+import org.apache.log4j.Logger
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.{SQLUserDefinedType, UserDefinedType}
 import org.reflections.Reflections
@@ -7,6 +8,8 @@ import org.reflections.Reflections
 import scala.collection.JavaConverters._
 
 object RikaiTypeRegisters {
+
+  private val logger = Logger.getLogger("RikaiTypeRegisters")
 
   private var rikaiTypes: Map[String, Class[_ <: UserDefinedType[_]]] =
     Map.empty
@@ -28,7 +31,7 @@ object RikaiTypeRegisters {
           udt.getDeclaredConstructor().newInstance().simpleString -> udt
         )
 
-    println(s"All collected rikai types: ${loadedUdt}")
+    logger.info(s"All collected rikai types: ${loadedUdt}")
     rikaiTypes ++= loadedUdt
   }
 

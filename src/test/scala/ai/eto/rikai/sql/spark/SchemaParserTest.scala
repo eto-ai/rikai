@@ -16,9 +16,11 @@
 
 package ai.eto.rikai.sql.spark
 
+import ai.eto.rikai.sql.spark.parser.SchemaParser
 import org.apache.spark.sql.rikai.{Box2dType, RikaiTypeRegisters}
 import org.apache.spark.sql.types.{
   ArrayType,
+  DoubleType,
   FloatType,
   IntegerType,
   LongType,
@@ -28,7 +30,7 @@ import org.apache.spark.sql.types.{
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 
-class SchemaUtilsTest extends AnyFunSuite with BeforeAndAfterAll {
+class SchemaParserTest extends AnyFunSuite with BeforeAndAfterAll {
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -45,7 +47,7 @@ class SchemaUtilsTest extends AnyFunSuite with BeforeAndAfterAll {
     )
 
     val schemaText = schema.simpleString
-    val actual = SchemaUtils.parse(schemaText)
+    val actual = SchemaParser.parse(schemaText)
     assert(actual == schema)
     assert(actual.simpleString == schema.simpleString)
     assert("struct<id:int,box:box2d>" == schema.simpleString)
@@ -60,20 +62,24 @@ class SchemaUtilsTest extends AnyFunSuite with BeforeAndAfterAll {
     )
 
     val schemaText = schema.simpleString
-    val actual = SchemaUtils.parse(schemaText)
+    val actual = SchemaParser.parse(schemaText)
     assert(actual == schema)
     assert(actual.simpleString == schema.simpleString)
     assert("struct<id:int,scores:array<bigint>>" == schema.simpleString)
 
     // using long also works
-    assert(SchemaUtils.parse("struct<id:int,scores:array<long>>") == schema)
+    assert(SchemaParser.parse("struct<id:int,scores:array<long>>") == schema)
   }
 
   test("parse array of floats") {
     val schema = ArrayType(FloatType)
     val schemaText = schema.simpleString
-    val actual = SchemaUtils.parse(schemaText)
+    val actual = SchemaParser.parse(schemaText)
 
     assert(schema == actual)
+  }
+
+  test("parse primitive value") {
+    assert(SchemaParser.parse("double") == DoubleType)
   }
 }

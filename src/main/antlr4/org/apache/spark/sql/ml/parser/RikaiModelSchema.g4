@@ -15,8 +15,7 @@
 grammar RikaiModelSchema;
 
 schema
-    : struct
-    | array
+    : fieldType
     ;
 
 identifier
@@ -40,8 +39,6 @@ fieldType
 field
     : name=identifier ':' fieldType   # structField
     ;
-
-
 
 STRUCT: 'struct';
 ARRAY: 'array';

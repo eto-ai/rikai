@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql.spark
+package ai.eto.rikai.sql.spark.parser
 
 import ai.eto.rikai.sql.spark.parser.RikaiModelSchemaParser.{
   ArrayTypeContext,
   PlainFieldTypeContext,
   StructFieldContext,
   StructTypeContext
-}
-import ai.eto.rikai.sql.spark.parser.{
-  RikaiModelSchemaBaseVisitor,
-  RikaiModelSchemaLexer,
-  RikaiModelSchemaParser
 }
 import org.antlr.v4.runtime.atn.PredictionMode
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
@@ -34,7 +29,19 @@ import org.apache.spark.sql.types._
 
 import scala.collection.JavaConverters.iterableAsScalaIterableConverter
 
-class SchemaBuilder extends RikaiModelSchemaBaseVisitor[AnyRef] {
+/**
+  * Build Spark's DataType from the model schema AST.
+  *
+  * It accepts any forms of value from `DataType.simpleString()`:
+  *
+  * {{{
+  *   * struct<score:int, box:box2d, label:string>
+  *   * struct<id:int, detection:array<struct<box:box2d, class:int>>>
+  *   * array<float>
+  *   * Primitive type: float
+  * }}}
+  */
+private class SchemaBuilder extends RikaiModelSchemaBaseVisitor[AnyRef] {
 
   override def visitStructType(ctx: StructTypeContext): StructType = {
     new StructType(
@@ -71,7 +78,7 @@ class SchemaBuilder extends RikaiModelSchemaBaseVisitor[AnyRef] {
   }
 }
 
-object SchemaUtils {
+private[sql] object SchemaParser {
 
   private val builder = new SchemaBuilder()
 

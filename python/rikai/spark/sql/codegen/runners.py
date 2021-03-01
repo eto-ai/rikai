@@ -13,10 +13,11 @@
 #  limitations under the License.
 
 
-from typing import Callable, Dict, Optional, Iterator
-from pyspark.sql.types import DataType
-from pyspark.sql.functions import pandas_udf
+from typing import Callable, Dict, Iterator, Optional
+
 import pandas as pd
+from pyspark.sql.functions import pandas_udf
+from pyspark.sql.types import DataType
 
 from rikai.io import open_uri
 
@@ -28,6 +29,7 @@ def pytorch_runner(
     post_processing: Optional[Callable] = None,
     options: Optional[Dict[str, str]] = None,
 ):
+    """Construct a UDF to run pytorch model."""
     if pre_processing is None:
         pre_processing = lambda x: x
     if post_processing is None:

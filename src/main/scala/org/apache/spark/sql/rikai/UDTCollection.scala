@@ -33,17 +33,18 @@ import scala.collection.JavaConverters.iterableAsScalaIterableConverter
   */
 object UDTCollection {
 
-  private val logger = Logger.getLogger("UDTCollections")
+  private val logger = Logger.getLogger(UDTCollection.getClass)
 
   private var udtMap: Map[String, Class[_ <: UserDefinedType[_]]] =
     Map.empty
 
   /**
-    * Load UDTs to work with Rikai schema parser
+    * Load UDTs to work with Rikai schema parser.
     * .
     * @param session SparkSession
     */
   def loadUDTs(session: SparkSession): Unit = {
+    // Load Rikai types
     loadUDTs("org.apache.spark.sql")
     // TODO: support load 3rd Party UDTs via SparkSession.conf
   }

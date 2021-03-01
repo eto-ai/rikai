@@ -69,20 +69,3 @@ def test_segment(spark, tmpdir):
     df = spark.createDataFrame([Row(Segment(0, 10)), Row(Segment(15, -1))])
     _check_roundtrip(spark, df, tmpdir)
 
-
-def test_schema_ddl():
-    schema = StructType(
-        [
-            StructField("box", Box2dType(), False),
-            StructField("num", IntegerType(), False),
-            StructField("points", ArrayType(PointType()), False),
-            StructField(
-                "nested",
-                StructType([StructField("score", IntegerType(), False)]),
-                False,
-            ),
-            StructField("mask", NDArrayType(), False),
-        ]
-    )
-    print(dir(schema))
-    print(schema.simpleString())

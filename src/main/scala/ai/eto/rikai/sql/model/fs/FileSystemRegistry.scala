@@ -36,7 +36,7 @@ class FileSystemRegistry extends Registry with Logging {
     * @return [[Model]] if found.
     */
   @throws[ModelNotFoundException]
-  override def resolve(uri: String, name: Option[String]): Model = {
+  override def resolve(uri: String, name: Option[String]): Model =
     if (uri.endsWith(".yml") || uri.endsWith(".yaml")) {
       logger.info(s"Resolving YAML-based model: ${uri}")
       null
@@ -51,7 +51,7 @@ class FileSystemRegistry extends Registry with Logging {
     } else {
       throw new ModelUriNotSupportedException(s"URI ${uri} is not supported")
     }
-  }
+
 }
 
 class ModelUriNotSupportedException(message: String) extends Exception(message);

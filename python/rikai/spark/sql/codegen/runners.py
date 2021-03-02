@@ -13,38 +13,113 @@
 #  limitations under the License.
 
 
+import os
+from contextlib import contextmanager
 from typing import Callable, Dict, Iterator, Optional
+import json
 
+import numpy as np
 import pandas as pd
 from pyspark.sql.functions import pandas_udf
-from pyspark.sql.types import DataType
+from pyspark.sql.types import (
+    ArrayType,
+    DataType,
+    IntegerType,
+    StructField,
+    StructType,
+    StringType,
+)
+from torch.utils.data import DataLoader, Dataset
+from torchvision import transforms as T
 
 from rikai.io import open_uri
 
 
+@contextmanager
+def cwd(path):
+    oldpwd = os.getcwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(oldpwd)
+
+
+class _Dataset(Dataset):
+    def __init__(self, data: pd.DataFrame, transform: Callable):
+        self.data: pd.DataFrame = data
+        self.transform = transform
+
+    def __len__(self) -> int:
+        return self.data.shape[0]
+
+    def __getitem__(self, index):
+        row = self.data.iloc[index]
+        if self.transform:
+            row = self.transform(row)
+        return row
+
+
+def to_numpy(b):
+    return np.frombuffer(b, dtype=np.uint8).reshape(3, 128, 128)
+
+
 def pytorch_runner(
+    yaml_uri: str,
     model_uri: str,
     schema: DataType,
     pre_processing: Optional[Callable] = None,
     post_processing: Optional[Callable] = None,
     options: Optional[Dict[str, str]] = None,
 ):
-    """Construct a UDF to run pytorch model."""
-    if pre_processing is None:
-        pre_processing = lambda x: x
-    if post_processing is None:
-        post_processing = lambda x: x
+    """Construct a UDF to run pytor ch model."""
+    options = {} if options is None else options
+    use_gpu = options.get("device", "cpu") == "gpu"
 
     def torch_inference_udf(
         iter: Iterator[pd.DataFrame],
     ) -> Iterator[pd.DataFrame]:
         import torch
 
-        with open_uri(model_uri) as fobj:
+        with open_uri(
+            os.path.join(os.path.dirname(yaml_uri), model_uri)
+        ) as fobj:
             model = torch.load(fobj)
+        device = torch.device("cuda" if use_gpu else "cpu")
+
+        model.to(device)
         model.eval()
 
-        for series in iter:
-            yield series
+        transform = T.Compose(
+            [
+                to_numpy,
+                T.functional.to_pil_image,
+                T.Resize(256),
+                T.CenterCrop(224),
+                T.ToTensor(),
+            ]
+        )
 
-    return pandas_udf(torch_inference_udf, returnType=schema)
+        with torch.no_grad():
+            for series in iter:
+                dataset = _Dataset(series, transform=transform)
+                batch_result = {"boxes": []}
+                for batch in DataLoader(dataset, num_workers=4):
+                    # print(batch)
+                    print(model(batch))
+                    predictions = model(batch)
+                    print(predictions)
+                    if post_processing:
+                        predictions = post_processing(predictions)
+                    boxes = []
+                    for p in predictions:
+                        boxes.append(p["boxes"].tolist())
+                    batch_result["boxes"].append(boxes)
+                yield pd.DataFrame(batch_result)
+
+    return pandas_udf(
+        torch_inference_udf,
+        returnType=StructType(
+            [StructField("boxes", ArrayType(ArrayType(IntegerType())))]
+        ),
+    )

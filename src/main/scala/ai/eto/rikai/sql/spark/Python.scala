@@ -26,6 +26,8 @@ trait Python {
 
   /** Generate code for a model */
   def codegen(model: Model, temporary: Boolean): Unit
+
+  def resolve(uri: String, name: String, options: Map[String, String]): Model
 }
 
 object Python {
@@ -35,7 +37,7 @@ object Python {
     python = Some(mr)
 
   @throws[RuntimeException]
-  def checkRegistered: Unit = {
+  def checkRegistered(): Unit = {
     if (python.isEmpty) {
       throw new RuntimeException("""ModelResolved has not been initialized.
           |Please make sure "rikai.spark.sql.init" has been called.
@@ -46,5 +48,11 @@ object Python {
   def generateCode(model: Model, temporary: Boolean = true): Unit = {
     checkRegistered
     python.get.codegen(model, temporary)
+  }
+
+  /** Resolve a model in Python */
+  def resolve(uri: String, name: Option[String]): Model = {
+    checkRegistered()
+    python.get.resolve(uri, name.getOrElse(""), Map.empty)
   }
 }

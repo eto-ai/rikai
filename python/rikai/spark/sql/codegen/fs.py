@@ -63,7 +63,7 @@ def codegen_from_yaml(
     flavor = model["flavor"]
     if flavor == "pytorch":
         print("REGISTER WITH SCHEMA: ", schema)
-        spark.udf.register(name, pytorch_runner(model_uri, schema))
+        spark.udf.register(name, pytorch_runner(yaml_uri, model_uri, schema))
     else:
         raise ModelSpecFormatError(f"Unsupported model flavor: ${flavor}")
 

@@ -13,9 +13,14 @@
 
 from pathlib import Path
 
-from pyspark.sql.session import SparkSession
+from pyspark.sql import SparkSession, Row
+from pyspark.sql.types import BinaryType, StructField, StructType
+import torchvision
+import torch
+import numpy as np
 
 from rikai.spark.sql.codegen.fs import FileSystemModel
+from rikai.numpy import wrap
 
 
 def test_model_codegen_registered(spark: SparkSession):
@@ -28,9 +33,9 @@ def test_model_codegen_registered(spark: SparkSession):
 def test_yaml_spec(spark: SparkSession, tmp_path: Path):
     spec_yaml = """
 version: 1.0
-name: yolo_test
+name: resnet
 model:
-  uri: yolo.pt
+  uri: resnet.pth
   flavor: pytorch
 schema: struct<box:box2d, score:float, class:int>
 transforms:
@@ -41,6 +46,23 @@ transforms:
     spec_file = tmp_path / "spec.yaml"
     with spec_file.open("w") as fobj:
         fobj.write(spec_yaml)
+    # Prepare model
+    resnet = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
+    torch.save(resnet, (tmp_path / "resnet.pth"))
 
     fs_model = FileSystemModel(spec_file)
     fs_model.codegen(spark)
+    spark.sql("SHOW FUNCTIONS '*resnet*'").show()
+
+    df = spark.createDataFrame(
+        [
+            Row(
+                data=bytearray(
+                    np.empty((3, 128, 128), dtype=np.uint8).tobytes()
+                )
+            )
+        ],
+        schema=StructType([StructField("data", BinaryType())]),
+    )
+    df.createOrReplaceTempView("df")
+    spark.sql("SELECT resnet(data) FROM df").show()

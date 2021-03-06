@@ -41,7 +41,7 @@ setup(
         "pandas",
         "Pillow",
         "pyarrow>=2.0",
-        "pyspark>=3",
+        "pyspark>=3.1,<3.2",
         "requests",
     ],
     extras_require={

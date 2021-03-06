@@ -24,7 +24,7 @@ developers := List(
 publishMavenStyle := true
 
 libraryDependencies ++= {
-  val sparkVersion = "3.0.1"
+  val sparkVersion = "3.1.1"
   val awsVersion = "2.15.69"
   val log4jScalaVersion = "12.0"
   val log4jVersion = "2.13.0"

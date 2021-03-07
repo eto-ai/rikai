@@ -127,8 +127,6 @@ private[spark] class RikaiExtSqlParser(
   override def parseDataType(sqlText: String): DataType =
     delegate.parseDataType(sqlText)
 
-  override def parseRawDataType(sqlText: String): DataType =
-    delegate.parseRawDataType(sqlText)
 }
 
 // scalastyle:off line.size.limit

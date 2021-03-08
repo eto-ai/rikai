@@ -17,7 +17,8 @@
 package ai.eto.rikai.sql.spark.execution
 
 import ai.eto.rikai.SparkTestSession
-import ai.eto.rikai.sql.model.{Catalog, FakeModel, ModelNotFoundException}
+import ai.eto.rikai.sql.model.testing.TestModel
+import ai.eto.rikai.sql.model.{Catalog, ModelNotFoundException}
 import org.scalatest.funsuite.AnyFunSuite
 
 class DescribeModelCommandTest extends AnyFunSuite with SparkTestSession {
@@ -26,7 +27,7 @@ class DescribeModelCommandTest extends AnyFunSuite with SparkTestSession {
 
   test("describe model") {
     Catalog.testing.createModel(
-      new FakeModel("model_foo", "uri://model/foo", null)
+      new TestModel("model_foo", "uri://model/foo", null)
     )
 
     val expected = Seq(("model_foo", "uri://model/foo", "{}")).toDF(

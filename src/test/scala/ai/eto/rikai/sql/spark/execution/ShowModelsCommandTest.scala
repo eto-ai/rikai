@@ -17,7 +17,7 @@
 package ai.eto.rikai.sql.spark.execution
 
 import ai.eto.rikai.SparkTestSession
-import ai.eto.rikai.sql.model.{Catalog, FakeModel, Model}
+import ai.eto.rikai.sql.model.Model
 import org.scalatest.funsuite.AnyFunSuite
 
 class ShowModelsCommandTest extends AnyFunSuite with SparkTestSession {
@@ -31,12 +31,13 @@ class ShowModelsCommandTest extends AnyFunSuite with SparkTestSession {
   }
 
   test("show models") {
-    Catalog.testing.createModel(
-      new FakeModel("model_foo", "uri://model/foo", null)
-    )
+    spark
+      .sql(
+        "CREATE MODEL model_foo USING 'test://model/foo'"
+      )
 
     val expected =
-      Seq(("model_foo", "uri://model/foo", "{}")).toDF("name", "uri", "options")
+      Seq(("model_foo", "test://model/foo", "{}")).toDF("name", "uri", "options")
     val result = spark.sql("SHOW MODELS")
     assertEqual(result, expected)
   }
@@ -44,7 +45,7 @@ class ShowModelsCommandTest extends AnyFunSuite with SparkTestSession {
   test("show models with options") {
     spark
       .sql(
-        "CREATE MODEL model_options OPTIONS (foo='bar',num=1.2,flag=True) USING 'fake://foo'"
+        "CREATE MODEL model_options OPTIONS (foo='bar',num=1.2,flag=True) USING 'test://foo'"
       )
 
     val expected_options = Seq(
@@ -53,7 +54,7 @@ class ShowModelsCommandTest extends AnyFunSuite with SparkTestSession {
       "flag" -> "true"
     ).toMap
     val expected = Seq(
-      ("model_options", "fake://foo", Model.serializeOptions(expected_options))
+      ("model_options", "test://foo", Model.serializeOptions(expected_options))
     ).toDF("name", "uri", "options")
     assertEqual(spark.sql("SHOW MODELS"), expected)
   }
@@ -61,19 +62,19 @@ class ShowModelsCommandTest extends AnyFunSuite with SparkTestSession {
   test("show multiple models") {
     spark
       .sql(
-        "CREATE MODEL model_foo OPTIONS (foo='bar',num=1.2,flag=True) USING 'fake://foo'"
+        "CREATE MODEL model_foo OPTIONS (foo='bar',num=1.2,flag=True) USING 'test://foo'"
       )
     assert(spark.sql("SHOW MODELS").count() == 1)
 
     spark
       .sql(
-        "CREATE MODEL model_bar OPTIONS (foo='bar',num=1.2,flag=True) USING 'fake://bar'"
+        "CREATE MODEL model_bar OPTIONS (foo='bar',num=1.2,flag=True) USING 'test://bar'"
       )
     assert(spark.sql("SHOW MODELS").count() == 2)
 
     // same name
     spark
-      .sql("CREATE MODEL model_foo USING 'fake://foo2'")
+      .sql("CREATE MODEL model_foo USING 'test://foo2'")
     assert(spark.sql("SHOW MODELS").count() == 2)
 
     // drop model

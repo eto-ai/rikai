@@ -12,26 +12,26 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-
-# Third Party
-import pytest
-from torch.utils.data import DataLoader  # Prevent DataLoader hangs
 from pyspark.sql import SparkSession
 
+from rikai.spark.sql.callback_service import init_cb_service
 
-@pytest.fixture(scope="session")
-def spark() -> SparkSession:
-    return (
-        SparkSession.builder.appName("spark-test")
-        .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.2-SNAPSHOT")
-        .config(
-            "spark.sql.extensions",
-            "ai.eto.rikai.sql.spark.RikaiSparkSessionExtensions",
-        )
-        .config(
-            "rikai.sql.ml.registry.test.impl",
-            "ai.eto.rikai.sql.model.testing.TestRegistry",
-        )
-        .master("local[2]")
-        .getOrCreate()
-    )
+__all__ = ["init"]
+
+
+def init(spark: SparkSession):
+    """Initialize SQL-ML services.
+
+    .. code-block:: python
+
+        # To start use Rikai SQL-ML in Spark
+        from rikai.spark.sql import init
+
+        spark = (
+            SparkSession
+            ...
+            .getOrCreate)
+        init(spark)
+
+    """
+    init_cb_service(spark)

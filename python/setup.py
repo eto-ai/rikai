@@ -7,7 +7,8 @@ with open(pathlib.Path("rikai") / "__version__.py", "r") as fh:
     exec(fh.read(), about)
 
 with open(
-    pathlib.Path(__file__).absolute().parent.parent / "README.md", "r",
+    pathlib.Path(__file__).absolute().parent.parent / "README.md",
+    "r",
 ) as fh:
     long_description = fh.read()
 
@@ -40,7 +41,7 @@ setup(
         "pandas",
         "Pillow",
         "pyarrow>=2.0",
-        "pyspark>=3",
+        "pyspark>=3.1,<3.2",
         "requests",
     ],
     extras_require={

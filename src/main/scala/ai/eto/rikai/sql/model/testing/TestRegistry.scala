@@ -14,46 +14,21 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql.model
+package ai.eto.rikai.sql.model.testing
 
-import ai.eto.rikai.sql.spark.SparkRunnable
-import org.apache.spark.sql.catalyst.FunctionIdentifier
-import org.apache.spark.sql.catalyst.analysis.UnresolvedFunction
-import org.apache.spark.sql.catalyst.expressions.Expression
+import ai.eto.rikai.sql.model.{Model, ModelNotFoundException, Registry}
 
 import java.io.File
 import java.net.URI
 
-/** a FakeModel for testing */
-class FakeModel(
-    val name: String,
-    val uri: String,
-    funcName: String,
-    val registry: Registry
-) extends Model
-    with SparkRunnable {
-
-  def this(name: String, uri: String, registry: Registry) =
-    this(name, uri, name, registry)
-
-  /**
-    * Convert a [[ai.eto.rikai.sql.model.Model]] to a Spark Expression in Spark SQL's logical plan.
-    */
-  override def asSpark(args: Seq[Expression]): Expression = {
-    new UnresolvedFunction(
-      new FunctionIdentifier(funcName),
-      arguments = args,
-      isDistinct = false
-    )
-  }
-}
-
 /**
-  * FakeRegistry for the testing purpose.
+  * [[TestRegistry]] is a Registry for the testing purpose.
   *
-  * A valid model URI is: "model://hostname/model_name"
+  * A valid model URI is: "test://hostname/model_name"
   */
-class FakeRegistry(conf: Map[String, String]) extends Registry {
+class TestRegistry(conf: Map[String, String]) extends Registry {
+
+  val schema: String = "test"
 
   /**
     * Resolve a Model from the specific URI.
@@ -66,7 +41,7 @@ class FakeRegistry(conf: Map[String, String]) extends Registry {
   override def resolve(uri: String, name: Option[String] = None): Model = {
     val parsed = URI.create(uri)
     parsed.getScheme match {
-      case "fake" => {
+      case this.schema => {
         val model_name = name match {
           case Some(name) => name
           case None =>
@@ -74,7 +49,7 @@ class FakeRegistry(conf: Map[String, String]) extends Registry {
               parsed.getAuthority + "/" + parsed.getPath
             ).getName
         }
-        new FakeModel(model_name, uri, this)
+        new TestModel(model_name, uri, this)
       }
       case _ => throw new ModelNotFoundException(s"Fake model ${uri} not found")
     }

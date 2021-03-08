@@ -22,7 +22,6 @@ import org.apache.spark.sql.catalyst.parser.{
   AstBuilder,
   ParserInterface
 }
-import org.apache.spark.sql.internal.SQLConf
 
 /**
   * Spark SQL-ML Parser.
@@ -49,7 +48,7 @@ import org.apache.spark.sql.internal.SQLConf
 private[sql] class RikaiSparkSQLParser(
     session: SparkSession,
     delegate: ParserInterface
-) extends AbstractSqlParser(SQLConf.getFallbackConf) {
+) extends AbstractSqlParser {
 
   override protected def astBuilder: AstBuilder =
     new RikaiSparkSQLAstBuilder(session)

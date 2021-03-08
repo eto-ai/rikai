@@ -14,23 +14,14 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql.model
+package ai.eto.rikai.sql.spark
 
-import ai.eto.rikai.sql.model.testing.TestModel
-import org.scalatest.BeforeAndAfterEach
-import org.scalatest.funsuite.AnyFunSuite
+import ai.eto.rikai.sql.model.Model
 
-class CatalogTest extends AnyFunSuite with BeforeAndAfterEach {
+/**
+  * [[Python]] callback service for unit testing
+  */
+class TestPython extends Python {
 
-  val catalog = Catalog.testing
-
-  override def beforeEach(): Unit = catalog.clear()
-
-  test("Test simple catalog") {
-    assert(!catalog.modelExists("foo"))
-    val created = catalog.createModel(new TestModel("foo", "bar", null))
-    assert(created.name == "foo")
-    assert(created.uri == "bar")
-    assert(catalog.modelExists("foo"))
-  }
+  override def codegen(model: Model, temporary: Boolean): Unit = {}
 }

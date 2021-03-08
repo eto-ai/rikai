@@ -27,11 +27,8 @@ case class ShowModelsCommand() extends ModelCommand {
   override def run(spark: SparkSession): Seq[Row] = {
     val models = catalog(spark).listModels()
 
-    if (models.isEmpty) Seq.empty
-    else {
-      models.map { model: Model =>
-        Row(model.name, model.uri, Model.serializeOptions(model.options))
-      }
+    models.map { model: Model =>
+      Row(model.name, model.uri, Model.serializeOptions(model.options))
     }
   }
 }

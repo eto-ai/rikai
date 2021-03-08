@@ -17,7 +17,7 @@
 package ai.eto.rikai.sql.spark.execution
 
 import ai.eto.rikai.SparkTestSession
-import ai.eto.rikai.sql.model.Catalog
+import ai.eto.rikai.sql.model.{Catalog, ModelAlreadyExistException}
 import org.scalatest.funsuite.AnyFunSuite
 
 class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
@@ -50,5 +50,12 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
         "flag" -> "true"
       ).toMap
     )
+  }
+
+  test("model already exist") {
+    spark.sql("CREATE MODEL model_created USING 'test://model/created/from/uri'")
+    assertThrows[ModelAlreadyExistException] {
+      spark.sql("CREATE MODEL model_created USING 'test://model/other/uri'")
+    }
   }
 }

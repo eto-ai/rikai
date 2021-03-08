@@ -16,10 +16,10 @@
 
 package ai.eto.rikai.sql.spark.execution
 
+import ai.eto.rikai.sql.model.Model
 import ai.eto.rikai.sql.model.ModelNotFoundException
 import org.apache.spark.sql.catalyst.expressions.Attribute
 import org.apache.spark.sql.{Row, SparkSession}
-import ai.eto.rikai.sql.model.Model
 
 case class DescribeModelCommand(name: String) extends ModelCommand {
 

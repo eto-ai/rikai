@@ -37,7 +37,7 @@ class ShowModelsCommandTest extends AnyFunSuite with SparkTestSession {
       )
 
     val expected =
-      Seq(("model_foo", "test://model/foo", "{}")).toDF("name", "uri", "options")
+      Seq(("model_foo", "test://model/foo", "")).toDF("name", "uri", "options")
     val result = spark.sql("SHOW MODELS")
     assertEqual(result, expected)
   }

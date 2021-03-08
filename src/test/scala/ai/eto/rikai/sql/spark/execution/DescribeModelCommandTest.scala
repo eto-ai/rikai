@@ -30,7 +30,7 @@ class DescribeModelCommandTest extends AnyFunSuite with SparkTestSession {
       new TestModel("model_foo", "uri://model/foo", null)
     )
 
-    val expected = Seq(("model_foo", "uri://model/foo", "{}")).toDF(
+    val expected = Seq(("model_foo", "uri://model/foo", "")).toDF(
       "model",
       "uri",
       "options"

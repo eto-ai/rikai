@@ -30,6 +30,7 @@ libraryDependencies ++= {
   val log4jVersion = "2.13.0"
   val snappyVersion = "1.1.8.4" // Support Apple Silicon
   val scalatestVersion = "3.2.0"
+  val circeVersion = "0.12.3"
 
   Seq(
     "org.apache.spark" %% "spark-sql" % sparkVersion % "provided",
@@ -37,7 +38,10 @@ libraryDependencies ++= {
     "org.xerial.snappy" % "snappy-java" % snappyVersion,
     "org.apache.logging.log4j" %% "log4j-api-scala" % log4jScalaVersion,
     "org.apache.logging.log4j" % "log4j-core" % log4jVersion % Runtime,
-    "org.scalatest" %% "scalatest-funsuite" % scalatestVersion % "test"
+    "org.scalatest" %% "scalatest-funsuite" % scalatestVersion % "test",
+    "io.circe" %% "circe-core" % circeVersion,
+    "io.circe" %% "circe-generic" % circeVersion,
+    "io.circe" %% "circe-parser" % circeVersion
   )
 }
 

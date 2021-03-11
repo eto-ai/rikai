@@ -21,6 +21,7 @@ antlr: python/rikai/spark/sql/generated/RikaiModelSchemaParser.py
 python/rikai/spark/sql/generated/RikaiModelSchemaParser.py: src/main/antlr4/org/apache/spark/sql/ml/parser/RikaiModelSchema.g4
 	antlr -Dlanguage=Python3 \
 		-Xexact-output-dir \
+		-no-listener -visitor \
 		-o python/rikai/spark/sql/generated \
 		src/main/antlr4/org/apache/spark/sql/ml/parser/RikaiModelSchema.g4
 

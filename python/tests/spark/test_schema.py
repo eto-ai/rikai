@@ -74,3 +74,10 @@ def test_invalid_identifier():
         parse_schema("struct<0id:int>")
     with pytest.raises(SchemaError, match=r".*can not start with a digit.*"):
         parse_schema("struct<id:8float>")
+
+
+def test_bad_schema():
+    with pytest.raises(SchemaError, match=r".*Invalid schema.*"):
+        parse_schema("")
+    with pytest.raises(SchemaError, match=r".*Can not recognize type.*"):
+        parse_schema("foo,bar")

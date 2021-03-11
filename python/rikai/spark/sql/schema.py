@@ -100,7 +100,7 @@ class SchemaBuilder(RikaiModelSchemaVisitor):
             return _SPARK_TYPE_MAPPING[name]
         except KeyError as e:
             # TODO: Support customized UDT
-            raise KeyError(f'Can not recognize type: "{name}"') from e
+            raise SchemaError(f'Can not recognize type: "{name}"') from e
 
 
 def parse_schema(schema_str: str) -> DataType:
@@ -111,4 +111,7 @@ def parse_schema(schema_str: str) -> DataType:
 
     visitor = SchemaBuilder()
     schema = visitor.visit(parser.schema())
+    # TODO: we should add error listener to Antlr Parser.
+    if schema is None:
+        raise SchemaError(f"Invalid schema: '{schema_str}'")
     return schema

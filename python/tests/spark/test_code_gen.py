@@ -67,4 +67,4 @@ transforms:
         schema=StructType([StructField("data", BinaryType())]),
     )
     df.createOrReplaceTempView("df")
-    spark.sql("SELECT resnet(data) FROM df").show()
+    spark.sql("SELECT resnet(data) as predictions FROM df").show()

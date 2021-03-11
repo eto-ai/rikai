@@ -108,7 +108,7 @@ def pytorch_runner(
                     # print(batch)
                     print(model(batch))
                     predictions = model(batch)
-                    print(predictions)
+                    print("GOT PREDICTIONS ", predictions)
                     if post_processing:
                         predictions = post_processing(predictions)
                     boxes = []

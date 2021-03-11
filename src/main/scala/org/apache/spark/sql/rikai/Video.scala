@@ -61,6 +61,9 @@ class YouTubeVideoType extends UserDefinedType[YouTubeVideo] {
   override def defaultSize: Int = 128
 
   override def typeName: String = "youTubeVideo"
+
+  override def equals(other: Any): Boolean =
+    other.isInstanceOf[YouTubeVideoType]
 }
 
 case object YouTubeVideoType extends YouTubeVideoType
@@ -104,6 +107,8 @@ class VideoStreamType extends UserDefinedType[VideoStream] {
   override def defaultSize: Int = 128
 
   override def typeName: String = "videoStream"
+
+  override def equals(other: Any): Boolean = other.isInstanceOf[VideoStreamType]
 }
 
 case object VideoStreamType extends VideoStreamType
@@ -161,6 +166,8 @@ class SegmentType extends UserDefinedType[Segment] {
   override def defaultSize: Int = 16
 
   override def typeName: String = "segment"
+
+  override def equals(other: Any): Boolean = other.isInstanceOf[SegmentType]
 }
 
 case object SegmentType extends SegmentType

@@ -102,6 +102,9 @@ class Box2dType extends UserDefinedType[Box2d] {
   override def simpleString: String = "box2d"
 
   override def toString: String = "Box2dType"
+
+  override def equals(other: Any): Boolean =
+    other.isInstanceOf[Box2dType]
 }
 
 case object Box2dType extends Box2dType

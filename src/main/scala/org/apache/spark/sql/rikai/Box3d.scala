@@ -111,6 +111,8 @@ class Box3dType extends UserDefinedType[Box3d] {
   override def defaultSize: Int = 40
 
   override def typeName: String = "box3d"
+
+  override def equals(other: Any): Boolean = other.isInstanceOf[Box3dType]
 }
 
 case object Box3dType extends Box3dType

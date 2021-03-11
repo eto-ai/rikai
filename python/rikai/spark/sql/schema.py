@@ -12,8 +12,22 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from antlr4 import InputStream, CommonTokenStream
-from pyspark.sql.types import DataType, StructType, StructField, StringType, IntegerType
+from antlr4 import CommonTokenStream, InputStream
+from pyspark.sql.types import (
+    ArrayType,
+    BinaryType,
+    BooleanType,
+    ByteType,
+    DataType,
+    DoubleType,
+    FloatType,
+    IntegerType,
+    LongType,
+    ShortType,
+    StringType,
+    StructField,
+    StructType,
+)
 
 from rikai.spark.sql.generated.RikaiModelSchemaLexer import (
     RikaiModelSchemaLexer,
@@ -25,12 +39,33 @@ from rikai.spark.sql.generated.RikaiModelSchemaVisitor import (
     RikaiModelSchemaVisitor,
 )
 
+_SPARK_TYPE_MAPPING = {
+    "bool": BooleanType(),
+    "boolean": BooleanType(),
+    "byte": ByteType(),
+    "tinyint": ByteType(),
+    "short": ShortType(),
+    "smallint": ShortType(),
+    "int": IntegerType(),
+    "long": LongType(),
+    "bigint": LongType(),
+    "float": FloatType(),
+    "double": DoubleType(),
+    "str": StringType(),
+    "string": StringType(),
+    "binary": BinaryType(),
+}
+
+
+class SchemaError(Exception):
+    def __init__(self, message):
+        self.message = message
+
 
 class SchemaBuilder(RikaiModelSchemaVisitor):
     def visitStructType(
         self, ctx: RikaiModelSchemaParser.StructTypeContext
     ) -> StructType:
-        print("Visit struct: ", ctx.STRUCT(), ctx.field())
         return StructType(
             [self.visitStructField(field) for field in ctx.field()]
         )
@@ -42,20 +77,30 @@ class SchemaBuilder(RikaiModelSchemaVisitor):
         dataType = self.visit(ctx.fieldType())
         return StructField(name, dataType)
 
+    def visitArrayType(
+        self, ctx: RikaiModelSchemaParser.ArrayTypeContext
+    ) -> ArrayType:
+        return ArrayType(self.visit(ctx.fieldType()))
+
     def visitUnquotedIdentifier(
         self, ctx: RikaiModelSchemaParser.UnquotedIdentifierContext
     ):
-        return ctx.IDENTIFIER().getText()
+        identifer = ctx.IDENTIFIER().getText()
+        if identifer[0].isnumeric():
+            raise SchemaError(
+                f'Identifier can not start with a digit: "{identifer}"'
+            )
+        return identifer
 
     def visitPlainFieldType(
         self, ctx: RikaiModelSchemaParser.PlainFieldTypeContext
     ) -> DataType:
-        name = self.visit(ctx.identifier()).lower()
-        return {
-            'int': IntegerType(),
-            'str': StringType(),
-            'string': StringType(),
-        }[name]
+        name = self.visit(ctx.identifier())
+        try:
+            return _SPARK_TYPE_MAPPING[name]
+        except KeyError as e:
+            # TODO: Support customized UDT
+            raise KeyError(f'Can not recognize type: "{name}"') from e
 
 
 def parse_schema(schema_str: str) -> DataType:

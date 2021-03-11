@@ -14,6 +14,7 @@
 
 from typing import Dict, Optional, Union
 from pathlib import Path
+from rikai.spark.sql.schema import parse_schema
 
 import yaml
 from pyspark.sql import SparkSession
@@ -39,16 +40,16 @@ def codegen_from_yaml(
         raise ModelSpecFormatError("Missing model name")
     try:
         model = spec["model"]
-    except KeyError as e:
+    except KeyError as err:
         raise ModelSpecFormatError(
             f"Model section is missing from YAML spec: {yaml_uri}"
-        ) from e
+        ) from err
     try:
         model_uri = model["uri"]
-    except KeyError as e:
+    except KeyError as err:
         raise ModelSpecFormatError(
             f"Miss model.uri from YAML spec: {yaml_uri}"
-        ) from e
+        ) from err
     if model_uri is None:
         raise ModelSpecFormatError(
             f"Miss model.uri from YAML spec: {yaml_uri}"
@@ -56,9 +57,9 @@ def codegen_from_yaml(
 
     try:
         schema_str = spec["schema"]
-        schema = parse_schema(schema_str)  # parse_schema(schema_str)
-    except KeyError:
-        raise ModelSpecFormatError("Missing schema from YAML spec")
+        schema = parse_schema(schema_str)
+    except KeyError as err:
+        raise ModelSpecFormatError("Missing schema from YAML spec") from err
 
     func_name = name
     flavor = model["flavor"]

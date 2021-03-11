@@ -56,7 +56,7 @@ object UDTCollection {
       reflections
         .getTypesAnnotatedWith(classOf[SQLUserDefinedType])
         .asScala
-        .map(c => c.getAnnotation(classOf[SQLUserDefinedType]).udt())
+        .map(_.getAnnotation(classOf[SQLUserDefinedType]).udt())
         .map(udt =>
           udt.getDeclaredConstructor().newInstance().simpleString -> udt
         )

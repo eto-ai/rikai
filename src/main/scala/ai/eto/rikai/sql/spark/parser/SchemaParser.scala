@@ -45,7 +45,7 @@ private class SchemaBuilder extends RikaiModelSchemaBaseVisitor[AnyRef] {
 
   override def visitStructType(ctx: StructTypeContext): StructType = {
     new StructType(
-      ctx.field.asScala.map(visit).map(v => v.asInstanceOf[StructField]).toArray
+      ctx.field.asScala.map(visit).map(_.asInstanceOf[StructField]).toArray
     )
   }
 

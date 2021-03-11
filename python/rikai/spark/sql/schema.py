@@ -58,7 +58,7 @@ _SPARK_TYPE_MAPPING = {
 
 
 class SchemaError(Exception):
-    def __init__(self, message):
+    def __init__(self, message: str):
         self.message = message
 
 
@@ -84,7 +84,7 @@ class SchemaBuilder(RikaiModelSchemaVisitor):
 
     def visitUnquotedIdentifier(
         self, ctx: RikaiModelSchemaParser.UnquotedIdentifierContext
-    ):
+    ) -> str:
         identifer = ctx.IDENTIFIER().getText()
         if identifer[0].isnumeric():
             raise SchemaError(
@@ -111,7 +111,7 @@ def parse_schema(schema_str: str) -> DataType:
 
     visitor = SchemaBuilder()
     schema = visitor.visit(parser.schema())
-    # TODO: we should add error listener to Antlr Parser.
+    # TODO(GH#112) we should add error listener to Antlr Parser.
     if schema is None:
         raise SchemaError(f"Invalid schema: '{schema_str}'")
     return schema

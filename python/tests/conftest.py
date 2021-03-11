@@ -12,9 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import os
-import sys
-
 # Third Party
 import pytest
 from torch.utils.data import DataLoader  # Prevent DataLoader hangs
@@ -25,8 +22,6 @@ from rikai.spark.sql import init
 
 @pytest.fixture(scope="session")
 def spark() -> SparkSession:
-    os.environ["PYSPARK_PYTHON"] = sys.executable
-
     session = (
         SparkSession.builder.appName("spark-test")
         .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.2-SNAPSHOT")

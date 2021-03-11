@@ -47,7 +47,9 @@ transforms:
     with spec_file.open("w") as fobj:
         fobj.write(spec_yaml)
     # Prepare model
-    resnet = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
+    resnet = torchvision.models.detection.fasterrcnn_resnet50_fpn(
+        pretrained=True
+    )
     torch.save(resnet, (tmp_path / "resnet.pth"))
 
     fs_model = FileSystemModel(spec_file)

@@ -43,6 +43,7 @@ setup(
         "pyarrow>=2.0",
         "pyspark>=3.1,<3.2",
         "requests",
+        "antlr4-python3-runtime",
     ],
     extras_require={
         "test": test,

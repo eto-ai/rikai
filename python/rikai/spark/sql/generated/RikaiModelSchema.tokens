@@ -1,0 +1,14 @@
+T__0=1
+T__1=2
+T__2=3
+T__3=4
+STRUCT=5
+ARRAY=6
+IDENTIFIER=7
+WS=8
+'<'=1
+','=2
+'>'=3
+':'=4
+'struct'=5
+'array'=6

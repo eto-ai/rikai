@@ -17,6 +17,7 @@
 
 # Third Party
 from pyspark.sql.functions import udf
+from pyspark.sql.types import ArrayType
 
 # Rikai
 from rikai.io import copy as _copy
@@ -24,8 +25,10 @@ from rikai.logging import logger
 from rikai.numpy import ndarray
 from rikai.spark.types.vision import ImageType
 from rikai.types.vision import Image
+from rikai.types.video import YouTubeVideo, VideoStream
 
-__all__ = ["image", "image_copy", "numpy_to_image"]
+
+__all__ = ["image", "image_copy", "numpy_to_image", "video_to_images"]
 
 
 @udf(returnType=ImageType())
@@ -85,3 +88,32 @@ def numpy_to_image(array: ndarray, uri: str) -> Image:
     :py:meth:`rikai.types.vision.Image.from_array`
     """
     return Image.from_array(array, uri)
+
+
+@udf(returnType=ArrayType(ImageType()))
+def video_to_images(video) -> list:
+    """Extract video frames into a list of images.
+    Parameters
+    ----------
+    video : Video
+        An video object, either YouTubeVideo or VideoStream
+    Return
+    ------
+    List
+        Return a list of images from video
+    """
+    assert isinstance(video, YouTubeVideo) or isinstance(
+        video, VideoStream
+    ), "Input type must be YouTubeVideo or VideoStream"
+
+    base_path = video.uri
+    video_iterator = video
+
+    if isinstance(video, YouTubeVideo):
+        base_path = video.vid
+        video_iterator = video.get_stream()
+
+    return [
+        Image.from_array(img, "{}_{}.jpg".format(base_path, str(idx)))
+        for idx, img in enumerate(video_iterator)
+    ]

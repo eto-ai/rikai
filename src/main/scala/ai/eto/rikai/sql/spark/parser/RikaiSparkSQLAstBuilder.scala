@@ -17,8 +17,8 @@
 package ai.eto.rikai.sql.spark.parser
 
 import ai.eto.rikai.sql.model.{Catalog, Registry}
-import ai.eto.rikai.sql.spark.{Python, SparkRunnable}
 import ai.eto.rikai.sql.spark.expressions.Predict
+import ai.eto.rikai.sql.spark.{Python, SparkRunnable}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.analysis.UnresolvedAttribute
 import org.apache.spark.sql.catalyst.expressions.{Expression, Literal}
@@ -71,7 +71,7 @@ private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
         case arg: Literal => {
           val model = Registry.resolve(arg.toString)
           Python.generateCode(model)
-          model
+          Some(model)
         }
         case _ =>
           throw new ParseException(
@@ -81,15 +81,18 @@ private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
       }
 
       model match {
-        case r: SparkRunnable => r.asSpark(arguments.drop(1))
+        case Some(m) =>
+          m match {
+            case r: SparkRunnable => r.asSpark(arguments.drop(1))
+            case _ =>
+              throw new ParseException(
+                s"Model ${model} is not runnable in Spark",
+                ctx
+              )
+          }
         case None =>
           throw new ParseException(
             s"Model ${arguments.head} does not exist",
-            ctx
-          )
-        case _ =>
-          throw new ParseException(
-            s"Model ${model_name} is not runnable in Spark",
             ctx
           )
       }

@@ -26,7 +26,7 @@ import java.net.URI
   *
   * A valid model URI is: "test://hostname/model_name"
   */
-class TestRegistry(conf: Map[String, String]) extends Registry {
+class TestRegistry(val conf: Map[String, String]) extends Registry {
 
   val schema: String = "test"
 

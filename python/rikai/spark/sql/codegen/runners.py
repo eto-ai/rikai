@@ -70,7 +70,7 @@ def pytorch_runner(
     post_processing: Optional[Callable] = None,
     options: Optional[Dict[str, str]] = None,
 ):
-    """Construct a UDF to run pytor ch model."""
+    """Construct a UDF to run pytorch model."""
     options = {} if options is None else options
     use_gpu = options.get("device", "cpu") == "gpu"
 
@@ -103,10 +103,8 @@ def pytorch_runner(
                 dataset = _Dataset(series, transform=transform)
                 batch_result = {"boxes": [], "scores": [], "labels": []}
                 for batch in DataLoader(dataset, num_workers=2):
-                    # print(batch)
-                    print(model(batch))
                     predictions = model(batch)
-                    print("GOT PREDICTIONS ", predictions)
+                    print(predictions)
                     if post_processing:
                         predictions = post_processing(predictions)
                     for p in predictions:

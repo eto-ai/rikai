@@ -29,7 +29,7 @@ def codegen_from_yaml(
     spark: SparkSession, yaml_uri: str, name: Optional[str] = None
 ):
     # TODO(lei): find a schema validation for spec?
-    spec = yaml.load(open_uri(yaml_uri))  # type: Dict
+    spec = yaml.load(open_uri(yaml_uri), Loader=yaml.FullLoader)  # type: Dict
     print(spec)
     version = spec.get("version", None)
     if version is None:
@@ -60,12 +60,16 @@ def codegen_from_yaml(
     except KeyError:
         raise ModelSpecFormatError("Missing schema from YAML spec")
 
+    func_name = name
     flavor = model["flavor"]
     if flavor == "pytorch":
         print("REGISTER WITH SCHEMA: ", schema)
-        spark.udf.register(name, pytorch_runner(yaml_uri, model_uri, schema))
+        spark.udf.register(
+            func_name, pytorch_runner(yaml_uri, model_uri, schema)
+        )
     else:
         raise ModelSpecFormatError(f"Unsupported model flavor: ${flavor}")
+    return func_name
 
 
 class FileSystemModel:
@@ -82,8 +86,25 @@ class FileSystemModel:
         self.options = options
 
     def codegen(self, spark: SparkSession):
+        """Code Generation for a Filesystem based model.
+
+        Parameters
+        ----------
+        spark : SparkSession
+            SparkSession
+
+        Returns
+        -------
+
+        """
         if self.uri.endswith(".yml") or self.uri.endswith(".yaml"):
             logger.info(f"Load model from YAML file: {self.uri}")
-            codegen_from_yaml(spark, self.uri)
+            func_name = codegen_from_yaml(spark, self.uri)
         else:
             raise ValueError(f"Not supported model URI: ${self.uri}")
+        print(f"Code generation for model_name={self.name}")
+        return (
+            spark.sparkContext._jvm.ai.eto.rikai.sql.model.fs.FileSystemModel(
+                self.uri, self.name, None
+            )
+        )

@@ -27,6 +27,15 @@ trait Python {
   /** Generate code for a model */
   def codegen(model: Model, temporary: Boolean): Unit
 
+  /**
+    * Resolve a Model from python.
+    *
+    * @param uri Model URI
+    * @param name Optional model name. Can be empty.
+    * @param options options to the model.
+    *
+    * @return
+    */
   def resolve(uri: String, name: String, options: Map[String, String]): Model
 }
 

@@ -16,9 +16,8 @@
 
 package ai.eto.rikai.sql.spark.execution
 
-import org.apache.logging.log4j.scala.Logging
 import ai.eto.rikai.sql.model.{ModelResolveException, Registry}
-import ai.eto.rikai.sql.spark.Python
+import org.apache.logging.log4j.scala.Logging
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.{Row, SparkSession}
 
@@ -42,7 +41,6 @@ case class CreateModelCommand(
     model.options ++= options
     catalog(spark).createModel(model)
     logger.info(s"Model ${model} created")
-    Python.generateCode(model)
     Seq.empty
   }
 

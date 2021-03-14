@@ -30,6 +30,7 @@ class SimpleCatalog extends Catalog {
     synchronized {
       models += (model.name -> model)
     }
+    println(s"Create model: ${model}")
     model
   }
 

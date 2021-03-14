@@ -12,15 +12,48 @@
 #  See the License for the specific language governing permissions and
 
 from pathlib import Path
+import tempfile
 
+import numpy as np
+import pytest
+import torch
+import torchvision
 from pyspark.sql import SparkSession, Row
 from pyspark.sql.types import BinaryType, StructField, StructType
-import torchvision
-import torch
-import numpy as np
-
 from rikai.spark.sql.codegen.fs import FileSystemModel
-from rikai.numpy import wrap
+
+
+@pytest.fixture(scope="module")
+def yaml_spec():
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        tmp_path = Path(tmp_dir)
+        # Prepare model
+        resnet = torchvision.models.detection.fasterrcnn_resnet50_fpn(
+            pretrained=True,
+            progress=False,
+        )
+        model_uri = tmp_path / "resnet.pth"
+        torch.save(resnet, model_uri)
+
+        spec_yaml = """
+version: 1.0
+name: resnet
+model:
+    uri: file://{}
+    flavor: pytorch
+schema: struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>
+transforms:
+    pre: demoproject.yolo.transform
+    post: demoproject.yolo.postprocess
+        """.format(
+            model_uri
+        )  # noqa: E501
+
+        spec_file = tmp_path / "spec.yaml"
+        with spec_file.open("w") as fobj:
+            fobj.write(spec_yaml)
+        yield spec_file
 
 
 def test_model_codegen_registered(spark: SparkSession):
@@ -30,29 +63,9 @@ def test_model_codegen_registered(spark: SparkSession):
     ).count()
 
 
-def test_yaml_spec(spark: SparkSession, tmp_path: Path):
-    spec_yaml = """
-version: 1.0
-name: resnet
-model:
-  uri: resnet.pth
-  flavor: pytorch
-schema: struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>
-transforms:
-  pre: demoproject.yolo.transform
-  post: demoproject.yolo.postprocess
-"""  # noqa: E501
-    spec_file = tmp_path / "spec.yaml"
-    with spec_file.open("w") as fobj:
-        fobj.write(spec_yaml)
-    # Prepare model
-    resnet = torchvision.models.detection.fasterrcnn_resnet50_fpn(
-        pretrained=True,
-        progress=False,
-    )
-    torch.save(resnet, (tmp_path / "resnet.pth"))
+def test_yaml_spec(spark: SparkSession, yaml_spec):
 
-    fs_model = FileSystemModel(spec_file)
+    fs_model = FileSystemModel(yaml_spec)
     fs_model.codegen(spark)
     spark.sql("SHOW FUNCTIONS '*resnet*'").show()
 
@@ -68,3 +81,22 @@ transforms:
     )
     df.createOrReplaceTempView("df")
     spark.sql("SELECT resnet(data) as predictions FROM df").show()
+
+
+def test_yaml_model(spark: SparkSession, yaml_spec):
+
+    spark.sql("CREATE MODEL resnet_m USING 'file://{}'".format(yaml_spec))
+
+    df = spark.createDataFrame(
+        [
+            Row(
+                data=bytearray(
+                    np.empty((128, 128, 3), dtype=np.uint8).tobytes()
+                )
+            )
+        ],
+        schema=StructType([StructField("data", BinaryType())]),
+    )
+    df.createOrReplaceTempView("df")
+
+    spark.sql("SELECT ML_PREDICT(resnet_m, data) as predictions FROM df").show()

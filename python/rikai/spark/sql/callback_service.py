@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import Any
+
 from py4j.java_gateway import CallbackServerParameters
 from pyspark.sql import SparkSession
 
@@ -78,6 +80,13 @@ class CallbackService:
         logger.info(
             "Rikai Python CallbackService is registered to SparkSession"
         )
+
+    def resolve(self, uri: str, name: str, options: Any):
+        # Only support FileSystem based model now
+
+        from rikai.spark.sql.codegen.fs import FileSystemModel
+
+        return FileSystemModel(uri, name, options).codegen(self.spark)
 
     def toString(self):
         return repr(self)

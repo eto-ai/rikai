@@ -14,7 +14,6 @@
 
 # Third Party
 import pytest
-from torch.utils.data import DataLoader  # Prevent DataLoader hangs
 from pyspark.sql import SparkSession
 
 from rikai.spark.sql import init
@@ -32,6 +31,10 @@ def spark() -> SparkSession:
         .config(
             "rikai.sql.ml.registry.test.impl",
             "ai.eto.rikai.sql.model.testing.TestRegistry",
+        )
+        .config(
+            "rikai.sql.ml.registry.file.impl",
+            "ai.eto.rikai.sql.model.fs.FileSystemRegistry",
         )
         .config(
             "spark.driver.extraJavaOptions",

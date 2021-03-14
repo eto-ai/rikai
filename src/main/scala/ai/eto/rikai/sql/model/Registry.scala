@@ -25,6 +25,8 @@ import java.net.URI
   */
 trait Registry {
 
+  val conf: Map[String, String]
+
   /**
     * Resolve a Model from the specific URI.
     *

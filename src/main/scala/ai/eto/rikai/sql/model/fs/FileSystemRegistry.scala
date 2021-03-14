@@ -16,13 +16,16 @@
 
 package ai.eto.rikai.sql.model.fs
 
-import org.apache.logging.log4j.scala.Logging
 import ai.eto.rikai.sql.model.{Model, ModelNotFoundException, Registry}
+import ai.eto.rikai.sql.spark.Python
+import org.apache.logging.log4j.scala.Logging
 
 /**
   * FileSystem-based [[Registry]].
   */
-class FileSystemRegistry extends Registry with Logging {
+class FileSystemRegistry(val conf: Map[String, String])
+    extends Registry
+    with Logging {
 
   /**
     * Resolve a [[Model]] from the specific URI.
@@ -39,7 +42,7 @@ class FileSystemRegistry extends Registry with Logging {
   override def resolve(uri: String, name: Option[String]): Model =
     if (uri.endsWith(".yml") || uri.endsWith(".yaml")) {
       logger.info(s"Resolving YAML-based model: ${uri}")
-      null
+      Python.resolve(uri, name)
     } else if (
       uri.endsWith(".tar") ||
       uri.endsWith(".zip") ||
@@ -51,7 +54,6 @@ class FileSystemRegistry extends Registry with Logging {
     } else {
       throw new ModelUriNotSupportedException(s"URI ${uri} is not supported")
     }
-
 }
 
 class ModelUriNotSupportedException(message: String) extends Exception(message);

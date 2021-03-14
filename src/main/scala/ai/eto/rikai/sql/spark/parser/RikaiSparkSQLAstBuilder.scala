@@ -70,8 +70,12 @@ private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
         case arg: UnresolvedAttribute => catalog.getModel(arg.name)
         case arg: Literal => {
           val model = Registry.resolve(arg.toString)
-          Python.generateCode(model)
+          <<<<<<< HEAD
+            Python.generateCode(model)
           Some(model)
+          =======
+          model
+          >>>>>>> pass model from sql
         }
         case _ =>
           throw new ParseException(

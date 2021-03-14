@@ -81,18 +81,15 @@ private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
       }
 
       model match {
-        case Some(m) =>
-          m match {
-            case r: SparkRunnable => r.asSpark(arguments.drop(1))
-            case _ =>
-              throw new ParseException(
-                s"Model ${model} is not runnable in Spark",
-                ctx
-              )
-          }
+        case Some(r: SparkRunnable) => r.asSpark(arguments.drop(1))
         case None =>
           throw new ParseException(
             s"Model ${arguments.head} does not exist",
+            ctx
+          )
+        case _ =>
+          throw new ParseException(
+            s"Model ${model} is not runnable in Spark",
             ctx
           )
       }

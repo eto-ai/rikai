@@ -139,6 +139,7 @@ def test_video_to_images(spark: SparkSession):
     into list of Image assets.
     """
     sample_rate = 2
+    start_frame = 0
     max_samples = 10
     videostream_df = spark.createDataFrame(
         [
@@ -165,11 +166,15 @@ def test_video_to_images(spark: SparkSession):
     )
     videostream_df = videostream_df.withColumn(
         "images",
-        video_to_images(col("video"), lit(sample_rate), lit(max_samples)),
+        video_to_images(
+            col("video"), lit(sample_rate), lit(start_frame), lit(max_samples)
+        ),
     )
     youtube_df = youtube_df.withColumn(
         "images",
-        video_to_images(col("video"), lit(sample_rate), lit(max_samples)),
+        video_to_images(
+            col("video"), lit(sample_rate), lit(start_frame), lit(max_samples)
+        ),
     )
 
     videostream_sample = videostream_df.first()["images"]

@@ -25,7 +25,7 @@ from rikai.logging import logger
 from rikai.numpy import ndarray
 from rikai.spark.types.vision import ImageType
 from rikai.types.vision import Image
-from rikai.types.video import YouTubeVideo, VideoStream
+from rikai.types.video import YouTubeVideo, VideoStream, SingleFrameSampler
 
 
 __all__ = ["image", "image_copy", "numpy_to_image", "video_to_images"]
@@ -92,36 +92,44 @@ def numpy_to_image(array: ndarray, uri: str) -> Image:
 
 @udf(returnType=ArrayType(ImageType()))
 def video_to_images(
-    video, sample_rate: int = 1, max_samples: int = 15000
+    video, sample_rate: int = 1, start_frame: int = 0, max_samples: int = 15000
 ) -> list:
     """Extract video frames into a list of images.
     Parameters
     ----------
     video : Video
         An video object, either YouTubeVideo or VideoStream.
-    sample_rate  : Int
-        Filters video images to extract every `sample_rate` images.
-        i.e. sample_rate=2 for every other image
+    sample_rate : Int
+        The sampling rate in number of frames
+    start_frame : Int
+        Start from a specific frame
     max_samples : Int
-        Default limit on number of images to extract from video.
+        Yield at most this many frames (-1 means no max)
     Return
     ------
     List
-        Return a list of images from video.
+        Return a list of images from video indexed by frame number.
     """
     assert isinstance(video, YouTubeVideo) or isinstance(
         video, VideoStream
     ), "Input type must be YouTubeVideo or VideoStream"
 
     base_path = video.uri
-    video_iterator = video
 
     if isinstance(video, YouTubeVideo):
         base_path = video.vid
-        video_iterator = video.get_stream()
+        video_iterator = SingleFrameSampler(
+            video.get_stream(), sample_rate, start_frame, max_samples
+        )
+    else:
+        video_iterator = SingleFrameSampler(
+            video, sample_rate, start_frame, max_samples
+        )
 
     return [
-        Image.from_array(img, "{}_{}.jpg".format(base_path, str(idx)))
+        Image.from_array(
+            img,
+            "{}_{}.jpg".format(base_path, (start_frame + idx) * sample_rate),
+        )
         for idx, img in enumerate(video_iterator)
-        if not idx % sample_rate and idx < max_samples * sample_rate
     ]

@@ -60,7 +60,7 @@ transforms:
         [
             Row(
                 data=bytearray(
-                    np.empty((3, 128, 128), dtype=np.uint8).tobytes()
+                    np.empty((128, 128, 3), dtype=np.uint8).tobytes()
                 )
             )
         ],

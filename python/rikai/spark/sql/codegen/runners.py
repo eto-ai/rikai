@@ -61,7 +61,7 @@ class _Dataset(Dataset):
 
 
 def to_numpy(b):
-    return np.frombuffer(b, dtype=np.uint8).reshape(3, 128, 128)
+    return np.frombuffer(b, dtype=np.uint8).reshape(128, 128, 3)
 
 
 def pytorch_runner(
@@ -102,6 +102,7 @@ def pytorch_runner(
 
         with torch.no_grad():
             for series in iter:
+                print("Series[0] = ", series.iloc[0])
                 dataset = _Dataset(series, transform=transform)
                 batch_result = {"boxes": []}
                 for batch in DataLoader(dataset, num_workers=4):

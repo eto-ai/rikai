@@ -37,18 +37,18 @@ name: resnet
 model:
   uri: resnet.pth
   flavor: pytorch
-schema: struct<box:box2d, score:float, class:int>
+schema: struct<boxes:array<array<float>>, score:array<float>, labels:array<int>>
 transforms:
   pre: demoproject.yolo.transform
   post: demoproject.yolo.postprocess
-
-    """
+"""
     spec_file = tmp_path / "spec.yaml"
     with spec_file.open("w") as fobj:
         fobj.write(spec_yaml)
     # Prepare model
     resnet = torchvision.models.detection.fasterrcnn_resnet50_fpn(
-        pretrained=True
+        pretrained=True,
+        progress=False,
     )
     torch.save(resnet, (tmp_path / "resnet.pth"))
 

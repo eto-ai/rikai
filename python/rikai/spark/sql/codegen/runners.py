@@ -16,7 +16,6 @@
 import os
 from contextlib import contextmanager
 from typing import Callable, Dict, Iterator, Optional
-import json
 
 import numpy as np
 import pandas as pd
@@ -24,10 +23,9 @@ from pyspark.sql.functions import pandas_udf
 from pyspark.sql.types import (
     ArrayType,
     DataType,
-    IntegerType,
+    FloatType,
     StructField,
     StructType,
-    StringType,
 )
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms as T
@@ -105,7 +103,7 @@ def pytorch_runner(
                 print("Series[0] = ", series.iloc[0])
                 dataset = _Dataset(series, transform=transform)
                 batch_result = {"boxes": []}
-                for batch in DataLoader(dataset, num_workers=4):
+                for batch in DataLoader(dataset, num_workers=2):
                     # print(batch)
                     print(model(batch))
                     predictions = model(batch)
@@ -121,6 +119,6 @@ def pytorch_runner(
     return pandas_udf(
         torch_inference_udf,
         returnType=StructType(
-            [StructField("boxes", ArrayType(ArrayType(IntegerType())))]
+            [StructField("boxes", ArrayType(ArrayType(FloatType())))]
         ),
     )

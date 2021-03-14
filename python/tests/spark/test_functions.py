@@ -138,8 +138,8 @@ def test_video_to_images(spark: SparkSession):
     """Test extract video frames from YouTubeVideo/VideoStream types
     into list of Image assets.
     """
-    sampling_rate = 2
-    max_images = 10
+    sample_rate = 2
+    max_samples = 10
     videostream_df = spark.createDataFrame(
         [
             (
@@ -165,11 +165,11 @@ def test_video_to_images(spark: SparkSession):
     )
     videostream_df = videostream_df.withColumn(
         "images",
-        video_to_images(col("video"), lit(sampling_rate), lit(max_images)),
+        video_to_images(col("video"), lit(sample_rate), lit(max_samples)),
     )
     youtube_df = youtube_df.withColumn(
         "images",
-        video_to_images(col("video"), lit(sampling_rate), lit(max_images)),
+        video_to_images(col("video"), lit(sample_rate), lit(max_samples)),
     )
 
     videostream_sample = videostream_df.first()["images"]
@@ -178,10 +178,10 @@ def test_video_to_images(spark: SparkSession):
     assert (
         type(videostream_sample) == list
         and type(videostream_sample[0]) == Image
-        and len(videostream_sample) == max_images
+        and len(videostream_sample) == max_samples
     )
     assert (
         type(youtube_sample) == list
         and type(youtube_sample[0]) == Image
-        and len(youtube_sample) == max_images
+        and len(youtube_sample) == max_samples
     )

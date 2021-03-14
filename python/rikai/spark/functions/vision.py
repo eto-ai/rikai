@@ -92,22 +92,22 @@ def numpy_to_image(array: ndarray, uri: str) -> Image:
 
 @udf(returnType=ArrayType(ImageType()))
 def video_to_images(
-    video, sampling_rate: int = 1, max_images: int = 15000
+    video, sample_rate: int = 1, max_samples: int = 15000
 ) -> list:
     """Extract video frames into a list of images.
     Parameters
     ----------
     video : Video
-        An video object, either YouTubeVideo or VideoStream
-    sampling_rate  : Int
-        Filters video images to extract every `sampling_rate` images
-        i.e. sampling_rate=2 for every other image
-    max_images : Int
-        Default limit on number of images to extract from video
+        An video object, either YouTubeVideo or VideoStream.
+    sample_rate  : Int
+        Filters video images to extract every `sample_rate` images.
+        i.e. sample_rate=2 for every other image
+    max_samples : Int
+        Default limit on number of images to extract from video.
     Return
     ------
     List
-        Return a list of images from video
+        Return a list of images from video.
     """
     assert isinstance(video, YouTubeVideo) or isinstance(
         video, VideoStream
@@ -123,5 +123,5 @@ def video_to_images(
     return [
         Image.from_array(img, "{}_{}.jpg".format(base_path, str(idx)))
         for idx, img in enumerate(video_iterator)
-        if not idx % sampling_rate and idx < max_images * sampling_rate
+        if not idx % sample_rate and idx < max_samples * sample_rate
     ]

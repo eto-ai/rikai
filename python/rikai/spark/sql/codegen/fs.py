@@ -17,10 +17,10 @@ from pathlib import Path
 
 import yaml
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StringType
 
 from rikai.io import open_uri
 from rikai.logging import logger
+from rikai.spark.sql.schema import parse_schema
 from rikai.spark.sql.codegen.exceptions import ModelSpecFormatError
 from rikai.spark.sql.codegen.runners import pytorch_runner
 
@@ -56,7 +56,7 @@ def codegen_from_yaml(
 
     try:
         schema_str = spec["schema"]
-        schema = StringType()  # parse_schema(schema_str)
+        schema = parse_schema(schema_str)  # parse_schema(schema_str)
     except KeyError:
         raise ModelSpecFormatError("Missing schema from YAML spec")
 

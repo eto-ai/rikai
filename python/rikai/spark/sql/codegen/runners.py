@@ -100,9 +100,8 @@ def pytorch_runner(
 
         with torch.no_grad():
             for series in iter:
-                print("Series[0] = ", series.iloc[0])
                 dataset = _Dataset(series, transform=transform)
-                batch_result = {"boxes": []}
+                batch_result = {"boxes": [], "scores": [], "labels": []}
                 for batch in DataLoader(dataset, num_workers=2):
                     # print(batch)
                     print(model(batch))
@@ -110,15 +109,10 @@ def pytorch_runner(
                     print("GOT PREDICTIONS ", predictions)
                     if post_processing:
                         predictions = post_processing(predictions)
-                    boxes = []
                     for p in predictions:
-                        boxes.append(p["boxes"].tolist())
-                    batch_result["boxes"].append(boxes)
+                        batch_result["boxes"].append(p["boxes"].tolist())
+                        batch_result["scores"].append(p["scores"].tolist())
+                        batch_result["labels"].append(p["labels"].tolist())
                 yield pd.DataFrame(batch_result)
 
-    return pandas_udf(
-        torch_inference_udf,
-        returnType=StructType(
-            [StructField("boxes", ArrayType(ArrayType(FloatType())))]
-        ),
-    )
+    return pandas_udf(torch_inference_udf, returnType=schema)

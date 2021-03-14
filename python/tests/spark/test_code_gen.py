@@ -37,7 +37,7 @@ name: resnet
 model:
   uri: resnet.pth
   flavor: pytorch
-schema: struct<boxes:array<array<float>>, score:array<float>, labels:array<int>>
+schema: struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>
 transforms:
   pre: demoproject.yolo.transform
   post: demoproject.yolo.postprocess

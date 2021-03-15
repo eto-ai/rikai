@@ -30,7 +30,7 @@ class SimpleCatalog extends Catalog {
     synchronized {
       models += (model.name -> model)
     }
-    println(s"Create model: ${model}")
+    println(s"Create model: ${model}  name=[${model.name}]")
     model
   }
 
@@ -58,6 +58,7 @@ class SimpleCatalog extends Catalog {
     */
   override def getModel(name: String): Option[Model] =
     synchronized {
+      println(s"GET MODEL: name=[${name}] model=${models get name}")
       models get name
     }
 

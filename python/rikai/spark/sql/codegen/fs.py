@@ -106,6 +106,6 @@ class FileSystemModel:
         print(f"Code generation for model_name={self.name}")
         return (
             spark.sparkContext._jvm.ai.eto.rikai.sql.model.fs.FileSystemModel(
-                self.uri, self.name, None
+                self.name, self.uri, func_name, None
             )
         )

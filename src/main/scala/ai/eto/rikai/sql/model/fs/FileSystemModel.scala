@@ -18,6 +18,8 @@ package ai.eto.rikai.sql.model.fs
 
 import ai.eto.rikai.sql.model.{Model, Registry}
 import ai.eto.rikai.sql.spark.SparkRunnable
+import org.apache.spark.sql.catalyst.FunctionIdentifier
+import org.apache.spark.sql.catalyst.analysis.UnresolvedFunction
 import org.apache.spark.sql.catalyst.expressions.Expression
 
 /**
@@ -29,7 +31,7 @@ import org.apache.spark.sql.catalyst.expressions.Expression
   * @param uri model URI. It can be a `.yml` file, a tar ball or a directory.
   * @param registry model registry instance.
   */
-class FileSystemModel(val name: String, val uri: String, val registry: Registry)
+class FileSystemModel(val name: String, val uri: String, val funcName: String, val registry: Registry)
     extends Model
     with SparkRunnable {
 
@@ -37,6 +39,10 @@ class FileSystemModel(val name: String, val uri: String, val registry: Registry)
 
   /** Convert a [[Model]] to a Spark Expression in Spark SQL's logical plan. */
   override def asSpark(args: Seq[Expression]): Expression = {
-    null
+    new UnresolvedFunction(
+      new FunctionIdentifier(funcName),
+      arguments = args,
+      isDistinct = false
+    )
   }
 }

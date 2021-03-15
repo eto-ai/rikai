@@ -40,7 +40,7 @@ def yaml_spec():
 version: 1.0
 name: resnet
 model:
-    uri: file://{}
+    uri: {}
     flavor: pytorch
 schema: struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>
 transforms:

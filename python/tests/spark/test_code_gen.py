@@ -46,9 +46,9 @@ schema: struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>
 transforms:
     pre: demoproject.yolo.transform
     post: demoproject.yolo.postprocess
-        """.format(
+        """.format(  # noqa: E501
             model_uri
-        )  # noqa: E501
+        )
 
         spec_file = tmp_path / "spec.yaml"
         with spec_file.open("w") as fobj:

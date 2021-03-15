@@ -99,4 +99,6 @@ def test_yaml_model(spark: SparkSession, yaml_spec):
     )
     df.createOrReplaceTempView("df")
 
-    spark.sql("SELECT ML_PREDICT(resnet_m, data) as predictions FROM df").show()
+    spark.sql(
+        "SELECT ML_PREDICT(resnet_m, data) as predictions FROM df"
+    ).show()

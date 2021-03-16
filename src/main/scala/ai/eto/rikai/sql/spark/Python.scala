@@ -16,7 +16,7 @@
 
 package ai.eto.rikai.sql.spark
 
-import ai.eto.rikai.sql.model.Model
+import ai.eto.rikai.sql.model.{Model, ModelNotFoundException}
 
 /**
   * [[Python]] is the callback service to call arbitrary Python code
@@ -36,6 +36,7 @@ trait Python {
     *
     * @return a Model
     */
+  @throws[ModelNotFoundException]
   def resolve(uri: String, name: String, options: Map[String, String]): Model
 }
 
@@ -60,6 +61,7 @@ object Python {
   }
 
   /** Resolve a Model from Python process. */
+  @throws[ModelNotFoundException]
   def resolve(
       uri: String,
       name: Option[String],

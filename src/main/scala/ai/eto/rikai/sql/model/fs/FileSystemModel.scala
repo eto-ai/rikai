@@ -14,31 +14,30 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql.model.testing
+package ai.eto.rikai.sql.model.fs
 
-import ai.eto.rikai.sql.model.{Model, Registry}
+import ai.eto.rikai.sql.model.Model
 import ai.eto.rikai.sql.spark.SparkRunnable
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.UnresolvedFunction
 import org.apache.spark.sql.catalyst.expressions.Expression
 
-/** a [[TestModel]] for testing */
-class TestModel(
-    val name: String,
-    val uri: String,
-    funcName: String,
-    val registry: Registry
-) extends Model
+/**
+  * FileSystem-based [[Model]].
+  *
+  * It covers the model stored on a file system or cloud storage.
+  *
+  * @param name model name.
+  * @param uri model URI. It can be a `.yml` file, a tar ball or a directory.
+  * @param funcName the name of a UDF which will be called when this model is invoked.
+  */
+class FileSystemModel(val name: String, val uri: String, val funcName: String)
+    extends Model
     with SparkRunnable {
 
-  def this(name: String, uri: String, registry: Registry) =
-    this(name, uri, name, registry)
+  override def toString: String = s"FileSystemModel(name=${name}, uri=${uri})"
 
-  override def toString: String = s"TestModel(${name}, uri=${uri})"
-
-  /**
-    * Convert a [[ai.eto.rikai.sql.model.Model]] to a Spark Expression in Spark SQL's logical plan.
-    */
+  /** Convert a [[Model]] to a Spark Expression in Spark SQL's logical plan. */
   override def asSpark(args: Seq[Expression]): Expression = {
     new UnresolvedFunction(
       new FunctionIdentifier(funcName),

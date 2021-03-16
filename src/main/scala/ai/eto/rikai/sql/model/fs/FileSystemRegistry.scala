@@ -21,7 +21,7 @@ import ai.eto.rikai.sql.spark.Python
 import org.apache.logging.log4j.scala.Logging
 
 /**
-  * FileSystem-based [[Registry]].
+  * FileSystem-based Model [[Registry]].
   */
 class FileSystemRegistry(val conf: Map[String, String])
     extends Registry

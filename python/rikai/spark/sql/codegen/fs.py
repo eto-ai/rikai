@@ -24,6 +24,7 @@ class Registry:
 
     def __init__(self, spark: SparkSession):
         self.spark = spark
+        self.jvm = spark.sparkContext._jvm
 
     def __repr__(self):
         return f"FileSystemRegistry"
@@ -33,3 +34,9 @@ class Registry:
         func_name = f"{name}_{secrets.token_hex(4)}"
         logger.info(f"Creating pandas_udf with name {func_name}")
         # TODO(lei): create pandas UDF inference from uri and options.
+
+        model = self.jvm.ai.eto.rikai.sql.model.fs.FileSystemModel(
+            name, uri, func_name
+        )
+        # TODO: set options
+        return model

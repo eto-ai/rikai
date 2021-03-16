@@ -19,6 +19,8 @@ from rikai.logging import logger
 
 
 class Registry:
+    """FileSystem-based Model Registry"""
+
     def __init__(self, spark: SparkSession):
         self.spark = spark
 

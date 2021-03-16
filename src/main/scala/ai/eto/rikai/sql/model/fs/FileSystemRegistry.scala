@@ -27,6 +27,8 @@ class FileSystemRegistry(val conf: Map[String, String])
     extends Registry
     with Logging {
 
+  private val pyClass: String = "rikai.spark.sql.codegen.fs.Registry"
+
   /**
     * Resolve a [[Model]] from the specific URI.
     *
@@ -39,21 +41,8 @@ class FileSystemRegistry(val conf: Map[String, String])
     * @return [[Model]] if found.
     */
   @throws[ModelNotFoundException]
-  override def resolve(uri: String, name: Option[String]): Model =
-    if (uri.endsWith(".yml") || uri.endsWith(".yaml")) {
-      logger.info(s"Resolving YAML-based model: ${uri}")
-      Python.resolve(uri, name, Map.empty)
-    } else if (
-      uri.endsWith(".tar") ||
-      uri.endsWith(".zip") ||
-      uri.endsWith(".tar.gz") ||
-      uri.endsWith(".tar.bz")
-    ) {
-      logger.info(s"Resolving Model tar ball from ${uri}")
-      throw new NotImplementedError("Tar-ball Model is not implemented yet.")
-    } else {
-      throw new ModelUriNotSupportedException(s"URI ${uri} is not supported")
-    }
+  override def resolve(uri: String, name: Option[String]): Model = {
+    logger.info(s"Resolving ML model from ${uri}")
+    Python.resolve(pyClass, uri, name, Map.empty)
+  }
 }
-
-class ModelUriNotSupportedException(message: String) extends Exception(message);

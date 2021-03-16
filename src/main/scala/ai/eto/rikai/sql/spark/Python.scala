@@ -24,9 +24,6 @@ import ai.eto.rikai.sql.model.{Model, ModelNotFoundException}
   */
 trait Python {
 
-  /** Generate code for a model */
-  def codegen(model: Model, temporary: Boolean): Unit
-
   /**
     * Resolve a Model from python.
     *
@@ -37,7 +34,12 @@ trait Python {
     * @return a Model
     */
   @throws[ModelNotFoundException]
-  def resolve(uri: String, name: String, options: Map[String, String]): Model
+  def resolve(
+      className: String,
+      uri: String,
+      name: String,
+      options: Map[String, String]
+  ): Model
 }
 
 object Python {
@@ -55,19 +57,15 @@ object Python {
     }
   }
 
-  def generateCode(model: Model, temporary: Boolean = true): Unit = {
-    checkRegistered
-    python.get.codegen(model, temporary)
-  }
-
   /** Resolve a Model from Python process. */
   @throws[ModelNotFoundException]
   def resolve(
+      className: String,
       uri: String,
       name: Option[String],
       options: Map[String, String]
   ): Model = {
     checkRegistered
-    python.get.resolve(uri, name.getOrElse(""), options)
+    python.get.resolve(className, uri, name.getOrElse(""), options)
   }
 }

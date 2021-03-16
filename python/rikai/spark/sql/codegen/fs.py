@@ -12,26 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Dict
-
 from pyspark.sql import SparkSession
 
 
-class TestModel:
-    def __init__(self, name: str, uri: str, options: Dict[str, str]):
-        self.name = name
-        self.uri = uri
-        self.options = options
+from rikai.logging import logger
 
-    def codegen(self, spark: SparkSession, temporary: bool):
-        """Codegen for :py:class:`TestModel`
 
-        Parameters
-        ----------
-        spark : SparkSession
-            SparkSession
+class Registry:
+    def __init__(self, spark: SparkSession):
+        self.spark = spark
 
-        temporary : bool
-            Whether this model is generate temporary functions.
-        """
-        pass
+    def __repr__(self):
+        return f"FileSystemRegistry"
+
+    def resolve(self, uri, name, options):
+        logger.info(f"Resolving model {name} from {uri}")

@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from py4j.java_gateway import CallbackServerParameters
+from py4j.java_collections import JavaMap
 from pyspark.sql import SparkSession
 
 from rikai.logging import logger
@@ -47,29 +48,38 @@ class CallbackService:
 
     def __init__(self, spark: SparkSession):
         self.spark = spark
+        self.registry_map = {}
 
     def __repr__(self):
         return "PythonCbService"
 
-    def codegen(self, model, temporary: bool):
-        """Code generation for a Model.
+    def resolve(
+        self, registry_class: str, uri: str, name: str, options: JavaMap
+    ):
+        """Resolve a ML model.
 
         Parameters
         ----------
-        model : jvm Model class
-            The model to generate python code.
-        temporary : bool
-            Set true of the generated code will only be used once. Temporary
-            code generation will be used when we use `ML_PREDICT` directly
-            with a model URI.
+        registry_class : str
+            The full class name for the registry.
+        uri : str
+            The model URI.
+        name : str
+            Mode name
+        options : JavaMap
+            Options passed to the model.
         """
-        opt = model.javaOptions()
-        options = {key: opt[key] for key in opt}
-        py_class = model.pyClass()
-        logger.debug(
-            f"Code generation for model={model.toString()}, options={options}"
-            f", pyClass=${py_class}, temporary=${temporary}"
-        )
+        try:
+            registry = self.registry_map[registry_class]
+        except KeyError:
+            from rikai.internal.reflection import find_class
+
+            cls = find_class(registry_class)
+            self.registry_map[registry_class] = cls(self.spark)
+            registry = self.registry_map[registry_class]
+
+        options = {key: options[key] for key in options}
+        return registry.resolve(uri, name, options)
 
     def register(self):
         """Register this :py:class:`CallbackService` to SparkSession's JVM."""
@@ -80,6 +90,7 @@ class CallbackService:
         )
 
     def toString(self):
+        """For Java compatibility"""
         return repr(self)
 
     class Java:

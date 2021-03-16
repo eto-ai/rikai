@@ -31,8 +31,11 @@ import org.apache.spark.sql.catalyst.expressions.Expression
   * @param uri model URI. It can be a `.yml` file, a tar ball or a directory.
   * @param funcName the name of a UDF which will be called when this model is invoked.
   */
-class FileSystemModel(val name: String, val uri: String, val funcName: String)
-    extends Model
+class FileSystemModel(
+    val name: String,
+    val uri: String,
+    val funcName: String
+) extends Model
     with SparkRunnable {
 
   override def toString: String = s"FileSystemModel(name=${name}, uri=${uri})"

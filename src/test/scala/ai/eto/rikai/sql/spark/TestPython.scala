@@ -23,8 +23,6 @@ import ai.eto.rikai.sql.model.Model
   */
 class TestPython extends Python {
 
-  override def codegen(model: Model, temporary: Boolean): Unit = {}
-
   /**
     * Resolve a Model from python.
     *
@@ -34,6 +32,7 @@ class TestPython extends Python {
     * @return a Model
     */
   override def resolve(
+      className: String,
       uri: String,
       name: String,
       options: Map[String, String]

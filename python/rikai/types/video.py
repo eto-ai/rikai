@@ -224,10 +224,7 @@ class Segment:
         return isinstance(other, Segment) and (
             self.start_fno,
             self.end_fno,
-        ) == (
-            other.start_fno,
-            other.end_fno,
-        )
+        ) == (other.start_fno, other.end_fno,)
 
 
 class VideoSampler(ABC):

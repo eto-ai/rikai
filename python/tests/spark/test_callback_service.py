@@ -29,4 +29,3 @@ def test_cb_service_find_registry():
     with pytest.raises(ModuleNotFoundError):
         cb.resolve("rikai.spark.not.exist.Registry", "s3://foo", "bar", {})
     assert len(cb.registry_map) == 1
-

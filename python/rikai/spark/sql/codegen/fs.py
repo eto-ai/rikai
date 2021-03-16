@@ -12,8 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from pyspark.sql import SparkSession
+import secrets
 
+from pyspark.sql import SparkSession
 
 from rikai.logging import logger
 
@@ -27,5 +28,8 @@ class Registry:
     def __repr__(self):
         return f"FileSystemRegistry"
 
-    def resolve(self, uri, name, options):
+    def resolve(self, uri: str, name: str, options):
         logger.info(f"Resolving model {name} from {uri}")
+        func_name = f"{name}_{secrets.token_hex(4)}"
+        logger.info(f"Creating pandas_udf with name {func_name}")
+        # TODO(lei): create pandas UDF inference from uri and options.

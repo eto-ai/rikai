@@ -25,11 +25,6 @@ class TestPython extends Python {
 
   /**
     * Resolve a Model from python.
-    *
-    * @param uri     URL for a model spec or model file.
-    * @param name    Optional model name. Can be empty.
-    * @param options options to the model.
-    * @return a Model
     */
   override def resolve(
       className: String,

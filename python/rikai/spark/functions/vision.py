@@ -100,7 +100,7 @@ def video_to_images(
     video,
     segment: Segment = Segment(0, -1),
     sample_rate: int = 1,
-    max_samples: int = 15000
+    max_samples: int = 15000,
 ) -> list:
     """Extract video frames into a list of images.
     Parameters

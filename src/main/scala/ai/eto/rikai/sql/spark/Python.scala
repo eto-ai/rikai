@@ -26,6 +26,17 @@ trait Python {
 
   /** Generate code for a model */
   def codegen(model: Model, temporary: Boolean): Unit
+
+  /**
+    * Resolve a Model from python.
+    *
+    * @param uri URL for a model spec or model file.
+    * @param name Optional model name. Can be empty.
+    * @param options options to the model.
+    *
+    * @return a Model
+    */
+  def resolve(uri: String, name: String, options: Map[String, String]): Model
 }
 
 object Python {
@@ -46,5 +57,15 @@ object Python {
   def generateCode(model: Model, temporary: Boolean = true): Unit = {
     checkRegistered
     python.get.codegen(model, temporary)
+  }
+
+  /** Resolve a Model from Python process. */
+  def resolve(
+      uri: String,
+      name: Option[String],
+      options: Map[String, String]
+  ): Model = {
+    checkRegistered
+    python.get.resolve(uri, name.getOrElse(""), options)
   }
 }

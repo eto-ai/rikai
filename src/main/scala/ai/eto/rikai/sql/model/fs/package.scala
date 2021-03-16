@@ -14,28 +14,18 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql.spark
-
-import ai.eto.rikai.sql.model.Model
+package ai.eto.rikai.sql.model
 
 /**
-  * [[Python]] callback service for unit testing
+  * FileSystem-based on [[Model]]s.
+  *
+  * It supports the following URIs.
+  *
+  *   - ../relative/path/to/model
+  *   - /absolute/path/to/model
+  *   - file:///absolute/path/to/model
+  *   - s3://bucket/path/to/model
+  *   - gs://bucket/path/to/model
+  *   - https://example.com/path/to/model
   */
-class TestPython extends Python {
-
-  override def codegen(model: Model, temporary: Boolean): Unit = {}
-
-  /**
-    * Resolve a Model from python.
-    *
-    * @param uri     URL for a model spec or model file.
-    * @param name    Optional model name. Can be empty.
-    * @param options options to the model.
-    * @return a Model
-    */
-  override def resolve(
-      uri: String,
-      name: String,
-      options: Map[String, String]
-  ): Model = ???
-}
+package object fs {}

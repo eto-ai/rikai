@@ -18,8 +18,8 @@ from rikai.spark.sql.callback_service import CallbackService
 from rikai.spark.sql.codegen.fs import Registry
 
 
-def test_cb_service_find_registry():
-    cb = CallbackService(None)
+def test_cb_service_find_registry(spark):
+    cb = CallbackService(spark)
 
     cb.resolve("rikai.spark.sql.codegen.fs.Registry", "s3://foo", "foo", {})
     assert isinstance(

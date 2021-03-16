@@ -31,8 +31,9 @@ from rikai.spark.functions import (
     box2d,
     image_copy,
     numpy_to_image,
+    video_to_images,
 )
-from rikai.types import Box2d, Image
+from rikai.types import Box2d, Image, VideoStream, YouTubeVideo
 
 
 def assert_area_equals(array, df):
@@ -131,3 +132,61 @@ def test_numpy_to_image(spark: SparkSession, tmp_path: Path):
     # print(df.first().image)
     assert Path(df.first().image.uri) == tmp_path / "1.png"
     assert (tmp_path / "1.png").exists()
+
+
+def test_video_to_images(spark: SparkSession):
+    """Test extract video frames from YouTubeVideo/VideoStream types
+    into list of Image assets.
+    """
+    sample_rate = 2
+    start_frame = 0
+    max_samples = 10
+    videostream_df = spark.createDataFrame(
+        [
+            (
+                VideoStream(
+                    uri=os.path.abspath(
+                        os.path.join(
+                            os.path.dirname(__file__),
+                            "..",
+                            "assets",
+                            "big_buck_bunny_short.mp4",
+                        )
+                    )
+                ),
+            ),
+        ],
+        ["video"],
+    )
+    youtube_df = spark.createDataFrame(
+        [
+            (YouTubeVideo(vid="rUWxSEwctFU"),),
+        ],
+        ["video"],
+    )
+    videostream_df = videostream_df.withColumn(
+        "images",
+        video_to_images(
+            col("video"), lit(sample_rate), lit(start_frame), lit(max_samples)
+        ),
+    )
+    youtube_df = youtube_df.withColumn(
+        "images",
+        video_to_images(
+            col("video"), lit(sample_rate), lit(start_frame), lit(max_samples)
+        ),
+    )
+
+    videostream_sample = videostream_df.first()["images"]
+    youtube_sample = youtube_df.first()["images"]
+
+    assert (
+        type(videostream_sample) == list
+        and type(videostream_sample[0]) == Image
+        and len(videostream_sample) == max_samples
+    )
+    assert (
+        type(youtube_sample) == list
+        and type(youtube_sample[0]) == Image
+        and len(youtube_sample) == max_samples
+    )

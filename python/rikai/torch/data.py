@@ -28,6 +28,7 @@ from torch.utils.data import IterableDataset
 # Rikai
 import rikai.parquet
 from rikai.mixin import ToNumpy
+from rikai.torch.utils import convert_tensor
 
 __all__ = ["DataLoader", "Dataset"]
 
@@ -253,18 +254,3 @@ class DataLoader:
             stop.set()  # tell the prefetch thread to stop
         prefetch_thd.join()
         q.join()
-
-
-def convert_tensor(row):
-    """Convert a parquet row into rikai semantic objects."""
-    tensors = {}
-    for key, value in row.items():
-        if isinstance(value, dict):
-            tensors[key] = convert_tensor(value)
-        elif isinstance(value, (list, tuple)):
-            tensors[key] = np.array([convert_tensor(elem) for elem in value])
-        elif isinstance(value, ToNumpy):
-            tensors[key] = value.to_numpy()
-        else:
-            tensors[key] = value
-    return tensors

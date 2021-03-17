@@ -16,6 +16,8 @@
 """
 
 # Third Party
+import ffmpeg
+import numpy as np
 from pyspark.sql.functions import udf
 from pyspark.sql.types import ArrayType
 
@@ -28,7 +30,13 @@ from rikai.types.vision import Image
 from rikai.types.video import YouTubeVideo, VideoStream, SingleFrameSampler
 
 
-__all__ = ["image", "image_copy", "numpy_to_image", "video_to_images"]
+__all__ = [
+    "image",
+    "image_copy",
+    "numpy_to_image",
+    "video_to_images",
+    "spectrogram_image",
+]
 
 
 @udf(returnType=ImageType())
@@ -98,7 +106,7 @@ def video_to_images(
     Parameters
     ----------
     video : Video
-        An video object, either YouTubeVideo or VideoStream.
+        A video object, either YouTubeVideo or VideoStream.
     sample_rate : Int
         The sampling rate in number of frames
     start_frame : Int
@@ -133,3 +141,37 @@ def video_to_images(
         )
         for idx, img in enumerate(video_iterator)
     ]
+
+
+@udf(returnType=ImageType())
+def spectrogram_image(video) -> Image:
+    """Applied ffmpeg filter to generate spectrogram
+    Parameters
+    ----------
+    video : Video
+        A video object, either YouTubeVideo or VideoStream.
+    Return
+    ------
+    Image
+        Return an Image of the audio spectrogram
+    """
+    assert isinstance(video, YouTubeVideo) or isinstance(
+        video, VideoStream
+    ), "Input type must be YouTubeVideo or VideoStream"
+
+    base_path = video.vid if isinstance(video, YouTubeVideo) else video.uri
+    video_uri = (
+        video.get_stream().uri
+        if isinstance(video, YouTubeVideo)
+        else video.uri
+    )
+    output, _ = (
+        ffmpeg.input(video_uri)
+        .filter("showspectrumpic", "224x224", legend=0)
+        .output("pipe:", format="rawvideo", pix_fmt="rgb24")
+        .run(capture_stdout=True)
+    )
+    return Image.from_array(
+        np.frombuffer(output, np.uint8).reshape([224, 224, 3]),
+        "{}_spectrogram.jpg".format(base_path),
+    )

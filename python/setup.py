@@ -18,7 +18,7 @@ torch = ["torch>=1.5.0", "torchvision"]
 jupyter = ["matplotlib", "jupyterlab"]
 aws = ["boto"]
 docs = ["sphinx"]
-youtube = ["pafy", "youtube_dl"]
+youtube = ["pafy", "youtube_dl", "ffmpeg-python"]
 all = test + torch + jupyter + aws + docs + youtube
 
 

@@ -30,6 +30,7 @@ jobs:
       working-directory: python
       run: |
         sudo apt-get -y -qq install libsnappy-dev
+        sudo apt-get -y install ffmpeg
         python -m pip install -q wheel pylint black flake8
         python -m pip install -e .[all]
     - name: Python black and flake8

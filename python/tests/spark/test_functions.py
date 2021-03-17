@@ -194,7 +194,8 @@ def test_video_to_images(spark: SparkSession):
 
 
 def test_spectrogram_image(spark: SparkSession):
-    """Test generate spectrogram image from YouTubeVideo/VideoStream video types."""
+    """Test generate spectrogram image
+    from YouTubeVideo/VideoStream videos types."""
     videostream_df = spark.createDataFrame(
         [
             (

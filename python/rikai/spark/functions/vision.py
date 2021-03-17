@@ -16,7 +16,6 @@
 """
 
 # Third Party
-import ffmpeg
 import numpy as np
 from pyspark.sql.functions import udf
 from pyspark.sql.types import ArrayType
@@ -103,6 +102,7 @@ def video_to_images(
     video, sample_rate: int = 1, start_frame: int = 0, max_samples: int = 15000
 ) -> list:
     """Extract video frames into a list of images.
+
     Parameters
     ----------
     video : Video
@@ -113,6 +113,7 @@ def video_to_images(
         Start from a specific frame
     max_samples : Int
         Yield at most this many frames (-1 means no max)
+
     Return
     ------
     List
@@ -144,16 +145,22 @@ def video_to_images(
 
 
 @udf(returnType=ImageType())
-def spectrogram_image(video) -> Image:
-    """Applied ffmpeg filter to generate spectrogram
+def spectrogram_image(video, size: Int = 224) -> Image:
+    import ffmpeg
+
+    """Applied ffmpeg filter to generate spectrogram.
+
     Parameters
     ----------
     video : Video
         A video object, either YouTubeVideo or VideoStream.
+    size : Int
+        Sets resolution of frequency, time spectrogram image.
+
     Return
     ------
     Image
-        Return an Image of the audio spectrogram
+        Return an Image of the audio spectrogram.
     """
     assert isinstance(video, YouTubeVideo) or isinstance(
         video, VideoStream
@@ -167,11 +174,11 @@ def spectrogram_image(video) -> Image:
     )
     output, _ = (
         ffmpeg.input(video_uri)
-        .filter("showspectrumpic", "224x224", legend=0)
+        .filter("showspectrumpic", "{}x{}".format(size), legend=0)
         .output("pipe:", format="rawvideo", pix_fmt="rgb24")
         .run(capture_stdout=True)
     )
     return Image.from_array(
-        np.frombuffer(output, np.uint8).reshape([224, 224, 3]),
+        np.frombuffer(output, np.uint8).reshape([size, size, 3]),
         "{}_spectrogram.jpg".format(base_path),
     )

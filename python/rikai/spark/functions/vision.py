@@ -174,7 +174,7 @@ def spectrogram_image(video, size: Int = 224) -> Image:
     )
     output, _ = (
         ffmpeg.input(video_uri)
-        .filter("showspectrumpic", "{}x{}".format(size), legend=0)
+        .filter("showspectrumpic", "{}x{}".format(size, size), legend=0)
         .output("pipe:", format="rawvideo", pix_fmt="rgb24")
         .run(capture_stdout=True)
     )

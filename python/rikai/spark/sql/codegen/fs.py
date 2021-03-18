@@ -13,36 +13,50 @@
 #  limitations under the License.
 
 import secrets
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 import yaml
-from jsonschema import validate
+from jsonschema import ValidationError, validate
 from pyspark.sql import SparkSession
 
 from rikai.io import open_uri
 from rikai.logging import logger
 from rikai.spark.sql.codegen.base import Registry
+from rikai.spark.sql.exceptions import SpecError
+
+__all__ = ["FileSystemRegistry"]
 
 # YAML-Spec SCHEMA
 SPEC_SCHEMA = {
     "type": "object",
     "properties": {
-        "version": {"type": "string"},
-        "name": {"type": "string"},
+        "version": {
+            "type": "string",
+            "description": "Model SPEC format version",
+        },
+        "name": {"type": "string", "description": "Model name"},
         "schema": {"type": "string"},
         "model": {
             "type": "object",
             "description": "model description",
             "properties": {
-                "uri": "string",
-                "flavor": "string",
+                "uri": {"type": "string"},
+                "flavor": {"type": "string"},
             },
             "required": ["uri"],
         },
-        "options": {"type": "object"},
     },
     "required": ["version", "schema", "model"],
 }
+
+
+def validate_spec(spec: Dict[str, Any]):
+    """Validate spec"""
+    logger.debug(f"Validate spec: {spec}")
+    try:
+        validate(instance=spec, schema=SPEC_SCHEMA)
+    except ValidationError as ve:
+        raise SpecError(ve.message) from ve
 
 
 def codegen_from_yaml(
@@ -52,8 +66,7 @@ def codegen_from_yaml(
     options: Dict[str, str] = {},
 ):
     spec = yaml.load(open_uri(uri), Loader=yaml.FullLoader)
-    print(spec)
-    validate(instance=spec, schema=SPEC_SCHEMA)
+    validate_spec(spec)
 
     func_name = f"{name}_{secrets.token_hex(4)}"
     logger.info(f"Creating pandas_udf with name {func_name}")

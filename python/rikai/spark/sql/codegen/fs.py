@@ -121,14 +121,11 @@ def codegen_from_yaml(
         )
 
     if spec.flavor == "pytorch":
-        from rikai.spark.sql.codegen.pytorch import runner
-
-        udf = runner(spec.uri, spec.schema, options=spec.options)
+        pass
     else:
         raise SpecError(f"Unsupported flavor: {spec.flavor}")
 
     func_name = f"{name}_{secrets.token_hex(4)}"
-    spark.udf.register(func_name, udf)
     logger.info(f"Creating pandas_udf with name {func_name}")
     return func_name
 

@@ -12,47 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import tempfile
-from pathlib import Path
-
 import pytest
-import torch
-import torchvision
-import numpy as np
-from pyspark.sql import Row, SparkSession
-from pyspark.sql.types import BinaryType, StructField, StructType
 
 from rikai.spark.sql.codegen.fs import ModelSpec
 from rikai.spark.sql.exceptions import SpecError
-
-
-@pytest.fixture(scope="module")
-def yaml_spec():
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        tmp_path = Path(tmp_dir)
-        # Prepare model
-        resnet = torchvision.models.detection.fasterrcnn_resnet50_fpn(
-            pretrained=True,
-            progress=False,
-        )
-        model_uri = tmp_path / "resnet.pth"
-        torch.save(resnet, model_uri)
-
-        spec_yaml = """
-version: 1.0
-name: resnet
-model:
-    uri: {}
-    flavor: pytorch
-schema: struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>
-        """.format(  # noqa: E501
-            model_uri
-        )
-
-        spec_file = tmp_path / "spec.yaml"
-        with spec_file.open("w") as fobj:
-            fobj.write(spec_yaml)
-        yield spec_file
 
 
 def test_validate_yaml_spec():
@@ -104,24 +67,3 @@ def test_validate_misformed_spec():
                 "model": {},
             },
         )
-
-
-def test_yaml_model(spark: SparkSession, yaml_spec):
-
-    spark.sql("CREATE MODEL resnet_m USING 'file://{}'".format(yaml_spec))
-
-    df = spark.createDataFrame(
-        [
-            Row(
-                data=bytearray(
-                    np.empty((128, 128, 3), dtype=np.uint8).tobytes()
-                )
-            )
-        ],
-        schema=StructType([StructField("data", BinaryType())]),
-    )
-    df.createOrReplaceTempView("df")
-
-    spark.sql(
-        "SELECT ML_PREDICT(resnet_m, data) as predictions FROM df"
-    ).show()

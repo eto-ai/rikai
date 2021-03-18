@@ -38,6 +38,7 @@ def runner(
     options = {} if options is None else options
     use_gpu = options.get("device", "cpu") == "gpu"
     num_workers = int(options.get("num_workers", 4))
+    batch_size = int(options.get("batch_size", 1))
 
     def torch_inference(
         iter: Iterator[pd.DataFrame],
@@ -52,16 +53,13 @@ def runner(
         with torch.no_grad():
             for series in iter:
                 dataset = PandasDataset(series, transform=pre_processing)
-                batch_result = {"boxes": [], "scores": [], "labels": []}
-                for batch in DataLoader(dataset, num_workers=num_workers):
+                for batch in DataLoader(
+                    dataset, num_workers=num_workers, batch_size=batch_size
+                ):
                     predictions = model(batch)
                     print(predictions)
                     if post_processing:
                         predictions = post_processing(predictions)
-                    for p in predictions:
-                        batch_result["boxes"].append(p["boxes"].tolist())
-                        batch_result["scores"].append(p["scores"].tolist())
-                        batch_result["labels"].append(p["labels"].tolist())
-                yield pd.DataFrame(batch_result)
+                yield pd.DataFrame(predictions)
 
     return pandas_udf(torch_inference, schema)

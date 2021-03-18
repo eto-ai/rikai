@@ -12,23 +12,24 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
-
-from rikai.spark.sql.callback_service import CallbackService
-from rikai.spark.sql.codegen.fs import Registry
+from abc import ABC, abstractmethod
+from typing import Dict
 
 
-def test_cb_service_find_registry(spark):
-    cb = CallbackService(spark)
+class Registry(ABC):
+    """Base class of a Model Registry"""
 
-    cb.resolve(
-        "rikai.spark.sql.codegen.fs.FileSystemRegistry", "s3://foo", "foo", {}
-    )
-    assert isinstance(
-        cb.registry_map["rikai.spark.sql.codegen.fs.FileSystemRegistry"],
-        Registry,
-    )
+    @abstractmethod
+    def resolve(self, uri: str, name: str, options: Dict[str, str]):
+        """Resolve a model from a model URI.
 
-    with pytest.raises(ModuleNotFoundError):
-        cb.resolve("rikai.spark.not.exist.Registry", "s3://foo", "bar", {})
-    assert len(cb.registry_map) == 1
+        Parameters
+        ----------
+        uri : str
+            Model URI
+        name : str, optional
+            Optional model name. Can be empty or None. If provided, it overrides
+            the model name got from the model URI.
+        options: dict
+            Additional options passed to the model.
+        """

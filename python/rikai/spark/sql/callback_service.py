@@ -66,18 +66,21 @@ class CallbackService:
             The model URI.
         name : str
             Mode name
-        options : JavaMap
+        options : dict[str, str]
             Options passed to the model.
         """
-        try:
-            registry = self.registry_map[registry_class]
-        except KeyError:
+        if registry_class not in self.registry_map:
             from rikai.internal.reflection import find_class
+            from rikai.spark.sql.codegen.base import Registry
 
             cls = find_class(registry_class)
+            if not issubclass(cls, Registry):
+                raise ValueError(
+                    f"Class '{registry_class}' is not a Registry'"
+                )
             self.registry_map[registry_class] = cls(self.spark)
-            registry = self.registry_map[registry_class]
 
+        registry = self.registry_map[registry_class]
         options = {key: options[key] for key in options}
         return registry.resolve(uri, name, options)
 

@@ -27,7 +27,7 @@ class FileSystemRegistry(val conf: Map[String, String])
     extends Registry
     with Logging {
 
-  private val pyClass: String = "rikai.spark.sql.codegen.fs.Registry"
+  private val pyClass: String = "rikai.spark.sql.codegen.fs.FileSystemRegistry"
 
   /**
     * Resolve a [[Model]] from the specific URI.

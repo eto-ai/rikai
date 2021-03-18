@@ -16,6 +16,8 @@
 """
 
 # Third Party
+import os
+import tempfile
 import numpy as np
 from pyspark.sql.functions import udf
 from pyspark.sql.types import ArrayType
@@ -26,7 +28,12 @@ from rikai.logging import logger
 from rikai.numpy import ndarray
 from rikai.spark.types.vision import ImageType
 from rikai.types.vision import Image
-from rikai.types.video import YouTubeVideo, VideoStream, SingleFrameSampler
+from rikai.types.video import (
+    YouTubeVideo,
+    VideoStream,
+    SingleFrameSampler,
+    Segment,
+)
 
 
 __all__ = [
@@ -126,7 +133,7 @@ def video_to_images(
     base_path = video.uri
 
     if isinstance(video, YouTubeVideo):
-        base_path = video.vid
+        base_path = os.path.join(tempfile.gettempdir(), video.vid)
         video_iterator = SingleFrameSampler(
             video.get_stream(), sample_rate, start_frame, max_samples
         )
@@ -148,8 +155,8 @@ def video_to_images(
 def spectrogram_image(
     video,
     segment: Segment = Segment(0, -1),
-    size: int = 224,
     max_samples: int = 15000,
+    resolution: int = 224,
 ) -> Image:
     """Applies ffmpeg filter to generate spectrogram image.
 
@@ -161,8 +168,8 @@ def spectrogram_image(
             A Segment object, localizing video in time to (start_fno, end_fno)
     max_samples : Int
             Yield at most this many frames (-1 means no max)
-    size : Int
-        Sets resolution of frequency, time spectrogram image.
+    resolution : Int
+        Sets resolution of time-frequency spectrogram image.
 
     Return
     ------
@@ -187,7 +194,9 @@ def spectrogram_image(
     )
     output, _ = (
         ffmpeg.input(video_uri)
-        .filter("showspectrumpic", "{}x{}".format(size, size), legend=0)
+        .filter(
+            "showspectrumpic", "{}x{}".format(resolution, resolution), legend=0
+        )
         .output(
             "pipe:",
             format="rawvideo",
@@ -198,6 +207,6 @@ def spectrogram_image(
         .run(capture_stdout=True)
     )
     return Image.from_array(
-        np.frombuffer(output, np.uint8).reshape([size, size, 3]),
+        np.frombuffer(output, np.uint8).reshape([resolution, resolution, 3]),
         "{}_spectrogram.jpg".format(base_path),
     )

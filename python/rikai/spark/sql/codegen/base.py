@@ -28,8 +28,8 @@ class Registry(ABC):
         uri : str
             Model URI
         name : str, optional
-            Optional model name. Can be empty or None. If provided, it overrides
-            the model name got from the model URI.
+            Optional model name. Can be empty or None. If provided, it
+            overrides the model name got from the model URI.
         options: dict
             Additional options passed to the model.
         """

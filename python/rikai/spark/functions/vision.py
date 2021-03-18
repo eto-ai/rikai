@@ -25,7 +25,12 @@ from rikai.logging import logger
 from rikai.numpy import ndarray
 from rikai.spark.types.vision import ImageType
 from rikai.types.vision import Image
-from rikai.types.video import YouTubeVideo, VideoStream, SingleFrameSampler
+from rikai.types.video import (
+    YouTubeVideo,
+    VideoStream,
+    SingleFrameSampler,
+    Segment,
+)
 
 
 __all__ = ["image", "image_copy", "numpy_to_image", "video_to_images"]
@@ -92,19 +97,26 @@ def numpy_to_image(array: ndarray, uri: str) -> Image:
 
 @udf(returnType=ArrayType(ImageType()))
 def video_to_images(
-    video, sample_rate: int = 1, start_frame: int = 0, max_samples: int = 15000
+    video,
+    segment: Segment = Segment(0, -1),
+    sample_rate: int = 1,
+    max_samples: int = 15000,
+    quality: str = "worst",
 ) -> list:
     """Extract video frames into a list of images.
     Parameters
     ----------
     video : Video
         An video object, either YouTubeVideo or VideoStream.
+    segment: Segment
+        A Segment object, localizing video in time to (start_fno, end_fno)
     sample_rate : Int
         The sampling rate in number of frames
-    start_frame : Int
-        Start from a specific frame
     max_samples : Int
         Yield at most this many frames (-1 means no max)
+    quality: str, default 'worst'
+                Either 'worst' (lowest bitrate) or 'best' (highest bitrate)
+                See: https://pythonhosted.org/Pafy/index.html#Pafy.Pafy.getbest
     Return
     ------
     List
@@ -113,13 +125,21 @@ def video_to_images(
     assert isinstance(video, YouTubeVideo) or isinstance(
         video, VideoStream
     ), "Input type must be YouTubeVideo or VideoStream"
+    assert isinstance(segment, Segment), "Second input type must be Segment"
 
     base_path = video.uri
+
+    start_frame = segment.start_fno
+    if segment.end_fno > 0:
+        max_samples = min((segment.end_fno - start_frame), max_samples)
 
     if isinstance(video, YouTubeVideo):
         base_path = video.vid
         video_iterator = SingleFrameSampler(
-            video.get_stream(), sample_rate, start_frame, max_samples
+            video.get_stream(quality=quality),
+            sample_rate,
+            start_frame,
+            max_samples,
         )
     else:
         video_iterator = SingleFrameSampler(

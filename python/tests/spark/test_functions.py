@@ -33,7 +33,7 @@ from rikai.spark.functions import (
     numpy_to_image,
     video_to_images,
 )
-from rikai.types import Box2d, Image, VideoStream, YouTubeVideo
+from rikai.types import Box2d, Image, VideoStream, YouTubeVideo, Segment
 
 
 def assert_area_equals(array, df):
@@ -139,7 +139,6 @@ def test_video_to_images(spark: SparkSession):
     into list of Image assets.
     """
     sample_rate = 2
-    start_frame = 0
     max_samples = 10
     videostream_df = spark.createDataFrame(
         [
@@ -154,26 +153,27 @@ def test_video_to_images(spark: SparkSession):
                         )
                     )
                 ),
+                Segment(0, 20),
             ),
         ],
-        ["video"],
+        ["video", "segment"],
     )
     youtube_df = spark.createDataFrame(
         [
-            (YouTubeVideo(vid="rUWxSEwctFU"),),
+            (YouTubeVideo(vid="rUWxSEwctFU"), Segment(0, 20)),
         ],
-        ["video"],
+        ["video", "segment"],
     )
     videostream_df = videostream_df.withColumn(
         "images",
         video_to_images(
-            col("video"), lit(sample_rate), lit(start_frame), lit(max_samples)
+            col("video"), col("segment"), lit(sample_rate), lit(max_samples)
         ),
     )
     youtube_df = youtube_df.withColumn(
         "images",
         video_to_images(
-            col("video"), lit(sample_rate), lit(start_frame), lit(max_samples)
+            col("video"), col("segment"), lit(sample_rate), lit(max_samples)
         ),
     )
 

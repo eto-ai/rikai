@@ -145,13 +145,22 @@ def video_to_images(
 
 
 @udf(returnType=ImageType())
-def spectrogram_image(video, size: int = 224) -> Image:
+def spectrogram_image(
+    video,
+    segment: Segment = Segment(0, -1),
+    size: int = 224,
+    max_samples: int = 15000,
+) -> Image:
     """Applies ffmpeg filter to generate spectrogram image.
 
     Parameters
     ----------
     video : Video
         A video object, either YouTubeVideo or VideoStream.
+    segment: Segment
+            A Segment object, localizing video in time to (start_fno, end_fno)
+    max_samples : Int
+            Yield at most this many frames (-1 means no max)
     size : Int
         Sets resolution of frequency, time spectrogram image.
 
@@ -165,8 +174,12 @@ def spectrogram_image(video, size: int = 224) -> Image:
     assert isinstance(video, YouTubeVideo) or isinstance(
         video, VideoStream
     ), "Input type must be YouTubeVideo or VideoStream"
+    assert isinstance(segment, Segment), "Second input type must be Segment"
 
     base_path = video.vid if isinstance(video, YouTubeVideo) else video.uri
+    start_frame = segment.start_fno
+    if segment.end_fno > 0:
+        max_samples = min((segment.end_fno - start_frame), max_samples)
     video_uri = (
         video.get_stream().uri
         if isinstance(video, YouTubeVideo)
@@ -175,7 +188,13 @@ def spectrogram_image(video, size: int = 224) -> Image:
     output, _ = (
         ffmpeg.input(video_uri)
         .filter("showspectrumpic", "{}x{}".format(size, size), legend=0)
-        .output("pipe:", format="rawvideo", pix_fmt="rgb24")
+        .output(
+            "pipe:",
+            format="rawvideo",
+            pix_fmt="rgb24",
+            start_number=start_frame,
+            vframes=max_samples,
+        )
         .run(capture_stdout=True)
     )
     return Image.from_array(

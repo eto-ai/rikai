@@ -25,6 +25,9 @@ from rikai.io import open_uri
 from rikai.torch.pandas import PandasDataset
 
 
+__all__ = ["runner"]
+
+
 def runner(
     model_uri: Union[str, Path],
     schema: DataType,
@@ -34,7 +37,7 @@ def runner(
 ):
     options = {} if options is None else options
     use_gpu = options.get("device", "cpu") == "gpu"
-    num_workers = options.get("num_workers", 4)
+    num_workers = int(options.get("num_workers", 4))
 
     def torch_inference(
         iter: Iterator[pd.DataFrame],

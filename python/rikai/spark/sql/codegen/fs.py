@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import secrets
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, IO, Mapping
 
 import yaml
 from jsonschema import ValidationError, validate
@@ -32,7 +32,7 @@ SPEC_SCHEMA = {
     "type": "object",
     "properties": {
         "version": {
-            "type": "string",
+            "type": "number",
             "description": "Model SPEC format version",
         },
         "name": {"type": "string", "description": "Model name"},
@@ -55,9 +55,11 @@ class ModelSpec:
     """Model Spec"""
 
     def __init__(
-        self, spec: Union[bytes, str, Dict[str, Any]], validate: bool = True
+        self,
+        spec: Union[bytes, str, IO, Dict[str, Any]],
+        validate: bool = True,
     ):
-        if isinstance(spec, str):
+        if not isinstance(spec, Mapping):
             spec = yaml.load(spec, Loader=yaml.FullLoader)
         self._spec = spec
 
@@ -113,7 +115,7 @@ def codegen_from_yaml(
     with open_uri(uri) as fobj:
         spec = ModelSpec(fobj)
 
-    if spec.version != "1.0":
+    if spec.version != 1.0:
         raise SpecError(
             f"Only spec version 1.0 is supported, got {spec.version}"
         )

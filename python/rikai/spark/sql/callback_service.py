@@ -34,7 +34,6 @@ def init_cb_service(spark: SparkSession):
 
     cb = CallbackService(spark)
     cb.register()
-    logger.info("Rikai Python callback service registered")
 
 
 class CallbackService:
@@ -81,7 +80,8 @@ class CallbackService:
             self.registry_map[registry_class] = cls(self.spark)
 
         registry = self.registry_map[registry_class]
-        options = {key: options[key] for key in options}
+        print(options)
+        options = {key: options[key] for key in options.keys()}
         return registry.resolve(uri, name, options)
 
     def register(self):

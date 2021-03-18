@@ -14,12 +14,12 @@
 
 import pytest
 
-from rikai.spark.sql.codegen.fs import validate_spec
+from rikai.spark.sql.codegen.fs import ModelSpec
 from rikai.spark.sql.exceptions import SpecError
 
 
 def test_validate_yaml_spec():
-    validate_spec(
+    ModelSpec(
         {
             "version": "1.2",
             "name": "test_yaml_model",
@@ -38,10 +38,10 @@ def test_validate_yaml_spec():
 
 def test_validate_misformed_spec():
     with pytest.raises(SpecError):
-        validate_spec({})
+        ModelSpec({})
 
     with pytest.raises(SpecError, match=".*version' is a required property.*"):
-        validate_spec(
+        ModelSpec(
             {
                 "name": "test_yaml_model",
                 "schema": "long",
@@ -50,7 +50,7 @@ def test_validate_misformed_spec():
         )
 
     with pytest.raises(SpecError, match=".*'model' is a required property.*"):
-        validate_spec(
+        ModelSpec(
             {
                 "version": "1.0",
                 "name": "test_yaml_model",
@@ -59,7 +59,7 @@ def test_validate_misformed_spec():
         )
 
     with pytest.raises(SpecError, match=".*'uri' is a required property.*"):
-        validate_spec(
+        ModelSpec(
             {
                 "version": "1.0",
                 "name": "test_yaml_model",

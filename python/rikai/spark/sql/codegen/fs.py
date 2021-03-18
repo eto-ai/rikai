@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import secrets
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import yaml
 from jsonschema import ValidationError, validate
@@ -23,6 +23,7 @@ from rikai.io import open_uri
 from rikai.logging import logger
 from rikai.spark.sql.codegen.base import Registry
 from rikai.spark.sql.exceptions import SpecError
+from rikai.spark.sql.schema import parse_schema
 
 __all__ = ["FileSystemRegistry"]
 
@@ -50,13 +51,57 @@ SPEC_SCHEMA = {
 }
 
 
-def validate_spec(spec: Dict[str, Any]):
-    """Validate spec"""
-    logger.debug(f"Validate spec: {spec}")
-    try:
-        validate(instance=spec, schema=SPEC_SCHEMA)
-    except ValidationError as ve:
-        raise SpecError(ve.message) from ve
+class ModelSpec:
+    """Model Spec"""
+
+    def __init__(
+        self, spec: Union[bytes, str, Dict[str, Any]], validate: bool = True
+    ):
+        if isinstance(spec, str):
+            spec = yaml.load(spec, Loader=yaml.FullLoader)
+        self._spec = spec
+
+        if validate:
+            self.validate()
+
+    def validate(self):
+        """Validate model spec
+
+        Raises
+        ------
+        SpecError
+            If the spec is not well-formatted.
+        """
+        logger.debug("Validate spec: %s", self._spec)
+        try:
+            validate(instance=self._spec, schema=SPEC_SCHEMA)
+        except ValidationError as e:
+            raise SpecError(e.message) from e
+
+    @property
+    def version(self):
+        """Returns spec version."""
+        return self._spec["version"]
+
+    @property
+    def uri(self):
+        """Return Model URI"""
+        return self._spec["model"]["uri"]
+
+    @property
+    def flavor(self):
+        """Model flavor"""
+        return self._spec["model"].get("flavor", "")
+
+    @property
+    def schema(self):
+        """Return the output schema of the model."""
+        return parse_schema(self._spec["schema"])
+
+    @property
+    def options(self):
+        """Model options"""
+        return self._spec.get("options", {})
 
 
 def codegen_from_yaml(
@@ -65,10 +110,23 @@ def codegen_from_yaml(
     name: Optional[str] = None,
     options: Dict[str, str] = {},
 ):
-    spec = yaml.load(open_uri(uri), Loader=yaml.FullLoader)
-    validate_spec(spec)
+    with open_uri(uri) as fobj:
+        spec = ModelSpec(fobj)
+
+    if spec.version != "1.0":
+        raise SpecError(
+            f"Only spec version 1.0 is supported, got {spec.version}"
+        )
+
+    if spec.flavor == "pytorch":
+        from rikai.spark.sql.codegen.pytorch import runner
+
+        udf = runner(spec.uri, spec.schema, options=spec.options)
+    else:
+        raise SpecError(f"Unsupported flavor: {spec.flavor}")
 
     func_name = f"{name}_{secrets.token_hex(4)}"
+    spark.udf.register(func_name, udf)
     logger.info(f"Creating pandas_udf with name {func_name}")
     return func_name
 

@@ -12,26 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Dict
+"""Helper functions for python reflections.
+"""
 
-from pyspark.sql import SparkSession
+import importlib
 
 
-class TestModel:
-    def __init__(self, name: str, uri: str, options: Dict[str, str]):
-        self.name = name
-        self.uri = uri
-        self.options = options
-
-    def codegen(self, spark: SparkSession, temporary: bool):
-        """Codegen for :py:class:`TestModel`
-
-        Parameters
-        ----------
-        spark : SparkSession
-            SparkSession
-
-        temporary : bool
-            Whether this model is generate temporary functions.
-        """
-        pass
+def find_class(class_name: str):
+    module, cls = class_name.rsplit(".", 1)
+    mod = importlib.import_module(module)
+    return getattr(mod, cls)

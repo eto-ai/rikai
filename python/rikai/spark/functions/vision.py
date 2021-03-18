@@ -146,7 +146,7 @@ def video_to_images(
 
 @udf(returnType=ImageType())
 def spectrogram_image(video, size: int = 224) -> Image:
-    """Applied ffmpeg filter to generate spectrogram.
+    """Applies ffmpeg filter to generate spectrogram image.
 
     Parameters
     ----------

@@ -101,6 +101,7 @@ def video_to_images(
     segment: Segment = Segment(0, -1),
     sample_rate: int = 1,
     max_samples: int = 15000,
+    quality: str = "worst",
 ) -> list:
     """Extract video frames into a list of images.
     Parameters
@@ -113,6 +114,9 @@ def video_to_images(
         The sampling rate in number of frames
     max_samples : Int
         Yield at most this many frames (-1 means no max)
+    quality: str, default 'worst'
+                Either 'worst' (lowest bitrate) or 'best' (highest bitrate)
+                See: https://pythonhosted.org/Pafy/index.html#Pafy.Pafy.getbest
     Return
     ------
     List
@@ -132,7 +136,10 @@ def video_to_images(
     if isinstance(video, YouTubeVideo):
         base_path = video.vid
         video_iterator = SingleFrameSampler(
-            video.get_stream(), sample_rate, start_frame, max_samples
+            video.get_stream(quality=quality),
+            sample_rate,
+            start_frame,
+            max_samples,
         )
     else:
         video_iterator = SingleFrameSampler(

@@ -16,6 +16,8 @@
 """
 
 # Third Party
+import os
+import tempfile
 from pyspark.sql.functions import udf
 from pyspark.sql.types import ArrayType
 
@@ -117,7 +119,7 @@ def video_to_images(
     base_path = video.uri
 
     if isinstance(video, YouTubeVideo):
-        base_path = video.vid
+        base_path = os.path.join(tempfile.gettempdir(), video.vid)
         video_iterator = SingleFrameSampler(
             video.get_stream(), sample_rate, start_frame, max_samples
         )

@@ -32,8 +32,4 @@ class Registry(ABC):
             overrides the model name got from the model URI.
         options: dict
             Additional options passed to the model.
-
-        Returns
-        -------
-        Java model class.
         """

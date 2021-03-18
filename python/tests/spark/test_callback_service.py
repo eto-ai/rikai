@@ -12,26 +12,23 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Dict
+import pytest
 
-from pyspark.sql import SparkSession
+from rikai.spark.sql.callback_service import CallbackService
+from rikai.spark.sql.codegen.fs import Registry
 
 
-class TestModel:
-    def __init__(self, name: str, uri: str, options: Dict[str, str]):
-        self.name = name
-        self.uri = uri
-        self.options = options
+def test_cb_service_find_registry(spark):
+    cb = CallbackService(spark)
 
-    def codegen(self, spark: SparkSession, temporary: bool):
-        """Codegen for :py:class:`TestModel`
+    cb.resolve(
+        "rikai.spark.sql.codegen.fs.FileSystemRegistry", "s3://foo", "foo", {}
+    )
+    assert isinstance(
+        cb.registry_map["rikai.spark.sql.codegen.fs.FileSystemRegistry"],
+        Registry,
+    )
 
-        Parameters
-        ----------
-        spark : SparkSession
-            SparkSession
-
-        temporary : bool
-            Whether this model is generate temporary functions.
-        """
-        pass
+    with pytest.raises(ModuleNotFoundError):
+        cb.resolve("rikai.spark.not.exist.Registry", "s3://foo", "bar", {})
+    assert len(cb.registry_map) == 1

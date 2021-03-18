@@ -80,7 +80,7 @@ class CallbackService:
             self.registry_map[registry_class] = cls(self.spark)
 
         registry = self.registry_map[registry_class]
-        print(options)
+        # Convert JavaMap to dict
         options = {key: options[key] for key in options.keys()}
         return registry.resolve(uri, name, options)
 

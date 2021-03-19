@@ -25,6 +25,7 @@ from rikai.spark.sql.codegen.base import Registry
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
 
+
 __all__ = ["FileSystemRegistry"]
 
 # YAML-Spec SCHEMA
@@ -121,12 +122,15 @@ def codegen_from_yaml(
         )
 
     if spec.flavor == "pytorch":
-        pass
+        from rikai.spark.sql.codegen.pytorch import generate_udf
+
+        udf = generate_udf(spec.uri, spec.schema, spec.options)
     else:
-        raise SpecError(f"Unsupported flavor: {spec.flavor}")
+        raise SpecError(f"Unsupported model flavor: {spec.flavor}")
 
     func_name = f"{name}_{secrets.token_hex(4)}"
-    logger.info(f"Creating pandas_udf with name {func_name}")
+    spark.udf.register(func_name, udf)
+    logger.info(f"Created model inference pandas_udf with name {func_name}")
     return func_name
 
 

@@ -43,11 +43,14 @@ class PandasDataset(Dataset):
     ) -> None:
         assert isinstance(data, (pd.DataFrame, pd.Series))
         self.data = data
-        self.transform = transform if transform is not None else lambda x: x
+        self.transform = transform
 
     def __len__(self) -> int:
         return self.data.shape[0]
 
     def __getitem__(self, index: int) -> Any:
         row = self.data.iloc[index]
-        return self.transform(convert_tensor(row))
+        row = convert_tensor(row)
+        if self.transform:
+            row = self.transform(row)
+        return row

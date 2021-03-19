@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import secrets
-from typing import Any, Dict, Optional, Union, IO, Mapping
+from typing import IO, Any, Dict, Mapping, Optional, Union
 
 import yaml
 from jsonschema import ValidationError, validate
@@ -24,7 +24,6 @@ from rikai.logging import logger
 from rikai.spark.sql.codegen.base import Registry
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
-
 
 __all__ = ["FileSystemRegistry"]
 
@@ -53,16 +52,31 @@ SPEC_SCHEMA = {
 
 
 class ModelSpec:
-    """Model Spec"""
+    """Model Spec.
+
+    Parameters
+    ----------
+    spec : str, bytes, dict or file object
+        String content of the serialized spec, or a dict
+    options : Dict[str, Any], optional
+        Additionally options. If the same option exists in spec already,
+        it will be override.
+    validate : bool
+        Validate the spec during construction. Default True
+    """
 
     def __init__(
         self,
         spec: Union[bytes, str, IO, Dict[str, Any]],
+        options: Optional[Dict[str, Any]] = None,
         validate: bool = True,
     ):
         if not isinstance(spec, Mapping):
             spec = yaml.load(spec, Loader=yaml.FullLoader)
         self._spec = spec
+        self._options: Dict[str, Any] = self._spec.get("options", {})
+        if options:
+            self._options.update(options)
 
         if validate:
             self.validate()
@@ -75,7 +89,7 @@ class ModelSpec:
         SpecError
             If the spec is not well-formatted.
         """
-        logger.debug("Validate spec: %s", self._spec)
+        logger.debug("Validating spec: %s", self._spec)
         try:
             validate(instance=self._spec, schema=SPEC_SCHEMA)
         except ValidationError as e:
@@ -104,17 +118,17 @@ class ModelSpec:
     @property
     def options(self):
         """Model options"""
-        return self._spec.get("options", {})
+        return self._options
 
 
 def codegen_from_yaml(
     spark: SparkSession,
     uri: str,
     name: Optional[str] = None,
-    options: Dict[str, str] = {},
+    options: Optional[Dict[str, str]] = None,
 ):
     with open_uri(uri) as fobj:
-        spec = ModelSpec(fobj)
+        spec = ModelSpec(fobj, options=options)
 
     if spec.version != 1.0:
         raise SpecError(

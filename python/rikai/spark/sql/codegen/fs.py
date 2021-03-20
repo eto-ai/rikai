@@ -68,9 +68,9 @@ class ModelSpec:
         String content of the serialized spec, or a dict
     options : Dict[str, Any], optional
         Additionally options. If the same option exists in spec already,
-        it will be override.
-    validate : bool
-        Validate the spec during construction. Default True
+        it will be overridden.
+    validate : bool, default True.
+        Validate the spec during construction. Default ``True``.
     """
 
     def __init__(

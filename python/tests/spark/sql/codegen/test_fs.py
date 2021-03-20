@@ -27,6 +27,8 @@ from rikai.spark.sql.exceptions import SpecError
 
 @pytest.fixture(scope="module")
 def resnet_spec():
+    # Can not use default pytest fixture `tmp_dir` or `tmp_path` because
+    # they do not work with module scoped fixture.
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp_path = Path(tmp_dir)
         # Prepare model

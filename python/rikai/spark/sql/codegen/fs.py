@@ -132,7 +132,7 @@ class ModelSpec:
     def pre_processing(self) -> Optional[Callable]:
         if (
             "transforms" not in self._spec
-            and "pre" not in self._spec["transforms"]
+            or "pre" not in self._spec["transforms"]
         ):
             return None
         f = find_class(self._spec["transforms"]["pre"])
@@ -142,7 +142,7 @@ class ModelSpec:
     def post_processing(self) -> Optional[Callable]:
         if (
             "transforms" not in self._spec
-            and "post" not in self._spec["transforms"]
+            or "post" not in self._spec["transforms"]
         ):
             return None
         f = find_class(self._spec["transforms"]["post"])

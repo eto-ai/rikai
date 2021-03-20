@@ -111,6 +111,8 @@ def test_validate_misformed_spec():
 def test_yaml_model(spark: SparkSession, resnet_spec: str):
     spark.sql("CREATE MODEL resnet_m USING 'file://{}'".format(resnet_spec))
 
+    # TODO: Replace uri string with Image class after GH#90 is released with
+    # the upstream spark
     df = spark.createDataFrame(
         [
             # http://cocodataset.org/#explore?id=484912

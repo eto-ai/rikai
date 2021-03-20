@@ -11,11 +11,3 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-
-from rikai.types.vision import Image
-
-
-def uri_to_pil(uri):
-    # We can remove this after UDT is supported in Spark
-    return Image(uri=uri).to_pil()

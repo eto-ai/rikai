@@ -14,7 +14,7 @@
 
 from torchvision import transforms as T
 
-from rikai.torch.transforms.utils import uri_to_pil
+from rikai.contrib.torch.transforms.utils import uri_to_pil
 
 __all__ = ["pre_processing", "post_processing"]
 

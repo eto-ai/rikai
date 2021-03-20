@@ -15,14 +15,21 @@
 import tempfile
 from pathlib import Path
 
-import numpy as np
 import pytest
 import torch
 import torchvision
 from pyspark.sql import Row, SparkSession
+from pyspark.sql.types import (
+    ArrayType,
+    FloatType,
+    IntegerType,
+    StructField,
+    StructType,
+)
 
 from rikai.spark.sql.codegen.fs import ModelSpec
 from rikai.spark.sql.exceptions import SpecError
+from rikai.spark.sql.schema import parse_schema
 
 
 @pytest.fixture(scope="module")
@@ -133,6 +140,32 @@ def test_yaml_model(spark: SparkSession, resnet_spec: str):
         "SELECT ML_PREDICT(resnet_m, uri) as predictions FROM df"
     )
     predictions.show()
-    predictions.printSchema()
+    assert predictions.schema == StructType(
+        [
+            StructField(
+                "predictions",
+                StructType(
+                    [
+                        StructField(
+                            "boxes",
+                            ArrayType(ArrayType(FloatType())),
+                        ),
+                        StructField("scores", ArrayType(FloatType())),
+                        StructField("labels", ArrayType(IntegerType())),
+                    ]
+                ),
+            ),
+        ]
+    )
+    assert predictions.schema == StructType(
+        [
+            StructField(
+                "predictions",
+                parse_schema(
+                    "struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>"
+                ),
+            )
+        ]
+    )
 
     assert predictions.count() == 2

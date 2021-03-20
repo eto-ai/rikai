@@ -50,7 +50,7 @@ def generate_udf(
     options = {} if options is None else options
     use_gpu = options.get("device", "cpu") == "gpu"
     num_workers = int(options.get("num_workers", 4))
-    batch_size = int(options.get("batch_size", 1))
+    batch_size = int(options.get("batch_size", 4))
 
     def torch_inference_udf(
         iter: Iterator[pd.DataFrame],
@@ -63,22 +63,14 @@ def generate_udf(
         model.to(device)
         model.eval()
 
-        transform = T.Compose(
-            [
-                to_numpy,
-                T.functional.to_pil_image,
-                T.Resize(256),
-                T.CenterCrop(224),
-                T.ToTensor(),
-            ]
-        )
-
         with torch.no_grad():
             for series in iter:
                 dataset = PandasDataset(series, transform=pre_processing)
                 results = []
                 for batch in DataLoader(
-                    dataset, num_workers=num_workers, batch_size=batch_size
+                    dataset,
+                    batch_size=batch_size,
+                    num_workers=num_workers,
                 ):
                     predictions = model(batch)
                     if post_processing:

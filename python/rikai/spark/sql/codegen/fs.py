@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import secrets
-from typing import IO, Any, Dict, Mapping, Optional, Union
+from typing import Callable, IO, Any, Dict, Mapping, Optional, Union
 
 import yaml
 from jsonschema import ValidationError, validate
@@ -24,6 +24,7 @@ from rikai.logging import logger
 from rikai.spark.sql.codegen.base import Registry
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
+from rikai.internal.reflection import find_class
 
 __all__ = ["FileSystemRegistry"]
 
@@ -46,6 +47,7 @@ SPEC_SCHEMA = {
             },
             "required": ["uri"],
         },
+        "transforms": {"type": "string"},
     },
     "required": ["version", "schema", "model"],
 }
@@ -120,6 +122,22 @@ class ModelSpec:
         """Model options"""
         return self._options
 
+    @property
+    def pre_processing(self) -> Optional[Callable]:
+        if "transforms" not in self._spec:
+            return None
+        f = find_class(self._spec["transforms"])
+        transforms = f()
+        return transforms["pre_processing"]
+
+    @property
+    def post_processing(self) -> Optional[Callable]:
+        if "transforms" not in self._spec:
+            return None
+        f = find_class(self._spec["transforms"])
+        transforms = f()
+        return transforms["post_processing"]
+
 
 def codegen_from_yaml(
     spark: SparkSession,
@@ -127,6 +145,11 @@ def codegen_from_yaml(
     name: Optional[str] = None,
     options: Optional[Dict[str, str]] = None,
 ):
+    """Generate code from a YAML file.
+
+    Parameters
+    ----------
+    """
     with open_uri(uri) as fobj:
         spec = ModelSpec(fobj, options=options)
 
@@ -138,7 +161,13 @@ def codegen_from_yaml(
     if spec.flavor == "pytorch":
         from rikai.spark.sql.codegen.pytorch import generate_udf
 
-        udf = generate_udf(spec.uri, spec.schema, spec.options)
+        udf = generate_udf(
+            spec.uri,
+            spec.schema,
+            spec.options,
+            pre_processing=spec.pre_processing,
+            post_processing=spec.post_processing,
+        )
     else:
         raise SpecError(f"Unsupported model flavor: {spec.flavor}")
 

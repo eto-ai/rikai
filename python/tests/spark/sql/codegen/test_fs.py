@@ -12,10 +12,47 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import tempfile
+from pathlib import Path
+
+import numpy as np
 import pytest
+import torch
+import torchvision
+from pyspark.sql import Row, SparkSession
 
 from rikai.spark.sql.codegen.fs import ModelSpec
 from rikai.spark.sql.exceptions import SpecError
+
+
+@pytest.fixture(scope="module")
+def resnet_spec():
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        tmp_path = Path(tmp_dir)
+        # Prepare model
+        resnet = torchvision.models.detection.fasterrcnn_resnet50_fpn(
+            pretrained=True,
+            progress=False,
+        )
+        model_uri = tmp_path / "resnet.pth"
+        torch.save(resnet, model_uri)
+
+        spec_yaml = """
+version: 1.0
+name: resnet
+model:
+    uri: {}
+    flavor: pytorch
+schema: struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>
+transforms: rikai.torch.transforms.fasterrcnn_resnet50_fpn
+        """.format(  # noqa: E501
+            model_uri
+        )
+
+        spec_file = tmp_path / "spec.yaml"
+        with spec_file.open("w") as fobj:
+            fobj.write(spec_yaml)
+        yield spec_file
 
 
 def test_validate_yaml_spec():
@@ -67,3 +104,29 @@ def test_validate_misformed_spec():
                 "model": {},
             },
         )
+
+
+def test_yaml_model(spark: SparkSession, resnet_spec: str):
+    spark.sql("CREATE MODEL resnet_m USING 'file://{}'".format(resnet_spec))
+
+    df = spark.createDataFrame(
+        [
+            # http://cocodataset.org/#explore?id=484912
+            Row(
+                uri="http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"  # noqa
+            ),
+            # https://cocodataset.org/#explore?id=433013
+            Row(
+                uri="http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg"  # noqa
+            ),
+        ],
+    )
+    df.createOrReplaceTempView("df")
+
+    predictions = spark.sql(
+        "SELECT ML_PREDICT(resnet_m, uri) as predictions FROM df"
+    )
+    predictions.show()
+    predictions.printSchema()
+
+    assert predictions.count() == 2

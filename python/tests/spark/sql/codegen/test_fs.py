@@ -162,7 +162,7 @@ def test_yaml_model(spark: SparkSession, resnet_spec: str):
             StructField(
                 "predictions",
                 parse_schema(
-                    "struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>"
+                    "struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>"  # noqa
                 ),
             )
         ]

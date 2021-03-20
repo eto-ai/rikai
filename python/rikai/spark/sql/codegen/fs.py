@@ -47,7 +47,13 @@ SPEC_SCHEMA = {
             },
             "required": ["uri"],
         },
-        "transforms": {"type": "string"},
+        "transforms": {
+            "type": "object",
+            "properties": {
+                "pre": {"type": "string"},
+                "post": {"type": "string"},
+            },
+        },
     },
     "required": ["version", "schema", "model"],
 }
@@ -124,19 +130,23 @@ class ModelSpec:
 
     @property
     def pre_processing(self) -> Optional[Callable]:
-        if "transforms" not in self._spec:
+        if (
+            "transforms" not in self._spec
+            and "pre" not in self._spec["transforms"]
+        ):
             return None
-        f = find_class(self._spec["transforms"])
-        transforms = f()
-        return transforms["pre_processing"]
+        f = find_class(self._spec["transforms"]["pre"])
+        return f
 
     @property
     def post_processing(self) -> Optional[Callable]:
-        if "transforms" not in self._spec:
+        if (
+            "transforms" not in self._spec
+            and "post" not in self._spec["transforms"]
+        ):
             return None
-        f = find_class(self._spec["transforms"])
-        transforms = f()
-        return transforms["post_processing"]
+        f = find_class(self._spec["transforms"]["post"])
+        return f
 
 
 def codegen_from_yaml(

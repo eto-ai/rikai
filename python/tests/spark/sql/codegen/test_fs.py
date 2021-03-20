@@ -44,7 +44,9 @@ model:
     uri: {}
     flavor: pytorch
 schema: struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>
-transforms: rikai.torch.transforms.fasterrcnn_resnet50_fpn
+transforms:
+    pre: rikai.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing
+    post: rikai.torch.transforms.fasterrcnn_resnet50_fpn.post_processing
         """.format(  # noqa: E501
             model_uri
         )

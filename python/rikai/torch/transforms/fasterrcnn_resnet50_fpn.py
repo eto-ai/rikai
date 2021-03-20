@@ -1,4 +1,4 @@
-#  Copyright 2021 Rikai Authors
+#  Copyright 2020 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -12,19 +12,23 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Callable, Dict
+from torchvision import transforms as T
 
-from rikai.types.vision import Image
+from rikai.torch.transforms.utils import uri_to_pil
 
-__all__ = ["fasterrcnn_resnet50_fpn"]
+__all__ = ["pre_processing", "post_processing"]
+
+pre_processing = T.Compose(
+    [
+        uri_to_pil,
+        T.Resize(256),
+        T.CenterCrop(224),
+        T.ToTensor(),
+    ]
+)
 
 
-def _uri_to_pil(uri):
-    # We can remove this after UDT is supported in Spark
-    return Image(uri=uri).to_pil()
-
-
-def _fasterrnn_post_processing(batch):
+def post_processing(batch):
     results = []
     for predicts in batch:
         predict_result = {
@@ -43,24 +47,3 @@ def _fasterrnn_post_processing(batch):
 
         results.append(predict_result)
     return results
-
-
-def fasterrcnn_resnet50_fpn() -> Dict[str, Callable]:
-    """Pre/Post processing routines for
-    :py:class:`torchvision.models.detection.fasterrcnn_resnet50_fpn`
-
-    """
-    from torchvision import transforms as T
-
-    pre_processing = T.Compose(
-        [
-            _uri_to_pil,
-            T.Resize(256),
-            T.CenterCrop(224),
-            T.ToTensor(),
-        ]
-    )
-    return {
-        "pre_processing": pre_processing,
-        "post_processing": _fasterrnn_post_processing,
-    }

@@ -130,6 +130,7 @@ class ModelSpec:
 
     @property
     def pre_processing(self) -> Optional[Callable]:
+        """Return pre-processing transform if exists"""
         if (
             "transforms" not in self._spec
             or "pre" not in self._spec["transforms"]
@@ -140,6 +141,7 @@ class ModelSpec:
 
     @property
     def post_processing(self) -> Optional[Callable]:
+        """Return post-processing transform if exists"""
         if (
             "transforms" not in self._spec
             or "post" not in self._spec["transforms"]
@@ -154,11 +156,24 @@ def codegen_from_yaml(
     uri: str,
     name: Optional[str] = None,
     options: Optional[Dict[str, str]] = None,
-):
+) -> str:
     """Generate code from a YAML file.
 
     Parameters
     ----------
+    spark : SparkSession
+        A live spark session
+    uri : str
+        the model spec URI
+    name : model name
+        The name of the model.
+    options : dict
+        Optional parameters passed to the model.
+
+    Returns
+    -------
+    str
+        Spark UDF function name for the generated data.
     """
     with open_uri(uri) as fobj:
         spec = ModelSpec(fobj, options=options)

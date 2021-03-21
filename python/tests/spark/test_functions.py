@@ -138,6 +138,7 @@ def test_video_to_images(spark: SparkSession):
     """Test extract video frames from YouTubeVideo/VideoStream types
     into list of Image assets.
     """
+    youtube_uri = os.path.join(os.path.dirname(__file__), "..", "assets")
     sample_rate = 2
     start_frame = 0
     max_samples = 10
@@ -147,9 +148,7 @@ def test_video_to_images(spark: SparkSession):
                 VideoStream(
                     uri=os.path.abspath(
                         os.path.join(
-                            os.path.dirname(__file__),
-                            "..",
-                            "assets",
+                            youtube_uri,
                             "big_buck_bunny_short.mp4",
                         )
                     )
@@ -160,9 +159,9 @@ def test_video_to_images(spark: SparkSession):
     )
     youtube_df = spark.createDataFrame(
         [
-            (YouTubeVideo(vid="rUWxSEwctFU"),),
+            (YouTubeVideo(vid="rUWxSEwctFU"), youtube_uri),
         ],
-        ["video"],
+        ["video", "youtube_uri"],
     )
     videostream_df = videostream_df.withColumn(
         "images",
@@ -173,7 +172,11 @@ def test_video_to_images(spark: SparkSession):
     youtube_df = youtube_df.withColumn(
         "images",
         video_to_images(
-            col("video"), lit(sample_rate), lit(start_frame), lit(max_samples)
+            col("video"),
+            col("youtube_uri"),
+            lit(sample_rate),
+            lit(start_frame),
+            lit(max_samples),
         ),
     )
 

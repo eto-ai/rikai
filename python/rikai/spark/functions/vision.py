@@ -94,13 +94,21 @@ def numpy_to_image(array: ndarray, uri: str) -> Image:
 
 @udf(returnType=ArrayType(ImageType()))
 def video_to_images(
-    video, sample_rate: int = 1, start_frame: int = 0, max_samples: int = 15000
+    video,
+    youtube_uri: str = tempfile.gettempdir(),
+    sample_rate: int = 1,
+    start_frame: int = 0,
+    max_samples: int = 15000,
 ) -> list:
     """Extract video frames into a list of images.
     Parameters
     ----------
     video : Video
         An video object, either YouTubeVideo or VideoStream.
+    youtube_uri: Str
+        The output directory where images from YouTubeVideo
+        will be written. Images from VideoStream will be written
+        to VideoStream.uri directory.
     sample_rate : Int
         The sampling rate in number of frames
     start_frame : Int
@@ -112,14 +120,14 @@ def video_to_images(
     List
         Return a list of images from video indexed by frame number.
     """
-    assert isinstance(video, YouTubeVideo) or isinstance(
-        video, VideoStream
+    assert isinstance(
+        video, (YouTubeVideo, VideoStream)
     ), "Input type must be YouTubeVideo or VideoStream"
 
     base_path = video.uri
 
     if isinstance(video, YouTubeVideo):
-        base_path = os.path.join(tempfile.gettempdir(), video.vid)
+        base_path = os.path.join(youtube_uri, video.vid)
         video_iterator = SingleFrameSampler(
             video.get_stream(), sample_rate, start_frame, max_samples
         )

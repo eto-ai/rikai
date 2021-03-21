@@ -32,8 +32,9 @@ from rikai.spark.functions import (
     image_copy,
     numpy_to_image,
     video_to_images,
+    spectrogram_image,
 )
-from rikai.types import Box2d, Image, VideoStream, YouTubeVideo
+from rikai.types import Box2d, Image, VideoStream, YouTubeVideo, Segment
 
 
 def assert_area_equals(array, df):
@@ -140,7 +141,6 @@ def test_video_to_images(spark: SparkSession):
     """
     youtube_uri = os.path.join(os.path.dirname(__file__), "..", "assets")
     sample_rate = 2
-    start_frame = 0
     max_samples = 10
     videostream_df = spark.createDataFrame(
         [
@@ -153,20 +153,21 @@ def test_video_to_images(spark: SparkSession):
                         )
                     )
                 ),
+                Segment(0, 20),
             ),
         ],
-        ["video"],
+        ["video", "segment"],
     )
     youtube_df = spark.createDataFrame(
         [
-            (YouTubeVideo(vid="rUWxSEwctFU"), youtube_uri),
+            (YouTubeVideo(vid="rUWxSEwctFU"), youtube_uri, Segment(0, 20)),
         ],
-        ["video", "youtube_uri"],
+        ["video", "youtube_uri", "segment"],
     )
     videostream_df = videostream_df.withColumn(
         "images",
         video_to_images(
-            col("video"), lit(sample_rate), lit(start_frame), lit(max_samples)
+            col("video"), col("segment"), lit(sample_rate), lit(max_samples)
         ),
     )
     youtube_df = youtube_df.withColumn(
@@ -174,8 +175,8 @@ def test_video_to_images(spark: SparkSession):
         video_to_images(
             col("video"),
             col("youtube_uri"),
+            col("segment"),
             lit(sample_rate),
-            lit(start_frame),
             lit(max_samples),
         ),
     )
@@ -193,3 +194,44 @@ def test_video_to_images(spark: SparkSession):
         and type(youtube_sample[0]) == Image
         and len(youtube_sample) == max_samples
     )
+
+
+def test_spectrogram_image(spark: SparkSession):
+    """Test generate spectrogram image
+    from YouTubeVideo/VideoStream videos types."""
+    videostream_df = spark.createDataFrame(
+        [
+            (
+                VideoStream(
+                    uri=os.path.abspath(
+                        os.path.join(
+                            os.path.dirname(__file__),
+                            "..",
+                            "assets",
+                            "big_buck_bunny_short.mp4",
+                        )
+                    )
+                ),
+            ),
+        ],
+        ["video"],
+    )
+    youtube_df = spark.createDataFrame(
+        [
+            (YouTubeVideo(vid="rUWxSEwctFU"),),
+        ],
+        ["video"],
+    )
+    videostream_df = videostream_df.withColumn(
+        "spectrogram",
+        spectrogram_image(col("video")),
+    )
+    youtube_df = youtube_df.withColumn(
+        "spectrogram",
+        spectrogram_image(col("video")),
+    )
+    videostream_sample = videostream_df.first()["spectrogram"]
+    youtube_sample = youtube_df.first()["spectrogram"]
+
+    assert type(videostream_sample) == Image
+    assert type(youtube_sample) == Image

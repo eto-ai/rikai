@@ -18,6 +18,8 @@ package ai.eto.rikai.sql.spark
 
 import ai.eto.rikai.sql.model.{Model, ModelNotFoundException}
 
+import scala.collection.JavaConverters.mapAsJavaMap
+
 /**
   * [[Python]] is the callback service to call arbitrary Python code
   * in the SparkSessions' main python interpreter.
@@ -38,7 +40,7 @@ trait Python {
       className: String,
       uri: String,
       name: String,
-      options: Map[String, String]
+      options: java.util.Map[String, String]
   ): Model
 }
 
@@ -66,6 +68,11 @@ object Python {
       options: Map[String, String]
   ): Model = {
     checkRegistered
-    python.get.resolve(className, uri, name.getOrElse(""), options)
+    python.get.resolve(
+      className,
+      uri,
+      name.getOrElse(""),
+      mapAsJavaMap(options)
+    )
   }
 }

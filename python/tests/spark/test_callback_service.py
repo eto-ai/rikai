@@ -12,17 +12,35 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from pathlib import Path
+
 import pytest
+from pyspark.sql import SparkSession
 
 from rikai.spark.sql.callback_service import CallbackService
 from rikai.spark.sql.codegen.fs import Registry
 
 
-def test_cb_service_find_registry(spark):
-    cb = CallbackService(spark)
+def test_cb_service_find_registry(spark: SparkSession, tmp_path: Path):
 
+    spec_file = tmp_path / "spec.yml"
+    with spec_file.open("w") as fobj:
+        fobj.write(
+            """
+version: 1.0
+schema: long
+model:
+    uri: abc.pt
+    flavor: pytorch
+    """
+        )
+
+    cb = CallbackService(spark)
     cb.resolve(
-        "rikai.spark.sql.codegen.fs.FileSystemRegistry", "s3://foo", "foo", {}
+        "rikai.spark.sql.codegen.fs.FileSystemRegistry",
+        str(spec_file),
+        "foo",
+        {},
     )
     assert isinstance(
         cb.registry_map["rikai.spark.sql.codegen.fs.FileSystemRegistry"],

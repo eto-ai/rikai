@@ -30,6 +30,6 @@ class TestPython extends Python {
       className: String,
       uri: String,
       name: String,
-      options: Map[String, String]
+      options: java.util.Map[String, String]
   ): Model = ???
 }

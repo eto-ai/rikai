@@ -28,7 +28,7 @@ def test_cb_service_find_registry(spark: SparkSession, tmp_path: Path):
         fobj.write(
             """
 version: 1.0
-schema: foo
+schema: long
 model:
     uri: abc.pt
     flavor: pytorch

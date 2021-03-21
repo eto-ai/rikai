@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import secrets
-from typing import Any, Dict, Optional, Union, IO, Mapping
+from typing import Callable, IO, Any, Dict, Mapping, Optional, Union
 
 import yaml
 from jsonschema import ValidationError, validate
@@ -24,6 +24,7 @@ from rikai.logging import logger
 from rikai.spark.sql.codegen.base import Registry
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
+from rikai.internal.reflection import find_class
 
 __all__ = ["FileSystemRegistry"]
 
@@ -46,22 +47,44 @@ SPEC_SCHEMA = {
             },
             "required": ["uri"],
         },
+        "transforms": {
+            "type": "object",
+            "properties": {
+                "pre": {"type": "string"},
+                "post": {"type": "string"},
+            },
+        },
     },
     "required": ["version", "schema", "model"],
 }
 
 
 class ModelSpec:
-    """Model Spec"""
+    """Model Spec.
+
+    Parameters
+    ----------
+    spec : str, bytes, dict or file object
+        String content of the serialized spec, or a dict
+    options : Dict[str, Any], optional
+        Additionally options. If the same option exists in spec already,
+        it will be overridden.
+    validate : bool, default True.
+        Validate the spec during construction. Default ``True``.
+    """
 
     def __init__(
         self,
         spec: Union[bytes, str, IO, Dict[str, Any]],
+        options: Optional[Dict[str, Any]] = None,
         validate: bool = True,
     ):
         if not isinstance(spec, Mapping):
             spec = yaml.load(spec, Loader=yaml.FullLoader)
         self._spec = spec
+        self._options: Dict[str, Any] = self._spec.get("options", {})
+        if options:
+            self._options.update(options)
 
         if validate:
             self.validate()
@@ -74,7 +97,7 @@ class ModelSpec:
         SpecError
             If the spec is not well-formatted.
         """
-        logger.debug("Validate spec: %s", self._spec)
+        logger.debug("Validating spec: %s", self._spec)
         try:
             validate(instance=self._spec, schema=SPEC_SCHEMA)
         except ValidationError as e:
@@ -103,17 +126,57 @@ class ModelSpec:
     @property
     def options(self):
         """Model options"""
-        return self._spec.get("options", {})
+        return self._options
+
+    @property
+    def pre_processing(self) -> Optional[Callable]:
+        """Return pre-processing transform if exists"""
+        if (
+            "transforms" not in self._spec
+            or "pre" not in self._spec["transforms"]
+        ):
+            return None
+        f = find_class(self._spec["transforms"]["pre"])
+        return f
+
+    @property
+    def post_processing(self) -> Optional[Callable]:
+        """Return post-processing transform if exists"""
+        if (
+            "transforms" not in self._spec
+            or "post" not in self._spec["transforms"]
+        ):
+            return None
+        f = find_class(self._spec["transforms"]["post"])
+        return f
 
 
 def codegen_from_yaml(
     spark: SparkSession,
     uri: str,
     name: Optional[str] = None,
-    options: Dict[str, str] = {},
-):
+    options: Optional[Dict[str, str]] = None,
+) -> str:
+    """Generate code from a YAML file.
+
+    Parameters
+    ----------
+    spark : SparkSession
+        A live spark session
+    uri : str
+        the model spec URI
+    name : model name
+        The name of the model.
+    options : dict
+        Optional parameters passed to the model.
+
+    Returns
+    -------
+    str
+        Spark UDF function name for the generated data.
+    """
     with open_uri(uri) as fobj:
-        spec = ModelSpec(fobj)
+        spec = ModelSpec(fobj, options=options)
 
     if spec.version != 1.0:
         raise SpecError(
@@ -121,12 +184,21 @@ def codegen_from_yaml(
         )
 
     if spec.flavor == "pytorch":
-        pass
+        from rikai.spark.sql.codegen.pytorch import generate_udf
+
+        udf = generate_udf(
+            spec.uri,
+            spec.schema,
+            spec.options,
+            pre_processing=spec.pre_processing,
+            post_processing=spec.post_processing,
+        )
     else:
-        raise SpecError(f"Unsupported flavor: {spec.flavor}")
+        raise SpecError(f"Unsupported model flavor: {spec.flavor}")
 
     func_name = f"{name}_{secrets.token_hex(4)}"
-    logger.info(f"Creating pandas_udf with name {func_name}")
+    spark.udf.register(func_name, udf)
+    logger.info(f"Created model inference pandas_udf with name {func_name}")
     return func_name
 
 

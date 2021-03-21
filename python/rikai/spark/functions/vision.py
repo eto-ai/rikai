@@ -107,8 +107,8 @@ def numpy_to_image(array: ndarray, uri: str) -> Image:
 @udf(returnType=ArrayType(ImageType()))
 def video_to_images(
     video,
-    youtube_uri: str = tempfile.gettempdir(),
     segment: Segment = Segment(0, -1),
+    youtube_uri: str = tempfile.gettempdir(),
     sample_rate: int = 1,
     max_samples: int = 15000,
     quality: str = "worst",
@@ -119,12 +119,12 @@ def video_to_images(
     ----------
     video : Video
         An video object, either YouTubeVideo or VideoStream.
+    segment: Segment
+        A Segment object, localizing video in time to (start_fno, end_fno)
     youtube_uri: Str
         The output directory where images from YouTubeVideo
         will be written. Images from VideoStream will be written
         to VideoStream.uri directory.
-    segment: Segment
-        A Segment object, localizing video in time to (start_fno, end_fno)
     sample_rate : Int
         The sampling rate in number of frames
     max_samples : Int

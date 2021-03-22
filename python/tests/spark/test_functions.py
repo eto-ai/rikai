@@ -135,11 +135,10 @@ def test_numpy_to_image(spark: SparkSession, tmp_path: Path):
     assert (tmp_path / "1.png").exists()
 
 
-def test_video_to_images(spark: SparkSession):
+def test_video_to_images(spark: SparkSession, tmp_path: Path):
     """Test extract video frames from YouTubeVideo/VideoStream types
     into list of Image assets.
     """
-    youtube_uri = os.path.join(os.path.dirname(__file__), "..", "assets")
     sample_rate = 2
     max_samples = 10
     videostream_df = spark.createDataFrame(
@@ -148,7 +147,9 @@ def test_video_to_images(spark: SparkSession):
                 VideoStream(
                     uri=os.path.abspath(
                         os.path.join(
-                            youtube_uri,
+                            os.path.dirname(__file__),
+                            "..",
+                            "assets",
                             "big_buck_bunny_short.mp4",
                         )
                     )
@@ -160,9 +161,9 @@ def test_video_to_images(spark: SparkSession):
     )
     youtube_df = spark.createDataFrame(
         [
-            (YouTubeVideo(vid="rUWxSEwctFU"), Segment(0, 20), youtube_uri),
+            (YouTubeVideo(vid="rUWxSEwctFU"), Segment(0, 20), str(tmp_path)),
         ],
-        ["video", "segment", "youtube_uri"],
+        ["video", "segment", "tmp_path"],
     )
     videostream_df = videostream_df.withColumn(
         "images",
@@ -181,7 +182,7 @@ def test_video_to_images(spark: SparkSession):
             col("segment"),
             lit(sample_rate),
             lit(max_samples),
-            col("youtube_uri"),
+            col("tmp_path"),
         ),
     )
 

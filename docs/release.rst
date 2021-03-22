@@ -23,7 +23,9 @@ Release PyPI Package
 Once the maven jar is released, you can make a pypi package release by following `pypi`_
 packaging instructions.
 
-1. Update the `rikai/python/rikai/__version__.py` version file
+0. :code:`cd` into the :code:`/python` subdirectory under the rikai repo root.
+1. Update the `./rikai/__version__.py` version file, `./tests/conftest.py`,
+   `./notebooks/VideoData.ipynb`, and `./notebooks/Coco.ipynb`.
 2. Clean the build directories :code:`rm -rf ./build ./dist ./*egg-info`
 3. Build the package via :code:`python setup.py sdist bdist_wheel`
 4. Upload build to the testpypi repo: :code:`twine upload --repository testpypi dist/*`. You'll

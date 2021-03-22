@@ -108,9 +108,9 @@ def numpy_to_image(array: ndarray, uri: str) -> Image:
 def video_to_images(
     video,
     segment: Segment = Segment(0, -1),
-    youtube_uri: str = tempfile.gettempdir(),
     sample_rate: int = 1,
     max_samples: int = 15000,
+    youtube_uri: str = "",
     quality: str = "worst",
 ) -> list:
     """Extract video frames into a list of images.
@@ -121,17 +121,17 @@ def video_to_images(
         An video object, either YouTubeVideo or VideoStream.
     segment: Segment
         A Segment object, localizing video in time to (start_fno, end_fno)
-    youtube_uri: Str
-        The output directory where images from YouTubeVideo
-        will be written. Images from VideoStream will be written
-        to VideoStream.uri directory.
     sample_rate : Int
         The sampling rate in number of frames
     max_samples : Int
         Yield at most this many frames (-1 means no max)
+     youtube_uri: Str
+        The output directory where images from YouTubeVideo
+        will be written. Images from VideoStream will be written
+        to VideoStream.uri directory.
     quality: str, default 'worst'
-                Either 'worst' (lowest bitrate) or 'best' (highest bitrate)
-                See: https://pythonhosted.org/Pafy/index.html#Pafy.Pafy.getbest
+        Either 'worst' (lowest bitrate) or 'best' (highest bitrate)
+        See: https://pythonhosted.org/Pafy/index.html#Pafy.Pafy.getbest
 
     Return
     ------
@@ -144,6 +144,8 @@ def video_to_images(
     assert isinstance(segment, Segment), "Second input type must be Segment"
 
     base_path = video.uri
+    if not youtube_uri:
+        youtube_uri = tempfile.gettempdir()
 
     start_frame = segment.start_fno
     if segment.end_fno > 0:

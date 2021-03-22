@@ -169,9 +169,9 @@ def test_video_to_images(spark: SparkSession):
         video_to_images(
             col("video"),
             col("segment"),
-            lit(""),
             lit(sample_rate),
             lit(max_samples),
+            lit(""),
         ),
     )
     youtube_df = youtube_df.withColumn(
@@ -179,9 +179,9 @@ def test_video_to_images(spark: SparkSession):
         video_to_images(
             col("video"),
             col("segment"),
-            col("youtube_uri"),
             lit(sample_rate),
             lit(max_samples),
+            col("youtube_uri"),
         ),
     )
 

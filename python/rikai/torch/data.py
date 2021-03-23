@@ -26,9 +26,7 @@ from torch.utils.data import IterableDataset
 
 # Rikai
 import rikai.parquet
-from rikai.mixin import ToNumpy, ToPIL
-from rikai.torch.utils import convert_tensor
-from rikai.torch.transforms import RikaiToTensor
+from rikai.torch.transforms import RikaiToTensor, convert_tensor
 
 __all__ = ["DataLoader", "Dataset"]
 

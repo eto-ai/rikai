@@ -12,9 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any
+from typing import Any, Mapping
 
 import numpy as np
+import pandas as pd
 
 from rikai.mixin import ToNumpy, ToPIL
 
@@ -23,6 +24,9 @@ __all__ = ["RikaiToTensor"]
 
 def convert_tensor(row, use_pil: bool = False):
     """Convert a parquet row into rikai semantic objects."""
+    if not isinstance(row, (Mapping, pd.Series)):
+        # Primitive values
+        return row
     tensors = {}
     for key, value in row.items():
         if isinstance(value, dict):

@@ -161,9 +161,9 @@ def test_video_to_images(spark: SparkSession, tmp_path: Path):
     )
     youtube_df = spark.createDataFrame(
         [
-            (YouTubeVideo(vid="rUWxSEwctFU"), Segment(0, 20), str(tmp_path)),
+            (YouTubeVideo(vid="rUWxSEwctFU"), Segment(0, 20)),
         ],
-        ["video", "segment", "tmp_path"],
+        ["video", "segment"],
     )
     videostream_df = videostream_df.withColumn(
         "images",
@@ -172,7 +172,7 @@ def test_video_to_images(spark: SparkSession, tmp_path: Path):
             col("segment"),
             lit(sample_rate),
             lit(max_samples),
-            lit(""),
+            lit(str(tmp_path)),
         ),
     )
     youtube_df = youtube_df.withColumn(
@@ -182,7 +182,7 @@ def test_video_to_images(spark: SparkSession, tmp_path: Path):
             col("segment"),
             lit(sample_rate),
             lit(max_samples),
-            col("tmp_path"),
+            lit(str(tmp_path)),
         ),
     )
 

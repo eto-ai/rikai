@@ -110,7 +110,7 @@ def video_to_images(
     segment: Segment = Segment(0, -1),
     sample_rate: int = 1,
     max_samples: int = 15000,
-    youtube_uri: str = "",
+    output_dir: str = "",
     quality: str = "worst",
 ) -> list:
     """Extract video frames into a list of images.
@@ -121,14 +121,13 @@ def video_to_images(
         An video object, either YouTubeVideo or VideoStream.
     segment: Segment
         A Segment object, localizing video in time to (start_fno, end_fno)
-    sample_rate : Int
+    sample_rate : int
         The sampling rate in number of frames
-    max_samples : Int
+    max_samples : int
         Yield at most this many frames (-1 means no max)
-     youtube_uri: Str
-        The output directory where images from YouTubeVideo
-        will be written. Images from VideoStream will be written
-        to VideoStream.uri directory.
+    output_dir: str
+        The output directory where images from YouTubeVideo or
+        VideoStream will be written.
     quality: str, default 'worst'
         Either 'worst' (lowest bitrate) or 'best' (highest bitrate)
         See: https://pythonhosted.org/Pafy/index.html#Pafy.Pafy.getbest
@@ -143,16 +142,16 @@ def video_to_images(
     ), "Input type must be YouTubeVideo or VideoStream"
     assert isinstance(segment, Segment), "Second input type must be Segment"
 
-    base_path = video.uri
-    if not youtube_uri:
-        youtube_uri = tempfile.gettempdir()
+    base_path = os.path.join(
+        output_dir, os.path.splitext(os.path.basename(video.uri))[0]
+    )
 
     start_frame = segment.start_fno
     if segment.end_fno > 0:
         max_samples = min((segment.end_fno - start_frame), max_samples)
 
     if isinstance(video, YouTubeVideo):
-        base_path = os.path.join(youtube_uri, video.vid)
+        base_path = os.path.join(output_dir, video.vid)
         video_iterator = SingleFrameSampler(
             video.get_stream(quality=quality),
             sample_rate,

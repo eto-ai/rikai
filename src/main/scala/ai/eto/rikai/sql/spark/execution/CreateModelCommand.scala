@@ -22,7 +22,6 @@ import ai.eto.rikai.sql.model.{
   ModelResolveException,
   ModelAlreadyExistException
 }
-import ai.eto.rikai.sql.spark.Python
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.{Row, SparkSession}
 
@@ -50,7 +49,6 @@ case class CreateModelCommand(
     model.options ++= options
     catalog(spark).createModel(model)
     logger.info(s"Model ${model} created")
-    Python.generateCode(model)
     Seq.empty
   }
 

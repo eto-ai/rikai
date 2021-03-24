@@ -18,7 +18,7 @@ torch = ["torch>=1.5.0", "torchvision"]
 jupyter = ["matplotlib", "jupyterlab"]
 aws = ["boto"]
 docs = ["sphinx"]
-youtube = ["pafy", "youtube_dl"]
+youtube = ["pafy", "youtube_dl", "ffmpeg-python"]
 all = test + torch + jupyter + aws + docs + youtube
 
 
@@ -35,13 +35,16 @@ setup(
     include_package_data=True,
     python_requires=">=3.7",
     install_requires=[
+        "antlr4-python3-runtime",
         "ipython",
+        "jsonschema",
         "numpy",
         "opencv-python",
         "pandas",
         "Pillow",
         "pyarrow>=2.0",
         "pyspark>=3.1,<3.2",
+        "pyyaml",
         "requests",
     ],
     extras_require={

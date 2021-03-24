@@ -23,16 +23,19 @@ Release PyPI Package
 Once the maven jar is released, you can make a pypi package release by following `pypi`_
 packaging instructions.
 
-1. Build the package via :code:`python setup.py sdist bdist_wheel`
-2. Upload build to the testpypi repo: :code:`twine upload --repository testpypi dist/*`. You'll
+0. :code:`cd` into the :code:`/python` subdirectory under the rikai repo root.
+1. Update the `./rikai/__version__.py` version file, `./tests/conftest.py`,
+   `./notebooks/VideoData.ipynb`, and `./notebooks/Coco.ipynb`.
+2. Clean the build directories :code:`rm -rf ./build ./dist ./*egg-info`
+3. Build the package via :code:`python setup.py sdist bdist_wheel`
+4. Upload build to the testpypi repo: :code:`twine upload --repository testpypi dist/*`. You'll
    need to have `Twine` installed.
-3. Check the test build:
-   :code:`pip install --index-url https://test.pypi.org/simple/ --no-deps rikai-<user>` where the
-   <user> is the user name you used to authenticate with testpypi in the upload step.
-4. Validate the package
-5. When you're ready for the actual release, run :code:`twine upload dist/*` to upload to public
+5. Check the test build:
+   :code:`pip install --index-url https://test.pypi.org/simple/ --no-deps rikai`
+6. Validate the package
+7. When you're ready for the actual release, run :code:`twine upload dist/*` to upload to public
    pypi.
-6. Check the release: :code:`pip install rikai=<new version number>`
+8. Check the release: :code:`pip install rikai=<new version number>`
 
 .. _sbt-sonatype : https://github.com/xerial/sbt-sonatype
 .. _sbt-release : https://github.com/sbt/sbt-release

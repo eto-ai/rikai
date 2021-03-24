@@ -12,26 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Dict
 
-from pyspark.sql import SparkSession
+from rikai.types.vision import Image
 
 
-class TestModel:
-    def __init__(self, name: str, uri: str, options: Dict[str, str]):
-        self.name = name
-        self.uri = uri
-        self.options = options
-
-    def codegen(self, spark: SparkSession, temporary: bool):
-        """Codegen for :py:class:`TestModel`
-
-        Parameters
-        ----------
-        spark : SparkSession
-            SparkSession
-
-        temporary : bool
-            Whether this model is generate temporary functions.
-        """
-        pass
+def uri_to_pil(uri):
+    # TODO: We can remove this after UDT is supported in Spark
+    return Image(uri=uri).to_pil()

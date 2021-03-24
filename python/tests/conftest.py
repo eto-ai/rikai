@@ -18,12 +18,14 @@ import pytest
 from torch.utils.data import DataLoader  # Prevent DataLoader hangs
 from pyspark.sql import SparkSession
 
+from rikai.spark.sql import init
+
 
 @pytest.fixture(scope="session")
 def spark() -> SparkSession:
-    return (
+    session = (
         SparkSession.builder.appName("spark-test")
-        .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.2-SNAPSHOT")
+        .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.3-SNAPSHOT")
         .config(
             "spark.sql.extensions",
             "ai.eto.rikai.sql.spark.RikaiSparkSessionExtensions",
@@ -32,6 +34,20 @@ def spark() -> SparkSession:
             "rikai.sql.ml.registry.test.impl",
             "ai.eto.rikai.sql.model.testing.TestRegistry",
         )
+        .config(
+            "rikai.sql.ml.registry.file.impl",
+            "ai.eto.rikai.sql.model.fs.FileSystemRegistry",
+        )
+        .config(
+            "spark.driver.extraJavaOptions",
+            "-Dio.netty.tryReflectionSetAccessible=true",
+        )
+        .config(
+            "spark.executor.extraJavaOptions",
+            "-Dio.netty.tryReflectionSetAccessible=true",
+        )
         .master("local[2]")
         .getOrCreate()
     )
+    init(session)
+    return session

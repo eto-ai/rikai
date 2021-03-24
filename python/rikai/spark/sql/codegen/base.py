@@ -12,26 +12,24 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from abc import ABC, abstractmethod
 from typing import Dict
 
-from pyspark.sql import SparkSession
 
+class Registry(ABC):
+    """Base class of a Model Registry"""
 
-class TestModel:
-    def __init__(self, name: str, uri: str, options: Dict[str, str]):
-        self.name = name
-        self.uri = uri
-        self.options = options
-
-    def codegen(self, spark: SparkSession, temporary: bool):
-        """Codegen for :py:class:`TestModel`
+    @abstractmethod
+    def resolve(self, uri: str, name: str, options: Dict[str, str]):
+        """Resolve a model from a model URI.
 
         Parameters
         ----------
-        spark : SparkSession
-            SparkSession
-
-        temporary : bool
-            Whether this model is generate temporary functions.
+        uri : str
+            Model URI
+        name : str, optional
+            Optional model name. Can be empty or None. If provided, it
+            overrides the model name got from the model URI.
+        options: dict
+            Additional options passed to the model.
         """
-        pass

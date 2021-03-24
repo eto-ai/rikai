@@ -12,26 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Dict
 
-from pyspark.sql import SparkSession
-
-
-class TestModel:
-    def __init__(self, name: str, uri: str, options: Dict[str, str]):
-        self.name = name
-        self.uri = uri
-        self.options = options
-
-    def codegen(self, spark: SparkSession, temporary: bool):
-        """Codegen for :py:class:`TestModel`
-
-        Parameters
-        ----------
-        spark : SparkSession
-            SparkSession
-
-        temporary : bool
-            Whether this model is generate temporary functions.
-        """
-        pass
+class SpecError(Exception):
+    def __init__(self, message):
+        self.message = message

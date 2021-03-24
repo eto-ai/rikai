@@ -30,14 +30,8 @@ trait Model {
   /** Model URI in the registry */
   val uri: String
 
-  /** The model registry object. */
-  val registry: Registry
-
   /** Model Options. */
   var options: Map[String, String] = Map.empty
-
-  /** python class if this model has a python counterpart. */
-  def pyClass: String = ""
 
   /** Return options as java Map, so that it is easily accessible in Python via py4j. */
   final def javaOptions: java.util.Map[String, String] = mapAsJavaMap(options)

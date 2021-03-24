@@ -17,8 +17,8 @@
 package ai.eto.rikai.sql.spark.execution
 
 import org.apache.spark.sql.{Row, SparkSession}
-import ai.eto.rikai.sql.model.Model
 import org.apache.spark.sql.catalyst.expressions.Attribute
+import ai.eto.rikai.sql.model.Model
 
 case class ShowModelsCommand() extends ModelCommand {
 

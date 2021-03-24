@@ -16,9 +16,9 @@
 
 package ai.eto.rikai.sql.spark.execution
 
-import ai.eto.rikai.SparkTestSession
-import ai.eto.rikai.sql.model.Model
 import org.scalatest.funsuite.AnyFunSuite
+import ai.eto.rikai.SparkTestSession
+import ai.eto.rikai.sql.model.{Model, ModelAlreadyExistException}
 
 class ShowModelsCommandTest extends AnyFunSuite with SparkTestSession {
 
@@ -73,7 +73,9 @@ class ShowModelsCommandTest extends AnyFunSuite with SparkTestSession {
     assert(spark.sql("SHOW MODELS").count() == 2)
 
     // same name
-    spark.sql("CREATE MODEL model_foo USING 'test://foo2'")
+    assertThrows[ModelAlreadyExistException] {
+      spark.sql("CREATE MODEL model_foo USING 'test://foo2'")
+    }
     assert(spark.sql("SHOW MODELS").count() == 2)
 
     // drop model

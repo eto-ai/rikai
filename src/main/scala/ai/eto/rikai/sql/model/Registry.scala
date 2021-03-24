@@ -134,5 +134,3 @@ class ModelNotFoundException(message: String) extends Exception(message)
 
 class ModelRegistryAlreadyExistException(message: String)
     extends Exception(message)
-
-class ModelAlreadyExistException(message: String) extends Exception(message)

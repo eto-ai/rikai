@@ -16,12 +16,8 @@
 
 package ai.eto.rikai.sql.spark.execution
 
+import ai.eto.rikai.sql.model.{ModelResolveException, Registry}
 import org.apache.logging.log4j.scala.Logging
-import ai.eto.rikai.sql.model.{
-  Registry,
-  ModelResolveException,
-  ModelAlreadyExistException
-}
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.{Row, SparkSession}
 
@@ -35,10 +31,6 @@ case class CreateModelCommand(
     with Logging {
 
   override def run(spark: SparkSession): Seq[Row] = {
-    if (catalog(spark).modelExists(name)) {
-      throw new ModelAlreadyExistException(s"Model (${name}) already exists")
-    }
-
     val model = uri match {
       case Some(u) => Registry.resolve(u, Some(name))
       case None =>

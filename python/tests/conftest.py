@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from pathlib import Path
 
 # Third Party
 import pytest
@@ -51,3 +52,8 @@ def spark() -> SparkSession:
     )
     init(session)
     return session
+
+
+@pytest.fixture
+def asset_path() -> Path:
+    return Path(__file__).parent / "assets"

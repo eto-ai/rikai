@@ -14,10 +14,10 @@
 
 """Vision related Spark UDFs.
 """
+from typing import Union
 
 # Third Party
 import os
-import tempfile
 import numpy as np
 from pyspark.sql.functions import udf
 from pyspark.sql.types import ArrayType
@@ -106,11 +106,11 @@ def numpy_to_image(array: ndarray, uri: str) -> Image:
 
 @udf(returnType=ArrayType(ImageType()))
 def video_to_images(
-    video,
+    video: Union[VideoStream, YouTubeVideo],
+    output_uri: str,
     segment: Segment = Segment(0, -1),
     sample_rate: int = 1,
     max_samples: int = 15000,
-    output_dir: str = "",
     quality: str = "worst",
 ) -> list:
     """Extract video frames into a list of images.
@@ -119,15 +119,14 @@ def video_to_images(
     ----------
     video : Video
         An video object, either YouTubeVideo or VideoStream.
-    segment: Segment
+    output_uri: str
+        Frames will be written as <output_uri>/<fno>.jpg
+    segment: Segment, default Segment(0, -1)
         A Segment object, localizing video in time to (start_fno, end_fno)
-    sample_rate : int
-        The sampling rate in number of frames
-    max_samples : int
-        Yield at most this many frames (-1 means no max)
-    output_dir: str
-        The output directory where images from YouTubeVideo or
-        VideoStream will be written.
+    sample_rate : int, default 1
+        Keep 1 out of every sample_rate frames.
+    max_samples : int, default 15000
+        Return at most this many frames (-1 means no max)
     quality: str, default 'worst'
         Either 'worst' (lowest bitrate) or 'best' (highest bitrate)
         See: https://pythonhosted.org/Pafy/index.html#Pafy.Pafy.getbest
@@ -142,16 +141,11 @@ def video_to_images(
     ), "Input type must be YouTubeVideo or VideoStream"
     assert isinstance(segment, Segment), "Second input type must be Segment"
 
-    base_path = os.path.join(
-        output_dir, os.path.splitext(os.path.basename(video.uri))[0]
-    )
-
     start_frame = segment.start_fno
     if segment.end_fno > 0:
         max_samples = min((segment.end_fno - start_frame), max_samples)
 
     if isinstance(video, YouTubeVideo):
-        base_path = os.path.join(output_dir, video.vid)
         video_iterator = SingleFrameSampler(
             video.get_stream(quality=quality),
             sample_rate,
@@ -166,7 +160,9 @@ def video_to_images(
     return [
         Image.from_array(
             img,
-            "{}_{}.jpg".format(base_path, (start_frame + idx) * sample_rate),
+            os.path.join(
+                output_uri, "{}.jpg".format((start_frame + idx) * sample_rate)
+            ),
         )
         for idx, img in enumerate(video_iterator)
     ]
@@ -174,7 +170,8 @@ def video_to_images(
 
 @udf(returnType=ImageType())
 def spectrogram_image(
-    video,
+    video: Union[VideoStream, YouTubeVideo],
+    output_uri: str,
     segment: Segment = Segment(0, -1),
     size: int = 224,
     max_samples: int = 15000,
@@ -183,8 +180,10 @@ def spectrogram_image(
 
     Parameters
     ----------
-    video : Video
-        A video object, either YouTubeVideo or VideoStream.
+    video : VideoStream or YouTubeVideo
+        A video object whose audio track will be converted to spectrogram
+    output_uri: str
+        The uri to which the spectrogram image will be written to
     segment: Segment
             A Segment object, localizing video in time to (start_fno, end_fno)
     max_samples : Int
@@ -197,14 +196,19 @@ def spectrogram_image(
     Image
         Return an Image of the audio spectrogram.
     """
-    import ffmpeg
-
+    try:
+        import ffmpeg
+    except ImportError:
+        raise ValueError(
+            "Couldn't import ffmpeg. Please make sure to "
+            "`pip install ffmpeg-python` explicitly or install "
+            "the correct extras like `pip install rikai[all]`"
+        )
     assert isinstance(
         video, (YouTubeVideo, VideoStream)
     ), "Input type must be YouTubeVideo or VideoStream"
     assert isinstance(segment, Segment), "Second input type must be Segment"
 
-    base_path = video.vid if isinstance(video, YouTubeVideo) else video.uri
     start_frame = segment.start_fno
     if segment.end_fno > 0:
         max_samples = min((segment.end_fno - start_frame), max_samples)
@@ -226,6 +230,5 @@ def spectrogram_image(
         .run(capture_stdout=True)
     )
     return Image.from_array(
-        np.frombuffer(output, np.uint8).reshape([size, size, 3]),
-        "{}_spectrogram.jpg".format(base_path),
+        np.frombuffer(output, np.uint8).reshape([size, size, 3]), output_uri
     )

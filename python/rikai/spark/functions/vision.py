@@ -14,10 +14,12 @@
 
 """Vision related Spark UDFs.
 """
+
+# Standard library 
+import os
 from typing import Union
 
 # Third Party
-import os
 import numpy as np
 from pyspark.sql.functions import udf
 from pyspark.sql.types import ArrayType

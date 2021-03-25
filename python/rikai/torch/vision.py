@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""`Torchvision`_ compatibile Dataset
+"""`Torchvision`_ compatible Dataset
 
 
 .. _torchvision: https://pytorch.org/vision/stable/index.html

@@ -14,6 +14,7 @@
 
 """Vision related Spark UDFs.
 """
+
 # Standard library 
 import os
 from typing import Union

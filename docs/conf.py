@@ -78,4 +78,6 @@ intersphinx_mapping = {
     "numpy": ("http://docs.scipy.org/doc/numpy/", None),
     "python": ("https://docs.python.org/", None),
     "PyTorch": ("http://pytorch.org/docs/master/", None),
+    "Torchvision": ("https://pytorch.org/vision/stable/", None),
+    "PIL": ("https://pillow.readthedocs.io/en/stable", None),
 }

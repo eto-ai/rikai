@@ -21,14 +21,12 @@ from queue import Empty, Queue
 from typing import Callable, Dict, Generator, List, Optional, Union
 
 # Third Party
-import numpy as np
 import torch
 from torch.utils.data import IterableDataset
 
 # Rikai
 import rikai.parquet
-from rikai.mixin import ToNumpy
-from rikai.torch.utils import convert_tensor
+from rikai.torch.transforms import RikaiToTensor, convert_tensor
 
 __all__ = ["DataLoader", "Dataset"]
 
@@ -74,10 +72,12 @@ class Dataset(IterableDataset):
         self,
         uri: Union[str, Path],
         columns: List[str] = None,
+        transform: Callable = RikaiToTensor(),
     ):
         super().__init__()
         self.uri = str(uri)
         self.columns = columns
+        self._transform = transform
 
     def __repr__(self) -> str:
         return f"Dataset(torch, {self.uri}, columns={self.columns})"
@@ -97,7 +97,7 @@ class Dataset(IterableDataset):
             world_size=world_size,
             rank=rank,
         ):
-            yield convert_tensor(row)
+            yield self._transform(row)
 
 
 class DataLoader:

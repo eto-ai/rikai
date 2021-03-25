@@ -20,7 +20,7 @@ import pandas as pd
 from torch.utils.data import Dataset
 
 # Rikai
-from rikai.torch.utils import convert_tensor
+from rikai.torch.transforms import convert_tensor
 
 __all__ = ["PandasDataset"]
 

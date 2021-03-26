@@ -107,7 +107,7 @@ the content of "s3://bucket/to/spec.yaml" can be:
             batch_size: 16
             resize: 640
             min_confidence: 0.3
-
+            use_tensorrt: true
     .. warning::
 
         YAML-based model spec is still under heavy development.

@@ -31,7 +31,6 @@ Roadmap:
 2. Versioning support built into the dataset
 3. Richer video capabilities (ffmpeg-python integration)
 4. Declarative annotation API (think vega-lite for annotating images/videos)
-5. Data-centric analytics API (think BigQuery ML)
 
 ## Example
 

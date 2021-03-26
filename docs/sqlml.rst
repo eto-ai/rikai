@@ -4,8 +4,7 @@
 ML-enabled SQL
 ==============
 
-``Rikai`` extends Spark SQL to offer Machine Learning(**ML**)-enabled analytics over
-machine learning datasets.
+``Rikai`` extends Spark SQL to offer Machine Learning(**ML**)-enabled analytics.
 
     Make your Data Warehouse as Smart as your ML models
 
@@ -14,7 +13,7 @@ Rikai SQL ML is designed to be extensible to any Model Registry, no matter it is
 ``open-source`` or ``proprietary``.
 
 As a result, ``Rikai SQL-ML`` can be easily integrated into existing machine learning infrastructure,
-and allow your Data Warehouse as smart as your ML models.
+and allow your Data Warehouse to be as smart as your ML models.
 
 .. warning::
 
@@ -31,7 +30,7 @@ Before we can use ``Rikai SQL-ML``, we need to configure SparkSession:
         SparkSession
         .builder
         .appName("spark-app")
-        .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.3")
+        .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.2")
         .config(
             "spark.sql.extensions",
             "ai.eto.rikai.sql.spark.RikaiSparkSessionExtensions",

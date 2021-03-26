@@ -1,6 +1,6 @@
 ![Apache License](https://img.shields.io/github/license/eto-ai/rikai?style=for-the-badge)
 [![Read The Doc](https://img.shields.io/readthedocs/rikai?style=for-the-badge)](https://rikai.readthedocs.io/)
-[![javadoc](https://javadoc.io/badge2/ai.eto/rikai_2.12/javadoc.svg?style=for-the-badge)](https://javadoc.io/doc/ai.eto/rikai_2.12) 
+[![javadoc](https://javadoc.io/badge2/ai.eto/rikai_2.12/javadoc.svg?style=for-the-badge)](https://javadoc.io/doc/ai.eto/rikai_2.12)
 [![Join the chat at https://gitter.im/rikaidev/community](https://img.shields.io/badge/chat-on%20gitter-green?style=for-the-badge)](https://gitter.im/rikaidev/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 ![Pypi version](https://img.shields.io/pypi/v/rikai?style=for-the-badge)
 ![Github Action](https://img.shields.io/github/workflow/status/eto-ai/rikai/Python?style=for-the-badge)
@@ -24,6 +24,7 @@ Current (v0.0.1) main features:
    conversions when moving between ETL and training.
 2. Custom functionality for working with images and videos at scale: reduce boilerplate and
    low-level code currently required to process images, filter/sample videos, etc.
+3. ML-enabled SQL analytics API
 
 Roadmap:
 1. TensorFlow integration

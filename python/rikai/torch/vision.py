@@ -34,8 +34,8 @@ class Dataset(rikai.torch.data.Dataset):
 
     Parameters
     ----------
-    uri : str or Path
-        URI to the dataset
+    uri_or_df : str, Path, or pyspark.sql.DataFrame
+        URI of the dataset or the dataset as a pyspark DataFrame
     image_column : str
         The column name for the image data.
     target_column : str or list[str]
@@ -80,7 +80,7 @@ class Dataset(rikai.torch.data.Dataset):
 
     def __init__(
         self,
-        uri: Union[str, Path],
+        uri_or_df: Union[str, Path, 'pyspark.sql.DataFrame'],
         image_column: str,
         target_column: Union[str, List[str]],
         transform: Optional[Callable] = None,
@@ -93,7 +93,7 @@ class Dataset(rikai.torch.data.Dataset):
             else target_column
         )
         super().__init__(
-            uri,
+            uri_or_df,
             [self.image_column] + self.target_columns,
             transform=RikaiToTensor(use_pil=True),
         )

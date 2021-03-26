@@ -106,7 +106,8 @@ class Dataset:
 
         # Provide deterministic order between distributed workers.
         self.files = sorted(Resolver.resolve(self.uri))
-        logger.info("Loading parquet files: %s", self.files)
+        if self.rank == 0:
+            logger.info("Loading parquet files: %s", self.files)
 
         self.spark_row_metadata = Resolver.get_schema(self.uri)
 

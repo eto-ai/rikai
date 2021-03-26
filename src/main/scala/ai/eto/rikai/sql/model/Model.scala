@@ -16,6 +16,7 @@
 
 package ai.eto.rikai.sql.model
 
+import io.circe.syntax._
 import scala.collection.JavaConverters.mapAsJavaMap
 
 /**
@@ -47,6 +48,10 @@ object Model {
     if (!name.matches(namePattern.regex)) {
       throw new ModelNameException(s"Model name '${name}' is not valid")
     }
+  }
+
+  def serializeOptions(options: Map[String, String]): String = {
+    options.asJson.asString.getOrElse("")
   }
 }
 

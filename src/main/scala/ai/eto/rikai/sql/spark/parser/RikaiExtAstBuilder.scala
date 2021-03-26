@@ -20,7 +20,8 @@ import ai.eto.rikai.sql.model.Model
 import ai.eto.rikai.sql.spark.execution.{
   CreateModelCommand,
   DescribeModelCommand,
-  DropModelCommand
+  DropModelCommand,
+  ShowModelsCommand
 }
 import ai.eto.rikai.sql.spark.parser.RikaiExtSqlBaseParser._
 import org.apache.spark.sql.catalyst.TableIdentifier
@@ -64,6 +65,10 @@ private[parser] class RikaiExtAstBuilder
     DropModelCommand(
       ctx.model.getText
     )
+  }
+
+  override def visitShowModels(ctx: ShowModelsContext): LogicalPlan = {
+    ShowModelsCommand()
   }
 
   override def visitOptionList(ctx: OptionListContext): Map[String, String] =

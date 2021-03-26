@@ -22,6 +22,7 @@ import ai.eto.rikai.sql.model.{Catalog, ModelNotFoundException}
 import org.scalatest.funsuite.AnyFunSuite
 
 class DescribeModelCommandTest extends AnyFunSuite with SparkTestSession {
+
   import spark.implicits._
 
   test("describe model") {
@@ -29,7 +30,11 @@ class DescribeModelCommandTest extends AnyFunSuite with SparkTestSession {
       new TestModel("model_foo", "uri://model/foo", null)
     )
 
-    val expected = Seq(("model_foo", "uri://model/foo")).toDF("model", "uri")
+    val expected = Seq(("model_foo", "uri://model/foo", "")).toDF(
+      "model",
+      "uri",
+      "options"
+    )
     assertEqual(spark.sql("DESCRIBE MODEL model_foo"), expected)
     assertEqual(spark.sql("DESC MODEL model_foo"), expected)
   }

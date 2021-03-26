@@ -1,8 +1,8 @@
 .. toctree::
    :maxdepth: 1
 
-SQL ML
-============
+ML-enabled SQL
+==============
 
 ``Rikai`` extends Spark SQL to offer Machine Learning(**ML**)-enabled analytics over
 machine learning datasets.

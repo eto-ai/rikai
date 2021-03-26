@@ -78,8 +78,8 @@ Rikai extends Spark SQL with four more SQL statements:
         DROP MODEL model_name
 
 Rikai uses URL schema to decide which Model Registry to be used to resolve a
-ML Model. Once one model registry is resolved and registered via ``CREATE MODEL``,
-you could invoke the model in Spark SQL:
+ML Model. Once one ML model is via ``CREATE MODEL``,
+it can be used in Spark SQL directly:
 
     .. code-block:: sql
 

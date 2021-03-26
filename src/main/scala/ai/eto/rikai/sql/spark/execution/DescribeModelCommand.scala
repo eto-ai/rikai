@@ -16,9 +16,9 @@
 
 package ai.eto.rikai.sql.spark.execution
 
+import ai.eto.rikai.sql.model.{Model, ModelNotFoundException}
 import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.catalyst.expressions.Attribute
-import ai.eto.rikai.sql.model.{Model, ModelNotFoundException}
 
 case class DescribeModelCommand(name: String) extends ModelCommand {
 

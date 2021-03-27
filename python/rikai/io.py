@@ -64,7 +64,6 @@ def _gcsfs(project="", token=None, block_size=None):
 def _open_input_stream(uri: str) -> BinaryIO:
     parsed = urlparse(uri)
     if parsed.scheme == "gs":
-        filesystem = _gcsfs()
         return _gcsfs().open(uri)
     else:
         filesystem, path = fs.FileSystem.from_uri(uri)
@@ -74,7 +73,6 @@ def _open_input_stream(uri: str) -> BinaryIO:
 def _open_output_stream(uri: str) -> BinaryIO:
     parsed = urlparse(uri)
     if parsed.scheme == "gs":
-        filesystem = _gcsfs()
         return _gcsfs().open(uri, mode="wb")
     else:
         filesystem, path = fs.FileSystem.from_uri(uri)

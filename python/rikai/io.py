@@ -16,9 +16,8 @@
 from io import BytesIO
 from os.path import basename, join
 from pathlib import Path
-from typing import BinaryIO, Union, Tuple
+from typing import BinaryIO, Union
 from urllib.parse import ParseResult, urlparse
-
 
 # Third Party
 import requests
@@ -117,8 +116,7 @@ def copy(source: str, dest: str) -> str:
             s3fs.copy(source_path, dest_path)
             return dest
         elif scheme == "gs":
-            gs_fs = _gcsfs()
-            gs_fs.copy(source, dest)
+            _gcsfs().copy(source, dest)
             return dest
 
     # TODO: find better i/o utilis to copy between filesystems

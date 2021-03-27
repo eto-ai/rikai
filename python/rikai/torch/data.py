@@ -15,12 +15,14 @@
 """Pytorch Dataset and DataLoader"""
 
 import threading
+import warnings
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from queue import Empty, Queue
 from typing import Callable, Dict, Generator, List, Optional, Union
 
 # Third Party
+import semver
 import torch
 from torch.utils.data import IterableDataset
 
@@ -150,6 +152,13 @@ class DataLoader:
             for batch_idx, (data, target) in enumerate(train_loader):
                 ...
 
+    .. warning::
+
+        With Pytorch 1.8+, users should use the official :py:class:`torch.utils.data.DataLoader`
+        with :py:class:`torch.utils.data.BufferedShuffleDataset` instead.
+
+        This class will be deprecated later.
+
     References
     ----------
     .. `Horovod with Pytorch <https://horovod.readthedocs.io/en/stable/pytorch.html>`_
@@ -179,6 +188,16 @@ class DataLoader:
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.collate_fn = collate_fn if collate_fn else lambda x: x
+
+        torch_version = semver.VersionInfo.parse(torch.__version__)
+        if torch_version.major >= 1 and torch_version.minor >= 8:
+            warnings.warn(
+                "rikai.torch.data.DataLoader should be replaced with "
+                "'torch.utils.data.BufferedShuffleDataset' and "
+                "'torch.utils.data.DataLoader' "
+                "in Pytorch 1.8+",
+                DeprecationWarning,
+            )
 
     def _prefetch(
         self, out_queue: Queue, done: threading.Event, stop: threading.Event

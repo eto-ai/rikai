@@ -15,10 +15,11 @@
 """Test torchvision compabilities"""
 import random
 from pathlib import Path
+from typing import Union
 
 import numpy as np
 import torch
-from pyspark.sql import Row, SparkSession
+from pyspark.sql import Row, SparkSession, DataFrame
 from torchvision import transforms
 
 from rikai.torch.vision import Dataset
@@ -26,8 +27,29 @@ from rikai.types import Box2d, Image
 
 
 def test_vision_dataset(spark: SparkSession, tmp_path: Path):
-    dataset_dir = tmp_path / "data"
-    asset_dir = tmp_path / "assets"
+    df = _create_dataframe(tmp_path, spark)
+    df.show()
+    dataset_dir = str(tmp_path / "data")
+    df.write.mode("overwrite").format("rikai").save(dataset_dir)
+
+    dataset = _create_dataset(dataset_dir)
+    dataset_from_df = _create_dataset(df)
+    img, target = next(iter(dataset))
+
+    assert df.first()["label"] == target
+    assert torch.equal(dataset.transform(df.first()["image"].to_pil()), img)
+    assert isinstance(img, torch.Tensor)
+    assert len(list(dataset)) == 100
+
+    for (img1, target1), (img2, target2) in zip(
+        iter(dataset), iter(dataset_from_df)
+    ):
+        assert torch.equal(img1, img2)
+        assert target1 == target2
+
+
+def _create_dataframe(df_path: Path, spark: SparkSession):
+    asset_dir = df_path / "assets"
     asset_dir.mkdir(parents=True)
 
     data = []
@@ -43,11 +65,10 @@ def test_vision_dataset(spark: SparkSession, tmp_path: Path):
                 label=random.choice(["cat", "dog", "duck", "bird"]),
             )
         )
-    df = spark.createDataFrame(data)
-    df.show()
+    return spark.createDataFrame(data)
 
-    df.write.mode("overwrite").format("rikai").save(str(dataset_dir))
 
+def _create_dataset(data: Union[str, Path, DataFrame]):
     transform = transforms.Compose(
         transforms=[
             transforms.Resize(64),
@@ -55,11 +76,4 @@ def test_vision_dataset(spark: SparkSession, tmp_path: Path):
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
         ]
     )
-    dataset = Dataset(dataset_dir, "image", "label", transform=transform)
-    first_data = data[0]
-    img, target = next(iter(dataset))
-
-    assert first_data["label"] == target
-    assert torch.equal(transform(first_data["image"].to_pil()), img)
-    assert isinstance(img, torch.Tensor)
-    assert len(list(dataset)) == 100
+    return Dataset(data, "image", "label", transform=transform)

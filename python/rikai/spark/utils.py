@@ -16,8 +16,14 @@ from pyspark.sql import DataFrame
 
 DEFAULT_ROW_GROUP_SIZE_BYTES = 32 * 1024 * 1024
 
-def df_to_parquet(df: DataFrame, uri: str,
-        parquet_row_group_size_bytes: int=DEFAULT_ROW_GROUP_SIZE_BYTES):
-    (df.write.option("parquet.block.size", parquet_row_group_size_bytes)
-    .parquet(uri))
 
+def df_to_rikai(
+    df: DataFrame,
+    uri: str,
+    parquet_row_group_size_bytes: int = DEFAULT_ROW_GROUP_SIZE_BYTES,
+):
+    (
+        df.write.format("rikai")
+        .option("parquet.block.size", parquet_row_group_size_bytes)
+        .save(uri)
+    )

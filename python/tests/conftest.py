@@ -23,7 +23,7 @@ from rikai.spark.sql import init
 
 
 @pytest.fixture(scope="session")
-def spark() -> SparkSession:
+def spark(tmp_path_factory) -> SparkSession:
     session = (
         SparkSession.builder.appName("spark-test")
         .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.3-SNAPSHOT")
@@ -47,6 +47,7 @@ def spark() -> SparkSession:
             "spark.executor.extraJavaOptions",
             "-Dio.netty.tryReflectionSetAccessible=true",
         )
+        .config("spark.rikai.cacheUri", str(tmp_path_factory.mktemp("data")))
         .master("local[2]")
         .getOrCreate()
     )

@@ -53,6 +53,12 @@ def test_load_dataset(spark: SparkSession, tmp_path: Path):
     df.write.mode("overwrite").format("rikai").save(str(dataset_dir))
 
     loader = DataLoader(dataset_dir, batch_size=8)
+    _check_loader(loader, expected)
+    loader2 = DataLoader(df, batch_size=8)
+    _check_loader(loader2, expected)
+
+
+def _check_loader(loader, expected_data):
     actual = []
     for examples in loader:
         # print(examples)
@@ -61,7 +67,7 @@ def test_load_dataset(spark: SparkSession, tmp_path: Path):
 
     actual = sorted(actual, key=lambda x: x["id"])
     assert len(actual) == 1000
-    for expect, act in zip(expected, actual):
+    for expect, act in zip(expected_data, actual):
         assert np.array_equal(expect["array"], act["array"])
         assert np.array_equal(expect["image"], act["image"])
 

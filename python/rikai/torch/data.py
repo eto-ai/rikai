@@ -73,9 +73,9 @@ class Dataset(IterableDataset):
 
     def __init__(
         self,
-        uri_or_df: Union[str, Path, 'pyspark.sql.DataFrame'],
+        uri_or_df: Union[str, Path, "pyspark.sql.DataFrame"],
         columns: List[str] = None,
-        transform: Callable = RikaiToTensor()
+        transform: Callable = RikaiToTensor(),
     ):
         super().__init__()
         self.uri_or_df = uri_or_df
@@ -94,7 +94,7 @@ class Dataset(IterableDataset):
             rank = worker_info.id
             world_size = worker_info.num_workers
 
-        uri = _maybe_cache_df(uri_or_df)
+        uri = _maybe_cache_df(self.uri_or_df)
         for row in rikai.parquet.Dataset(
             uri,
             columns=self.columns,
@@ -161,7 +161,7 @@ class DataLoader:
 
     def __init__(
         self,
-        dataset: Union[str, Path, 'pyspark.sql.DataFrame'],
+        dataset: Union[str, Path, "pyspark.sql.DataFrame"],
         columns: List[str] = None,
         batch_size: int = 1,
         shuffle: bool = False,
@@ -169,11 +169,11 @@ class DataLoader:
         collate_fn: Callable = None,
         seed: Optional[int] = None,
         world_size: int = 1,
-        rank: int = 0
+        rank: int = 0,
     ):  # pylint: disable=too-many-arguments
-        assert isinstance(dataset, (str, Path)) or \
-               (rank == 0 and world_size == 1), \
-                "Only str/Path references are supported in distributed mode"
+        assert isinstance(dataset, (str, Path)) or (
+            rank == 0 and world_size == 1
+        ), "Only str/Path references are supported in distributed mode"
         dataset = _maybe_cache_df(dataset)
         self.dataset = rikai.parquet.Dataset(
             dataset,
@@ -263,7 +263,9 @@ class DataLoader:
         q.join()
 
 
-def _maybe_cache_df(dataset_ref: Union[str, Path, 'pyspark.sql.DataFrame']) -> str:
+def _maybe_cache_df(
+    dataset_ref: Union[str, Path, "pyspark.sql.DataFrame"]
+) -> str:
     """
     If the given dataset_ref is a str/Path, then just return a str ref.
     If it's a pyspark DataFrame then cache the DataFrame as parquet and
@@ -285,25 +287,33 @@ def _maybe_cache_df(dataset_ref: Union[str, Path, 'pyspark.sql.DataFrame']) -> s
         try:
             from pyspark.sql import DataFrame
         except ImportError:
-            raise ImportError('Cannot create rikai pytorch dataset from '
-                              'Spark DataFrame without pyspark installed.')
-        from rikai.spark.utils import df_to_parquet
+            raise ImportError(
+                "Cannot create rikai pytorch dataset from "
+                "Spark DataFrame without pyspark installed."
+            )
+        from rikai.spark.utils import df_to_rikai
+
         if isinstance(dataset_ref, DataFrame):
             kwargs = {}
             # TODO also try to get it from rikai.options once #134 is done
-            block_size = (dataset_ref.rdd.ctx.getConf()
-                          .get('parquet.block.size', None))
+            block_size = dataset_ref.rdd.ctx.getConf().get(
+                "parquet.block.size", None
+            )
             if block_size is not None:
-                kwargs['parquet_row_group_size_bytes'] = block_size
+                kwargs["parquet_row_group_size_bytes"] = block_size
             cache_uri = _get_cache_uri(dataset_ref)
-            df_to_parquet(dataset_ref, cache_uri, **kwargs)
+            df_to_rikai(dataset_ref, cache_uri, **kwargs)
         else:
-            raise TypeError(('dataset_ref must be a str, Path, or DataFrame and '
-                             'not a {}.').format(type(dataset_ref)))
+            raise TypeError(
+                (
+                    "dataset_ref must be a str, Path, or DataFrame and "
+                    "not a {}."
+                ).format(type(dataset_ref))
+            )
         return cache_uri
 
 
-def _get_cache_uri(df: 'pyspark.sql.DataFrame') -> str:
+def _get_cache_uri(df: "pyspark.sql.DataFrame") -> str:
     """
     TODO create a deterministic unique uri from the df for sharing
 
@@ -318,5 +328,5 @@ def _get_cache_uri(df: 'pyspark.sql.DataFrame') -> str:
         The uri to write the DataFrame to
     """
     # TODO also try to get it from rikai.options once #134 is done
-    cache_root_uri = df.rdd.ctx.getConf().get('spark.rikai.cacheUri')
-    return os.path.join(cache_root_uri, uuid.uuid4())
+    cache_root_uri = df.rdd.ctx.getConf().get("spark.rikai.cacheUri")
+    return os.path.join(cache_root_uri, str(uuid.uuid4()))

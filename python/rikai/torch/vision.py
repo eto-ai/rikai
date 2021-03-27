@@ -80,7 +80,7 @@ class Dataset(rikai.torch.data.Dataset):
 
     def __init__(
         self,
-        uri_or_df: Union[str, Path, 'pyspark.sql.DataFrame'],
+        uri_or_df: Union[str, Path, "pyspark.sql.DataFrame"],
         image_column: str,
         target_column: Union[str, List[str]],
         transform: Optional[Callable] = None,
@@ -104,7 +104,7 @@ class Dataset(rikai.torch.data.Dataset):
         )
 
     def __repr__(self) -> str:
-        return f"RikaiDataset({self.uri})"
+        return f"RikaiDataset({self.uri_or_df})"
 
     def __iter__(self) -> Tuple[PIL.Image.Image, Any]:
         for row in super().__iter__():

@@ -13,13 +13,13 @@
 #  limitations under the License.
 
 # Standard
+import functools
 import shutil
 from io import BytesIO
 from os.path import basename, join
 from pathlib import Path
 from typing import IO, BinaryIO, Union
 from urllib.parse import ParseResult, urlparse
-import functools
 
 # Third Party
 import requests

@@ -19,6 +19,7 @@ from os.path import basename, join
 from pathlib import Path
 from typing import IO, BinaryIO, Union
 from urllib.parse import ParseResult, urlparse
+import functools
 
 # Third Party
 import requests
@@ -28,8 +29,6 @@ from pyarrow import fs
 from rikai.logging import logger
 
 __all__ = ["copy", "open_uri"]
-
-_GCSFS = None
 
 
 def _normalize_uri(uri: str) -> str:
@@ -49,17 +48,17 @@ def _normalize_uri(uri: str) -> str:
     ).geturl()
 
 
-def _gcsfs():
+@functools.lru_cache(maxsize=1)
+def _gcsfs(project="", token=None, block_size=None):
     try:
         import gcsfs
     except ImportError as e:
         raise ImportError(
             "Please make sure gcsfs is installed via `pip install rikai[gcp]`"
         ) from e
-    global _GCSFS
-    if _GCSFS is None:
-        _GCSFS = gcsfs.GCSFileSystem()
-    return _GCSFS
+    return gcsfs.GCSFileSystem(
+        project=project, token=token, block_size=block_size
+    )
 
 
 def _open_input_stream(uri: str) -> BinaryIO:

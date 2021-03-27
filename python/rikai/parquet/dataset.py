@@ -28,6 +28,7 @@ from pyspark.sql import Row
 from pyspark.sql.types import UserDefinedType
 
 # Rikai
+from rikai.io import open_input_stream
 from rikai.logging import logger
 from rikai.parquet.resolver import Resolver
 from rikai.parquet.shuffler import RandomShuffler
@@ -189,9 +190,8 @@ class Dataset:
             self.shuffler_capacity if self.shuffle else 1, self.seed
         )
         group_count = -1
-        for filepath in self.files:
-            fs, path = FileSystem.from_uri(filepath)
-            with fs.open_input_file(path) as fobj:
+        for file_uri in self.files:
+            with open_input_stream(file_uri) as fobj:
                 parquet = pg.ParquetFile(fobj)
                 for group_idx in range(parquet.num_row_groups):
                     # A simple form of row-group level bucketing without

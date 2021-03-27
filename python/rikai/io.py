@@ -13,10 +13,11 @@
 #  limitations under the License.
 
 # Standard
+import shutil
 from io import BytesIO
 from os.path import basename, join
 from pathlib import Path
-from typing import BinaryIO, Union
+from typing import IO, BinaryIO, Union
 from urllib.parse import ParseResult, urlparse
 
 # Third Party
@@ -28,7 +29,6 @@ from rikai.logging import logger
 
 __all__ = ["copy", "open_uri"]
 
-_BUFSIZE = 8 * (2 ** 20)  # 8MB
 _GCSFS = None
 
 
@@ -122,15 +122,11 @@ def copy(source: str, dest: str) -> str:
     # TODO: find better i/o utilis to copy between filesystems
     with _open_output_stream(dest) as out_stream:
         with _open_input_stream(source) as in_stream:
-            while True:
-                buf = in_stream.read(_BUFSIZE)
-                if not buf:
-                    break
-                out_stream.write(buf)
+            shutil.copyfileobj(in_stream, out_stream)
     return dest
 
 
-def open_uri(uri: Union[str, Path], mode="rb") -> BinaryIO:
+def open_uri(uri: Union[str, Path], mode="rb") -> IO:
     """Open URI for read.
 
     It supports the following URI pattens:

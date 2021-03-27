@@ -76,32 +76,17 @@ class DefaultResolver(BaseResolver):
                 base_dir, allow_not_found=True, recursive=True
             )
             scheme = parsed.scheme if parsed.scheme else "file"
-            paths = [
+            paths = (
                 finfo.path
                 for finfo in fs.get_file_info(selector)
                 if finfo.path.endswith(".parquet")
-            ]
-        return [scheme + "://" + path for path in paths]
+            )
+        return (scheme + "://" + path for path in paths)
 
     def get_schema(self, uri: str):
         uri = normalize_uri(uri)
-        parsed = urlparse(uri)
 
-        first_parquet = None
-        if parsed.scheme == "gs":
-            # TODO(lei): we should use some API that yields iterator instead of list,
-            # to avoid scan the full directory for just one file.
-            first_parquet = self.resolve(uri)[0]
-        else:
-            fs, base_dir = FileSystem.from_uri(normalize_uri(uri))
-            selector = FileSelector(
-                base_dir, allow_not_found=True, recursive=True
-            )
-
-            for finfo in fs.get_file_info(selector):
-                if finfo.path.endswith(".parquet"):
-                    first_parquet = finfo.path
-                    break
+        first_parquet = next(self.resolve(uri))
         metadata_file = open_input_stream(str(first_parquet))
         metadata = pq.read_metadata(metadata_file)
 

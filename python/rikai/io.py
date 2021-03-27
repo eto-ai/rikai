@@ -68,7 +68,7 @@ def open_input_stream(uri: str) -> BinaryIO:
         return _gcsfs().open(uri)
     else:
         filesystem, path = fs.FileSystem.from_uri(uri)
-        return filesystem.open_input_stream(path)
+        return filesystem.open_input_file(path)
 
 
 def _open_output_stream(uri: str) -> BinaryIO:

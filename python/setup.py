@@ -7,8 +7,7 @@ with open(pathlib.Path("rikai") / "__version__.py", "r") as fh:
     exec(fh.read(), about)
 
 with open(
-    pathlib.Path(__file__).absolute().parent.parent / "README.md",
-    "r",
+    pathlib.Path(__file__).absolute().parent.parent / "README.md", "r"
 ) as fh:
     long_description = fh.read()
 
@@ -17,9 +16,10 @@ test = ["pytest"]
 torch = ["torch>=1.5.0", "torchvision"]
 jupyter = ["matplotlib", "jupyterlab"]
 aws = ["boto"]
+gcp = ["gcsfs"]
 docs = ["sphinx"]
 youtube = ["pafy", "youtube_dl", "ffmpeg-python"]
-all = test + torch + jupyter + aws + docs + youtube
+all = test + torch + jupyter + aws + gcp + docs + youtube
 
 
 setup(

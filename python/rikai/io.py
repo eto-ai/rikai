@@ -62,8 +62,7 @@ def _gcsfs(project="", token=None, block_size=None):
 
 
 def open_input_stream(uri: str) -> BinaryIO:
-    """Open a URI and returns the content as a File Object.
-    """
+    """Open a URI and returns the content as a File Object."""
     parsed = urlparse(uri)
     if parsed.scheme == "gs":
         return _gcsfs().open(uri)

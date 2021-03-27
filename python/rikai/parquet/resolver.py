@@ -59,17 +59,30 @@ class DefaultResolver(BaseResolver):
     SPARK_PARQUET_ROW_METADATA = b"org.apache.spark.sql.parquet.row.metadata"
 
     def resolve(self, uri: str) -> Iterable[str]:
-        """Resolve dataset via a filesystem URI."""
+        """Resolve dataset via a filesystem URI.
+
+        Parameters
+        ----------
+        uri : str
+            The directory / base uri for a dataset.
+
+        Returns
+        -------
+        Iterator[str]
+            An iterator of parquet files.
+        """
         uri = normalize_uri(uri)
         parsed = urlparse(uri)
-        scheme = parsed.scheme if parsed.scheme else "file"
+        scheme = parsed.scheme
 
         paths = None
         if scheme == "gs":
             fs = _gcsfs()
             glob_uri = os.path.join(uri, "*.parquet")
+            logger.debug("Scan GCS directory: %s", glob_uri)
             paths = fs.glob(glob_uri)
         else:
+            logger.debug("Scan pyarrow supported directory: %s", uri)
             fs, base_dir = FileSystem.from_uri(uri)
             # base_dir = parsed.netloc + parsed.path
             selector = FileSelector(
@@ -84,9 +97,21 @@ class DefaultResolver(BaseResolver):
         return (scheme + "://" + path for path in paths)
 
     def get_schema(self, uri: str):
-        uri = normalize_uri(uri)
+        """Get the schema of the dataset.
+
+        Parameters
+        ----------
+        uri : str
+            The directory URI for the dataset.
+
+        Returns
+        -------
+        Dict
+            Json formatted schema of the dataset.
+        """
 
         first_parquet = next(self.resolve(uri))
+        logger.debug("Resolve dataset schema from %s", first_parquet)
         metadata_file = open_input_stream(str(first_parquet))
         metadata = pq.read_metadata(metadata_file)
 

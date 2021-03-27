@@ -152,6 +152,13 @@ class DataLoader:
             for batch_idx, (data, target) in enumerate(train_loader):
                 ...
 
+    .. warning::
+
+        With Pytorch 1.8+, users should use the official :py:class:`torch.utils.data.DataLoader`
+        with :py:class:`torch.utils.data.BufferedShuffleDataset` instead.
+
+        This class will be deprecated later.
+
     References
     ----------
     .. `Horovod with Pytorch <https://horovod.readthedocs.io/en/stable/pytorch.html>`_

@@ -61,7 +61,9 @@ def _gcsfs(project="", token=None, block_size=None):
     )
 
 
-def _open_input_stream(uri: str) -> BinaryIO:
+def open_input_stream(uri: str) -> BinaryIO:
+    """Open a URI and returns the content as a File Object.
+    """
     parsed = urlparse(uri)
     if parsed.scheme == "gs":
         return _gcsfs().open(uri)
@@ -116,10 +118,10 @@ def copy(source: str, dest: str) -> str:
             _gcsfs().copy(source, dest)
             return dest
 
-    # TODO: find better i/o utilis to copy between filesystems
-    with _open_output_stream(dest) as out_stream:
-        with _open_input_stream(source) as in_stream:
-            shutil.copyfileobj(in_stream, out_stream)
+    with _open_output_stream(dest) as out_stream, open_input_stream(
+        source
+    ) as in_stream:
+        shutil.copyfileobj(in_stream, out_stream)
     return dest
 
 

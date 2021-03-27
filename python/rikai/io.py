@@ -13,12 +13,13 @@
 #  limitations under the License.
 
 # Standard
+import functools
+import shutil
 from io import BytesIO
 from os.path import basename, join
 from pathlib import Path
-from typing import BinaryIO, Union
+from typing import IO, BinaryIO, Union
 from urllib.parse import ParseResult, urlparse
-
 
 # Third Party
 import requests
@@ -28,8 +29,6 @@ from pyarrow import fs
 from rikai.logging import logger
 
 __all__ = ["copy", "open_uri"]
-
-_BUFSIZE = 8 * (2 ** 20)  # 8MB
 
 
 def _normalize_uri(uri: str) -> str:
@@ -49,6 +48,37 @@ def _normalize_uri(uri: str) -> str:
     ).geturl()
 
 
+@functools.lru_cache(maxsize=1)
+def _gcsfs(project="", token=None, block_size=None):
+    try:
+        import gcsfs
+    except ImportError as e:
+        raise ImportError(
+            "Please make sure gcsfs is installed via `pip install rikai[gcp]`"
+        ) from e
+    return gcsfs.GCSFileSystem(
+        project=project, token=token, block_size=block_size
+    )
+
+
+def _open_input_stream(uri: str) -> BinaryIO:
+    parsed = urlparse(uri)
+    if parsed.scheme == "gs":
+        return _gcsfs().open(uri)
+    else:
+        filesystem, path = fs.FileSystem.from_uri(uri)
+        return filesystem.open_input_stream(path)
+
+
+def _open_output_stream(uri: str) -> BinaryIO:
+    parsed = urlparse(uri)
+    if parsed.scheme == "gs":
+        return _gcsfs().open(uri, mode="wb")
+    else:
+        filesystem, path = fs.FileSystem.from_uri(uri)
+        return filesystem.open_output_stream(path)
+
+
 def copy(source: str, dest: str) -> str:
     """Copy a file from source to destination, and return the URI of
     the copied file.
@@ -58,7 +88,7 @@ def copy(source: str, dest: str) -> str:
     source : str
         The source URI to copy from
     dest : str
-        The destination uri or the destionation directory. If ``dest`` is
+        The destination uri or the destination directory. If ``dest`` is
         a URI ends with a "/", it represents a directory.
 
     Return
@@ -76,26 +106,24 @@ def copy(source: str, dest: str) -> str:
 
     if parsed_dest.scheme == parsed_source.scheme:
         # Direct copy with the same file system
-        if parsed_dest.scheme == "s3":
+        scheme = parsed_dest.scheme
+        if scheme == "s3":
             s3fs, source_path = fs.FileSystem.from_uri(source)
             _, dest_path = fs.FileSystem.from_uri(dest)
             s3fs.copy(source_path, dest_path)
             return dest
+        elif scheme == "gs":
+            _gcsfs().copy(source, dest)
+            return dest
 
     # TODO: find better i/o utilis to copy between filesystems
-    filesystem, dest_path = fs.FileSystem.from_uri(dest)
-    with filesystem.open_output_stream(dest_path) as out_stream:
-        src_fs, src_path = fs.FileSystem.from_uri(source)
-        with src_fs.open_input_stream(src_path) as in_stream:
-            while True:
-                buf = in_stream.read(_BUFSIZE)
-                if not buf:
-                    break
-                out_stream.write(buf)
+    with _open_output_stream(dest) as out_stream:
+        with _open_input_stream(source) as in_stream:
+            shutil.copyfileobj(in_stream, out_stream)
     return dest
 
 
-def open_uri(uri: Union[str, Path], mode="rb") -> BinaryIO:
+def open_uri(uri: Union[str, Path], mode="rb") -> IO:
     """Open URI for read.
 
     It supports the following URI pattens:
@@ -124,6 +152,8 @@ def open_uri(uri: Union[str, Path], mode="rb") -> BinaryIO:
     elif parsed_uri.scheme in ("http", "https"):
         resp = requests.get(uri)
         return BytesIO(resp.content)
+    elif parsed_uri.scheme == "gs":
+        return _gcsfs().open(uri, mode=mode)
     else:
         filesystem, path = fs.FileSystem.from_uri(uri)
         return filesystem.open_input_file(path)

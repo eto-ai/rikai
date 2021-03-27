@@ -1,5 +1,6 @@
 import pathlib
 import re
+
 from setuptools import find_packages, setup
 
 about = {}
@@ -46,6 +47,7 @@ setup(
         "pyspark>=3.1,<3.2",
         "pyyaml",
         "requests",
+        "semver",
     ],
     extras_require={
         "test": test,

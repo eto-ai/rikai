@@ -15,7 +15,12 @@
 """Vision related Spark UDFs.
 """
 
+# Standard library
+import os
+from typing import Union
+
 # Third Party
+import numpy as np
 from pyspark.sql.functions import udf
 from pyspark.sql.types import ArrayType
 
@@ -25,10 +30,21 @@ from rikai.logging import logger
 from rikai.numpy import ndarray
 from rikai.spark.types.vision import ImageType
 from rikai.types.vision import Image
-from rikai.types.video import YouTubeVideo, VideoStream, SingleFrameSampler
+from rikai.types.video import (
+    YouTubeVideo,
+    VideoStream,
+    SingleFrameSampler,
+    Segment,
+)
 
 
-__all__ = ["image", "image_copy", "numpy_to_image", "video_to_images"]
+__all__ = [
+    "image",
+    "image_copy",
+    "numpy_to_image",
+    "video_to_images",
+    "spectrogram_image",
+]
 
 
 @udf(returnType=ImageType())
@@ -92,34 +108,51 @@ def numpy_to_image(array: ndarray, uri: str) -> Image:
 
 @udf(returnType=ArrayType(ImageType()))
 def video_to_images(
-    video, sample_rate: int = 1, start_frame: int = 0, max_samples: int = 15000
+    video: Union[VideoStream, YouTubeVideo],
+    output_uri: str,
+    segment: Segment = Segment(0, -1),
+    sample_rate: int = 1,
+    max_samples: int = 15000,
+    quality: str = "worst",
 ) -> list:
     """Extract video frames into a list of images.
+
     Parameters
     ----------
     video : Video
         An video object, either YouTubeVideo or VideoStream.
-    sample_rate : Int
-        The sampling rate in number of frames
-    start_frame : Int
-        Start from a specific frame
-    max_samples : Int
-        Yield at most this many frames (-1 means no max)
+    output_uri: str
+        Frames will be written as <output_uri>/<fno>.jpg
+    segment: Segment, default Segment(0, -1)
+        A Segment object, localizing video in time to (start_fno, end_fno)
+    sample_rate : int, default 1
+        Keep 1 out of every sample_rate frames.
+    max_samples : int, default 15000
+        Return at most this many frames (-1 means no max)
+    quality: str, default 'worst'
+        Either 'worst' (lowest bitrate) or 'best' (highest bitrate)
+        See: https://pythonhosted.org/Pafy/index.html#Pafy.Pafy.getbest
+
     Return
     ------
     List
         Return a list of images from video indexed by frame number.
     """
-    assert isinstance(video, YouTubeVideo) or isinstance(
-        video, VideoStream
+    assert isinstance(
+        video, (YouTubeVideo, VideoStream)
     ), "Input type must be YouTubeVideo or VideoStream"
+    assert isinstance(segment, Segment), "Second input type must be Segment"
 
-    base_path = video.uri
+    start_frame = segment.start_fno
+    if segment.end_fno > 0:
+        max_samples = min((segment.end_fno - start_frame), max_samples)
 
     if isinstance(video, YouTubeVideo):
-        base_path = video.vid
         video_iterator = SingleFrameSampler(
-            video.get_stream(), sample_rate, start_frame, max_samples
+            video.get_stream(quality=quality),
+            sample_rate,
+            start_frame,
+            max_samples,
         )
     else:
         video_iterator = SingleFrameSampler(
@@ -129,7 +162,75 @@ def video_to_images(
     return [
         Image.from_array(
             img,
-            "{}_{}.jpg".format(base_path, (start_frame + idx) * sample_rate),
+            os.path.join(
+                output_uri, "{}.jpg".format((start_frame + idx) * sample_rate)
+            ),
         )
         for idx, img in enumerate(video_iterator)
     ]
+
+
+@udf(returnType=ImageType())
+def spectrogram_image(
+    video: Union[VideoStream, YouTubeVideo],
+    output_uri: str,
+    segment: Segment = Segment(0, -1),
+    size: int = 224,
+    max_samples: int = 15000,
+) -> Image:
+    """Applies ffmpeg filter to generate spectrogram image.
+
+    Parameters
+    ----------
+    video : VideoStream or YouTubeVideo
+        A video object whose audio track will be converted to spectrogram
+    output_uri: str
+        The uri to which the spectrogram image will be written to
+    segment: Segment
+            A Segment object, localizing video in time to (start_fno, end_fno)
+    max_samples : Int
+            Yield at most this many frames (-1 means no max)
+    size : Int
+        Sets resolution of frequency, time spectrogram image.
+
+    Return
+    ------
+    Image
+        Return an Image of the audio spectrogram.
+    """
+    try:
+        import ffmpeg
+    except ImportError:
+        raise ValueError(
+            "Couldn't import ffmpeg. Please make sure to "
+            "`pip install ffmpeg-python` explicitly or install "
+            "the correct extras like `pip install rikai[all]`"
+        )
+    assert isinstance(
+        video, (YouTubeVideo, VideoStream)
+    ), "Input type must be YouTubeVideo or VideoStream"
+    assert isinstance(segment, Segment), "Second input type must be Segment"
+
+    start_frame = segment.start_fno
+    if segment.end_fno > 0:
+        max_samples = min((segment.end_fno - start_frame), max_samples)
+    video_uri = (
+        video.get_stream().uri
+        if isinstance(video, YouTubeVideo)
+        else video.uri
+    )
+    output, _ = (
+        ffmpeg.input(video_uri)
+        .filter("showspectrumpic", "{}x{}".format(size, size), legend=0)
+        .output(
+            "pipe:",
+            format="rawvideo",
+            pix_fmt="rgb24",
+            start_number=start_frame,
+            vframes=max_samples,
+        )
+        .run(capture_stdout=True)
+    )
+    return Image.from_array(
+        np.frombuffer(output, np.uint8).reshape([size, size, 3]), output_uri
+    )

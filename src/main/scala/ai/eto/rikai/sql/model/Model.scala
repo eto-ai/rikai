@@ -16,6 +16,7 @@
 
 package ai.eto.rikai.sql.model
 
+import io.circe.syntax._
 import scala.collection.JavaConverters.mapAsJavaMap
 
 /**
@@ -29,14 +30,8 @@ trait Model {
   /** Model URI in the registry */
   val uri: String
 
-  /** The model registry object. */
-  val registry: Registry
-
   /** Model Options. */
   var options: Map[String, String] = Map.empty
-
-  /** python class if this model has a python counterpart. */
-  def pyClass: String = ""
 
   /** Return options as java Map, so that it is easily accessible in Python via py4j. */
   final def javaOptions: java.util.Map[String, String] = mapAsJavaMap(options)
@@ -53,6 +48,10 @@ object Model {
     if (!name.matches(namePattern.regex)) {
       throw new ModelNameException(s"Model name '${name}' is not valid")
     }
+  }
+
+  def serializeOptions(options: Map[String, String]): String = {
+    options.asJson.asString.getOrElse("")
   }
 }
 

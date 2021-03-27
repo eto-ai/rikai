@@ -39,10 +39,12 @@ class RikaiSparkSQLParserTest extends AnyFunSuite with SparkTestSession {
   }
 
   test("Test parse ML_PREDICT with catalog") {
-    spark.sql("CREATE MODEL foo USING 'test://host/foo'").show()
+    spark.udf.register("bar", (s: Int) => s + 2)
+
+    spark.sql("CREATE MODEL bar USING 'test://host/bar'").show()
 
     val scores =
-      spark.sql("SELECT id, ML_PREDICT('test://host/foo', id) AS score FROM df")
+      spark.sql("SELECT id, ML_PREDICT(bar, id) AS score FROM df")
 
     val plus_two = udf((v: Int) => v + 2)
     val expected = df.withColumn("score", plus_two(col("id")))

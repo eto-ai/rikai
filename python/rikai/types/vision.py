@@ -29,14 +29,14 @@ from PIL import Image as PILImage
 
 # Rikai
 from rikai.internal.uri_utils import normalize_uri
-from rikai.mixin import Asset, Displayable, ToNumpy
+from rikai.mixin import Asset, Displayable, ToNumpy, ToPIL
 from rikai.spark.types import ImageType
 from rikai.io import copy
 
 __all__ = ["Image"]
 
 
-class Image(ToNumpy, Asset, Displayable):
+class Image(ToNumpy, ToPIL, Asset, Displayable):
     """An external Image Asset.
 
     It contains a reference URI to an image stored on the remote system.

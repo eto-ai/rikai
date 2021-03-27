@@ -38,6 +38,14 @@ class ToNumpy(ABC):
         """Returns the content as a numpy ndarray."""
 
 
+class ToPIL(ABC):
+    """ToPIL Mixin."""
+
+    @abstractmethod
+    def to_pil(self) -> "PIL.Image.Image":
+        pass
+
+
 class Displayable(ABC):
     """Mixin for notebook viz"""
 

@@ -42,7 +42,7 @@ import org.apache.spark.sql.catalyst.parser.{
   *    ground_label != ML_PREDICT(old_model, image).label
   * }}}
   *
-  * @param context Contains Rikai runtime information
+  * @param session Contains Rikai runtime information
   * @param delegate the delegated Spark SQL parser.
   */
 private[sql] class RikaiSparkSQLParser(

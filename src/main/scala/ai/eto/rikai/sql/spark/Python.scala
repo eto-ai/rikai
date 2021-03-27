@@ -16,7 +16,9 @@
 
 package ai.eto.rikai.sql.spark
 
-import ai.eto.rikai.sql.model.Model
+import ai.eto.rikai.sql.model.{Model, ModelNotFoundException}
+
+import scala.collection.JavaConverters.mapAsJavaMap
 
 /**
   * [[Python]] is the callback service to call arbitrary Python code
@@ -24,8 +26,22 @@ import ai.eto.rikai.sql.model.Model
   */
 trait Python {
 
-  /** Generate code for a model */
-  def codegen(model: Model, temporary: Boolean): Unit
+  /**
+    * Resolve a Model from python.
+    *
+    * @param uri URL for a model spec or model file.
+    * @param name Optional model name. Can be empty.
+    * @param options options to the model.
+    *
+    * @return a Model
+    */
+  @throws[ModelNotFoundException]
+  def resolve(
+      className: String,
+      uri: String,
+      name: String,
+      options: java.util.Map[String, String]
+  ): Model
 }
 
 object Python {
@@ -43,8 +59,20 @@ object Python {
     }
   }
 
-  def generateCode(model: Model, temporary: Boolean = true): Unit = {
+  /** Resolve a Model from Python process. */
+  @throws[ModelNotFoundException]
+  def resolve(
+      className: String,
+      uri: String,
+      name: Option[String],
+      options: Map[String, String]
+  ): Model = {
     checkRegistered
-    python.get.codegen(model, temporary)
+    python.get.resolve(
+      className,
+      uri,
+      name.getOrElse(""),
+      mapAsJavaMap(options)
+    )
   }
 }

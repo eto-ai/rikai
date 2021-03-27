@@ -16,9 +16,9 @@
 
 package ai.eto.rikai.sql.spark.execution
 
-import ai.eto.rikai.sql.model.ModelNotFoundException
-import org.apache.spark.sql.catalyst.expressions.Attribute
+import ai.eto.rikai.sql.model.{Model, ModelNotFoundException}
 import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.catalyst.expressions.Attribute
 
 case class DescribeModelCommand(name: String) extends ModelCommand {
 
@@ -26,7 +26,8 @@ case class DescribeModelCommand(name: String) extends ModelCommand {
 
   override def run(session: SparkSession): Seq[Row] = {
     catalog(session).getModel(name) match {
-      case Some(model) => Seq(Row(model.name, model.uri))
+      case Some(model) =>
+        Seq(Row(model.name, model.uri, Model.serializeOptions(model.options)))
       case None =>
         throw new ModelNotFoundException(s"Model '${name}' not found")
     }

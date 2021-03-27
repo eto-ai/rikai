@@ -33,4 +33,4 @@ def test_resolve_local_fs(tmp_path):
 
 
 def test_resolve_empty_dir(tmp_path):
-    assert [] == Resolver.resolve(tmp_path)
+    assert [] == list(Resolver.resolve(tmp_path))

@@ -15,6 +15,7 @@
 """Extensive Dataset Resolver."""
 
 import json
+import os
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Dict, Iterable, Union
@@ -22,7 +23,9 @@ from urllib.parse import urlparse
 
 import pyarrow.parquet as pq
 from pyarrow.fs import FileSelector, FileSystem
+
 from rikai.internal.uri_utils import normalize_uri
+from rikai.io import _gcsfs, open_input_stream
 from rikai.logging import logger
 
 __all__ = ["register", "Resolver", "BaseResolver"]
@@ -56,30 +59,60 @@ class DefaultResolver(BaseResolver):
     SPARK_PARQUET_ROW_METADATA = b"org.apache.spark.sql.parquet.row.metadata"
 
     def resolve(self, uri: str) -> Iterable[str]:
-        """Resolve dataset via a filesystem URI."""
+        """Resolve dataset via a filesystem URI.
+
+        Parameters
+        ----------
+        uri : str
+            The directory / base uri for a dataset.
+
+        Returns
+        -------
+        Iterator[str]
+            An iterator of parquet files.
+        """
         uri = normalize_uri(uri)
         parsed = urlparse(uri)
+        scheme = parsed.scheme
 
-        fs, base_dir = FileSystem.from_uri(uri)
-        # base_dir = parsed.netloc + parsed.path
-        selector = FileSelector(base_dir, allow_not_found=True, recursive=True)
-        scheme = parsed.scheme if parsed.scheme else "file"
-        return [
-            scheme + "://" + finfo.path
-            for finfo in fs.get_file_info(selector)
-            if finfo.path.endswith(".parquet")
-        ]
+        paths = None
+        if scheme == "gs":
+            fs = _gcsfs()
+            glob_uri = os.path.join(uri, "*.parquet")
+            logger.debug("Scan GCS directory: %s", glob_uri)
+            paths = fs.glob(glob_uri)
+        else:
+            logger.debug("Scan pyarrow supported directory: %s", uri)
+            fs, base_dir = FileSystem.from_uri(uri)
+            # base_dir = parsed.netloc + parsed.path
+            selector = FileSelector(
+                base_dir, allow_not_found=True, recursive=True
+            )
+            scheme = parsed.scheme if parsed.scheme else "file"
+            paths = (
+                finfo.path
+                for finfo in fs.get_file_info(selector)
+                if finfo.path.endswith(".parquet")
+            )
+        return (scheme + "://" + path for path in paths)
 
     def get_schema(self, uri: str):
-        fs, base_dir = FileSystem.from_uri(normalize_uri(uri))
-        selector = FileSelector(base_dir, allow_not_found=True, recursive=True)
+        """Get the schema of the dataset.
 
-        first_parquet = None
-        for finfo in fs.get_file_info(selector):
-            if finfo.path.endswith(".parquet"):
-                first_parquet = finfo.path
-                break
-        metadata_file = fs.open_input_file(first_parquet)
+        Parameters
+        ----------
+        uri : str
+            The directory URI for the dataset.
+
+        Returns
+        -------
+        Dict
+            Json formatted schema of the dataset.
+        """
+
+        first_parquet = next(self.resolve(uri))
+        logger.debug("Resolve dataset schema from %s", first_parquet)
+        metadata_file = open_input_stream(str(first_parquet))
         metadata = pq.read_metadata(metadata_file)
 
         kv_metadata = metadata.metadata

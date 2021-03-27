@@ -13,21 +13,23 @@
 #  limitations under the License.
 
 """Pytorch Dataset and DataLoader"""
-
+import os
 import threading
+import warnings
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from queue import Empty, Queue
 from typing import Callable, Dict, Generator, List, Optional, Union
+import uuid
 
 # Third Party
-import numpy as np
+import semver
 import torch
 from torch.utils.data import IterableDataset
 
 # Rikai
 import rikai.parquet
-from rikai.mixin import ToNumpy
+from rikai.torch.transforms import RikaiToTensor, convert_tensor
 
 __all__ = ["DataLoader", "Dataset"]
 
@@ -41,10 +43,12 @@ class Dataset(IterableDataset):
 
     Parameters
     ----------
-    uri : str
+    uri_or_df : str, Path, pyspark.sql.DataFrame
         URI to the dataset
     columns : list of str, optional
         An optional list of column to load from parquet files.
+    transform: Callable, default instance of RikaiToTensor
+        Apply row level transformation before yielding each sample
 
     Note
     ----
@@ -71,15 +75,17 @@ class Dataset(IterableDataset):
 
     def __init__(
         self,
-        uri: Union[str, Path],
+        uri_or_df: Union[str, Path, "pyspark.sql.DataFrame"],
         columns: List[str] = None,
+        transform: Callable = RikaiToTensor(),
     ):
         super().__init__()
-        self.uri = str(uri)
+        self.uri_or_df = uri_or_df
         self.columns = columns
+        self._transform = transform
 
     def __repr__(self) -> str:
-        return f"Dataset(torch, {self.uri}, columns={self.columns})"
+        return f"Dataset(torch, {self.uri_or_df}, columns={self.columns})"
 
     def __iter__(self):
         rank = 0
@@ -90,13 +96,14 @@ class Dataset(IterableDataset):
             rank = worker_info.id
             world_size = worker_info.num_workers
 
+        uri = _maybe_cache_df(self.uri_or_df)
         for row in rikai.parquet.Dataset(
-            self.uri,
+            uri,
             columns=self.columns,
             world_size=world_size,
             rank=rank,
         ):
-            yield convert_tensor(row)
+            yield self._transform(row)
 
 
 class DataLoader:
@@ -120,7 +127,6 @@ class DataLoader:
         The total number of distributed workers. Default is ``1``.
     rank : int
         The rank of this worker among distributed workers. Default is ``0``.
-
 
     **Distributed Training**
 
@@ -149,6 +155,13 @@ class DataLoader:
             for batch_idx, (data, target) in enumerate(train_loader):
                 ...
 
+    .. warning::
+
+        With Pytorch 1.8+, users should use the official :py:class:`torch.utils.data.DataLoader`
+        with :py:class:`torch.utils.data.BufferedShuffleDataset` instead.
+
+        This class will be deprecated later.
+
     References
     ----------
     .. `Horovod with Pytorch <https://horovod.readthedocs.io/en/stable/pytorch.html>`_
@@ -157,7 +170,7 @@ class DataLoader:
 
     def __init__(
         self,
-        dataset: str,
+        dataset: Union[str, Path, "pyspark.sql.DataFrame"],
         columns: List[str] = None,
         batch_size: int = 1,
         shuffle: bool = False,
@@ -167,6 +180,10 @@ class DataLoader:
         world_size: int = 1,
         rank: int = 0,
     ):  # pylint: disable=too-many-arguments
+        assert isinstance(dataset, (str, Path)) or (
+            rank == 0 and world_size == 1
+        ), "Only str/Path references are supported in distributed mode"
+        dataset = _maybe_cache_df(dataset)
         self.dataset = rikai.parquet.Dataset(
             dataset,
             columns=columns,
@@ -178,6 +195,16 @@ class DataLoader:
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.collate_fn = collate_fn if collate_fn else lambda x: x
+
+        torch_version = semver.VersionInfo.parse(torch.__version__)
+        if torch_version.major >= 1 and torch_version.minor >= 8:
+            warnings.warn(
+                "rikai.torch.data.DataLoader should be replaced with "
+                "'torch.utils.data.BufferedShuffleDataset' and "
+                "'torch.utils.data.DataLoader' "
+                "in Pytorch 1.8+",
+                DeprecationWarning,
+            )
 
     def _prefetch(
         self, out_queue: Queue, done: threading.Event, stop: threading.Event
@@ -255,16 +282,70 @@ class DataLoader:
         q.join()
 
 
-def convert_tensor(row):
-    """Convert a parquet row into rikai semantic objects."""
-    tensors = {}
-    for key, value in row.items():
-        if isinstance(value, dict):
-            tensors[key] = convert_tensor(value)
-        elif isinstance(value, (list, tuple)):
-            tensors[key] = np.array([convert_tensor(elem) for elem in value])
-        elif isinstance(value, ToNumpy):
-            tensors[key] = value.to_numpy()
+def _maybe_cache_df(
+    dataset_ref: Union[str, Path, "pyspark.sql.DataFrame"]
+) -> str:
+    """
+    If the given dataset_ref is a str/Path, then just return a str ref.
+    If it's a pyspark DataFrame then cache the DataFrame as parquet and
+    return the cache uri
+
+    Parameters
+    ----------
+    dataset_ref: str, Path, or pyspark DataFrame
+        Either a uri to parquet or a DataFrame that will be cached as parquet
+
+    Returns
+    -------
+    uri: str
+        Either the input parquet uri or the cached uri for a DataFrame
+    """
+    if isinstance(dataset_ref, (str, Path)):
+        return str(dataset_ref)
+    else:
+        try:
+            from pyspark.sql import DataFrame
+        except ImportError:
+            raise ImportError(
+                "Cannot create rikai pytorch dataset from "
+                "Spark DataFrame without pyspark installed."
+            )
+        from rikai.spark.utils import df_to_rikai
+
+        if isinstance(dataset_ref, DataFrame):
+            kwargs = {}
+            # TODO also try to get it from rikai.options once #134 is done
+            block_size = dataset_ref.rdd.ctx.getConf().get(
+                "parquet.block.size", None
+            )
+            if block_size is not None:
+                kwargs["parquet_row_group_size_bytes"] = block_size
+            cache_uri = _get_cache_uri(dataset_ref)
+            df_to_rikai(dataset_ref, cache_uri, **kwargs)
         else:
-            tensors[key] = value
-    return tensors
+            raise TypeError(
+                (
+                    "dataset_ref must be a str, Path, or DataFrame and "
+                    "not a {}."
+                ).format(type(dataset_ref))
+            )
+        return cache_uri
+
+
+def _get_cache_uri(df: "pyspark.sql.DataFrame") -> str:
+    """
+    TODO create a deterministic unique uri from the df for sharing
+
+    Parameters
+    ----------
+    df: DataFrame
+        The cache uri will be generated for the given DataFrame
+
+    Returns
+    -------
+    cache_uri: str
+        The uri to write the DataFrame to
+    """
+    # TODO also try to get it from rikai.options once #134 is done
+    cache_root_uri = df.rdd.ctx.getConf().get("spark.rikai.cacheUri")
+    return os.path.join(cache_root_uri, str(uuid.uuid4()))

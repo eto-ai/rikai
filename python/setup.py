@@ -13,7 +13,7 @@ with open(
 
 # extras
 test = ["pytest"]
-torch = ["torch>=1.5.0", "torchvision"]
+torch = ["torch>=1.4.0", "torchvision"]
 jupyter = ["matplotlib", "jupyterlab"]
 aws = ["boto"]
 gcp = ["gcsfs"]

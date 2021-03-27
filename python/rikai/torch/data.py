@@ -193,7 +193,8 @@ class DataLoader:
         if torch_version.major >= 1 and torch_version.minor >= 8:
             warnings.warn(
                 "rikai.torch.data.DataLoader should be replaced with "
-                "'torch.utils.data.BufferedShuffleDataset' and 'torch.utils.data.DataLoader' "
+                "'torch.utils.data.BufferedShuffleDataset' and "
+                "'torch.utils.data.DataLoader' "
                 "in Pytorch 1.8+",
                 DeprecationWarning,
             )

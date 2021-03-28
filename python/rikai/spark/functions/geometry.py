@@ -17,10 +17,10 @@
 # Third Party
 from pyspark.sql.functions import udf
 from pyspark.sql.types import FloatType
-from rikai.spark.types.geometry import Box2dType
 
 # Rikai
 from rikai.logging import logger
+from rikai.spark.types.geometry import Box2dType
 from rikai.types.geometry import Box2d
 
 __all__ = ["area", "box2d", "box2d_from_center", "box2d_from_top_left"]

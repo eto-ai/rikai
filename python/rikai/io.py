@@ -18,7 +18,7 @@ import shutil
 from io import BytesIO
 from os.path import basename, join
 from pathlib import Path
-from typing import IO, BinaryIO, Union
+from typing import BinaryIO, IO, Union
 from urllib.parse import ParseResult, urlparse
 
 # Third Party

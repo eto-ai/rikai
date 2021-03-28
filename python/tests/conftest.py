@@ -19,6 +19,7 @@ import pytest
 from torch.utils.data import DataLoader  # Prevent DataLoader hangs
 from pyspark.sql import SparkSession
 
+# Rikai
 from rikai.spark.sql import init
 
 

@@ -13,18 +13,18 @@
 #  limitations under the License.
 
 import secrets
-from typing import Callable, IO, Any, Dict, Mapping, Optional, Union
+from typing import Any, Callable, Dict, IO, Mapping, Optional, Union
 
 import yaml
-from jsonschema import ValidationError, validate
+from jsonschema import validate, ValidationError
 from pyspark.sql import SparkSession
 
+from rikai.internal.reflection import find_class
 from rikai.io import open_uri
 from rikai.logging import logger
 from rikai.spark.sql.codegen.base import Registry
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
-from rikai.internal.reflection import find_class
 
 __all__ = ["FileSystemRegistry"]
 

@@ -11,11 +11,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import pytest
-
 from binascii import b2a_base64
-from PIL import Image as PILImage
+
 import numpy as np
+import pytest
+from PIL import Image as PILImage
 
 from rikai.types.vision import Image
 

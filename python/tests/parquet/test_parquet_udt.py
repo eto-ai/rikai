@@ -16,6 +16,7 @@ from pathlib import Path
 
 # Third Party
 import numpy as np
+import pytest
 from pyspark.ml.linalg import DenseMatrix, Vectors
 from pyspark.sql import Row
 from pyspark.sql.functions import exp
@@ -27,7 +28,6 @@ from pyspark.sql.types import (
     StructField,
     StructType,
 )
-import pytest
 
 # Rikai
 from rikai.parquet import Dataset

@@ -14,7 +14,8 @@
 
 import numpy as np
 import pytest
-from rikai.types import YouTubeVideo, VideoStream, SingleFrameSampler
+
+from rikai.types import SingleFrameSampler, VideoStream, YouTubeVideo
 
 
 def test_youtube():

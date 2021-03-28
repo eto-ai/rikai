@@ -12,18 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from pyspark.sql import DataFrame
+# for parquet.block.size when caching during df -> Dataset conversion
+CONF_PARQUET_BLOCK_SIZE = "parquet.block.size"
+DEFAULT_ROW_GROUP_SIZE_BYTES = 32 * 1024 * 1024
 
-from .conf import CONF_PARQUET_BLOCK_SIZE, DEFAULT_ROW_GROUP_SIZE_BYTES
-
-
-def df_to_rikai(
-    df: DataFrame,
-    uri: str,
-    parquet_row_group_size_bytes: int = DEFAULT_ROW_GROUP_SIZE_BYTES,
-):
-    (
-        df.write.format("rikai")
-        .option(CONF_PARQUET_BLOCK_SIZE, parquet_row_group_size_bytes)
-        .save(uri)
-    )
+# config name for the cache root during df -> Dataset conversion
+CONF_SPARK_RIKAI_CACHEURI = "spark.rikai.cacheUri"

@@ -22,7 +22,7 @@ from typing import Union
 # Third Party
 import numpy as np
 from pyspark.sql.functions import udf
-from pyspark.sql.types import ArrayType
+from pyspark.sql.types import ArrayType, IntegerType
 
 # Rikai
 from rikai.io import copy as _copy

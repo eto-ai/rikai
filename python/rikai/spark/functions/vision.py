@@ -17,6 +17,7 @@
 
 # Standard library
 import os
+import subprocess
 from typing import Union
 
 # Third Party
@@ -234,3 +235,78 @@ def spectrogram_image(
     return Image.from_array(
         np.frombuffer(output, np.uint8).reshape([size, size, 3]), output_uri
     )
+
+
+@udf(returnType=T.ArrayType(SegmentType()))
+def scene_segmentor(
+    video: Union[VideoStream, YouTubeVideo],
+    threshold: float = 0.3,
+    fps: int = 30,
+) -> list:
+    """Extracts video segments from VideoStream or YouTubeVideo by thresholding sum-of-absolute differences.
+    https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/f_select.c
+    Parameters
+    ----------
+    video : Video
+      An video object, either YouTubeVideo or VideoStream.
+    threshold: float, default 0.3
+      Scene detection score, values in [0, 1]
+    fps: int, default 30
+      Frames per second of video asset
+    Return
+    ------
+    List
+      Return a list of Segments from video.
+    """
+    try:
+        import ffmpeg
+    except ImportError:
+        raise ValueError(
+            "Couldn't import ffmpeg. Please make sure to "
+            "`pip install ffmpeg-python` explicitly or install "
+            "the correct extras like `pip install rikai[all]`"
+        )
+    assert isinstance(
+        video, (YouTubeVideo, VideoStream)
+    ), "Input type must be YouTubeVideo or VideoStream"
+
+    def isfloat(value):
+        try:
+            float(value)
+            return True
+        except ValueError:
+            return False
+
+    video_uri = (
+        video.get_stream().uri
+        if isinstance(video, YouTubeVideo)
+        else video.uri
+    )
+
+    p = subprocess.Popen(
+        (
+            ffmpeg.input(video_uri)
+            .filter("select", "gte(scene,{})".format(threshold))
+            .filter("showinfo")
+            .output("-", format="null")
+            .compile()
+        ),
+        stderr=subprocess.PIPE,
+    )
+    result = p.communicate()[1].decode("utf-8")
+    cut_times = [0] + [
+        float(ln.split()[0])
+        for ln in result.split("pts_time:")
+        if isfloat(ln.split()[0])
+    ]
+    if len(cut_times) == 1:
+        return [Segment(0, -1)]
+    intervals = [
+        (cut_times[idx - 1], cut_times[idx])
+        for idx, time in enumerate(cut_times)
+    ][1:]
+    return [
+        Segment(start_fno=int(fps * tup[0]), end_fno=int(fps * tup[1]))
+        for tup in intervals
+        if tup[0] < tup[1]
+    ]

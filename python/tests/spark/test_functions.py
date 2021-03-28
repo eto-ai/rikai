@@ -33,6 +33,7 @@ from rikai.spark.functions import (
     numpy_to_image,
     video_to_images,
     spectrogram_image,
+    video_segmentor,
 )
 from rikai.types import Box2d, Image, VideoStream, YouTubeVideo, Segment
 

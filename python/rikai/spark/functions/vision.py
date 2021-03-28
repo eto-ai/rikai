@@ -29,7 +29,7 @@ from pyspark.sql.types import ArrayType
 from rikai.io import copy as _copy
 from rikai.logging import logger
 from rikai.numpy import ndarray
-from rikai.spark.types.vision import ImageType
+from rikai.spark.types.vision import ImageType, SegmentType
 from rikai.types.vision import Image
 from rikai.types.video import (
     YouTubeVideo,
@@ -237,7 +237,7 @@ def spectrogram_image(
     )
 
 
-@udf(returnType=T.ArrayType(SegmentType()))
+@udf(returnType=ArrayType(SegmentType()))
 def scene_segmentor(
     video: Union[VideoStream, YouTubeVideo],
     threshold: float = 0.3,

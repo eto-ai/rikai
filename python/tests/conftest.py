@@ -27,7 +27,7 @@ from rikai.spark.sql import init
 def spark(tmp_path_factory) -> SparkSession:
     session = (
         SparkSession.builder.appName("spark-test")
-        .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.3-SNAPSHOT")
+        .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.3")
         .config(
             "spark.sql.extensions",
             "ai.eto.rikai.sql.spark.RikaiSparkSessionExtensions",

@@ -187,6 +187,14 @@ def video_framerate(
     Integer
         Return integer frame rate.
     """
+    try:
+        import ffmpeg
+    except ImportError:
+        raise ValueError(
+            "Couldn't import ffmpeg. Please make sure to "
+            "`pip install ffmpeg-python` explicitly or install "
+            "the correct extras like `pip install rikai[all]`"
+        )
     assert isinstance(
         video, (YouTubeVideo, VideoStream)
     ), "Input type must be YouTubeVideo or VideoStream"

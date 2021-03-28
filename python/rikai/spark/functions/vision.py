@@ -43,6 +43,7 @@ __all__ = [
     "image_copy",
     "numpy_to_image",
     "video_to_images",
+    "video_framerate",
     "spectrogram_image",
 ]
 
@@ -168,6 +169,39 @@ def video_to_images(
         )
         for idx, img in enumerate(video_iterator)
     ]
+
+
+@udf(returnType=IntegerType())
+def video_framerate(
+    video: Union[VideoStream, YouTubeVideo],
+) -> int:
+    """Extract video frame rate.
+
+    Parameters
+    ----------
+    video : Video
+        An video object, either YouTubeVideo or VideoStream.
+
+    Return
+    ------
+    Integer
+        Return integer frame rate.
+    """
+    assert isinstance(
+        video, (YouTubeVideo, VideoStream)
+    ), "Input type must be YouTubeVideo or VideoStream"
+    video_uri = (
+        video.get_stream().uri
+        if isinstance(video, YouTubeVideo)
+        else video.uri
+    )
+
+    n, d = map(
+        int, ffmpeg.probe(video_uri)["streams"][0]["avg_frame_rate"].split("/")
+    )
+    if d:
+        return np.round(n / d).astype(int)
+    return -1
 
 
 @udf(returnType=ImageType())

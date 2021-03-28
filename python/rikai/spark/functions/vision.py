@@ -239,7 +239,7 @@ def spectrogram_image(
 
 
 @udf(returnType=ArrayType(SegmentType()))
-def scene_segmentor(
+def video_segmentor(
     video: Union[VideoStream, YouTubeVideo],
     threshold: float = 0.3,
     fps: int = 30,

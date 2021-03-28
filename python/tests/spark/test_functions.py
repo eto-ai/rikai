@@ -221,7 +221,7 @@ def test_spectrogram_image(
     # TODO include an actual expected answer
 
 
-def test_scene_segmentor(
+def test_video_segmentor(
     spark: SparkSession, tmp_path: Path, asset_path: Path
 ):
     """Test extract video segments from YouTubeVideo/VideoStream types
@@ -233,7 +233,7 @@ def test_scene_segmentor(
     output_dir.mkdir(parents=True)
     df1 = df1.withColumn(
         "scenes",
-        scene_segmentor(col("video")),
+        video_segmentor(col("video")),
     )
 
     df2 = spark.createDataFrame(
@@ -244,7 +244,7 @@ def test_scene_segmentor(
     output_dir.mkdir(parents=True)
     df2 = df2.withColumn(
         "scenes",
-        scene_segmentor(col("video")),
+        video_segmentor(col("video")),
     )
 
     videostream_sample = df1.first()["scenes"]

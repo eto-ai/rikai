@@ -228,16 +228,12 @@ def test_scene_segmentor(
     into list of Segments.
     """
     video = VideoStream(str(asset_path / "big_buck_bunny_short.mp4"))
-    df1 = spark.createDataFrame(
-        [(video)], ["video"]
-    )
+    df1 = spark.createDataFrame([(video)], ["video"])
     output_dir = tmp_path / "videostream_test"
     output_dir.mkdir(parents=True)
     df1 = df1.withColumn(
         "scenes",
-        scene_segmentor(
-            col("video")
-        ),
+        scene_segmentor(col("video")),
     )
 
     df2 = spark.createDataFrame(
@@ -248,9 +244,7 @@ def test_scene_segmentor(
     output_dir.mkdir(parents=True)
     df2 = df2.withColumn(
         "scenes",
-        scene_segmentor(
-            col("video")
-        ),
+        scene_segmentor(col("video")),
     )
 
     videostream_sample = df1.first()["scenes"]
@@ -260,8 +254,4 @@ def test_scene_segmentor(
         type(videostream_sample) == list
         and type(videostream_sample[0]) == Segment
     )
-    assert (
-        type(youtube_sample) == list
-        and type(youtube_sample[0]) == Segment
-    )
-
+    assert type(youtube_sample) == list and type(youtube_sample[0]) == Segment

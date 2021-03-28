@@ -244,7 +244,7 @@ def scene_segmentor(
     threshold: float = 0.3,
     fps: int = 30,
 ) -> list:
-    """Extracts video segments from VideoStream or YouTubeVideo by
+    """Returns list of video Segments from VideoStream or YouTubeVideo by
     thresholding sum-of-absolute differences.
     https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/f_select.c
     Parameters
@@ -254,11 +254,11 @@ def scene_segmentor(
     threshold: float, default 0.3
       Scene detection score, values in [0, 1]
     fps: int, default 30
-      Frames per second of video asset
+      Video frame rate in hertz
     Return
     ------
     List
-      Return a list of Segments from video.
+      Returns a list of Segments between detected scene changes.
     """
     try:
         import ffmpeg

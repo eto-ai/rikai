@@ -229,7 +229,7 @@ def test_video_segmentor(
     into list of Segments.
     """
     video = VideoStream(str(asset_path / "big_buck_bunny_short.mp4"))
-    df1 = spark.createDataFrame([(video)], ["video"])
+    df1 = spark.createDataFrame([(video,)], ["video"])
     output_dir = tmp_path / "videostream_test"
     output_dir.mkdir(parents=True)
     df1 = df1.withColumn(
@@ -237,10 +237,8 @@ def test_video_segmentor(
         video_segmentor(col("video")),
     )
 
-    df2 = spark.createDataFrame(
-        [(YouTubeVideo(vid="rUWxSEwctFU"))],
-        ["video"],
-    )
+    yt = YouTubeVideo(vid="rUWxSEwctFU")
+    df2 = spark.createDataFrame([(yt,)], ["video"])
     output_dir = tmp_path / "youtube_test"
     output_dir.mkdir(parents=True)
     df2 = df2.withColumn(

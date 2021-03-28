@@ -1,10 +1,8 @@
 # Generated from src/main/antlr4/org/apache/spark/sql/ml/parser/RikaiModelSchema.g4 by ANTLR 4.9.1
 # encoding: utf-8
-import sys
-from io import StringIO
-
 from antlr4 import *
-
+from io import StringIO
+import sys
 if sys.version_info[1] > 5:
 	from typing import TextIO
 else:

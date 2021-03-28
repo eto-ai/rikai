@@ -17,7 +17,7 @@ import os
 import threading
 import uuid
 import warnings
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import as_completed, ThreadPoolExecutor
 from pathlib import Path
 from queue import Empty, Queue
 from typing import Callable, Dict, Generator, List, Optional, Union
@@ -29,7 +29,7 @@ from torch.utils.data import IterableDataset
 
 # Rikai
 import rikai.parquet
-from rikai.torch.transforms import RikaiToTensor, convert_tensor
+from rikai.torch.transforms import convert_tensor, RikaiToTensor
 
 __all__ = ["DataLoader", "Dataset"]
 

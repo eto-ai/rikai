@@ -34,9 +34,8 @@ automatically converted into the appropriate format, i.e.,
 # Third Party
 import numpy as np
 
-from rikai.mixin import ToNumpy
-
 # Rikai
+from rikai.mixin import ToNumpy
 from rikai.spark.types import NDArrayType
 
 __all__ = ["wrap", "array", "empty"]

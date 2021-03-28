@@ -13,10 +13,10 @@
 #  limitations under the License.
 
 import secrets
-from typing import IO, Any, Callable, Dict, Mapping, Optional, Union
+from typing import Any, Callable, Dict, IO, Mapping, Optional, Union
 
 import yaml
-from jsonschema import ValidationError, validate
+from jsonschema import validate, ValidationError
 from pyspark.sql import SparkSession
 
 from rikai.internal.reflection import find_class

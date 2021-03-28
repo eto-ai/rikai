@@ -14,7 +14,7 @@
 
 from pathlib import Path
 
-from pyspark.sql import Row, SparkSession, DataFrame
+from pyspark.sql import DataFrame, Row, SparkSession
 
 from rikai.spark.utils import df_to_rikai
 from rikai.testing.asserters import assert_count_equal

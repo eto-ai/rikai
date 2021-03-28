@@ -34,10 +34,10 @@ automatically converted into the appropriate format, i.e.,
 # Third Party
 import numpy as np
 
-# Rikai
-from rikai.spark.types import NDArrayType
 from rikai.mixin import ToNumpy
 
+# Rikai
+from rikai.spark.types import NDArrayType
 
 __all__ = ["wrap", "array", "empty"]
 

@@ -16,8 +16,8 @@ from pathlib import Path
 
 # Third Party
 import pytest
-from torch.utils.data import DataLoader  # Prevent DataLoader hangs
 from pyspark.sql import SparkSession
+from torch.utils.data import DataLoader  # Prevent DataLoader hangs
 
 from rikai.spark.sql import init
 

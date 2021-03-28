@@ -19,5 +19,5 @@
 
 # __all__ is defined in these
 from rikai.types.geometry import *
-from rikai.types.vision import *
 from rikai.types.video import *
+from rikai.types.vision import *

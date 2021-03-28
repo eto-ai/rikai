@@ -14,12 +14,13 @@
 
 from pathlib import Path
 
-from pyspark.sql import Row, SparkSession, DataFrame
+from pyspark.sql import DataFrame, Row, SparkSession
 from pyspark.sql.functions import col
 
-# Rikai
-from rikai.types import Box3d, Box2d, Point, YouTubeVideo, VideoStream, Segment
 from rikai.testing.asserters import assert_count_equal
+
+# Rikai
+from rikai.types import Box2d, Box3d, Point, Segment, VideoStream, YouTubeVideo
 
 
 def _check_roundtrip(spark: SparkSession, df: DataFrame, tmp_path: Path):

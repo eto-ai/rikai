@@ -17,8 +17,8 @@
 
 from __future__ import annotations
 
-from typing import List, Sequence, Tuple, Union
 from numbers import Real
+from typing import List, Sequence, Tuple, Union
 
 import numpy as np
 

@@ -21,20 +21,20 @@ import numpy as np
 import pandas as pd
 import pandas.testing as pdt
 from pyspark.sql import Row, SparkSession
-from pyspark.sql.functions import col, lit, concat
+from pyspark.sql.functions import col, concat, lit
 
 # Rikai
 from rikai.numpy import wrap
 from rikai.spark.functions import (
     area,
-    box2d_from_center,
     box2d,
+    box2d_from_center,
     image_copy,
     numpy_to_image,
-    video_to_images,
     spectrogram_image,
+    video_to_images,
 )
-from rikai.types import Box2d, Image, VideoStream, YouTubeVideo, Segment
+from rikai.types import Box2d, Image, Segment, VideoStream, YouTubeVideo
 
 
 def assert_area_equals(array, df):

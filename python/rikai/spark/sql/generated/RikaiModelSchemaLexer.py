@@ -1,9 +1,9 @@
 # Generated from src/main/antlr4/org/apache/spark/sql/ml/parser/RikaiModelSchema.g4 by ANTLR 4.9.1
-from antlr4 import *
+import sys
 from io import StringIO
 from typing.io import TextIO
-import sys
 
+from antlr4 import *
 
 
 def serializedATN():

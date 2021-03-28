@@ -46,6 +46,7 @@ __all__ = [
     "numpy_to_image",
     "video_to_images",
     "spectrogram_image",
+    "video_segmentor",
 ]
 
 

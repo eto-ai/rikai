@@ -222,7 +222,7 @@ def test_spectrogram_image(
     # TODO include an actual expected answer
 
 
-def test_video_framerate(spark: SparkSession):
+def test_video_framerate(spark: SparkSession, asset_path: Path):
     """Test to calculate frames per second for
     YouTubeVideo/VideoStream video types."""
     video = VideoStream(str(asset_path / "big_buck_bunny_short.mp4"))

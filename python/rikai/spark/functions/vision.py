@@ -208,7 +208,7 @@ def video_framerate(
         int, ffmpeg.probe(video_uri)["streams"][0]["avg_frame_rate"].split("/")
     )
     if d:
-        return np.round(n / d).astype(int)
+        return int(np.round(n / d))
     return -1
 
 

@@ -21,8 +21,22 @@ from typing import Union
 
 # Third Party
 import numpy as np
-from pyspark.sql.functions import udf
-from pyspark.sql.types import ArrayType
+from pyspark.sql.functions import (
+    udf,
+    col,
+    collect_list,
+    lag,
+    struct,
+    row_number,
+)
+from pyspark.sql.types import (
+    ArrayType,
+    IntegerType,
+    MapType,
+    StructField,
+    StringType,
+    StructType,
+)
 
 # Rikai
 from rikai.io import copy as _copy
@@ -234,3 +248,146 @@ def spectrogram_image(
     return Image.from_array(
         np.frombuffer(output, np.uint8).reshape([size, size, 3]), output_uri
     )
+
+
+@udf(returnType=MapType(IntegerType(), IntegerType()))
+def tracker_match(trackers, detections, bbox_col="detections", threshold=0.3):
+    """
+    Match Bounding Boxes across successive image frames.
+    """
+    from scipy.optimize import linear_sum_assignment
+
+    similarity = lambda a, b: a.iou(b)
+    if not trackers or not detections:
+        return {}
+    if len(trackers) == len(detections) == 1:
+        if (
+            similarity(trackers[0][bbox_col], detections[0][bbox_col])
+            >= threshold
+        ):
+            return {0: 0}
+
+    sim_mat = np.array(
+        [
+            [
+                similarity(tracked[bbox_col], detection[bbox_col])
+                for tracked in trackers
+            ]
+            for detection in detections
+        ],
+        dtype=np.float32,
+    )
+
+    matched_idx = linear_sum_assignment(-sim_mat)
+    matches = []
+    for m in matched_idx:
+        try:
+            if sim_mat[m[0], m[1]] >= threshold:
+                matches.append(m.reshape(1, 2))
+        except:
+            pass
+
+    if len(matches) == 0:
+        matches = np.empty((0, 2), dtype=int)
+    else:
+        matches = np.concatenate(matches, axis=0, dtype=int)
+
+    rows, cols = zip(*np.where(matches))
+    idx_map = {cols[idx]: rows[idx] for idx in range(len(rows))}
+    return idx_map
+
+
+def match_annotations(iterator, video_col="video", id_col="detect_id"):
+    """
+    Used by mapPartitions to iterate over the small chunks of our hierarchically-organized data.
+    """
+
+    def id_gen(N=5):
+        import string, random
+
+        return "".join(
+            random.choice(string.ascii_uppercase + string.digits)
+            for x in range(N)
+        )
+
+    matched_annots = []
+    for idx, data in enumerate(iterator):
+        data = data[1]
+        if not idx:
+            old_row = {idx: id_gen() for idx in range(len(data[1]))}
+            old_row[video_col] = data[0]
+            pass
+        annots = []
+        curr_row = {video_col: data[0]}
+        if old_row[video_col] != curr_row[video_col]:
+            old_row = {}
+        if data[2] is not None:
+            for ky, vl in data[2].items():
+                detection = data[1][vl].asDict()
+                detection[id_col] = old_row.get(ky, id_gen())
+                curr_row[vl] = detection[id_col]
+                annots.append(Row(**detection))
+        matched_annots.append(annots)
+        old_row = curr_row
+    return matched_annots
+
+
+def track_detections(
+    df,
+    vid="vid",
+    video_col="video",
+    img_col="frame",
+    bbox_col="detections",
+    id_col="detect_id",
+):
+    dd = df.select(vid, img_col, bbox_col, id_col)
+    df = (
+        df.withColumn("annot", F.struct([F.col(bbox_col), F.col(id_col)]))
+        .groupBy(vid, video_col)
+        .agg(F.collect_list("annot").alias("annots"))
+    )
+    df = (
+        df.join(dd, on=[vid], how="inner")
+        .withColumn("annot", struct([col(bbox_col), col(id_col)]))
+        .groupBy(vid, video_col, img_col)
+        .agg(collect_list("annot").alias("annots"))
+    )
+    annot_window = Window.partitionBy().orderBy(vid, img_col)
+    df = df.withColumn("prev_annots", lag(df.annots).over(annot_window))
+    df = df.withColumn(
+        "matched", tracker_match(col("annots"), col("prev_annots"))
+    )
+
+    indexer = StringIndexer(inputCol=vid, outputCol="vidIndex")
+    df = indexer.fit(df).transform(df)
+
+    frame_window = Window().orderBy(img_col)
+    value_window = Window().orderBy("value")
+
+    df_rdd = (
+        df.select("vidIndex", video_col, "annots", "matched")
+        .withColumn("vidIndex", col("vidIndex").cast(StringType()))
+        .rdd.map(lambda x: (x[0], x[1:]))
+    )
+    matched = df_rdd.partitionBy(1, lambda k: int(k[0])).mapPartitions(
+        match_annotations
+    )
+
+    annot_schema = ArrayType(
+        StructType(
+            [
+                StructField(bbox_col, Box2dType(), False),
+                StructField(id_col, StringType(), False),
+            ]
+        )
+    )
+    matched_annotations = spark.createDataFrame(
+        matched, annot_schema
+    ).withColumn("idx1", row_number().over(value_window))
+    df = df.withColumn("idx2", row_number().over(frame_window))
+    df = (
+        df.join(matched_annotations, col("idx1") == col("idx2"))
+        .drop("prev_annots", "matched", "idx1", "idx2")
+        .withColumnRenamed("value", "matched")
+    )
+    return df.select(vid, video_col, img_col, "matched")

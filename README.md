@@ -95,7 +95,7 @@ CREATE MODEL yolo5
 OPTIONS (min_confidence=0.3, device="gpu", batch_size=32)
 USING "s3://bucket/to/yolo5_spec.yaml";
 
-SELECT id, ML_PREDICT(resnet, image) FROM my_dataset
+SELECT id, ML_PREDICT(yolo5, image) FROM my_dataset
 WHERE split = "train" LIMIT 100;
 ```
 

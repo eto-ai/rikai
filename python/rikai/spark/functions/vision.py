@@ -43,7 +43,7 @@ __all__ = [
     "image_copy",
     "numpy_to_image",
     "video_to_images",
-    "video_framerate",
+    "framerate",
     "spectrogram_image",
 ]
 
@@ -172,7 +172,7 @@ def video_to_images(
 
 
 @udf(returnType=IntegerType())
-def video_framerate(
+def framerate(
     video: Union[VideoStream, YouTubeVideo],
 ) -> int:
     """Extract video frame rate.

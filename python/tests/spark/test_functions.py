@@ -33,7 +33,7 @@ from rikai.spark.functions import (
     numpy_to_image,
     video_to_images,
     spectrogram_image,
-    video_framerate,
+    framerate,
 )
 from rikai.types import Box2d, Image, VideoStream, YouTubeVideo, Segment
 
@@ -222,7 +222,7 @@ def test_spectrogram_image(
     # TODO include an actual expected answer
 
 
-def test_video_framerate(spark: SparkSession, asset_path: Path):
+def test_framerate(spark: SparkSession, asset_path: Path):
     """Test to calculate frames per second for
     YouTubeVideo/VideoStream video types."""
     video = VideoStream(str(asset_path / "big_buck_bunny_short.mp4"))
@@ -230,7 +230,7 @@ def test_video_framerate(spark: SparkSession, asset_path: Path):
         spark.createDataFrame([(video,)], ["video"])
         .withColumn(
             "fps",
-            video_framerate(col("video")),
+            framerate(col("video")),
         )
         .first()["fps"]
     )
@@ -241,7 +241,7 @@ def test_video_framerate(spark: SparkSession, asset_path: Path):
         spark.createDataFrame([(yt,)], ["video"])
         .withColumn(
             "fps",
-            video_framerate(col("video")),
+            framerate(col("video")),
         )
         .first()["fps"]
     )

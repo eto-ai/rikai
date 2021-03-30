@@ -21,13 +21,14 @@ from pyspark.sql import SparkSession
 
 # Rikai
 from rikai.spark.sql import init
-
+from rikai.spark.utils import get_default_jar_version
 
 @pytest.fixture(scope="session")
 def spark(tmp_path_factory) -> SparkSession:
+    version = get_default_jar_version(use_snapshot=True)
     session = (
         SparkSession.builder.appName("spark-test")
-        .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.4-SNAPSHOT")
+        .config("spark.jars.packages", "ai.eto:rikai_2.12:{}".format(version))
         .config(
             "spark.sql.extensions",
             "ai.eto.rikai.sql.spark.RikaiSparkSessionExtensions",

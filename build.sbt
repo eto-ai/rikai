@@ -1,27 +1,51 @@
-import ReleaseTransformations._
-
 scalaVersion := "2.12.11"
-
 name := "rikai"
 
-organization := "ai.eto"
-homepage := Some(url("https://github.com/eto-ai/rikai"))
+def versionFmt(out: sbtdynver.GitDescribeOutput): String = {
+  val parts = out.ref.dropPrefix.split('.').toList
+  val major :: minor :: patch :: rest = parts
+  val nextPatchInt = patch.toInt + 1
+  if (out.isSnapshot)
+    s"$major.$minor.$nextPatchInt-SNAPSHOT"
+  else
+    out.ref.dropPrefix
+}
+
+def fallbackVersion(d: java.util.Date): String =
+  s"HEAD-${sbtdynver.DynVer timestamp d}"
+
+inThisBuild(
+  List(
+    organization := "ai.eto",
+    homepage := Some(url("https://github.com/eto-ai/rikai")),
+    licenses := List(
+      "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")
+    ),
+    developers := List(
+      Developer(
+        "rikai-dev",
+        "Rikai Developers",
+        "rikai-dev@eto.ai",
+        url("https://github.com/eto-ai/rikai")
+      )
+    ),
+    version := dynverGitDescribeOutput.value
+      .mkVersion(versionFmt, fallbackVersion(dynverCurrentDate.value)),
+    dynver := {
+      val d = new java.util.Date
+      sbtdynver.DynVer
+        .getGitDescribeOutput(d)
+        .mkVersion(versionFmt, fallbackVersion(d))
+    }
+  )
+)
+
 scmInfo := Some(
   ScmInfo(
     url("https://github.com/eto-ai/rikai"),
     "git@github.com:eto-ai/rikai.git"
   )
 )
-licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
-developers := List(
-  Developer(
-    "rikai",
-    "developers",
-    "rikai-dev@eto.ai",
-    url("https://github.com/eto-ai/rikai")
-  )
-)
-publishMavenStyle := true
 
 libraryDependencies ++= {
   val sparkVersion = "3.1.1"
@@ -60,24 +84,6 @@ scalacOptions ++= Seq(
 )
 
 Test / parallelExecution := false
-
-publishTo := sonatypePublishToBundle.value
-
-releasePublishArtifactsAction := PgpKeys.publishSigned.value
-releaseProcess := Seq[ReleaseStep](
-  checkSnapshotDependencies,
-  inquireVersions,
-  runClean,
-  runTest,
-  setReleaseVersion,
-  commitReleaseVersion,
-  tagRelease,
-  releaseStepCommandAndRemaining("publishSigned"),
-  releaseStepCommand("sonatypeBundleRelease"),
-  setNextVersion,
-  commitNextVersion,
-  pushChanges
-)
 
 antlr4PackageName in Antlr4 := Some("ai.eto.rikai.sql.spark.parser")
 antlr4GenVisitor in Antlr4 := true

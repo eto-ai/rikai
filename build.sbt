@@ -1,6 +1,16 @@
 scalaVersion := "2.12.11"
 name := "rikai"
 
+def versionFmt(out: sbtdynver.GitDescribeOutput): String = {
+  if (out.isSnapshot)
+    out.ref.dropPrefix + "-SNAPSHOT"
+  else
+    out.ref.dropPrefix
+}
+
+def fallbackVersion(d: java.util.Date): String =
+  s"HEAD-${sbtdynver.DynVer timestamp d}"
+
 inThisBuild(
   List(
     organization := "ai.eto",
@@ -15,7 +25,15 @@ inThisBuild(
         "rikai-dev@eto.ai",
         url("https://github.com/eto-ai/rikai")
       )
-    )
+    ),
+    version := dynverGitDescribeOutput.value
+      .mkVersion(versionFmt, fallbackVersion(dynverCurrentDate.value)),
+    dynver := {
+      val d = new java.util.Date
+      sbtdynver.DynVer
+        .getGitDescribeOutput(d)
+        .mkVersion(versionFmt, fallbackVersion(d))
+    }
   )
 )
 

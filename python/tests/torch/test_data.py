@@ -119,6 +119,7 @@ def test_coco_dataset(
 
 
 # @pytest.mark.parametrize("num_workers", [0, 2, 4])
+@pytest.mark.timeout(30)
 @pytest.mark.parametrize("num_workers", [0])  # Still hangs
 def test_torch_dataset(spark, tmp_path, num_workers):
     total = 1000

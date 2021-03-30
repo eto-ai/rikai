@@ -39,10 +39,10 @@ fix:
 
 # increment to the next released version and add a release tag
 release:
-  cd python && bumpversion release --tag
+	cd python && bumpversion release --tag
 .PHONY: release
 
 # from a release build go to the next patch
 patch:
-  cd python && bumpversion patch
+	cd python && bumpversion patch
 .PHONY: patch

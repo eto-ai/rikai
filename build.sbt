@@ -2,8 +2,11 @@ scalaVersion := "2.12.11"
 name := "rikai"
 
 def versionFmt(out: sbtdynver.GitDescribeOutput): String = {
+  val parts = out.ref.dropPrefix.split('.').toList
+  val major :: minor :: patch :: rest = parts
+  val nextPatchInt = patch.toInt + 1
   if (out.isSnapshot)
-    out.ref.dropPrefix + "-SNAPSHOT"
+    s"$major.$minor.$nextPatchInt-SNAPSHOT"
   else
     out.ref.dropPrefix
 }

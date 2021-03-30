@@ -13,14 +13,14 @@ with open(
     long_description = fh.read()
 
 # extras
-test = ["pytest"]
+dev = ["pytest", "bump2version"]
 torch = ["torch>=1.4.0", "torchvision"]
 jupyter = ["matplotlib", "jupyterlab"]
 aws = ["boto"]
 gcp = ["gcsfs"]
 docs = ["sphinx"]
 youtube = ["pafy", "youtube_dl", "ffmpeg-python"]
-all = test + torch + jupyter + aws + gcp + docs + youtube
+all = dev + torch + jupyter + aws + gcp + docs + youtube
 
 
 setup(
@@ -50,7 +50,7 @@ setup(
         "semver",
     ],
     extras_require={
-        "test": test,
+        "dev": dev,
         "pytorch": torch,
         "jupyter": jupyter,
         "aws": aws,

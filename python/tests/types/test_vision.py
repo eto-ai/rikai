@@ -44,6 +44,7 @@ def test_show_embedded_jpeg(tmp_path):
         assert result == expected
 
 
+@pytest.mark.timeout(30)
 @pytest.mark.webtest
 def test_show_remote_ref():
     from IPython.display import Image as IPyImage

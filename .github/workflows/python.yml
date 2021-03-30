@@ -41,7 +41,7 @@ jobs:
     - name: Run python tests
       working-directory: python
       run: |
-        pytest -v --duration=10 --ignore=tests/parquet/internal
+        pytest -v --durations=10 --ignore=tests/parquet/internal
   mac-build:
     runs-on: macos-latest
     timeout-minutes: 10

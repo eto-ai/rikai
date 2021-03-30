@@ -13,14 +13,15 @@ with open(
     long_description = fh.read()
 
 # extras
-dev = ["pytest", "bump2version"]
+dev = ["black", "bump2version", "flake8", "isort", "pylint", "pytest",
+       "pytest-timeout", "wheel"]
 torch = ["torch>=1.4.0", "torchvision"]
 jupyter = ["matplotlib", "jupyterlab"]
 aws = ["boto"]
 gcp = ["gcsfs"]
 docs = ["sphinx"]
 youtube = ["pafy", "youtube_dl", "ffmpeg-python"]
-all = dev + torch + jupyter + aws + gcp + docs + youtube
+all = torch + jupyter + aws + gcp + docs + youtube
 
 
 setup(

@@ -23,6 +23,7 @@ from pyspark.sql import SparkSession
 from rikai.spark.sql import init
 from rikai.spark.utils import get_default_jar_version
 
+
 @pytest.fixture(scope="session")
 def spark(tmp_path_factory) -> SparkSession:
     version = get_default_jar_version(use_snapshot=True)

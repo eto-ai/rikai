@@ -13,8 +13,16 @@ with open(
     long_description = fh.read()
 
 # extras
-dev = ["black", "bump2version", "flake8", "isort", "pylint", "pytest",
-       "pytest-timeout", "wheel"]
+dev = [
+    "black",
+    "bump2version",
+    "flake8",
+    "isort",
+    "pylint",
+    "pytest",
+    "pytest-timeout",
+    "wheel",
+]
 torch = ["torch>=1.4.0", "torchvision"]
 jupyter = ["matplotlib", "jupyterlab"]
 aws = ["boto"]

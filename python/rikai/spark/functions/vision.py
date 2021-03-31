@@ -251,7 +251,7 @@ def spectrogram_image(
 
 
 @udf(returnType=MapType(IntegerType(), IntegerType()))
-def tracker_match(trackers, detections, bbox_col="detections", threshold=0.3):
+def tracker_match(trackers, detections, bbox_col="bbox", threshold=0.3):
     """
     Match Bounding Boxes across successive image frames.
     """

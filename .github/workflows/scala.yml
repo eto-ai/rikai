@@ -12,6 +12,8 @@ jobs:
     timeout-minutes: 15
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
       # with:
       #   lfs: true
     # - name: Checkout LFS objects

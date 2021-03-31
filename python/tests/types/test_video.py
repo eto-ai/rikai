@@ -14,9 +14,12 @@
 
 import numpy as np
 import pytest
-from rikai.types import YouTubeVideo, VideoStream, SingleFrameSampler
+
+from rikai.types import SingleFrameSampler, VideoStream, YouTubeVideo
 
 
+@pytest.mark.timeout(30)
+@pytest.mark.webtest
 def test_youtube():
     from IPython.display import YouTubeVideo as IYT
 
@@ -28,6 +31,7 @@ def test_youtube():
     assert YouTubeVideo(vid) != YouTubeVideo("othervid")
 
 
+@pytest.mark.timeout(30)
 @pytest.mark.webtest
 def test_youtube_sample_stream():
     vid = "pD1gDSao1eA"
@@ -37,6 +41,7 @@ def test_youtube_sample_stream():
     isinstance(next(v.__iter__()), np.ndarray)
 
 
+@pytest.mark.timeout(30)
 @pytest.mark.webtest
 def test_youtube_show():
     vid = "pD1gDSao1eA"
@@ -50,6 +55,7 @@ def test_youtube_show():
     assert result == expected
 
 
+@pytest.mark.timeout(30)
 @pytest.mark.webtest
 def test_video_show():
     vid = "pD1gDSao1eA"

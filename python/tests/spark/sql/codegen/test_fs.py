@@ -14,6 +14,7 @@
 
 import tempfile
 from pathlib import Path
+import uuid
 
 import pytest
 import torch
@@ -33,37 +34,36 @@ from rikai.spark.sql.schema import parse_schema
 
 
 @pytest.fixture(scope="module")
-def resnet_spec():
+def resnet_spec(tmp_path_factory):
     # Can not use default pytest fixture `tmp_dir` or `tmp_path` because
     # they do not work with module scoped fixture.
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        tmp_path = Path(tmp_dir)
-        # Prepare model
-        resnet = torchvision.models.detection.fasterrcnn_resnet50_fpn(
-            pretrained=True,
-            progress=False,
-        )
-        model_uri = tmp_path / "resnet.pth"
-        torch.save(resnet, model_uri)
+    tmp_path = tmp_path_factory.mktemp(str(uuid.uuid4()))
+    # Prepare model
+    resnet = torchvision.models.detection.fasterrcnn_resnet50_fpn(
+        pretrained=True,
+        progress=False,
+    )
+    model_uri = tmp_path / "resnet.pth"
+    torch.save(resnet, model_uri)
 
-        spec_yaml = """
+    spec_yaml = """
 version: 1.0
 name: resnet
 model:
-    uri: {}
-    flavor: pytorch
+  uri: {}
+  flavor: pytorch
 schema: struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>
 transforms:
-    pre: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing
-    post: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing
-        """.format(  # noqa: E501
-            model_uri
-        )
+  pre: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing
+  post: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing
+    """.format(  # noqa: E501
+        model_uri
+    )
 
-        spec_file = tmp_path / "spec.yaml"
-        with spec_file.open("w") as fobj:
-            fobj.write(spec_yaml)
-        yield spec_file
+    spec_file = tmp_path / "spec.yaml"
+    with spec_file.open("w") as fobj:
+        fobj.write(spec_yaml)
+    yield spec_file
 
 
 def test_validate_yaml_spec():
@@ -117,6 +117,8 @@ def test_validate_misformed_spec():
         )
 
 
+@pytest.mark.skip(reason="disable flaky test GH#50")
+@pytest.mark.timeout(60)
 def test_yaml_model(spark: SparkSession, resnet_spec: str):
     spark.sql("CREATE MODEL resnet_m USING 'file://{}'".format(resnet_spec))
 

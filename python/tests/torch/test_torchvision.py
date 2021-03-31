@@ -19,7 +19,7 @@ from typing import Union
 
 import numpy as np
 import torch
-from pyspark.sql import Row, SparkSession, DataFrame
+from pyspark.sql import DataFrame, Row, SparkSession
 from torchvision import transforms
 
 from rikai.torch.vision import Dataset

@@ -19,9 +19,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import Union
 from urllib.parse import urlparse
-from tempfile import NamedTemporaryFile
 
 # Third-party libraries
 import numpy as np
@@ -29,9 +29,9 @@ from PIL import Image as PILImage
 
 # Rikai
 from rikai.internal.uri_utils import normalize_uri
+from rikai.io import copy
 from rikai.mixin import Asset, Displayable, ToNumpy, ToPIL
 from rikai.spark.types import ImageType
-from rikai.io import copy
 
 __all__ = ["Image"]
 

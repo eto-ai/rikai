@@ -15,7 +15,4 @@
 """Pytorch support"""
 
 
-from rikai.torch.data import (
-    Dataset,
-    DataLoader,
-)  # noqa: F401
+from rikai.torch.data import DataLoader, Dataset  # noqa: F401

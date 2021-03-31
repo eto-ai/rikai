@@ -14,10 +14,11 @@
 
 """Video related types and utils"""
 from abc import ABC, abstractmethod
+
 import cv2
 
 from rikai.mixin import Displayable
-from rikai.spark.types import YouTubeVideoType, VideoStreamType, SegmentType
+from rikai.spark.types import SegmentType, VideoStreamType, YouTubeVideoType
 
 __all__ = [
     "YouTubeVideo",

@@ -12,8 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from py4j.java_gateway import CallbackServerParameters
 from py4j.java_collections import JavaMap
+from py4j.java_gateway import CallbackServerParameters
 from pyspark.sql import SparkSession
 
 from rikai.logging import logger

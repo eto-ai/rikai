@@ -72,10 +72,10 @@ transform = T.Compose([
    T.ToTensor(),
    T.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
 ])
-    
+
 dataset = Dataset(
-   "s3://path/to/features", 
-   columns=["image"], 
+   "s3://path/to/features",
+   columns=["image"],
    transform=transform
 )
 loader = DataLoader(
@@ -95,7 +95,7 @@ CREATE MODEL yolo5
 OPTIONS (min_confidence=0.3, device="gpu", batch_size=32)
 USING "s3://bucket/to/yolo5_spec.yaml";
 
-SELECT id, ML_PREDICT(resnet, image) FROM my_dataset
+SELECT id, ML_PREDICT(yolo5, image) FROM my_dataset
 WHERE split = "train" LIMIT 100;
 ```
 
@@ -108,7 +108,7 @@ There are multiple ways to install Rikai:
 
 1. Try it using the included [Dockerfile](#Docker).
 2. OR install it via pip `pip install rikai`, with
-   [extras for aws/gc, pytorch/tf, and others](#Extras).
+   [extras for gcp, pytorch/tf, and others](#Extras).
 3. OR install it from [source](#Source)
 
 Note: if you want to use Rikai with your own pyspark, please consult rikai documentation for tips.
@@ -135,14 +135,14 @@ open a browser tab and go to `localhost:8888`.
 ### <a name="Extras"></a>Install from pypi
 
 Base rikai library can be installed with just `pip install rikai`. Dependencies for supporting
-pytorch (pytorch and torchvision), aws (boto), jupyter (matplotlib and jupyterlab) are all part of
+pytorch (pytorch and torchvision), jupyter (matplotlib and jupyterlab) are all part of
 optional extras. Many open-source datasets also use Youtube videos so we've also added pafy and
 youtube-dl as optional extras as well.
 
 For example, if you want to use pytorch in Jupyter to train models on rikai datasets in s3
 containing Youtube videos you would run:
 
-`pip install rikai[pytorch,aws,jupyter,youtube]`
+`pip install rikai[pytorch,jupyter,youtube]`
 
 If you're not sure what you need and don't mind installing some extra dependencies, you can
 simply install everything:

@@ -42,7 +42,7 @@ except ImportError as exc:
     raise ImportError("Please install pycocotools") from exc
 
 from rikai.spark.functions import image_copy
-from rikai.spark.types import ImageType, Box2dType
+from rikai.spark.types import Box2dType, ImageType
 from rikai.types import Box2d, Image
 
 __all__ = ["convert"]

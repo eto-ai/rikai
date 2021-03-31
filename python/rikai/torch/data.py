@@ -15,12 +15,12 @@
 """Pytorch Dataset and DataLoader"""
 import os
 import threading
+import uuid
 import warnings
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import as_completed, ThreadPoolExecutor
 from pathlib import Path
 from queue import Empty, Queue
 from typing import Callable, Dict, Generator, List, Optional, Union
-import uuid
 
 # Third Party
 import semver
@@ -29,7 +29,7 @@ from torch.utils.data import IterableDataset
 
 # Rikai
 import rikai.parquet
-from rikai.torch.transforms import RikaiToTensor, convert_tensor
+from rikai.torch.transforms import convert_tensor, RikaiToTensor
 
 __all__ = ["DataLoader", "Dataset"]
 
@@ -43,8 +43,8 @@ class Dataset(IterableDataset):
 
     Parameters
     ----------
-    uri_or_df : str, Path, pyspark.sql.DataFrame
-        URI to the dataset
+    data_ref : str, Path, pyspark.sql.DataFrame
+        URI to the data files or the dataframe
     columns : list of str, optional
         An optional list of column to load from parquet files.
     transform: Callable, default instance of RikaiToTensor
@@ -75,17 +75,17 @@ class Dataset(IterableDataset):
 
     def __init__(
         self,
-        uri_or_df: Union[str, Path, "pyspark.sql.DataFrame"],
+        data_ref: Union[str, Path, "pyspark.sql.DataFrame"],
         columns: List[str] = None,
         transform: Callable = RikaiToTensor(),
     ):
         super().__init__()
-        self.uri_or_df = uri_or_df
+        self.data_ref = data_ref
         self.columns = columns
         self._transform = transform
 
     def __repr__(self) -> str:
-        return f"Dataset(torch, {self.uri_or_df}, columns={self.columns})"
+        return f"Dataset(torch, {self.data_ref}, columns={self.columns})"
 
     def __iter__(self):
         rank = 0
@@ -96,7 +96,7 @@ class Dataset(IterableDataset):
             rank = worker_info.id
             world_size = worker_info.num_workers
 
-        uri = _maybe_cache_df(self.uri_or_df)
+        uri = _maybe_cache_df(self.data_ref)
         for row in rikai.parquet.Dataset(
             uri,
             columns=self.columns,
@@ -111,7 +111,7 @@ class DataLoader:
 
     Parameters
     ----------
-    dataset : str
+    data_ref : str
         The URI of a Rikai Dataset
     columns : list of str, optional
         An optional list of column to load from parquet files.
@@ -170,7 +170,7 @@ class DataLoader:
 
     def __init__(
         self,
-        dataset: Union[str, Path, "pyspark.sql.DataFrame"],
+        data_ref: Union[str, Path, "pyspark.sql.DataFrame"],
         columns: List[str] = None,
         batch_size: int = 1,
         shuffle: bool = False,
@@ -180,12 +180,12 @@ class DataLoader:
         world_size: int = 1,
         rank: int = 0,
     ):  # pylint: disable=too-many-arguments
-        assert isinstance(dataset, (str, Path)) or (
+        assert isinstance(data_ref, (str, Path)) or (
             rank == 0 and world_size == 1
         ), "Only str/Path references are supported in distributed mode"
-        dataset = _maybe_cache_df(dataset)
+        data_ref = _maybe_cache_df(data_ref)
         self.dataset = rikai.parquet.Dataset(
-            dataset,
+            data_ref,
             columns=columns,
             shuffle=shuffle,
             seed=seed,
@@ -283,7 +283,7 @@ class DataLoader:
 
 
 def _maybe_cache_df(
-    dataset_ref: Union[str, Path, "pyspark.sql.DataFrame"]
+    data_ref: Union[str, Path, "pyspark.sql.DataFrame"]
 ) -> str:
     """
     If the given dataset_ref is a str/Path, then just return a str ref.
@@ -292,7 +292,7 @@ def _maybe_cache_df(
 
     Parameters
     ----------
-    dataset_ref: str, Path, or pyspark DataFrame
+    data_ref: str, Path, or pyspark DataFrame
         Either a uri to parquet or a DataFrame that will be cached as parquet
 
     Returns
@@ -300,8 +300,8 @@ def _maybe_cache_df(
     uri: str
         Either the input parquet uri or the cached uri for a DataFrame
     """
-    if isinstance(dataset_ref, (str, Path)):
-        return str(dataset_ref)
+    if isinstance(data_ref, (str, Path)):
+        return str(data_ref)
     else:
         try:
             from pyspark.sql import DataFrame
@@ -310,24 +310,24 @@ def _maybe_cache_df(
                 "Cannot create rikai pytorch dataset from "
                 "Spark DataFrame without pyspark installed."
             )
-        from rikai.spark.utils import df_to_rikai
+        from rikai.spark.utils import CONF_PARQUET_BLOCK_SIZE, df_to_rikai
 
-        if isinstance(dataset_ref, DataFrame):
+        if isinstance(data_ref, DataFrame):
             kwargs = {}
             # TODO also try to get it from rikai.options once #134 is done
-            block_size = dataset_ref.rdd.ctx.getConf().get(
-                "parquet.block.size", None
+            block_size = data_ref.rdd.ctx.getConf().get(
+                CONF_PARQUET_BLOCK_SIZE, None
             )
             if block_size is not None:
                 kwargs["parquet_row_group_size_bytes"] = block_size
-            cache_uri = _get_cache_uri(dataset_ref)
-            df_to_rikai(dataset_ref, cache_uri, **kwargs)
+            cache_uri = _get_cache_uri(data_ref)
+            df_to_rikai(data_ref, cache_uri, **kwargs)
         else:
             raise TypeError(
                 (
                     "dataset_ref must be a str, Path, or DataFrame and "
                     "not a {}."
-                ).format(type(dataset_ref))
+                ).format(type(data_ref))
             )
         return cache_uri
 
@@ -347,5 +347,7 @@ def _get_cache_uri(df: "pyspark.sql.DataFrame") -> str:
         The uri to write the DataFrame to
     """
     # TODO also try to get it from rikai.options once #134 is done
-    cache_root_uri = df.rdd.ctx.getConf().get("spark.rikai.cacheUri")
+    from rikai.spark.conf import CONF_SPARK_RIKAI_CACHEURI
+
+    cache_root_uri = df.rdd.ctx.getConf().get(CONF_SPARK_RIKAI_CACHEURI)
     return os.path.join(cache_root_uri, str(uuid.uuid4()))

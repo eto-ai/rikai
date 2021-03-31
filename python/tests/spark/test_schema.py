@@ -28,7 +28,7 @@ from pyspark.sql.types import (
     StructType,
 )
 
-from rikai.spark.sql.schema import SchemaError, parse_schema
+from rikai.spark.sql.schema import parse_schema, SchemaError
 
 
 def test_parse_schema():

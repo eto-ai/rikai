@@ -11,11 +11,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import pytest
-
 from binascii import b2a_base64
-from PIL import Image as PILImage
+
 import numpy as np
+import pytest
+from PIL import Image as PILImage
 
 from rikai.types.vision import Image
 
@@ -44,6 +44,7 @@ def test_show_embedded_jpeg(tmp_path):
         assert result == expected
 
 
+@pytest.mark.timeout(30)
 @pytest.mark.webtest
 def test_show_remote_ref():
     from IPython.display import Image as IPyImage

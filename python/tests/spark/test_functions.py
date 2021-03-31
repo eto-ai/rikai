@@ -21,20 +21,21 @@ import numpy as np
 import pandas as pd
 import pandas.testing as pdt
 from pyspark.sql import Row, SparkSession
-from pyspark.sql.functions import col, lit, concat
+from pyspark.sql.functions import col, concat, lit
+import pytest
 
 # Rikai
 from rikai.numpy import wrap
 from rikai.spark.functions import (
     area,
-    box2d_from_center,
     box2d,
+    box2d_from_center,
     image_copy,
     numpy_to_image,
-    video_to_images,
     spectrogram_image,
+    video_to_images,
 )
-from rikai.types import Box2d, Image, VideoStream, YouTubeVideo, Segment
+from rikai.types import Box2d, Image, Segment, VideoStream, YouTubeVideo
 
 
 def assert_area_equals(array, df):
@@ -135,6 +136,8 @@ def test_numpy_to_image(spark: SparkSession, tmp_path: Path):
     assert (tmp_path / "1.png").exists()
 
 
+@pytest.mark.timeout(10)
+@pytest.mark.webtest
 def test_video_to_images(
     spark: SparkSession, tmp_path: Path, asset_path: Path
 ):
@@ -192,6 +195,8 @@ def test_video_to_images(
     )
 
 
+@pytest.mark.timeout(10)
+@pytest.mark.webtest
 def test_spectrogram_image(
     spark: SparkSession, tmp_path: Path, asset_path: Path
 ):

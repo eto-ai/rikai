@@ -297,7 +297,7 @@ def tracker_match(trackers, detections, bbox_col="detections", threshold=0.3):
     return idx_map
 
 
-def match_annotations(iterator, video_col="video", id_col="detect_id"):
+def match_annotations(iterator, segment_id="vid", id_col="tracker_id"):
     """
     Used by mapPartitions to iterate over the small chunks of our hierarchically-organized data.
     """
@@ -315,11 +315,11 @@ def match_annotations(iterator, video_col="video", id_col="detect_id"):
         data = data[1]
         if not idx:
             old_row = {idx: id_gen() for idx in range(len(data[1]))}
-            old_row[video_col] = data[0]
+            old_row[segment_id] = data[0]
             pass
         annots = []
-        curr_row = {video_col: data[0]}
-        if old_row[video_col] != curr_row[video_col]:
+        curr_row = {segment_id: data[0]}
+        if old_row[segment_id] != curr_row[segment_id]:
             old_row = {}
         if data[2] is not None:
             for ky, vl in data[2].items():
@@ -334,38 +334,44 @@ def match_annotations(iterator, video_col="video", id_col="detect_id"):
 
 def track_detections(
     df,
-    vid="vid",
-    video_col="video",
-    img_col="frame",
-    bbox_col="detections",
-    id_col="detect_id",
+    segment_id="vid",
+    frames="frame",
+    detections="detections",
+    id_col="tracker_id",
 ):
-    dd = df.select(vid, img_col, bbox_col, id_col)
     df = (
-        df.withColumn("annot", F.struct([F.col(bbox_col), F.col(id_col)]))
-        .groupBy(vid, video_col)
-        .agg(F.collect_list("annot").alias("annots"))
+        df.withColumn(detections, F.explode(detections))
+        .select(segment_id, frames, detections)
+        .withColumn(id_col, F.lit(""))
+    )
+    dd = df
+    df = (
+        df.withColumn(
+            "trackables", F.struct([F.col(detections), F.col(id_col)])
+        )
+        .groupBy(segment_id)
+        .agg(F.collect_list("trackables").alias("trackables"))
     )
     df = (
-        df.join(dd, on=[vid], how="inner")
-        .withColumn("annot", struct([col(bbox_col), col(id_col)]))
-        .groupBy(vid, video_col, img_col)
-        .agg(collect_list("annot").alias("annots"))
+        df.join(dd, on=[segment_id], how="inner")
+        .withColumn("trackables", struct([col(detections), col(id_col)]))
+        .groupBy(segment_id, frames)
+        .agg(collect_list("trackables").alias("trackables"))
     )
-    annot_window = Window.partitionBy().orderBy(vid, img_col)
-    df = df.withColumn("prev_annots", lag(df.annots).over(annot_window))
+    annot_window = Window.partitionBy(segment_id).orderBy(segment_id, frames)
+    df = df.withColumn("old_trackables", lag(df.trackables).over(annot_window))
     df = df.withColumn(
-        "matched", tracker_match(col("annots"), col("prev_annots"))
+        "matched", tracker_match(col("trackables"), col("old_trackables"))
     )
 
-    indexer = StringIndexer(inputCol=vid, outputCol="vidIndex")
+    indexer = StringIndexer(inputCol=segment_id, outputCol="vidIndex")
     df = indexer.fit(df).transform(df)
 
-    frame_window = Window().orderBy(img_col)
+    frame_window = Window().orderBy(frames)
     value_window = Window().orderBy("value")
 
     df_rdd = (
-        df.select("vidIndex", video_col, "annots", "matched")
+        df.select("vidIndex", segment_id, "trackables", "matched")
         .withColumn("vidIndex", col("vidIndex").cast(StringType()))
         .rdd.map(lambda x: (x[0], x[1:]))
     )
@@ -376,7 +382,7 @@ def track_detections(
     annot_schema = ArrayType(
         StructType(
             [
-                StructField(bbox_col, Box2dType(), False),
+                StructField(detections, Box2dType(), False),
                 StructField(id_col, StringType(), False),
             ]
         )
@@ -387,7 +393,14 @@ def track_detections(
     df = df.withColumn("idx2", row_number().over(frame_window))
     df = (
         df.join(matched_annotations, col("idx1") == col("idx2"))
-        .drop("prev_annots", "matched", "idx1", "idx2")
+        .drop("old_trackables", "matched", "idx1", "idx2")
         .withColumnRenamed("value", "matched")
     )
-    return df.select(vid, video_col, img_col, "matched")
+    df = df.withColumn("tracked", explode(col("matched"))).select(
+        segment_id,
+        frames,
+        col("tracked.{}".format(detections)).alias(detections),
+        col("tracked.{}".format(id_col)).alias(id_col),
+    )
+    df = df.withColumn(id_col, sha2(concat(col(segment_id), col(id_col)), 256))
+    return df

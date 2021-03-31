@@ -18,6 +18,7 @@
 
 from __future__ import annotations
 
+from io import BytesIO
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Union
@@ -104,6 +105,20 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
                 copy(fobj.name, uri)
         return Image(uri)
 
+    @staticmethod
+    def from_bytes(img: bytes, uri: Union[str, Path]) -> Image:
+        """Create an image in memory from a byte string.
+
+        Parameters
+        ----------
+        img : bytes
+            An PIL Image instance
+        uri : str or Path
+            The URI to store the image externally.
+        """
+        img = PILImage.open(BytesIO(img))
+        return self.from_pil(img, uri)
+
     def display(self, **kwargs):
         """
         Custom visualizer for this image in jupyter notebook
@@ -163,3 +178,16 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
                 self._cached_data = np.asarray(pil_img)
         assert self._cached_data is not None
         return self._cached_data
+
+    def to_bytes(self) -> bytes:
+        """Return a byte array.
+
+        Note
+        ----
+        The caller should close the image.
+        https://pillow.readthedocs.io/en/stable/reference/open_files.html#image-lifecycle
+        """
+        img = PILImage.open(self.open())
+        img_bytes = BytesIO()
+        img.save(img_bytes, format="PNG")
+        return img_bytes.getvalue()

@@ -392,7 +392,6 @@ def track_detections(
     df = df.withColumn("tracked", explode(col("matched"))).select(
         segment_id,
         frames,
-        detections,
         col("tracked.{}".format("bbox")).alias("bbox"),
         col("tracked.{}".format(id_col)).alias(id_col),
     )

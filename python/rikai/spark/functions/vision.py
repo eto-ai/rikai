@@ -359,9 +359,6 @@ def track_detections(
     indexer = StringIndexer(inputCol=segment_id, outputCol="vidIndex")
     df = indexer.fit(df).transform(df)
 
-    frame_window = Window().orderBy(frames)
-    value_window = Window().orderBy("value")
-
     df_rdd = (
         df.select("vidIndex", segment_id, "trackables", "matched")
         .withColumn("vidIndex", col("vidIndex").cast(StringType()))
@@ -379,6 +376,10 @@ def track_detections(
             ]
         )
     )
+
+    frame_window = Window().orderBy(frames)
+    value_window = Window().orderBy("value")
+
     matched_annotations = spark.createDataFrame(
         matched, annot_schema
     ).withColumn("idx1", row_number().over(value_window))
@@ -391,6 +392,7 @@ def track_detections(
     df = df.withColumn("tracked", explode(col("matched"))).select(
         segment_id,
         frames,
+        detections,
         col("tracked.{}".format("bbox")).alias("bbox"),
         col("tracked.{}".format(id_col)).alias(id_col),
     )

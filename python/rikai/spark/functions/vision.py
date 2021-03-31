@@ -332,74 +332,73 @@ def match_annotations(iterator, segment_id="vid", id_col="tracker_id"):
     return matched_annots
 
 
+annot_schema = ArrayType(
+    StructType(
+        [
+            StructField("bbox", Box2dType(), False),
+            StructField("tracker_id", StringType(), False),
+        ]
+    )
+)
+
+
 def track_detections(
-    df,
-    segment_id="vid",
-    frames="frame",
-    detections="detections",
-    id_col="tracker_id",
+    df, segment_id="vid", frames="frame", detections="detections"
 ):
+    # utilities
+    id_col = "tracker_id"
+    frame_window = Window().orderBy(frames)
+    value_window = Window().orderBy("value")
+    annot_window = Window.partitionBy(segment_id).orderBy(segment_id, frames)
+    indexer = StringIndexer(inputCol=segment_id, outputCol="vidIndex")
+
+    # dataframe manipulation
     df = (
         df.select(segment_id, frames, detections)
         .withColumn("bbox", F.explode(detections))
         .withColumn(id_col, F.lit(""))
-    )
-
-    df = (
-        df.withColumn("trackables", struct([col("bbox"), col(id_col)]))
-        .groupBy(segment_id, frames)
+        .withColumn("trackables", struct([col("bbox"), col(id_col)]))
+        .groupBy(segment_id, frames, detections)
         .agg(collect_list("trackables").alias("trackables"))
-    )
-    annot_window = Window.partitionBy(segment_id).orderBy(segment_id, frames)
-    df = df.withColumn("old_trackables", lag(df.trackables).over(annot_window))
-    df = df.withColumn(
-        "matched", tracker_match(col("trackables"), col("old_trackables"))
-    )
-
-    indexer = StringIndexer(inputCol=segment_id, outputCol="vidIndex")
-    df = indexer.fit(df).transform(df)
-
-    df_rdd = (
-        df.select("vidIndex", segment_id, "trackables", "matched")
-        .withColumn("vidIndex", col("vidIndex").cast(StringType()))
-        .rdd.map(lambda x: (x[0], x[1:]))
-    )
-    matched = df_rdd.partitionBy(1, lambda k: int(k[0])).mapPartitions(
-        match_annotations
-    )
-
-    annot_schema = ArrayType(
-        StructType(
-            [
-                StructField("bbox", Box2dType(), False),
-                StructField(id_col, StringType(), False),
-            ]
+        .withColumn(
+            "old_trackables", lag(col("trackables")).over(annot_window)
         )
+        .withColumn(
+            "matched", tracker_match(col("trackables"), col("old_trackables"))
+        )
+        .withColumn("frame_index", row_number().over(frame_window))
     )
 
-    frame_window = Window().orderBy(frames)
-    value_window = Window().orderBy("value")
-
+    # update ids
+    df = (
+        indexer.fit(df)
+        .transform(df)
+        .withColumn("vidIndex", col("vidIndex").cast(StringType()))
+    )
+    matched = (
+        df.select("vidIndex", segment_id, "trackables", "matched")
+        .rdd.map(lambda x: (x[0], x[1:]))
+        .partitionBy(1, lambda x: int(x[0]))
+        .mapPartitions(match_annotations)
+    )
     matched_annotations = spark.createDataFrame(
         matched, annot_schema
-    ).withColumn("idx1", row_number().over(value_window))
-    df = df.withColumn("idx2", row_number().over(frame_window))
-    df = (
-        df.join(matched_annotations, col("idx1") == col("idx2"))
-        .drop("old_trackables", "matched", "idx1", "idx2")
-        .withColumnRenamed("value", "matched")
-    )
-    df = df.withColumn("tracked", explode(col("matched"))).select(
-        segment_id,
-        frames,
-        col("tracked.{}".format("bbox")).alias("bbox"),
-        col("tracked.{}".format(id_col)).alias(id_col),
-    )
-    df = (
-        df.withColumn(id_col, sha2(concat(col(segment_id), col(id_col)), 256))
+    ).withColumn("value_index", row_number().over(value_window))
+
+    return (
+        df.join(matched_annotations, col("value_index") == col("frame_index"))
+        .withColumnRenamed("value", "trackers_matched")
+        .withColumn("tracked", explode(col("trackers_matched")))
+        .select(
+            segment_id,
+            frames,
+            detections,
+            col("tracked.{}".format("bbox")).alias("bbox"),
+            col("tracked.{}".format(id_col)).alias(id_col),
+        )
+        .withColumn(id_col, sha2(concat(col(segment_id), col(id_col)), 256))
         .withColumn("tracked_detections", struct([col("bbox"), col(id_col)]))
-        .groupBy(segment_id, frames)
+        .groupBy(segment_id, frames, detections)
         .agg(F.collect_list("tracked_detections").alias("tracked_detections"))
-        .orderBy(segment_id, frames)
+        .orderBy(segment_id, frames, detections)
     )
-    return df

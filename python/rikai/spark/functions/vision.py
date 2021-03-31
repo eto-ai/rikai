@@ -340,21 +340,13 @@ def track_detections(
     id_col="tracker_id",
 ):
     df = (
-        df.withColumn(detections, F.explode(detections))
-        .select(segment_id, frames, detections)
+        df.select(segment_id, frames, detections)
+        .withColumn("bbox", F.explode(detections))
         .withColumn(id_col, F.lit(""))
     )
-    dd = df
+
     df = (
-        df.withColumn(
-            "trackables", F.struct([F.col(detections), F.col(id_col)])
-        )
-        .groupBy(segment_id)
-        .agg(F.collect_list("trackables").alias("trackables"))
-    )
-    df = (
-        df.join(dd, on=[segment_id], how="inner")
-        .withColumn("trackables", struct([col(detections), col(id_col)]))
+        df.withColumn("trackables", struct([col("bbox"), col(id_col)]))
         .groupBy(segment_id, frames)
         .agg(collect_list("trackables").alias("trackables"))
     )
@@ -382,7 +374,7 @@ def track_detections(
     annot_schema = ArrayType(
         StructType(
             [
-                StructField(detections, Box2dType(), False),
+                StructField("bbox", Box2dType(), False),
                 StructField(id_col, StringType(), False),
             ]
         )
@@ -399,8 +391,14 @@ def track_detections(
     df = df.withColumn("tracked", explode(col("matched"))).select(
         segment_id,
         frames,
-        col("tracked.{}".format(detections)).alias(detections),
+        col("tracked.{}".format("bbox")).alias("bbox"),
         col("tracked.{}".format(id_col)).alias(id_col),
     )
-    df = df.withColumn(id_col, sha2(concat(col(segment_id), col(id_col)), 256))
+    df = (
+        df.withColumn(id_col, sha2(concat(col(segment_id), col(id_col)), 256))
+        .withColumn("tracked_detections", struct([col("bbox"), col(id_col)]))
+        .groupBy(segment_id, frames)
+        .agg(F.collect_list("tracked_detections").alias("tracked_detections"))
+        .orderBy(segment_id, frames)
+    )
     return df

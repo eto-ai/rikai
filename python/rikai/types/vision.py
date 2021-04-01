@@ -112,7 +112,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
         Parameters
         ----------
         img : bytes
-            An PIL Image instance
+            An image byte string.
         uri : str or Path
             The URI to store the image externally.
         """

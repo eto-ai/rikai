@@ -20,9 +20,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pandas.testing as pdt
+import pytest
 from pyspark.sql import Row, SparkSession
 from pyspark.sql.functions import col, concat, lit
-import pytest
 
 # Rikai
 from rikai.numpy import wrap

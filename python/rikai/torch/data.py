@@ -341,5 +341,6 @@ def _get_cache_uri(df: "pyspark.sql.DataFrame") -> str:
     cache_root_uri = rikai.options.rikai.cache_uri
     if not cache_root_uri:
         from rikai.conf import CONF_RIKAI_CACHEURI
+
         cache_root_uri = df.rdd.ctx.getConf().get(CONF_RIKAI_CACHEURI)
     return os.path.join(cache_root_uri, str(uuid.uuid4()))

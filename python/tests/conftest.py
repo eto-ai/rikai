@@ -16,13 +16,14 @@ from pathlib import Path
 
 # Third Party
 import pytest
-from torch.utils.data import DataLoader  # Prevent DataLoader hangs
 from pyspark.sql import SparkSession
+from torch.utils.data import DataLoader  # Prevent DataLoader hangs
+
+from rikai.conf import CONF_RIKAI_CACHEURI
 
 # Rikai
 from rikai.spark.sql import init
 from rikai.spark.utils import get_default_jar_version
-from rikai.conf import CONF_RIKAI_CACHEURI
 
 
 @pytest.fixture(scope="session")

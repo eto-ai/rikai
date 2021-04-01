@@ -17,14 +17,11 @@ import rikai
 from rikai.__version__ import version
 from rikai.conf import CONF_PARQUET_BLOCK_SIZE
 
-def df_to_rikai(
-    df: "pyspark.sql.DataFrame",
-    uri: str
-):
+
+def df_to_rikai(df: "pyspark.sql.DataFrame", uri: str):
     (
         df.write.format("rikai")
-        .option(CONF_PARQUET_BLOCK_SIZE,
-                rikai.options.parquet.block.size)
+        .option(CONF_PARQUET_BLOCK_SIZE, rikai.options.parquet.block.size)
         .save(uri)
     )
 

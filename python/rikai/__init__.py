@@ -14,9 +14,10 @@
 
 """Rikai Feature Store
 """
-
 from rikai.numpy import array, empty, wrap
+from rikai.conf import *
 
 from .__version__ import version
 
-__all__ = ["array", "empty", "wrap", "version"]
+__all__ = ["array", "empty", "wrap", "version", "options", "option_context",
+           "get_option", "set_option", "reset_option"]

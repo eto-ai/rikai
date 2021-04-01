@@ -248,6 +248,7 @@ def video_segmentor(
     """Returns list of video Segments from VideoStream or YouTubeVideo by
     thresholding sum-of-absolute differences.
     https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/f_select.c
+
     Parameters
     ----------
     video : Video
@@ -256,6 +257,7 @@ def video_segmentor(
       Scene detection score, values in [0, 1]
     fps: int, default 30
       Video frame rate in hertz
+
     Return
     ------
     List

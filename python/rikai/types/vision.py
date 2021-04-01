@@ -116,8 +116,8 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
         uri : str or Path
             The URI to store the image externally.
         """
-        img = PILImage.open(BytesIO(img))
-        return self.from_pil(img, uri)
+        with PILImage.open(BytesIO(img_bytes)) as pil_img:
+            return self.from_pil(pil_img, uri)
 
     def display(self, **kwargs):
         """
@@ -179,7 +179,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
         assert self._cached_data is not None
         return self._cached_data
 
-    def to_bytes(self) -> bytes:
+    def to_bytes(self, format="jpeg") -> bytes:
         """Return a byte array.
 
         Note
@@ -187,7 +187,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
         The caller should close the image.
         https://pillow.readthedocs.io/en/stable/reference/open_files.html#image-lifecycle
         """
-        img = PILImage.open(self.open())
-        img_bytes = BytesIO()
-        img.save(img_bytes, format="PNG")
-        return img_bytes.getvalue()
+        with self.to_pil() as img:
+            img_bytes = BytesIO()
+            img.save(img_bytes, format=format)
+            return img_bytes.getvalue()

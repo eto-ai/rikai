@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from pathlib import Path
-from typing import Callable, Dict, Iterator, Optional, Union
+from typing import Any, Callable, Dict, Iterator, Optional, Union
 
 import pandas as pd
 import torch
@@ -25,29 +25,20 @@ from rikai.io import open_uri
 from rikai.torch.pandas import PandasDataset
 
 
-def generate_udf(
-    model_uri: Union[str, Path],
-    schema: DataType,
-    options: Optional[Dict[str, str]] = None,
-    pre_processing: Optional[Callable] = None,
-    post_processing: Optional[Callable] = None,
-):
+def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     """Construct a UDF to run pytorch model.
 
     Parameters
     ----------
-    model_uri : str
-        The URI pointed to a model.
-    schema : DataType
-        Return type of the model inference function.
-    options : Dict[str, str], optional
-        Runtime options
+    spec : ModelSpec
+        the model specifications object
 
     Returns
     -------
     A Spark Pandas UDF.
     """
-    options = {} if options is None else options
+
+    options = {} if spec.options is None else spec.options
     use_gpu = options.get("device", "cpu") == "gpu"
     num_workers = int(options.get("num_workers", 4))
     batch_size = int(options.get("batch_size", 4))
@@ -56,7 +47,7 @@ def generate_udf(
         iter: Iterator[pd.DataFrame],
     ) -> Iterator[pd.DataFrame]:
 
-        with open_uri(model_uri) as fobj:
+        with open_uri(spec.uri) as fobj:
             model = torch.load(fobj)
         device = torch.device("cuda" if use_gpu else "cpu")
 
@@ -65,7 +56,7 @@ def generate_udf(
 
         with torch.no_grad():
             for series in iter:
-                dataset = PandasDataset(series, transform=pre_processing)
+                dataset = PandasDataset(series, transform=spec.pre_processing)
                 results = []
                 for batch in DataLoader(
                     dataset,
@@ -73,9 +64,9 @@ def generate_udf(
                     num_workers=num_workers,
                 ):
                     predictions = model(batch)
-                    if post_processing:
-                        predictions = post_processing(predictions)
+                    if spec.post_processing:
+                        predictions = spec.post_processing(predictions)
                     results.extend(predictions)
                 yield pd.DataFrame(results)
 
-    return pandas_udf(torch_inference_udf, returnType=schema)
+    return pandas_udf(torch_inference_udf, returnType=spec.schema)

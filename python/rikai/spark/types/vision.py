@@ -58,7 +58,7 @@ class ImageType(UserDefinedType):
     def deserialize(self, datum) -> "Image":
         from rikai.types.vision import Image
 
-        return Image(data=datum[0], uri=datum[1])
+        return Image(datum[0] or datum[1])
 
     def simpleString(self) -> str:
         return "ImageType"

@@ -102,7 +102,7 @@ def test_image_copy(spark: SparkSession, tmpdir):
     os.makedirs(os.path.join(tmpdir, "out"))
 
     df = spark.createDataFrame(
-        [(Image(uri=source_image),)], ["image"]
+        [(Image(source_image),)], ["image"]
     )  # type: pyspark.sql.DataFrame
     df = df.withColumn(
         "image",
@@ -110,7 +110,7 @@ def test_image_copy(spark: SparkSession, tmpdir):
     )
     data = df.collect()  # force lazy calculation
     out_file = os.path.join(tmpdir, "out", "source_image")
-    assert Image(uri=out_file) == data[0].image
+    assert Image(out_file) == data[0].image
 
     with open(os.path.join(out_file)) as fobj:
         assert fobj.read() == "abc"

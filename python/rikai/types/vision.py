@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Optional, Union
+from typing import Union
 from urllib.parse import urlparse
 
 # Third-party libraries
@@ -43,19 +43,21 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
 
     Parameters
     ----------
-    data : bytes, optional
-        The content of the image.
-    uri : str or Path, optional
-        The URI pointed to an Image stored on external storage.
+    image : bytes, str, or :py:class:`~pathlib.Path`
+        It can be the content of image, or a URI / Path of an image.
     """
 
     __UDT__ = ImageType()
 
     def __init__(
         self,
-        data: Optional[bytes] = None,
-        uri: Optional[Union[str, Path]] = None,
+        image: Union[bytes, bytearray, str, Path],
     ):
+        data, uri = None, None
+        if isinstance(image, (bytes, bytearray)):
+            data = image
+        else:
+            uri = image
         super().__init__(data=data, uri=uri)
 
     @classmethod
@@ -121,7 +123,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
                 img.save(fobj, format=format, **kwargs)
                 fobj.flush()
                 copy(fobj.name, uri)
-        return Image(uri=uri)
+        return Image(uri)
 
     def display(self, **kwargs):
         """

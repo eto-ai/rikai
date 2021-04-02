@@ -28,13 +28,13 @@ def test_show_embedded_png(tmp_path):
     im = PILImage.fromarray(rescaled)
     uri = tmp_path / "test.png"
     im.save(uri)
-    result = Image(uri=uri)._repr_png_()
+    result = Image(uri)._repr_png_()
     with open(uri, "rb") as fh:
         expected = b2a_base64(fh.read()).decode("ascii")
         assert result == expected
 
         fh.seek(0)
-        embedded_image = Image(data=fh.read())
+        embedded_image = Image(fh.read())
         assert result == embedded_image._repr_png_()
 
 
@@ -44,13 +44,13 @@ def test_show_embedded_jpeg(tmp_path):
     im = PILImage.fromarray(rescaled)
     uri = tmp_path / "test.jpg"
     im.save(uri)
-    result = Image(uri=uri)._repr_jpeg_()
+    result = Image(uri)._repr_jpeg_()
     with open(uri, "rb") as fh:
         expected = b2a_base64(fh.read()).decode("ascii")
         assert result == expected
 
         fh.seek(0)
-        embedded_image = Image(data=fh.read())
+        embedded_image = Image(fh.read())
         assert result == embedded_image._repr_jpeg_()
 
 
@@ -83,7 +83,7 @@ def test_show_remote_ref():
     from IPython.display import Image as IPyImage
 
     uri = "https://octodex.github.com/images/original.png"
-    img = Image(uri=uri)
+    img = Image(uri)
     # TODO check the actual content
     assert img._repr_html_() == img.display()._repr_html_()
     assert img.display()._repr_html_() == IPyImage(uri)._repr_html_()

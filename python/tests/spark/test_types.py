@@ -56,7 +56,7 @@ def test_box3d(spark, tmpdir):
 
 
 def test_embedded_images(spark, tmpdir):
-    df = spark.createDataFrame([Row(Image(data=secrets.token_bytes(128)))])
+    df = spark.createDataFrame([Row(Image(secrets.token_bytes(128)))])
     _check_roundtrip(spark, df, tmpdir)
 
 

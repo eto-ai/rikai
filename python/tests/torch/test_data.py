@@ -138,7 +138,7 @@ def test_torch_dataset(spark, tmp_path, num_workers):
             {
                 "id": i,
                 "array": array,
-                "image": Image(uri=image_uri),
+                "image": Image(image_uri),
             }
         )
         expected.append(

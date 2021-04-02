@@ -69,7 +69,7 @@ def image_copy(img: Image, uri: str) -> Image:
         Return a new image pointed to the new URI
     """
     logger.info("Copying image src=%s dest=%s", img.uri, uri)
-    return Image(uri=_copy(img.uri, uri))
+    return Image(_copy(img.uri, uri))
 
 
 @udf(returnType=ImageType())

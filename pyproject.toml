@@ -9,7 +9,9 @@ exclude = '''
 '''
 
 [tool.isort]
+profile = "black"
+multi_line_output = 3
 known_third_party = ["torch", "pyspark", "PIL", "pytest"]
 known_first_party = "rikai"
 order_by_type = false
-skip = "python/rikai/spark/sql/generated"
+skip_glob = ["python/rikai/spark/sql/generated/*.py"]

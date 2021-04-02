@@ -34,6 +34,7 @@ lint:
 # Fix code style
 fix:
 	sbt scalafmt
+	isort python
 	black -l 79 python/rikai python/tests
 .PHONY: fix
 

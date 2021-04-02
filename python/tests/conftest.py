@@ -16,8 +16,8 @@ from pathlib import Path
 
 # Third Party
 import pytest
-from torch.utils.data import DataLoader  # Prevent DataLoader hangs
 from pyspark.sql import SparkSession
+from torch.utils.data import DataLoader  # Prevent DataLoader hangs
 
 # Rikai
 from rikai.spark.sql import init
@@ -29,7 +29,7 @@ def spark(tmp_path_factory) -> SparkSession:
     version = get_default_jar_version(use_snapshot=True)
     session = (
         SparkSession.builder.appName("spark-test")
-        .config("spark.jars.packages", "ai.eto:rikai_2.12:{}".format(version))
+        .config("spark.jars.packages", f"ai.eto:rikai_2.12:{version}")
         .config(
             "spark.sql.extensions",
             "ai.eto.rikai.sql.spark.RikaiSparkSessionExtensions",
@@ -50,7 +50,6 @@ def spark(tmp_path_factory) -> SparkSession:
             "spark.executor.extraJavaOptions",
             "-Dio.netty.tryReflectionSetAccessible=true",
         )
-        .config("spark.rikai.cacheUri", str(tmp_path_factory.mktemp("data")))
         .master("local[2]")
         .getOrCreate()
     )

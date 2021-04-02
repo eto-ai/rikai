@@ -13,8 +13,8 @@
 #  limitations under the License.
 
 import tempfile
-from pathlib import Path
 import uuid
+from pathlib import Path
 
 import pytest
 import torch

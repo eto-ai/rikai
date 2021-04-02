@@ -18,6 +18,9 @@ We'll need a permanent solution later on for two main reasons:
 1. Users can accidentally clear options via pandas api
 2. We need better type handling to help bridge jvm-python communication (GH134)
 """
+import os
+import tempfile
+
 import pandas as pd
 from pandas._config.config import (
     get_option,
@@ -29,8 +32,11 @@ from pandas._config.config import (
 options = pd.options
 
 CONF_RIKAI_CACHEURI = "rikai.cache_uri"
+DEFAULT_RIKAI_CACHEURI = os.path.join(tempfile.gettempdir(), "rikai")
+os.makedirs(DEFAULT_RIKAI_CACHEURI, exist_ok=True)
+
 CONF_PARQUET_BLOCK_SIZE = "parquet.block.size"
 DEFAULT_ROW_GROUP_SIZE_BYTES = 32 * 1024 * 1024
 
-register_option(CONF_RIKAI_CACHEURI, None)
+register_option(CONF_RIKAI_CACHEURI, DEFAULT_RIKAI_CACHEURI)
 register_option(CONF_PARQUET_BLOCK_SIZE, DEFAULT_ROW_GROUP_SIZE_BYTES)

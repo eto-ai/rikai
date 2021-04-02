@@ -73,8 +73,7 @@ def _check_loader(loader, expected_data):
 
 
 def test_coco_dataset(
-    spark: SparkSession,
-    tmp_path: Path,
+    spark: SparkSession, tmp_path: Path,
 ):
     dataset_dir = tmp_path / "features"
     asset_dir = tmp_path / "assets"
@@ -135,11 +134,7 @@ def test_torch_dataset(spark, tmp_path, num_workers):
 
         array = wrap(np.random.random_sample((3, 4)))
         data.append(
-            {
-                "id": i,
-                "array": array,
-                "image": Image(image_uri),
-            }
+            {"id": i, "array": array, "image": Image(uri=image_uri),}
         )
         expected.append(
             {
@@ -152,11 +147,7 @@ def test_torch_dataset(spark, tmp_path, num_workers):
     df = spark.createDataFrame(data)
     df.write.mode("overwrite").format("rikai").save(str(dataset_dir))
     dataset = Dataset(dataset_dir)
-    loader = torchDataLoader(
-        dataset,
-        num_workers=num_workers,
-        drop_last=True,
-    )
+    loader = torchDataLoader(dataset, num_workers=num_workers, drop_last=True,)
     actual = sorted(list(loader), key=lambda x: x["id"])
     assert len(actual) == total
     for expect, act in zip(expected, actual):

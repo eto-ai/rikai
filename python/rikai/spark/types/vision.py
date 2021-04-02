@@ -14,6 +14,7 @@
 
 
 from pyspark.sql.types import (
+    BinaryType,
     StringType,
     StructField,
     StructType,
@@ -36,7 +37,10 @@ class ImageType(UserDefinedType):
     @classmethod
     def sqlType(cls) -> StructType:
         return StructType(
-            fields=[StructField("uri", StringType(), nullable=False)]
+            fields=[
+                StructField("data", BinaryType(), nullable=True),
+                StructField("uri", StringType(), nullable=True),
+            ]
         )
 
     @classmethod
@@ -49,12 +53,12 @@ class ImageType(UserDefinedType):
 
     def serialize(self, obj: "Image"):
         """Serialize an Image to a Spark Row?"""
-        return (obj.uri,)
+        return (obj.data, obj.uri)
 
     def deserialize(self, datum) -> "Image":
         from rikai.types.vision import Image
 
-        return Image(datum[0])
+        return Image(data=datum[0], uri=datum[1])
 
     def simpleString(self) -> str:
         return "ImageType"

@@ -28,7 +28,8 @@ private[spark] class ImageType extends UserDefinedType[Image] {
   override def sqlType: DataType =
     StructType(
       Seq(
-        StructField("uri", StringType, false)
+        StructField("data", BinaryType, true),
+        StructField("uri", StringType, true)
       )
     )
 
@@ -36,13 +37,22 @@ private[spark] class ImageType extends UserDefinedType[Image] {
 
   override def serialize(obj: Image): Any = {
     val row = new GenericInternalRow(1);
-    row.update(0, UTF8String.fromString(obj.uri))
+    row.update(0, obj.data.getOrElse(null))
+    row.update(
+      1,
+      obj.uri match {
+        case Some(s) => UTF8String.fromString(s)
+        case None    => None,
+      }
+    )
+
     row
   }
 
   override def deserialize(datum: Any): Image =
     datum match {
-      case row: InternalRow => new Image(row.getString(0).toString())
+      case row: InternalRow =>
+        new Image(Option(row.getBinary(0)), Option(row.getString(1).toString()))
     }
 
   override def userClass: Class[Image] = classOf[Image]
@@ -58,6 +68,6 @@ private[spark] class ImageType extends UserDefinedType[Image] {
   * @param uri
   */
 @SQLUserDefinedType(udt = classOf[ImageType])
-class Image(val uri: String) {
+class Image(val data: Option[Array[Byte]], val uri: Option[String]) {
   override def toString: String = s"Image(uri='$uri')"
 }

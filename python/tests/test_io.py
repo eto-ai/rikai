@@ -36,7 +36,7 @@ def test_open_https_uri():
 
 
 def test_image_use_https_uri():
-    img = Image(WIKIPEDIA)
+    img = Image(uri=WIKIPEDIA)
 
     fobj = BytesIO(requests.get(WIKIPEDIA).content)
     pic = PIL.Image.open(fobj)

@@ -18,9 +18,10 @@
 
 from __future__ import annotations
 
+from io import BytesIO
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Union
+from typing import Optional, Union
 from urllib.parse import urlparse
 
 # Third-party libraries
@@ -43,15 +44,20 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
 
     Parameters
     ----------
-    uri : str
+    data : bytes, optional
+        The content of the image.
+    uri : str or Path, optional
         The URI pointed to an Image stored on external storage.
     """
 
     __UDT__ = ImageType()
 
-    def __init__(self, uri: Union[str, Path]):
-        super().__init__(uri)
-        self._cached_data = None
+    def __init__(
+        self,
+        data: Optional[bytes] = None,
+        uri: Optional[Union[str, Path]] = None,
+    ):
+        super().__init__(data=data, uri=uri)
 
     @classmethod
     def from_array(
@@ -116,7 +122,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
                 img.save(fobj, format=format, **kwargs)
                 fobj.flush()
                 copy(fobj.name, uri)
-        return Image(uri)
+        return Image(uri=uri)
 
     def display(self, **kwargs):
         """
@@ -172,8 +178,5 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
 
     def to_numpy(self) -> np.ndarray:
         """Convert this image into an :py:class:`numpy.ndarray`."""
-        if self._cached_data is None:
-            with self.to_pil() as pil_img:
-                self._cached_data = np.asarray(pil_img)
-        assert self._cached_data is not None
-        return self._cached_data
+        with self.to_pil() as pil_img:
+            return np.asarray(pil_img)

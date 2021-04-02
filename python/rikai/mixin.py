@@ -63,12 +63,21 @@ class Asset(ABC):
 
     An asset is also a cell in a DataFrame for analytics. It offers both fast
     query on columnar format and easy tooling to access the actual data.
+
+    Attributes
+    ----------
+    data : bytes, optional
+        Embedded data
+    uri : str
+        URI of the external storage.
     """
 
     def __init__(
         self, data: Optional[bytes] = None, uri: Union[str, Path] = None
     ) -> None:
-        assert (data is not None) ^ (uri is not None)
+        assert (data is None) ^ (uri is None)
+        assert data is None or type(data, bytes)
+        assert uri is None or isinstance(uri, (str, Path))
         self.data = data
         self.uri = str(uri) if uri is not None else None
 

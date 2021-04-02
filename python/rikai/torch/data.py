@@ -340,9 +340,7 @@ def _get_cache_uri(df: "pyspark.sql.DataFrame") -> str:
     cache_uri: str
         The uri to write the DataFrame to
     """
-    cache_root_uri = df.rdd.ctx.getConf().get(CONF_RIKAI_CACHEURI)
-    if not cache_root_uri:
-        cache_root_uri = rikai.options.rikai.cache_uri
+    cache_root_uri = rikai.options.rikai.cache_uri
     if not cache_root_uri:
         raise ValueError(
             "Could not retrieve rikai cache_uri from either "

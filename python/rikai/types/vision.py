@@ -18,6 +18,7 @@
 
 from __future__ import annotations
 
+from io import IOBase
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Union
@@ -51,10 +52,12 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
 
     def __init__(
         self,
-        image: Union[bytes, bytearray, str, Path],
+        image: Union[bytes, bytearray, IOBase, str, Path],
     ):
         data, uri = None, None
-        if isinstance(image, (bytes, bytearray)):
+        if isinstance(image, IOBase):
+            data = image.read()
+        elif isinstance(image, (bytes, bytearray)):
             data = image
         else:
             uri = image
@@ -175,6 +178,8 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
         The caller should close the image.
         https://pillow.readthedocs.io/en/stable/reference/open_files.html#image-lifecycle
         """
+        if self.is_embedded:
+            return PILImage.open(self.open())
         return PILImage.open(self.open())
 
     def to_numpy(self) -> np.ndarray:

@@ -88,12 +88,13 @@ class Asset(ABC):
     def __eq__(self, o: object) -> bool:
         return isinstance(o, Asset) and uri_equal(self.uri, o.uri)
 
+    @property
     def is_embedded(self) -> bool:
         """Returns True if this Asset has embedded data."""
         return self.data is not None
 
     def open(self, mode="rb") -> BinaryIO:
         """Open the asset and returned as random-accessible file object."""
-        if self.is_embedded():
+        if self.is_embedded:
             return BytesIO(self.data)
         return open_uri(self.uri, mode=mode)

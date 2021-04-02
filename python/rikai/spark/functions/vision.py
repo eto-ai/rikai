@@ -73,7 +73,9 @@ def image_copy(img: Image, uri: str) -> Image:
 
 
 @udf(returnType=ImageType())
-def numpy_to_image(array: ndarray, uri: str) -> Image:
+def numpy_to_image(
+    array: ndarray, uri: str, format: str = None, **kwargs
+) -> Image:
     """Convert a numpy array to image, and upload to external storage.
 
     Parameters
@@ -82,6 +84,11 @@ def numpy_to_image(array: ndarray, uri: str) -> Image:
         Image data.
     uri : str
         The base directory to copy the image to.
+    format : str, optional
+        The image format to save as. See
+        `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
+    kwargs : dict, optional
+        Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
 
     Return
     ------
@@ -102,7 +109,7 @@ def numpy_to_image(array: ndarray, uri: str) -> Image:
     --------
     :py:meth:`rikai.types.vision.Image.from_array`
     """
-    return Image.from_array(array, uri)
+    return Image.from_array(array, uri, format=format, **kwargs)
 
 
 @udf(returnType=ArrayType(ImageType()))
@@ -113,6 +120,8 @@ def video_to_images(
     sample_rate: int = 1,
     max_samples: int = 15000,
     quality: str = "worst",
+    img_format: str = "png",
+    **img_kwargs,
 ) -> list:
     """Extract video frames into a list of images.
 
@@ -121,7 +130,7 @@ def video_to_images(
     video : Video
         An video object, either YouTubeVideo or VideoStream.
     output_uri: str
-        Frames will be written as <output_uri>/<fno>.jpg
+        Frames will be written as <output_uri>/<fno>.<img_format>
     segment: Segment, default Segment(0, -1)
         A Segment object, localizing video in time to (start_fno, end_fno)
     sample_rate : int, default 1
@@ -131,6 +140,11 @@ def video_to_images(
     quality: str, default 'worst'
         Either 'worst' (lowest bitrate) or 'best' (highest bitrate)
         See: https://pythonhosted.org/Pafy/index.html#Pafy.Pafy.getbest
+    img_format : str, optional
+        The image format to save as. See
+        `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
+    img_kwargs : dict, optional
+        Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
 
     Return
     ------
@@ -162,8 +176,11 @@ def video_to_images(
         Image.from_array(
             img,
             os.path.join(
-                output_uri, "{}.jpg".format((start_frame + idx) * sample_rate)
+                output_uri,
+                "{}.{}".format((start_frame + idx) * sample_rate, img_format),
             ),
+            format=img_format,
+            **img_kwargs,
         )
         for idx, img in enumerate(video_iterator)
     ]
@@ -176,6 +193,8 @@ def spectrogram_image(
     segment: Segment = Segment(0, -1),
     size: int = 224,
     max_samples: int = 15000,
+    img_format: str = None,
+    **img_kwargs,
 ) -> Image:
     """Applies ffmpeg filter to generate spectrogram image.
 
@@ -191,6 +210,11 @@ def spectrogram_image(
             Yield at most this many frames (-1 means no max)
     size : Int
         Sets resolution of frequency, time spectrogram image.
+    img_format : str, optional
+        The image format to save as. See
+        `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
+    img_kwargs : dict, optional
+        Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
 
     Return
     ------
@@ -231,5 +255,8 @@ def spectrogram_image(
         .run(capture_stdout=True)
     )
     return Image.from_array(
-        np.frombuffer(output, np.uint8).reshape([size, size, 3]), output_uri
+        np.frombuffer(output, np.uint8).reshape([size, size, 3]),
+        output_uri,
+        format=img_format,
+        **img_kwargs,
     )

@@ -59,6 +59,8 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
         array: np.ndarray,
         uri: Union[str, Path],
         mode: str = None,
+        format: str = None,
+        **kwargs,
     ) -> Image:
         """Create an image in memory from numpy array.
 
@@ -71,6 +73,11 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
         mode : str, optional
             The mode which PIL used to create image. See supported
             `modes on PIL document <https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-modes>`_.
+        format : str, optional
+            The image format to save as. See
+            `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
+        kwargs : dict, optional
+            Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
 
         See Also
         --------
@@ -81,10 +88,12 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
 
         assert array is not None
         img = PILImage.fromarray(array, mode=mode)
-        return cls.from_pil(img, uri)
+        return cls.from_pil(img, uri, format=format, **kwargs)
 
     @staticmethod
-    def from_pil(img: PILImage, uri: Union[str, Path]) -> Image:
+    def from_pil(
+        img: PILImage, uri: Union[str, Path], format: str = None, **kwargs
+    ) -> Image:
         """Create an image in memory from a :py:class:`PIL.Image`.
 
         Parameters
@@ -93,13 +102,18 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
             An PIL Image instance
         uri : str or Path
             The URI to store the image externally.
+        format : str, optional
+            The image format to save as. See
+            `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
+        kwargs : dict, optional
+            Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
         """
         parsed = urlparse(normalize_uri(uri))
         if parsed.scheme == "file":
-            img.save(uri)
+            img.save(uri, format=format, **kwargs)
         else:
             with NamedTemporaryFile() as fobj:
-                img.save(fobj)
+                img.save(fobj, format=format, **kwargs)
                 fobj.flush()
                 copy(fobj.name, uri)
         return Image(uri)

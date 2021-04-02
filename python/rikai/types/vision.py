@@ -178,8 +178,6 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
         The caller should close the image.
         https://pillow.readthedocs.io/en/stable/reference/open_files.html#image-lifecycle
         """
-        if self.is_embedded:
-            return PILImage.open(self.open())
         return PILImage.open(self.open())
 
     def to_numpy(self) -> np.ndarray:

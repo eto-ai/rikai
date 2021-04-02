@@ -86,9 +86,9 @@ def numpy_to_image(
         The base directory to copy the image to.
     format : str, optional
         The image format to save as. See
-        `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details. #pylint: disable=line-too-long
+        `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
     kwargs : dict, optional
-        Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_. #pylint: disable=line-too-long
+        Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
 
     Return
     ------
@@ -108,7 +108,7 @@ def numpy_to_image(
     See Also
     --------
     :py:meth:`rikai.types.vision.Image.from_array`
-    """
+    """  # noqa: E501
     return Image.from_array(array, uri, format=format, **kwargs)
 
 
@@ -142,15 +142,15 @@ def video_to_images(
         See: https://pythonhosted.org/Pafy/index.html#Pafy.Pafy.getbest
     img_format : str, optional
         The image format to save as. See
-        `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details. #pylint: disable=line-too-long
+        `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
     img_kwargs : dict, optional
-        Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_. #pylint: disable=line-too-long
+        Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
 
     Return
     ------
     List
         Return a list of images from video indexed by frame number.
-    """
+    """  # noqa: E501
     assert isinstance(
         video, (YouTubeVideo, VideoStream)
     ), "Input type must be YouTubeVideo or VideoStream"
@@ -212,15 +212,15 @@ def spectrogram_image(
         Sets resolution of frequency, time spectrogram image.
     img_format : str, optional
         The image format to save as. See
-        `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details. #pylint: disable=line-too-long
+        `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
     img_kwargs : dict, optional
-        Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_. #pylint: disable=line-too-long
+        Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
 
     Return
     ------
     Image
         Return an Image of the audio spectrogram.
-    """
+    """  # noqa: E501
     try:
         import ffmpeg
     except ImportError:

@@ -107,7 +107,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
             `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
         kwargs : dict, optional
             Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
-        """
+        """  # noqa: E501
         parsed = urlparse(normalize_uri(uri))
         if parsed.scheme == "file":
             img.save(uri, format=format, **kwargs)

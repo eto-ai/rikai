@@ -37,12 +37,8 @@ private[spark] class ImageType extends UserDefinedType[Image] {
 
   override def serialize(obj: Image): Any = {
     val row = new GenericInternalRow(2);
-    if (obj.data.isDefined) {
-      row.update(0, obj.data.get)
-    }
-    if (obj.uri.isDefined) {
-      row.update(1, UTF8String.fromString(obj.uri.get))
-    }
+    obj.data.map(x => row.update(0, x))
+    obj.uri.map(x => row.update(1, UTF8String.fromString(x)))
     row
   }
 

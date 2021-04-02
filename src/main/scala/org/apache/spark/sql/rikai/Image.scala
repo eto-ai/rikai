@@ -36,23 +36,29 @@ private[spark] class ImageType extends UserDefinedType[Image] {
   override def pyUDT: String = "rikai.spark.types.vision.ImageType"
 
   override def serialize(obj: Image): Any = {
-    val row = new GenericInternalRow(1);
-    row.update(0, obj.data.getOrElse(null))
-    row.update(
-      1,
-      obj.uri match {
-        case Some(s) => UTF8String.fromString(s)
-        case None    => None,
-      }
-    )
-
+    val row = new GenericInternalRow(2);
+    if (obj.data.isDefined) {
+      row.update(0, obj.data.get)
+    }
+    if (obj.uri.isDefined) {
+      row.update(1, UTF8String.fromString(obj.uri.get))
+    }
     row
   }
 
   override def deserialize(datum: Any): Image =
     datum match {
       case row: InternalRow =>
-        new Image(Option(row.getBinary(0)), Option(row.getString(1).toString()))
+        new Image(
+          row.isNullAt(0) match {
+            case true  => None
+            case false => Some(row.getBinary(0))
+          },
+          row.isNullAt(1) match {
+            case true  => None
+            case false => Some(row.getString(1).toString)
+          }
+        )
     }
 
   override def userClass: Class[Image] = classOf[Image]

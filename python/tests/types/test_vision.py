@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 from binascii import b2a_base64
 import filecmp
 
@@ -25,24 +26,32 @@ def test_show_embedded_png(tmp_path):
     data = np.random.random((100, 100))
     rescaled = (255.0 / data.max() * (data - data.min())).astype(np.uint8)
     im = PILImage.fromarray(rescaled)
-    uri = str(tmp_path / "test.png")
+    uri = tmp_path / "test.png"
     im.save(uri)
     result = Image(uri=uri)._repr_png_()
     with open(uri, "rb") as fh:
         expected = b2a_base64(fh.read()).decode("ascii")
         assert result == expected
 
+        fh.seek(0)
+        embedded_image = Image(data=fh.read())
+        assert result == embedded_image._repr_png_()
+
 
 def test_show_embedded_jpeg(tmp_path):
     data = np.random.random((100, 100))
     rescaled = (255.0 / data.max() * (data - data.min())).astype(np.uint8)
     im = PILImage.fromarray(rescaled)
-    uri = str(tmp_path / "test.jpg")
+    uri = tmp_path / "test.jpg"
     im.save(uri)
     result = Image(uri=uri)._repr_jpeg_()
     with open(uri, "rb") as fh:
         expected = b2a_base64(fh.read()).decode("ascii")
         assert result == expected
+
+        fh.seek(0)
+        embedded_image = Image(data=fh.read())
+        assert result == embedded_image._repr_jpeg_()
 
 
 def test_format_kwargs(tmp_path):

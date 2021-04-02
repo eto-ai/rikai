@@ -76,7 +76,9 @@ class Asset(ABC):
         self, data: Optional[bytes] = None, uri: Union[str, Path] = None
     ) -> None:
         assert (data is None) ^ (uri is None)
-        assert data is None or type(data, bytes)
+        assert data is None or isinstance(
+            data, (bytes, bytearray)
+        ), f"Expect bytes got {type(data)}"
         assert uri is None or isinstance(uri, (str, Path))
         self.data = data
         self.uri = str(uri) if uri is not None else None

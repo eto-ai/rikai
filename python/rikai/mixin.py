@@ -85,6 +85,7 @@ class Asset(ABC):
         return isinstance(o, Asset) and uri_equal(self.uri, o.uri)
 
     def is_embedded(self) -> bool:
+        """Returns True if this Asset has embedded data."""
         return self.data is not None
 
     def open(self, mode="rb") -> BinaryIO:

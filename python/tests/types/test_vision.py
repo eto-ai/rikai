@@ -48,20 +48,20 @@ def test_show_embedded_jpeg(tmp_path):
 def test_format_kwargs(tmp_path):
     data = np.random.random((100, 100))
     rescaled = (255.0 / data.max() * (data - data.min())).astype(np.uint8)
-    result_uri = str(tmp_path / "result.jpg")
+    result_uri = tmp_path / "result.jpg"
     Image.from_array(rescaled, result_uri, format="jpeg", optimize=True)
 
-    expected_uri = str(tmp_path / "expected.jpg")
+    expected_uri = tmp_path / "expected.jpg"
     PILImage.fromarray(rescaled).save(
         expected_uri, format="jpeg", optimize=True
     )
 
     assert filecmp.cmp(result_uri, expected_uri)
 
-    result_uri = str(tmp_path / "result.png")
+    result_uri = tmp_path / "result.png"
     Image.from_array(rescaled, result_uri, format="png", compress_level=1)
 
-    expected_uri = str(tmp_path / "expected.png")
+    expected_uri = tmp_path / "expected.png"
     PILImage.fromarray(rescaled).save(
         expected_uri, format="png", compress_level=1
     )

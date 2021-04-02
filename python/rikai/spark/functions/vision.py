@@ -120,8 +120,8 @@ def video_to_images(
     sample_rate: int = 1,
     max_samples: int = 15000,
     quality: str = "worst",
-    img_format: str = "png",
-    **img_kwargs,
+    image_format: str = "png",
+    **image_kwargs,
 ) -> list:
     """Extract video frames into a list of images.
 
@@ -140,10 +140,10 @@ def video_to_images(
     quality: str, default 'worst'
         Either 'worst' (lowest bitrate) or 'best' (highest bitrate)
         See: https://pythonhosted.org/Pafy/index.html#Pafy.Pafy.getbest
-    img_format : str, optional
+    image_format : str, optional
         The image format to save as. See
         `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
-    img_kwargs : dict, optional
+    image_kwargs : dict, optional
         Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
 
     Return
@@ -177,10 +177,12 @@ def video_to_images(
             img,
             os.path.join(
                 output_uri,
-                "{}.{}".format((start_frame + idx) * sample_rate, img_format),
+                "{}.{}".format(
+                    (start_frame + idx) * sample_rate, image_format
+                ),
             ),
-            format=img_format,
-            **img_kwargs,
+            format=image_format,
+            **image_kwargs,
         )
         for idx, img in enumerate(video_iterator)
     ]
@@ -193,8 +195,8 @@ def spectrogram_image(
     segment: Segment = Segment(0, -1),
     size: int = 224,
     max_samples: int = 15000,
-    img_format: str = None,
-    **img_kwargs,
+    image_format: str = None,
+    **image_kwargs,
 ) -> Image:
     """Applies ffmpeg filter to generate spectrogram image.
 
@@ -210,10 +212,10 @@ def spectrogram_image(
             Yield at most this many frames (-1 means no max)
     size : Int
         Sets resolution of frequency, time spectrogram image.
-    img_format : str, optional
+    image_format : str, optional
         The image format to save as. See
         `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
-    img_kwargs : dict, optional
+    image_kwargs : dict, optional
         Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
 
     Return
@@ -257,6 +259,6 @@ def spectrogram_image(
     return Image.from_array(
         np.frombuffer(output, np.uint8).reshape([size, size, 3]),
         output_uri,
-        format=img_format,
-        **img_kwargs,
+        format=image_format,
+        **image_kwargs,
     )

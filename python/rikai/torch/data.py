@@ -27,8 +27,10 @@ import semver
 import torch
 from torch.utils.data import IterableDataset
 
-# Rikai
 import rikai.parquet
+
+# Rikai
+from rikai.conf import CONF_RIKAI_CACHEURI
 from rikai.spark.utils import df_to_rikai
 from rikai.torch.transforms import convert_tensor, RikaiToTensor
 
@@ -338,9 +340,12 @@ def _get_cache_uri(df: "pyspark.sql.DataFrame") -> str:
     cache_uri: str
         The uri to write the DataFrame to
     """
-    cache_root_uri = rikai.options.rikai.cache_uri
+    cache_root_uri = df.rdd.ctx.getConf().get(CONF_RIKAI_CACHEURI)
     if not cache_root_uri:
-        from rikai.conf import CONF_RIKAI_CACHEURI
-
-        cache_root_uri = df.rdd.ctx.getConf().get(CONF_RIKAI_CACHEURI)
+        cache_root_uri = rikai.options.rikai.cache_uri
+    if not cache_root_uri:
+        raise ValueError(
+            "Could not retrieve rikai cache_uri from either "
+            "spark or rikai configurations."
+        )
     return os.path.join(cache_root_uri, str(uuid.uuid4()))

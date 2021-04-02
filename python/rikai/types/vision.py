@@ -44,7 +44,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
 
     Parameters
     ----------
-    image : bytes, str, or :py:class:`~pathlib.Path`
+    image : bytes, file-like object, str or :py:class:`~pathlib.Path`
         It can be the content of image, or a URI / Path of an image.
     """
 

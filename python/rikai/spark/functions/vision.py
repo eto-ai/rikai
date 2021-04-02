@@ -86,9 +86,9 @@ def numpy_to_image(
         The base directory to copy the image to.
     format : str, optional
         The image format to save as. See
-        `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
+        `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details. #pylint: disable=line-too-long
     kwargs : dict, optional
-        Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
+        Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_. #pylint: disable=line-too-long
 
     Return
     ------
@@ -142,9 +142,9 @@ def video_to_images(
         See: https://pythonhosted.org/Pafy/index.html#Pafy.Pafy.getbest
     img_format : str, optional
         The image format to save as. See
-        `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
+        `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details. #pylint: disable=line-too-long
     img_kwargs : dict, optional
-        Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
+        Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_. #pylint: disable=line-too-long
 
     Return
     ------
@@ -212,9 +212,9 @@ def spectrogram_image(
         Sets resolution of frequency, time spectrogram image.
     img_format : str, optional
         The image format to save as. See
-        `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
+        `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details. #pylint: disable=line-too-long
     img_kwargs : dict, optional
-        Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
+        Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_. #pylint: disable=line-too-long
 
     Return
     ------

@@ -49,11 +49,7 @@ def assert_area_equals(array, df):
 def test_areas(spark: SparkSession):
     """Test calculating bounding box's area."""
     df = spark.createDataFrame(
-        [
-            (Box2d(1, 2, 2.0, 3.0),),
-            (Box2d(10, 12, 11.0, 17.0),),
-        ],
-        ["bbox"],
+        [(Box2d(1, 2, 2.0, 3.0),), (Box2d(10, 12, 11.0, 17.0),),], ["bbox"],
     )
     df = df.withColumn("area", area(col("bbox")))
     assert_area_equals([1.0, 5.0], df)
@@ -102,15 +98,14 @@ def test_image_copy(spark: SparkSession, tmpdir):
     os.makedirs(os.path.join(tmpdir, "out"))
 
     df = spark.createDataFrame(
-        [(Image(source_image),)], ["image"]
+        [(Image(uri=source_image),)], ["image"]
     )  # type: pyspark.sql.DataFrame
     df = df.withColumn(
-        "image",
-        image_copy(col("image"), lit(os.path.join(tmpdir, "out/"))),
+        "image", image_copy(col("image"), lit(os.path.join(tmpdir, "out/"))),
     )
     data = df.collect()  # force lazy calculation
     out_file = os.path.join(tmpdir, "out", "source_image")
-    assert Image(out_file) == data[0].image
+    assert Image(uri=out_file) == data[0].image
 
     with open(os.path.join(out_file)) as fobj:
         assert fobj.read() == "abc"

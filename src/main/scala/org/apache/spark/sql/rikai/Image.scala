@@ -55,6 +55,7 @@ private[spark] class ImageType extends UserDefinedType[Image] {
             case false => Some(row.getString(1).toString)
           }
         )
+      case _ => throw new IllegalArgumentException()
     }
 
   override def userClass: Class[Image] = classOf[Image]

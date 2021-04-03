@@ -50,7 +50,7 @@ def generate_udf(
     """
     options = {} if options is None else options
     use_gpu = options.get("device", "cpu") == "gpu"
-    num_workers = int(options.get("num_workers", max(os.cpu_count(), 8)))
+    num_workers = int(options.get("num_workers", min(os.cpu_count(), 8)))
     batch_size = int(options.get("batch_size", 4))
 
     def torch_inference_udf(

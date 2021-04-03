@@ -25,6 +25,9 @@ from torch.utils.data import DataLoader
 from rikai.io import open_uri
 from rikai.torch.pandas import PandasDataset
 
+DEFAULT_NUM_WORKERS = 8
+DEFAULT_BATCH_SIZE = 4
+
 
 def generate_udf(
     model_uri: Union[str, Path],
@@ -50,8 +53,10 @@ def generate_udf(
     """
     options = {} if options is None else options
     use_gpu = options.get("device", "cpu") == "gpu"
-    num_workers = int(options.get("num_workers", min(os.cpu_count(), 8)))
-    batch_size = int(options.get("batch_size", 4))
+    num_workers = int(
+        options.get("num_workers", min(os.cpu_count(), DEFAULT_NUM_WORKERS))
+    )
+    batch_size = int(options.get("batch_size", DEFAULT_BATCH_SIZE))
 
     def torch_inference_udf(
         iter: Iterator[pd.DataFrame],

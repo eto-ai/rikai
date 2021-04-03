@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import secrets
 from typing import Any, Callable, Dict, IO, Mapping, Optional, Union
 
 import yaml
@@ -22,7 +21,12 @@ from pyspark.sql import SparkSession
 from rikai.internal.reflection import find_class
 from rikai.io import open_uri
 from rikai.logging import logger
-from rikai.spark.sql.codegen.base import Registry
+from rikai.spark.sql.codegen.base import (
+    ModelSpec,
+    register_udf,
+    Registry,
+    udf_from_spec,
+)
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
 
@@ -33,7 +37,7 @@ SPEC_SCHEMA = {
     "type": "object",
     "properties": {
         "version": {
-            "type": "number",
+            "type": "string",
             "description": "Model SPEC format version",
         },
         "name": {"type": "string", "description": "Model name"},
@@ -59,7 +63,7 @@ SPEC_SCHEMA = {
 }
 
 
-class ModelSpec:
+class FileModelSpec(ModelSpec):
     """Model Spec.
 
     Parameters
@@ -104,27 +108,27 @@ class ModelSpec:
             raise SpecError(e.message) from e
 
     @property
-    def version(self):
+    def version(self) -> str:
         """Returns spec version."""
-        return self._spec["version"]
+        return str(self._spec["version"])
 
     @property
-    def uri(self):
+    def uri(self) -> str:
         """Return Model URI"""
         return self._spec["model"]["uri"]
 
     @property
-    def flavor(self):
+    def flavor(self) -> str:
         """Model flavor"""
         return self._spec["model"].get("flavor", "")
 
     @property
-    def schema(self):
+    def schema(self) -> str:
         """Return the output schema of the model."""
         return parse_schema(self._spec["schema"])
 
     @property
-    def options(self):
+    def options(self) -> Dict[str, Any]:
         """Model options"""
         return self._options
 
@@ -176,30 +180,9 @@ def codegen_from_yaml(
         Spark UDF function name for the generated data.
     """
     with open_uri(uri) as fobj:
-        spec = ModelSpec(fobj, options=options)
-
-    if spec.version != 1.0:
-        raise SpecError(
-            f"Only spec version 1.0 is supported, got {spec.version}"
-        )
-
-    if spec.flavor == "pytorch":
-        from rikai.spark.sql.codegen.pytorch import generate_udf
-
-        udf = generate_udf(
-            spec.uri,
-            spec.schema,
-            spec.options,
-            pre_processing=spec.pre_processing,
-            post_processing=spec.post_processing,
-        )
-    else:
-        raise SpecError(f"Unsupported model flavor: {spec.flavor}")
-
-    func_name = f"{name}_{secrets.token_hex(4)}"
-    spark.udf.register(func_name, udf)
-    logger.info(f"Created model inference pandas_udf with name {func_name}")
-    return func_name
+        spec = FileModelSpec(fobj, options=options)
+    udf = udf_from_spec(spec)
+    return register_udf(spark, udf, name)
 
 
 class FileSystemRegistry(Registry):

@@ -28,7 +28,7 @@ from pyspark.sql.types import (
     StructType,
 )
 
-from rikai.spark.sql.codegen.fs import ModelSpec
+from rikai.spark.sql.codegen.fs import FileModelSpec
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
 
@@ -47,7 +47,7 @@ def resnet_spec(tmp_path_factory):
     torch.save(resnet, model_uri)
 
     spec_yaml = """
-version: 1.0
+version: "1.0"
 name: resnet
 model:
   uri: {}
@@ -67,9 +67,9 @@ transforms:
 
 
 def test_validate_yaml_spec():
-    ModelSpec(
+    FileModelSpec(
         {
-            "version": 1.2,
+            "version": "1.2",
             "name": "test_yaml_model",
             "schema": "long",
             "model": {
@@ -86,10 +86,10 @@ def test_validate_yaml_spec():
 
 def test_validate_misformed_spec():
     with pytest.raises(SpecError):
-        ModelSpec({})
+        FileModelSpec({})
 
     with pytest.raises(SpecError, match=".*version' is a required property.*"):
-        ModelSpec(
+        FileModelSpec(
             {
                 "name": "test_yaml_model",
                 "schema": "long",
@@ -98,18 +98,18 @@ def test_validate_misformed_spec():
         )
 
     with pytest.raises(SpecError, match=".*'model' is a required property.*"):
-        ModelSpec(
+        FileModelSpec(
             {
-                "version": 1.0,
+                "version": "1.0",
                 "name": "test_yaml_model",
                 "schema": "long",
             },
         )
 
     with pytest.raises(SpecError, match=".*'uri' is a required property.*"):
-        ModelSpec(
+        FileModelSpec(
             {
-                "version": 1.0,
+                "version": "1.0",
                 "name": "test_yaml_model",
                 "schema": "long",
                 "model": {},

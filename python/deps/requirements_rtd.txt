@@ -1,6 +1,11 @@
+antlr4-python3-runtime
 numpy
+opencv-python
 pandas
 Pillow
-pyspark>=3
 pyarrow>=2.0
 pycocotools==2.0.2
+pyspark>=3
+pytorch
+pyyaml
+semver

@@ -117,7 +117,6 @@ def test_validate_misformed_spec():
         )
 
 
-@pytest.mark.skip(reason="disable flaky test GH#50")
 @pytest.mark.timeout(60)
 def test_yaml_model(spark: SparkSession, resnet_spec: str):
     spark.sql("CREATE MODEL resnet_m USING 'file://{}'".format(resnet_spec))

@@ -17,11 +17,14 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, IO, Mapping, Optional, Union
 
 import pandas as pd
+from jsonschema import validate, ValidationError
 from pyspark.sql import SparkSession
 from pyspark.sql.types import DataType
 
+from rikai.internal.reflection import find_class
 from rikai.logging import logger
 from rikai.spark.sql.exceptions import SpecError
+from rikai.spark.sql.schema import parse_schema
 
 
 class Registry(ABC):
@@ -43,10 +46,58 @@ class Registry(ABC):
         """
 
 
-class ModelSpec(ABC):
-    """Base class of a Model spec"""
+# JSON schema specification for the model specifications
+# used to validate model spec input
+MODEL_SPEC_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "version": {
+            "type": "string",
+            "description": "Model SPEC format version",
+        },
+        "name": {"type": "string", "description": "Model name"},
+        "schema": {"type": "string"},
+        "model": {
+            "type": "object",
+            "description": "model description",
+            "properties": {
+                "uri": {"type": "string"},
+                "flavor": {"type": "string"},
+            },
+            "required": ["uri"],
+        },
+        "transforms": {
+            "type": "object",
+            "properties": {
+                "pre": {"type": "string"},
+                "post": {"type": "string"},
+            },
+        },
+    },
+    "required": ["version", "schema", "model"],
+}
 
-    @abstractmethod
+
+class ModelSpec(ABC):
+    """Model Spec.
+
+    Parameters
+    ----------
+    spec : dict
+        Dictionary representation of an input spec
+    validate : bool, default True.
+        Validate the spec during construction. Default ``True``.
+    """
+
+    def __init__(
+        self,
+        spec: Dict[str, Any],
+        validate: bool = True,
+    ):
+        self._spec = spec
+        if validate:
+            self.validate()
+
     def validate(self):
         """Validate model spec
 
@@ -55,41 +106,58 @@ class ModelSpec(ABC):
         SpecError
             If the spec is not well-formatted.
         """
+        logger.debug("Validating spec: %s", self._spec)
+        try:
+            validate(instance=self._spec, schema=MODEL_SPEC_SCHEMA)
+        except ValidationError as e:
+            raise SpecError(e.message) from e
 
     @property
-    @abstractmethod
     def version(self) -> str:
         """Returns spec version."""
+        return str(self._spec["version"])
 
     @property
-    @abstractmethod
     def uri(self) -> str:
         """Return Model URI"""
+        return self._spec["model"]["uri"]
 
     @property
-    @abstractmethod
     def flavor(self) -> str:
         """Model flavor"""
+        return self._spec["model"].get("flavor", "")
 
     @property
-    @abstractmethod
-    def schema(self) -> DataType:
+    def schema(self) -> str:
         """Return the output schema of the model."""
+        return parse_schema(self._spec["schema"])
 
     @property
-    @abstractmethod
-    def options(self) -> Dict[str, str]:
+    def options(self) -> Dict[str, Any]:
         """Model options"""
+        return self._spec["options"]
 
     @property
-    @abstractmethod
     def pre_processing(self) -> Optional[Callable]:
         """Return pre-processing transform if exists"""
+        if (
+            "transforms" not in self._spec
+            or "pre" not in self._spec["transforms"]
+        ):
+            return None
+        f = find_class(self._spec["transforms"]["pre"])
+        return f
 
     @property
-    @abstractmethod
     def post_processing(self) -> Optional[Callable]:
         """Return post-processing transform if exists"""
+        if (
+            "transforms" not in self._spec
+            or "post" not in self._spec["transforms"]
+        ):
+            return None
+        f = find_class(self._spec["transforms"]["post"])
+        return f
 
 
 def udf_from_spec(spec: ModelSpec):

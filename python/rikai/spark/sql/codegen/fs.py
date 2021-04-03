@@ -15,10 +15,8 @@
 from typing import Any, Callable, Dict, IO, Mapping, Optional, Union
 
 import yaml
-from jsonschema import validate, ValidationError
 from pyspark.sql import SparkSession
 
-from rikai.internal.reflection import find_class
 from rikai.io import open_uri
 from rikai.logging import logger
 from rikai.spark.sql.codegen.base import (
@@ -28,39 +26,10 @@ from rikai.spark.sql.codegen.base import (
     udf_from_spec,
 )
 from rikai.spark.sql.exceptions import SpecError
-from rikai.spark.sql.schema import parse_schema
 
 __all__ = ["FileSystemRegistry"]
 
 # YAML-Spec SCHEMA
-SPEC_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "version": {
-            "type": "string",
-            "description": "Model SPEC format version",
-        },
-        "name": {"type": "string", "description": "Model name"},
-        "schema": {"type": "string"},
-        "model": {
-            "type": "object",
-            "description": "model description",
-            "properties": {
-                "uri": {"type": "string"},
-                "flavor": {"type": "string"},
-            },
-            "required": ["uri"],
-        },
-        "transforms": {
-            "type": "object",
-            "properties": {
-                "pre": {"type": "string"},
-                "post": {"type": "string"},
-            },
-        },
-    },
-    "required": ["version", "schema", "model"],
-}
 
 
 class FileModelSpec(ModelSpec):
@@ -85,74 +54,10 @@ class FileModelSpec(ModelSpec):
     ):
         if not isinstance(spec, Mapping):
             spec = yaml.load(spec, Loader=yaml.FullLoader)
-        self._spec = spec
-        self._options: Dict[str, Any] = self._spec.get("options", {})
+        spec.setdefault("options", {})
         if options:
             self._options.update(options)
-
-        if validate:
-            self.validate()
-
-    def validate(self):
-        """Validate model spec
-
-        Raises
-        ------
-        SpecError
-            If the spec is not well-formatted.
-        """
-        logger.debug("Validating spec: %s", self._spec)
-        try:
-            validate(instance=self._spec, schema=SPEC_SCHEMA)
-        except ValidationError as e:
-            raise SpecError(e.message) from e
-
-    @property
-    def version(self) -> str:
-        """Returns spec version."""
-        return str(self._spec["version"])
-
-    @property
-    def uri(self) -> str:
-        """Return Model URI"""
-        return self._spec["model"]["uri"]
-
-    @property
-    def flavor(self) -> str:
-        """Model flavor"""
-        return self._spec["model"].get("flavor", "")
-
-    @property
-    def schema(self) -> str:
-        """Return the output schema of the model."""
-        return parse_schema(self._spec["schema"])
-
-    @property
-    def options(self) -> Dict[str, Any]:
-        """Model options"""
-        return self._options
-
-    @property
-    def pre_processing(self) -> Optional[Callable]:
-        """Return pre-processing transform if exists"""
-        if (
-            "transforms" not in self._spec
-            or "pre" not in self._spec["transforms"]
-        ):
-            return None
-        f = find_class(self._spec["transforms"]["pre"])
-        return f
-
-    @property
-    def post_processing(self) -> Optional[Callable]:
-        """Return post-processing transform if exists"""
-        if (
-            "transforms" not in self._spec
-            or "post" not in self._spec["transforms"]
-        ):
-            return None
-        f = find_class(self._spec["transforms"]["post"])
-        return f
+        super().__init__(spec, validate=validate)
 
 
 def codegen_from_yaml(

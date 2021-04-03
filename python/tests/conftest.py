@@ -12,10 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import uuid
 from pathlib import Path
 
 # Third Party
 import pytest
+import torch
+import torchvision
 from pyspark.sql import SparkSession
 from torch.utils.data import DataLoader  # Prevent DataLoader hangs
 
@@ -60,3 +63,16 @@ def spark(tmp_path_factory) -> SparkSession:
 @pytest.fixture
 def asset_path() -> Path:
     return Path(__file__).parent / "assets"
+
+
+@pytest.fixture(scope="session")
+def resnet_model_uri(tmp_path_factory):
+    # Prepare model
+    tmp_path = tmp_path_factory.mktemp(str(uuid.uuid4()))
+    resnet = torchvision.models.detection.fasterrcnn_resnet50_fpn(
+        pretrained=True,
+        progress=False,
+    )
+    model_uri = tmp_path / "resnet.pth"
+    torch.save(resnet, model_uri)
+    return model_uri

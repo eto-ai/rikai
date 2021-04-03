@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 from binascii import b2a_base64
+import filecmp
 
 import numpy as np
 import pytest
@@ -42,6 +43,29 @@ def test_show_embedded_jpeg(tmp_path):
     with open(uri, "rb") as fh:
         expected = b2a_base64(fh.read()).decode("ascii")
         assert result == expected
+
+
+def test_format_kwargs(tmp_path):
+    data = np.random.random((100, 100))
+    rescaled = (255.0 / data.max() * (data - data.min())).astype(np.uint8)
+    result_uri = tmp_path / "result.jpg"
+    Image.from_array(rescaled, result_uri, format="jpeg", optimize=True)
+
+    expected_uri = tmp_path / "expected.jpg"
+    PILImage.fromarray(rescaled).save(
+        expected_uri, format="jpeg", optimize=True
+    )
+
+    assert filecmp.cmp(result_uri, expected_uri)
+
+    result_uri = tmp_path / "result.png"
+    Image.from_array(rescaled, result_uri, format="png", compress_level=1)
+
+    expected_uri = tmp_path / "expected.png"
+    PILImage.fromarray(rescaled).save(
+        expected_uri, format="png", compress_level=1
+    )
+    assert filecmp.cmp(result_uri, expected_uri)
 
 
 @pytest.mark.timeout(30)

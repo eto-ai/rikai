@@ -6,6 +6,6 @@ Pillow
 pyarrow>=2.0
 pycocotools==2.0.2
 pyspark>=3
-pytorch
+torch
 pyyaml
 semver

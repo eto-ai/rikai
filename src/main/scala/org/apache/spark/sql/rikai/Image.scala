@@ -28,21 +28,34 @@ private[spark] class ImageType extends UserDefinedType[Image] {
   override def sqlType: DataType =
     StructType(
       Seq(
-        StructField("uri", StringType, false)
+        StructField("data", BinaryType, true),
+        StructField("uri", StringType, true)
       )
     )
 
   override def pyUDT: String = "rikai.spark.types.vision.ImageType"
 
   override def serialize(obj: Image): Any = {
-    val row = new GenericInternalRow(1);
-    row.update(0, UTF8String.fromString(obj.uri))
+    val row = new GenericInternalRow(2);
+    obj.data.map(x => row.update(0, x))
+    obj.uri.map(x => row.update(1, UTF8String.fromString(x)))
     row
   }
 
   override def deserialize(datum: Any): Image =
     datum match {
-      case row: InternalRow => new Image(row.getString(0).toString())
+      case row: InternalRow =>
+        new Image(
+          row.isNullAt(0) match {
+            case true  => None
+            case false => Some(row.getBinary(0))
+          },
+          row.isNullAt(1) match {
+            case true  => None
+            case false => Some(row.getString(1).toString)
+          }
+        )
+      case _ => throw new IllegalArgumentException()
     }
 
   override def userClass: Class[Image] = classOf[Image]
@@ -58,6 +71,6 @@ private[spark] class ImageType extends UserDefinedType[Image] {
   * @param uri
   */
 @SQLUserDefinedType(udt = classOf[ImageType])
-class Image(val uri: String) {
+class Image(val data: Option[Array[Byte]], val uri: Option[String]) {
   override def toString: String = s"Image(uri='$uri')"
 }

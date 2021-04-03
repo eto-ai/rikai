@@ -18,6 +18,7 @@
 
 from __future__ import annotations
 
+from io import IOBase
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Union
@@ -43,15 +44,24 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
 
     Parameters
     ----------
-    uri : str
-        The URI pointed to an Image stored on external storage.
+    image : bytes, file-like object, str or :py:class:`~pathlib.Path`
+        It can be the content of image, or a URI / Path of an image.
     """
 
     __UDT__ = ImageType()
 
-    def __init__(self, uri: Union[str, Path]):
-        super().__init__(uri)
-        self._cached_data = None
+    def __init__(
+        self,
+        image: Union[bytes, bytearray, IOBase, str, Path],
+    ):
+        data, uri = None, None
+        if isinstance(image, IOBase):
+            data = image.read()
+        elif isinstance(image, (bytes, bytearray)):
+            data = image
+        else:
+            uri = image
+        super().__init__(data=data, uri=uri)
 
     @classmethod
     def from_array(
@@ -172,8 +182,5 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
 
     def to_numpy(self) -> np.ndarray:
         """Convert this image into an :py:class:`numpy.ndarray`."""
-        if self._cached_data is None:
-            with self.to_pil() as pil_img:
-                self._cached_data = np.asarray(pil_img)
-        assert self._cached_data is not None
-        return self._cached_data
+        with self.to_pil() as pil_img:
+            return np.asarray(pil_img)

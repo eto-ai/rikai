@@ -98,11 +98,11 @@ def test_images(spark: SparkSession, tmp_path):
     expected = [
         {
             "id": 1,
-            "image": Image(uri="s3://123"),
+            "image": Image("s3://123"),
         },
         {
             "id": 2,
-            "image": Image(uri="s3://abc"),
+            "image": Image("s3://abc"),
         },
     ]
     df = spark.createDataFrame(expected)

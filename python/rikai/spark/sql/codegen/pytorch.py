@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import os
 from pathlib import Path
 from typing import Callable, Dict, Iterator, Optional, Union
 
@@ -49,7 +50,7 @@ def generate_udf(
     """
     options = {} if options is None else options
     use_gpu = options.get("device", "cpu") == "gpu"
-    num_workers = int(options.get("num_workers", 4))
+    num_workers = int(options.get("num_workers", os.cpu_count()))
     batch_size = int(options.get("batch_size", 4))
 
     def torch_inference_udf(

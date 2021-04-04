@@ -23,12 +23,12 @@ __all__ = ["logger"]
 logger = None
 
 
-def _set_logger():
+def _set_logger(level=logging.INFO):
     global logger
     if logger is not None:
         return logger
     logger = logging.getLogger("Rikai")
-    logger.setLevel(logging.INFO)
+    logger.setLevel(level)
 
     handler = logging.StreamHandler()
     handler.setFormatter(logging.Formatter(_LOG_FORMAT))

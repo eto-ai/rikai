@@ -146,7 +146,7 @@ class ModelSpec(ABC):
         ):
             return None
         f = find_class(self._spec["transforms"]["pre"])
-        return f
+        return f(self.options)
 
     @property
     def post_processing(self) -> Optional[Callable]:
@@ -157,7 +157,7 @@ class ModelSpec(ABC):
         ):
             return None
         f = find_class(self._spec["transforms"]["post"])
-        return f
+        return f(self.options)
 
 
 def udf_from_spec(spec: ModelSpec):

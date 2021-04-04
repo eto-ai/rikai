@@ -12,38 +12,45 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import Any, Dict, Callable
+
 from torchvision import transforms as T
 
 from rikai.contrib.torch.transforms.utils import uri_to_pil
 
 __all__ = ["pre_processing", "post_processing"]
 
-pre_processing = T.Compose(
-    [
-        uri_to_pil,
-        T.Resize(256),
-        T.CenterCrop(224),
-        T.ToTensor(),
-    ]
-)
+
+def pre_processing(options: Dict[str, Any]) -> Callable:
+    return T.Compose(
+        [
+            uri_to_pil,
+            T.Resize(256),
+            T.CenterCrop(224),
+            T.ToTensor(),
+        ]
+    )
 
 
-def post_processing(batch):
-    results = []
-    for predicts in batch:
-        predict_result = {
-            "boxes": [],
-            "labels": [],
-            "scores": [],
-        }
-        for box, label, score in zip(
-            predicts["boxes"].tolist(),
-            predicts["labels"].tolist(),
-            predicts["scores"].tolist(),
-        ):
-            predict_result["boxes"].append(box)
-            predict_result["labels"].append(label)
-            predict_result["scores"].append(score)
+def post_processing(options: Dict[str, Any]) -> Callable:
+    def post_process_func(batch):
+        results = []
+        for predicts in batch:
+            predict_result = {
+                "boxes": [],
+                "labels": [],
+                "scores": [],
+            }
+            for box, label, score in zip(
+                predicts["boxes"].tolist(),
+                predicts["labels"].tolist(),
+                predicts["scores"].tolist(),
+            ):
+                predict_result["boxes"].append(box)
+                predict_result["labels"].append(label)
+                predict_result["scores"].append(score)
 
-        results.append(predict_result)
-    return results
+            results.append(predict_result)
+        return results
+
+    return post_process_func

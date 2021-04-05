@@ -117,7 +117,7 @@ class MlflowModelSpec(ModelSpec):
         for key, value in tags.items():
             key = key.lower().strip()
             if key.startswith("rikai.option."):
-                options[key[len("rikai.option.") :]] = value
+                options[key[len("rikai.option."):]] = value
         if len(options) > 0:
             spec["options"] = options
 

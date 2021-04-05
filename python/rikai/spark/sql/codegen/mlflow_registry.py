@@ -58,6 +58,7 @@ class MlflowModelSpec(ModelSpec):
         self,
         run: "mlflow.entities.Run",
         options: Optional[Dict[str, Any]] = None,
+        tracking_uri: str = None,
         validate: bool = True,
     ):
         self._run = run
@@ -67,6 +68,7 @@ class MlflowModelSpec(ModelSpec):
             spec["options"].update(options)
         super().__init__(spec, validate=validate)
         self._artifact = None
+        self.tracking_uri = tracking_uri
 
     @property
     def run_id(self):
@@ -84,9 +86,8 @@ class MlflowModelSpec(ModelSpec):
     def artifact(self) -> Any:
         """Return Model artifact"""
         if self._artifact is None:
-            self._artifact = getattr(mlflow, self.flavor).load_model(
-                "runs://" + self.run_id + "/" + self.uri
-            )
+            mlflow.set_tracking_uri(self.tracking_uri)
+            self._artifact = getattr(mlflow, self.flavor).load_model(self.uri)
         return self._artifact
 
     def _run_to_spec_dict(self):
@@ -125,7 +126,7 @@ class MlflowModelSpec(ModelSpec):
         # uri (to the model artifact)
         if "rikai.model.artifact_path" in tags:
             spec["model"]["uri"] = os.path.join(
-                "runs://",
+                "runs:/",
                 self._run.info.run_id,
                 tags["rikai.model.artifact_path"],
             )
@@ -135,6 +136,7 @@ class MlflowModelSpec(ModelSpec):
 def codegen_from_run(
     spark: SparkSession,
     run: mlflow.entities.Run,
+    tracking_uri: str,
     name: Optional[str] = None,
     options: Optional[Dict[str, str]] = None,
 ) -> str:
@@ -157,7 +159,8 @@ def codegen_from_run(
         Spark UDF function name for the generated data.
     """
     try:
-        spec = MlflowModelSpec(run, options=options)
+        spec = MlflowModelSpec(run, options=options,
+                               tracking_uri=tracking_uri)
     except Exception:
         to_spec_msg = (
             "Could not create well-formed ModelSpec from run {}."
@@ -235,7 +238,8 @@ class MlflowRegistry(Registry):
         )
         client = MlflowClient(tracking_uri)
         run = get_run(client, uri)
-        func_name = codegen_from_run(self._spark, run, name, options)
+        func_name = codegen_from_run(self._spark, run, tracking_uri, name,
+                                     options)
         model = self._jvm.ai.eto.rikai.sql.model.mlflow.MlflowModel(
             name, run.info.run_id, func_name
         )

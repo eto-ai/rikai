@@ -29,8 +29,7 @@ from rikai.spark.sql.schema import parse_schema
 def mlflow_client(
     tmp_path_factory, resnet_model_uri: str, spark: SparkSession
 ):
-    db_uri = str(tmp_path_factory.mktemp("mlflow") / "mlruns.db")
-    tracking_uri = "sqlite:///" + db_uri
+    tracking_uri = 'http://0.0.0.0:5000'
     mlflow.set_tracking_uri(tracking_uri)
     # simpliest
     with mlflow.start_run():
@@ -58,14 +57,14 @@ def mlflow_client(
             schema,
             pre_processing,
             post_processing,
-            registered_model_name="test",
+            registered_model_name="rikai-test",
         )
     spark.conf.set("rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri)
     return mlflow.tracking.MlflowClient(tracking_uri)
 
 
 def test_modelspec(mlflow_client, resnet_model_uri):
-    run_id = mlflow_client.search_model_versions("name='test'")[0].run_id
+    run_id = mlflow_client.search_model_versions("name='rikai-test'")[0].run_id
     run = mlflow_client.get_run(run_id=run_id)
     spec = MlflowModelSpec(run)
     assert spec.flavor == "pytorch"
@@ -83,14 +82,14 @@ def test_modelspec(mlflow_client, resnet_model_uri):
         "rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn."
         "post_processing"
     )
-    assert spec.uri == "runs://" + run_id + "/model"
+    assert spec.uri == "runs:/" + run_id + "/model"
 
 
 @pytest.mark.timeout(60)
 def test_mlflow_model_from_runid(
     spark: SparkSession, mlflow_client: MlflowClient
 ):
-    run_id = mlflow_client.search_model_versions("name='test'")[0].run_id
+    run_id = mlflow_client.search_model_versions("name='rikai-test'")[0].run_id
     spark.sql("CREATE MODEL resnet_m_foo USING 'mlflow://{}'".format(run_id))
     check_ml_predict(spark, "resnet_m_foo")
 

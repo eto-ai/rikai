@@ -37,7 +37,7 @@ from rikai.spark.sql.codegen.base import (
 )
 from rikai.spark.sql.exceptions import SpecError
 
-__all__ = ["MLFlowRegistry"]
+__all__ = ["MlflowRegistry"]
 
 
 class MlflowModelSpec(ModelSpec):
@@ -237,7 +237,7 @@ class MlflowRegistry(Registry):
         run = get_run(client, uri)
         func_name = codegen_from_run(self._spark, run, name, options)
         model = self._jvm.ai.eto.rikai.sql.model.mlflow.MlflowModel(
-            name, run.run_id, func_name
+            name, run.info.run_id, func_name
         )
         return model
 

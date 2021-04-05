@@ -43,7 +43,9 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     """
     use_gpu = spec.options.get("device", "cpu") == "gpu"
     num_workers = int(
-        spec.options.get("num_workers", min(os.cpu_count(), DEFAULT_NUM_WORKERS))
+        spec.options.get(
+            "num_workers", min(os.cpu_count(), DEFAULT_NUM_WORKERS)
+        )
     )
     batch_size = int(spec.options.get("batch_size", DEFAULT_BATCH_SIZE))
 

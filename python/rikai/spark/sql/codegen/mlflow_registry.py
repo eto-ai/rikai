@@ -24,8 +24,8 @@ except ImportError:
         "`pip install mlflow` explicitly or install "
         "the correct extras like `pip install rikai[mlflow]`"
     )
-from mlflow.tracking import MlflowClient
 from mlflow.exceptions import MlflowException
+from mlflow.tracking import MlflowClient
 from pyspark.sql import SparkSession
 
 from rikai.logging import logger
@@ -85,7 +85,8 @@ class MlflowModelSpec(ModelSpec):
         """Return Model artifact"""
         if self._artifact is None:
             self._artifact = getattr(mlflow, self.flavor).load_model(
-                'runs://' + self.run_id + '/' + self.uri)
+                "runs://" + self.run_id + "/" + self.uri
+            )
         return self._artifact
 
     def _run_to_spec_dict(self):
@@ -123,8 +124,10 @@ class MlflowModelSpec(ModelSpec):
         # uri (to the model artifact)
         if "rikai.model.artifact_path" in tags:
             spec["model"]["uri"] = os.path.join(
-                'runs://', self._run.info.run_id,
-                tags["rikai.model.artifact_path"])
+                "runs://",
+                self._run.info.run_id,
+                tags["rikai.model.artifact_path"],
+            )
         return spec
 
 
@@ -164,11 +167,16 @@ def codegen_from_run(
     return register_udf(spark, udf, name)
 
 
-def log_model(model: Any, artifact_path: str, flavor: str, schema: str,
-              pre_processing: Optional[str] = None,
-              post_processing: Optional[str] = None,
-              registered_model_name: Optional[str] = None,
-              **kwargs):
+def log_model(
+    model: Any,
+    artifact_path: str,
+    flavor: str,
+    schema: str,
+    pre_processing: Optional[str] = None,
+    post_processing: Optional[str] = None,
+    registered_model_name: Optional[str] = None,
+    **kwargs,
+):
     """Convenience function to log the model with information needed by rikai
 
     Parameters
@@ -193,15 +201,18 @@ def log_model(model: Any, artifact_path: str, flavor: str, schema: str,
     # no need to set the tracking uri here since this is intended to be called
     # inside the training loop within mlflow.start_run
     getattr(mlflow, flavor).log_model(
-        model, artifact_path, registered_model_name=registered_model_name,
-        **kwargs)
+        model,
+        artifact_path,
+        registered_model_name=registered_model_name,
+        **kwargs,
+    )
     tags = {
         "rikai.spec.version": "1.0",
         "rikai.model.flavor": flavor,
         "rikai.output.schema": schema,
         "rikai.transforms.pre": pre_processing,
         "rikai.transforms.post": post_processing,
-        "rikai.model.artifact_path": artifact_path
+        "rikai.model.artifact_path": artifact_path,
     }
     mlflow.set_tags(tags)
 
@@ -219,7 +230,8 @@ class MlflowRegistry(Registry):
     def resolve(self, uri: str, name: str, options: Dict[str, str]):
         logger.info(f"Resolving model {name} from {uri}")
         tracking_uri = spark.conf.get(
-            'rikai.sql.ml.registry.mlflow.tracking_uri')
+            "rikai.sql.ml.registry.mlflow.tracking_uri"
+        )
         client = MlflowClient(tracking_uri)
         run = get_run(client, uri)
         func_name = codegen_from_run(self._spark, run, name, options)
@@ -240,13 +252,16 @@ def get_run(client: MlflowClient, uri: str) -> mlflow.entities.Run:
         if parsed.path and parsed.path[1:].isdigit():
             # we can support a reference to a registered model and version
             # 'mlflow://<model_name>/<version>'
-            return client.get_run(client.get_model_version(
-                runid_or_model, int(parsed.path[1:])).run_id)
+            return client.get_run(
+                client.get_model_version(
+                    runid_or_model, int(parsed.path[1:])
+                ).run_id
+            )
 
         # Or just use the latest version (by stage)
         if not parsed.path:
             # 'mlflow://<model_name>'
-            stage = 'none'
+            stage = "none"
         else:
             # 'mlflow://<model_name>/<stage>'
             stage = parsed.path[1:].lower()

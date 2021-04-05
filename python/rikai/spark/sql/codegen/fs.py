@@ -99,7 +99,6 @@ class FileSystemRegistry(Registry):
 
     def resolve(self, uri: str, name: str, options: Dict[str, str]):
         logger.info(f"Resolving model {name} from {uri}")
-
         if uri.endswith(".yml") or uri.endswith(".yaml"):
             func_name = codegen_from_yaml(self._spark, uri, name, options)
         else:

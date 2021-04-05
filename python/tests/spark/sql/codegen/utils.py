@@ -24,7 +24,7 @@ from pyspark.sql.types import (
 from rikai.spark.sql.schema import parse_schema
 
 
-def check_ml_predict(spark: SparkSession):
+def check_ml_predict(spark: SparkSession, model_name: str):
 
     # TODO: Replace uri string with Image class after GH#90 is released with
     # the upstream spark
@@ -43,7 +43,7 @@ def check_ml_predict(spark: SparkSession):
     df.createOrReplaceTempView("df")
 
     predictions = spark.sql(
-        "SELECT ML_PREDICT(resnet_m, uri) as predictions FROM df"
+        "SELECT ML_PREDICT(model_name, uri) as predictions FROM df"
     )
     predictions.show()
     assert predictions.schema == StructType(

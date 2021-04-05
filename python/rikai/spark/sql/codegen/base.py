@@ -126,6 +126,11 @@ class ModelSpec(ABC):
         return self._spec["model"]["uri"]
 
     @property
+    def artifact(self) -> Any:
+        """Return Model artifact"""
+        return None
+
+    @property
     def flavor(self) -> str:
         """Model flavor"""
         return self._spec["model"].get("flavor", "")

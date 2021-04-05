@@ -43,7 +43,7 @@ def check_ml_predict(spark: SparkSession, model_name: str):
     df.createOrReplaceTempView("df")
 
     predictions = spark.sql(
-        "SELECT ML_PREDICT(model_name, uri) as predictions FROM df"
+        f"SELECT ML_PREDICT({model_name}, uri) as predictions FROM df"
     )
     predictions.show()
     assert predictions.schema == StructType(

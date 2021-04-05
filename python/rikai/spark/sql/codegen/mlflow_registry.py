@@ -128,9 +128,9 @@ class MlflowModelSpec(ModelSpec):
         return spec
 
 
-def codegen_from_runid(
+def codegen_from_run(
     spark: SparkSession,
-    run_id: str,
+    run: mlflow.entities.Run,
     name: Optional[str] = None,
     options: Optional[Dict[str, str]] = None,
 ) -> str:
@@ -140,8 +140,8 @@ def codegen_from_runid(
     ----------
     spark : SparkSession
         A live spark session
-    run_id : str
-        the mlflow runid corresponding to the model spec
+    run : mlflow.entities.Run
+        the mlflow run that produced the model we want to register
     name : str
         The name of the model in the catalog
     options : dict
@@ -152,27 +152,16 @@ def codegen_from_runid(
     str
         Spark UDF function name for the generated data.
     """
-    get_run_msg = (
-        "Could not get run for {}. Please make sure tracking url "
-        "is set properly and the run_id exists."
-    ).format(run_id)
-    client = MlflowClient() # TODO pass in tracking uri from spark conf?
-    run = _try(client.get_run, get_run_msg, run_id=run_id)
-
-    to_spec_msg = (
-        "Could not create well-formed ModelSpec from run {}."
-        "Check MLFlowModelSpec._run_to_spec_dict"
-    ).format(run_id)
-    spec = _try(MlflowModelSpec, to_spec_msg, run, options=options)
+    try:
+        spec = MlflowModelSpec(run, options=options)
+    except Exception:
+        to_spec_msg = (
+            "Could not create well-formed ModelSpec from run {}."
+            "Check MLFlowModelSpec._run_to_spec_dict"
+        ).format(run_id)
+        raise SpecError(to_spec_msg) from e
     udf = udf_from_spec(spec)
     return register_udf(spark, udf, name)
-
-
-def _try(func, msg, *args, **kwargs):
-    try:
-        return func(*args, **kwargs)
-    except Exception as e:
-        raise SpecError(msg) from e
 
 
 def log_model(model: Any, artifact_path: str, flavor: str, schema: str,
@@ -201,6 +190,8 @@ def log_model(model: Any, artifact_path: str, flavor: str, schema: str,
     kwargs: dict
         Passed to `mlflow.<flavor>.log_model`
     """
+    # no need to set the tracking uri here since this is intended to be called
+    # inside the training loop within mlflow.start_run
     getattr(mlflow, flavor).log_model(
         model, artifact_path, registered_model_name=registered_model_name,
         **kwargs)
@@ -227,29 +218,30 @@ class MlflowRegistry(Registry):
 
     def resolve(self, uri: str, name: str, options: Dict[str, str]):
         logger.info(f"Resolving model {name} from {uri}")
-        client = MlflowClient() # TODO pass in tracking uri from spark conf?
-        run_id = get_runid(client, uri)
-        func_name = codegen_from_runid(self._spark, run_id, name, options)
+        tracking_uri = spark.conf.get(
+            'rikai.sql.ml.registry.mlflow.tracking_uri')
+        client = MlflowClient(tracking_uri)
+        run = get_run(client, uri)
+        func_name = codegen_from_run(self._spark, run, name, options)
         model = self._jvm.ai.eto.rikai.sql.model.mlflow.MlflowModel(
-            name, run_id, func_name
+            name, run.run_id, func_name
         )
         return model
 
 
-def get_runid(client: MlflowClient, uri: str) -> str:
+def get_run(client: MlflowClient, uri: str) -> mlflow.entities.Run:
     parsed = urlparse(uri)
     runid_or_model = parsed.hostname
     try:
-        client.get_run(runid_or_model)
         # we can support a direct reference to runid
         # 'mlflow://<run_id>'
-        return runid_or_model
+        return client.get_run(runid_or_model)
     except MlflowException:
         if parsed.path and parsed.path[1:].isdigit():
             # we can support a reference to a registered model and version
             # 'mlflow://<model_name>/<version>'
-            return client.get_model_version(
-                runid_or_model, int(parsed.path[1:])).run_id
+            return client.get_run(client.get_model_version(
+                runid_or_model, int(parsed.path[1:])).run_id)
 
         # Or just use the latest version (by stage)
         if not parsed.path:
@@ -260,4 +252,4 @@ def get_runid(client: MlflowClient, uri: str) -> str:
             stage = parsed.path[1:].lower()
         for x in client.get_registered_model(runid_or_model).latest_versions:
             if x.current_stage.lower() == stage:
-                return x.run_id
+                return client.get_run(x.run_id)

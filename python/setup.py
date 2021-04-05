@@ -21,7 +21,6 @@ dev = [
     "pylint",
     "pytest",
     "pytest-timeout",
-    "sqlite3",
     "wheel",
 ]
 torch = ["torch>=1.4.0", "torchvision"]

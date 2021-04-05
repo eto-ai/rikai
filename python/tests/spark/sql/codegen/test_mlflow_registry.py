@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import os
 import sqlite3
 import uuid
 
@@ -29,10 +30,13 @@ from rikai.spark.sql.schema import parse_schema
 def mlflow_client(
     tmp_path_factory, resnet_model_uri: str, spark: SparkSession
 ):
-    tracking_uri = 'http://0.0.0.0:5000'
+    tmp_path = tmp_path_factory.mktemp("mlflow")
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
     mlflow.set_tracking_uri(tracking_uri)
+    experiment_id = mlflow.create_experiment("rikai-test", str(tmp_path))
     # simpliest
-    with mlflow.start_run():
+    with mlflow.start_run(experiment_id=experiment_id):
         mlflow.log_param("optimizer", "Adam")
         # Fake training loop
         model = torch.load(resnet_model_uri)
@@ -96,5 +100,5 @@ def test_mlflow_model_from_runid(
 
 @pytest.mark.timeout(60)
 def test_mlflow_model_from_model_version(spark: SparkSession, mlflow_client):
-    spark.sql("CREATE MODEL resnet_m_bar USING 'mlflow://test/1'")
+    spark.sql("CREATE MODEL resnet_m_bar USING 'mlflow://rikai-test/1'")
     check_ml_predict(spark, "resnet_m_bar")

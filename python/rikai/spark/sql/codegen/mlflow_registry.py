@@ -159,8 +159,7 @@ def codegen_from_run(
         Spark UDF function name for the generated data.
     """
     try:
-        spec = MlflowModelSpec(run, options=options,
-                               tracking_uri=tracking_uri)
+        spec = MlflowModelSpec(run, options=options, tracking_uri=tracking_uri)
     except Exception:
         to_spec_msg = (
             "Could not create well-formed ModelSpec from run {}."
@@ -238,8 +237,9 @@ class MlflowRegistry(Registry):
         )
         client = MlflowClient(tracking_uri)
         run = get_run(client, uri)
-        func_name = codegen_from_run(self._spark, run, tracking_uri, name,
-                                     options)
+        func_name = codegen_from_run(
+            self._spark, run, tracking_uri, name, options
+        )
         model = self._jvm.ai.eto.rikai.sql.model.mlflow.MlflowModel(
             name, run.info.run_id, func_name
         )

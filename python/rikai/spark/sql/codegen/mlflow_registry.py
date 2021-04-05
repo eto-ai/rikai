@@ -230,7 +230,7 @@ class MlflowRegistry(Registry):
 
     def resolve(self, uri: str, name: str, options: Dict[str, str]):
         logger.info(f"Resolving model {name} from {uri}")
-        tracking_uri = spark.conf.get(
+        tracking_uri = self._spark.conf.get(
             "rikai.sql.ml.registry.mlflow.tracking_uri"
         )
         client = MlflowClient(tracking_uri)

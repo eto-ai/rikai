@@ -40,6 +40,10 @@ class VideoFrameSampler(VideoSampler):
         sample_rate: int = 1,
         start_frame: int = 0,
         max_samples: int = -1,
+        left: int = 0,
+        top: int = 0,
+        crop_width: int = -1,
+        crop_height: int = -1,
         scale_width: int = -1,
         scale_height: int = -1,
     ):
@@ -57,9 +61,14 @@ class VideoFrameSampler(VideoSampler):
         self.sample_rate = sample_rate
         self.start_frame = start_frame
         self.max_samples = max_samples
+        self.left = (left,)
+        self.top = (top,)
+        self.crop_width = (crop_width,)
+        self.crop_height = (crop_height,)
         self.scale_width = (scale_width,)
         self.scale_height = (scale_height,)
         self.probe = None
+        self.ffmpeg_load = None
 
     def _probe(self):
         try:
@@ -85,26 +94,50 @@ class VideoFrameSampler(VideoSampler):
         self.duration = int(video_stream["duration"])
         self.frame_rate = np.round(self.duration / self.num_frames).astype(int)
 
-    def load_video(self):
+    def _ffmpeg_load(self):
         if not self.probe:
             self._probe()
-        video_data, _ = (
+        self.ffmpeg_load = (
             ffmpeg.input(self.stream.uri)
+            .crop(self.left, self.top, crop_width, crop_width)
             .filter("scale", self.scale_width, self.scale_height)
-            .output(
-                "pipe:",
-                format="rawvideo",
-                pix_fmt="rgb24",
-                start_number=self.start_frame,
-                vframes=self.start_frame + self.max_samples
-                if self.max_samples
-                else None,
-                r=1 / self.sample_rate,
+        )
+
+    def sample_frame(self, frame_no=None, vcodec="mjpeg"):
+        if not self.ffmpeg_load:
+            self._ffmpeg_load()
+        if frame_no is None:
+            lower_limit = upper_limit = self.start_frame
+            upper_limit += (
+                self.num_frames if not self.max_samples else self.max_samples
             )
+            frame_no = np.random.randint(lower_limit, upper_limit)
+
+        img_bytes, _ = (
+            self.ffmpeg_load.filter("select", "gte(n,{})".format(frame_no))
+            .output("pipe:", vframes=1, format="image2", vcodec=vcodec)
             .run(capture_stdout=True)
         )
-        h = self.height if not self.scale_height else self.scale_height
-        w = self.height if not self.scale_width else self.scale_width
+        return Image.from_bytes(img_bytes, "{}.jpg".format(rand_frame_no))
+
+    def load_video(self):
+        if not self.ffmpeg_load:
+            self._ffmpeg_load()
+
+        crop_width = self.crop_width if self.crop_width else self.width
+        crop_width = self.crop_height if self.crop_height else self.height
+        video_data, _ = self.ffmpeg_load.output(
+            "pipe:",
+            format="rawvideo",
+            pix_fmt="rgb24",
+            start_number=self.start_frame,
+            vframes=self.start_frame + self.max_samples
+            if self.max_samples
+            else None,
+            r=1 / self.sample_rate,
+        ).run(capture_stdout=True)
+        h = self.crop_height if not self.scale_height else self.scale_height
+        w = self.crop_width if not self.scale_width else self.scale_width
 
         video_array = np.frombuffer(video_data, np.uint8).reshape(
             [-1, h, w, 3]

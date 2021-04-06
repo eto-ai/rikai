@@ -26,36 +26,35 @@ class RikaiRelationTest extends AnyFunSuite with SparkTestSession {
 
   import spark.implicits._
 
-  val examples = Seq(
+  private val examples = Seq(
     ("123", "car"),
     ("123", "people"),
     ("246", "tree")
   ).toDF("id", "label")
 
-  val testDir =
-    new File(Files.createTempDirectory("rikai").toFile(), "dataset")
+  private val testDir =
+    new File(Files.createTempDirectory("rikai").toFile, "dataset")
 
   test("Use rikai registered as the sink of spark") {
-    examples.write.format("rikai").save(testDir.toString())
+    examples.write.format("rikai").save(testDir.toString)
 
     val numParquetFileds =
-      testDir.list().filter(_.endsWith(".parquet")).length
+      testDir.list().count(_.endsWith(".parquet"))
     assert(numParquetFileds > 0)
 
-    val df = spark.read.parquet(testDir.toString())
+    val df = spark.read.parquet(testDir.toString)
     assert(df.intersectAll(examples).count == 3)
   }
 
   test("Use rikai reader and writer") {
-    import ai.eto.rikai.sql.RikaiWriter
-    examples.write.rikai(testDir.toString())
+    import ai.eto.rikai._
+    examples.write.rikai(testDir.toString)
 
     val numParquetFileds =
-      testDir.list().filter(_.endsWith(".parquet")).length
+      testDir.list().count(_.endsWith(".parquet"))
     assert(numParquetFileds > 0)
 
-    import ai.eto.rikai.sql.RikaiReader
-    val df = spark.read.rikai(testDir.toString())
+    val df = spark.read.rikai(testDir.toString)
     assert(df.intersectAll(examples).count == 3)
   }
 }

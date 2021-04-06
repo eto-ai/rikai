@@ -16,8 +16,6 @@
 
 package ai.eto.rikai
 
-import org.apache.spark.sql.{DataFrame, DataFrameReader, DataFrameWriter}
-
 /**
   * Rikai SQL-ML extension.
   *
@@ -42,16 +40,4 @@ import org.apache.spark.sql.{DataFrame, DataFrameReader, DataFrameWriter}
   *
   * {{{ SELECT id, ML_PREDICT(model_name, col1, col2, col3) as predicted FROM table }}}
   */
-package object sql {
-  implicit class RikaiReader(reader: DataFrameReader) {
-    def rikai(path: String): DataFrame = {
-      reader.format("rikai").load(path)
-    }
-  }
-
-  implicit class RikaiWriter[T](writer: DataFrameWriter[T]) {
-    def rikai(path: String): Unit = {
-      writer.format("rikai").save(path)
-    }
-  }
-}
+package object sql {}

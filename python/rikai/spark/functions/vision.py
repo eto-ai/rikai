@@ -17,6 +17,7 @@
 
 # Standard library
 import os
+import uuid
 from typing import Union
 
 # Third Party
@@ -302,19 +303,11 @@ def match_annotations(iterator, segment_id="vid", id_col="tracker_id"):
     Used by mapPartitions to iterate over the small chunks of our hierarchically-organized data.
     """
 
-    def id_gen(N=5):
-        import string, random
-
-        return "".join(
-            random.choice(string.ascii_uppercase + string.digits)
-            for x in range(N)
-        )
-
     matched_annots = []
     for idx, data in enumerate(iterator):
         data = data[1]
         if not idx:
-            old_row = {idx: id_gen() for idx in range(len(data[1]))}
+            old_row = {idx: uuid.uuid4() for idx in range(len(data[1]))}
             old_row[segment_id] = data[0]
             pass
         annots = []
@@ -324,7 +317,7 @@ def match_annotations(iterator, segment_id="vid", id_col="tracker_id"):
         if data[2] is not None:
             for ky, vl in data[2].items():
                 detection = data[1][vl].asDict()
-                detection[id_col] = old_row.get(ky, id_gen())
+                detection[id_col] = old_row.get(ky, uuid.uuid4())
                 curr_row[vl] = detection[id_col]
                 annots.append(Row(**detection))
         matched_annots.append(annots)
@@ -375,10 +368,11 @@ def track_detections(
         .transform(df)
         .withColumn("vidIndex", col("vidIndex").cast(StringType()))
     )
+    unique_ids = df.select("vidIndex").distinct().count()
     matched = (
         df.select("vidIndex", segment_id, "trackables", "matched")
         .rdd.map(lambda x: (x[0], x[1:]))
-        .partitionBy(1, lambda x: int(x[0]))
+        .partitionBy(unique_ids, lambda x: int(x[0]))
         .mapPartitions(match_annotations)
     )
     matched_annotations = spark.createDataFrame(

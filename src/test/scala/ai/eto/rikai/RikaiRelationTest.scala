@@ -26,16 +26,16 @@ class RikaiRelationTest extends AnyFunSuite with SparkTestSession {
 
   import spark.implicits._
 
+  val examples = Seq(
+    ("123", "car"),
+    ("123", "people"),
+    ("246", "tree")
+  ).toDF("id", "label")
+
+  val testDir =
+    new File(Files.createTempDirectory("rikai").toFile(), "dataset")
+
   test("Use rikai registered as the sink of spark") {
-    val examples = Seq(
-      ("123", "car"),
-      ("123", "people"),
-      ("246", "tree")
-    ).toDF("id", "label")
-
-    val testDir =
-      new File(Files.createTempDirectory("rikai").toFile(), "dataset")
-
     examples.write.format("rikai").save(testDir.toString())
 
     val numParquetFileds =
@@ -43,6 +43,19 @@ class RikaiRelationTest extends AnyFunSuite with SparkTestSession {
     assert(numParquetFileds > 0)
 
     val df = spark.read.parquet(testDir.toString())
+    assert(df.intersectAll(examples).count == 3)
+  }
+
+  test("Use rikai reader and writer") {
+    import ai.eto.rikai.sql.RikaiWriter
+    examples.write.rikai(testDir.toString())
+
+    val numParquetFileds =
+      testDir.list().filter(_.endsWith(".parquet")).length
+    assert(numParquetFileds > 0)
+
+    import ai.eto.rikai.sql.RikaiReader
+    val df = spark.read.rikai(testDir.toString())
     assert(df.intersectAll(examples).count == 3)
   }
 }

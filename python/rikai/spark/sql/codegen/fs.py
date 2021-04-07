@@ -52,9 +52,9 @@ class FileModelSpec(ModelSpec):
         if not isinstance(spec, Mapping):
             spec = yaml.load(spec, Loader=yaml.FullLoader)
         spec.setdefault("options", {})
-        super().__init__(spec, validate=validate)
         if options:
-            self.options.update(options)
+            spec["options"].update(options)
+        super().__init__(spec, validate=validate)
 
 
 def codegen_from_yaml(

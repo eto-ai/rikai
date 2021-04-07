@@ -14,17 +14,18 @@
 
 import secrets
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, IO, Mapping, Optional, Union
+from typing import Any, Callable, Dict, Optional
 
-import pandas as pd
 from jsonschema import validate, ValidationError
 from pyspark.sql import SparkSession
-from pyspark.sql.types import DataType
 
 from rikai.internal.reflection import find_class
 from rikai.logging import logger
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
+
+
+__all__ = ["Registry", "ModelSpec"]
 
 
 class Registry(ABC):
@@ -95,6 +96,7 @@ class ModelSpec(ABC):
         validate: bool = True,
     ):
         self._spec = spec
+        self._spec["options"] = self._spec.get("options", {})
         if validate:
             self.validate()
 

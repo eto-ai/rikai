@@ -70,7 +70,7 @@ def mlflow_client(
 def test_modelspec(mlflow_client, resnet_model_uri):
     run_id = mlflow_client.search_model_versions("name='rikai-test'")[0].run_id
     run = mlflow_client.get_run(run_id=run_id)
-    spec = MlflowModelSpec(run)
+    spec = MlflowModelSpec(run, tracking_uri="fake")
     assert spec.flavor == "pytorch"
     assert spec.schema == parse_schema(
         (

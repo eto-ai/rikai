@@ -24,7 +24,6 @@ from rikai.logging import logger
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
 
-
 __all__ = ["Registry", "ModelSpec"]
 
 

@@ -216,21 +216,21 @@ def log_model(
 
     # Log PyTorch model
     with mlflow.start_run() as run:
-        
+
         # Training loop
         # ...
 
         # Assume `model` is the trained model from the training loop
-        log_model(model, "model", "pytorch", 
-                  schema=rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.OUTPUT_SCHEMA, 
+        log_model(model, "model", "pytorch",
+                  schema=rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.OUTPUT_SCHEMA,
                   pre_processing="rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing",
                   post_processing="rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing",
-                  registered_model_name="MyPytorchModel")        
+                  registered_model_name="MyPytorchModel")
         # mlflow.pytorch.log_model(model, "model") <= vanilla mlflow usage
 
-    
+
     For more details see `mlflow docs <https://www.mlflow.org/docs/latest/python_api/mlflow.pytorch.html#mlflow.pytorch.log_model>`_.
-    """ # noqa E501
+    """  # noqa E501
     # no need to set the tracking uri here since this is intended to be called
     # inside the training loop within mlflow.start_run
     getattr(mlflow, flavor).log_model(

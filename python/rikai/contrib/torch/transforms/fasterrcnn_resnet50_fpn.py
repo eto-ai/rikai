@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, Callable
+from typing import Any, Callable, Dict
 
 from torchvision import transforms as T
 
@@ -56,5 +56,7 @@ def post_processing(options: Dict[str, Any]) -> Callable:
     return post_process_func
 
 
-OUTPUT_SCHEMA = ("struct<boxes:array<array<float>>, scores:array<float>, "
-                 "labels:array<int>>")
+OUTPUT_SCHEMA = (
+    "struct<boxes:array<array<float>>, scores:array<float>, "
+    "labels:array<int>>"
+)

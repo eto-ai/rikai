@@ -58,11 +58,12 @@ class FileModelSpec(ModelSpec):
         super().__init__(spec, validate=validate)
 
     def load_model(self):
-        if self.flavor == 'pytorch':
-            from rikai.spark.sql.codegen.pytorch import load_model
-            return load_model(self.uri)
+        if self.flavor == "pytorch":
+            from rikai.spark.sql.codegen.pytorch import load_model_from_uri
+
+            return load_model_from_uri(self.uri)
         else:
-            raise SpecError('Unsupported flavor {}'.format(self.flavor))
+            raise SpecError("Unsupported flavor {}".format(self.flavor))
 
 
 def codegen_from_yaml(

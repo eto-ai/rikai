@@ -117,6 +117,22 @@ def test_validate_misformed_spec():
         )
 
 
+def test_construct_spec_with_options():
+    spec = FileModelSpec(
+        {
+            "version": "1.0",
+            "name": "with_options",
+            "schema": "int",
+            "model": {
+                "uri": "s3://bucket/to/model.pt",
+                "unspecified_field": True,
+            },
+        },
+        options={"foo": 1, "bar": "2.3"},
+    )
+    assert {"foo": 1, "bar": "2.3"} == spec.options
+
+
 @pytest.mark.timeout(60)
 def test_yaml_model(spark: SparkSession, resnet_spec: str):
     spark.sql("CREATE MODEL resnet_m USING 'file://{}'".format(resnet_spec))

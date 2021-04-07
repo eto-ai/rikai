@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Callable, Dict, IO, Mapping, Optional, Union
+from typing import Any, Dict, IO, Mapping, Optional, Union
 
 import yaml
 from pyspark.sql import SparkSession
@@ -25,11 +25,8 @@ from rikai.spark.sql.codegen.base import (
     Registry,
     udf_from_spec,
 )
-from rikai.spark.sql.exceptions import SpecError
 
 __all__ = ["FileSystemRegistry"]
-
-# YAML-Spec SCHEMA
 
 
 class FileModelSpec(ModelSpec):
@@ -55,9 +52,9 @@ class FileModelSpec(ModelSpec):
         if not isinstance(spec, Mapping):
             spec = yaml.load(spec, Loader=yaml.FullLoader)
         spec.setdefault("options", {})
-        if options:
-            self._options.update(options)
         super().__init__(spec, validate=validate)
+        if options:
+            self.options.update(options)
 
 
 def codegen_from_yaml(

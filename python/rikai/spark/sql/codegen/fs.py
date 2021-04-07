@@ -25,6 +25,7 @@ from rikai.spark.sql.codegen.base import (
     Registry,
     udf_from_spec,
 )
+from rikai.spark.sql.exceptions import SpecError
 
 __all__ = ["FileSystemRegistry"]
 
@@ -55,6 +56,13 @@ class FileModelSpec(ModelSpec):
         if options:
             spec["options"].update(options)
         super().__init__(spec, validate=validate)
+
+    def load_model(self):
+        if self.flavor == 'pytorch':
+            from rikai.spark.sql.codegen.pytorch import load_model
+            return load_model(self.uri)
+        else:
+            raise SpecError('Unsupported flavor {}'.format(self.flavor))
 
 
 def codegen_from_yaml(

@@ -28,6 +28,7 @@ from mlflow.exceptions import MlflowException
 from mlflow.tracking import MlflowClient
 from pyspark.sql import SparkSession
 
+from rikai.conf import CONF_MLFLOW_TRACKING_URI
 from rikai.logging import logger
 from rikai.spark.sql.codegen.base import (
     ModelSpec,
@@ -45,20 +46,22 @@ class MlflowModelSpec(ModelSpec):
 
     Parameters
     ----------
-    run : mlflow.entities.Run
-        the Run object containing the spec info and ref to model artifact
-    options : Dict[str, Any], optional
+    run: mlflow.entities.Run
+        The Run object containing the spec info and ref to model artifact
+    tracking_uri: str
+        The mlflow tracking uri
+    options: Dict[str, Any], optional
         Additionally options. If the same option exists in spec already,
         it will be overridden.
-    validate : bool, default True.
+    validate: bool, default True.
         Validate the spec during construction. Default ``True``.
     """
 
     def __init__(
         self,
         run: "mlflow.entities.Run",
+        tracking_uri: str,
         options: Optional[Dict[str, Any]] = None,
-        tracking_uri: str = None,
         validate: bool = True,
     ):
         self._run = run
@@ -82,13 +85,14 @@ class MlflowModelSpec(ModelSpec):
     def end_time(self):
         return self._run.info.end_time
 
-    @property
-    def artifact(self) -> Any:
-        """Return Model artifact"""
-        if self._artifact is None:
+    def load_model(self) -> Any:
+        """Load the model artifact specified in this spec"""
+        old_uri = mlflow.get_tracking_uri()
+        try:
             mlflow.set_tracking_uri(self.tracking_uri)
-            self._artifact = getattr(mlflow, self.flavor).load_model(self.uri)
-        return self._artifact
+            return getattr(mlflow, self.flavor).load_model(self.uri)
+        finally:
+            mlflow.set_tracking_uri(old_uri)
 
     def _run_to_spec_dict(self):
         """Convert the Run into a ModelSpec
@@ -148,6 +152,8 @@ def codegen_from_run(
         A live spark session
     run : mlflow.entities.Run
         the mlflow run that produced the model we want to register
+    tracking_uri: str
+        The mlflow tracking uri
     name : str
         The name of the model in the catalog
     options : dict
@@ -159,12 +165,12 @@ def codegen_from_run(
         Spark UDF function name for the generated data.
     """
     try:
-        spec = MlflowModelSpec(run, options=options, tracking_uri=tracking_uri)
-    except Exception:
+        spec = MlflowModelSpec(run, tracking_uri, options=options)
+    except Exception as e:
         to_spec_msg = (
             "Could not create well-formed ModelSpec from run {}."
             "Check MLFlowModelSpec._run_to_spec_dict"
-        ).format(run_id)
+        ).format(run.run_id)
         raise SpecError(to_spec_msg) from e
     udf = udf_from_spec(spec)
     return register_udf(spark, udf, name)
@@ -180,7 +186,9 @@ def log_model(
     registered_model_name: Optional[str] = None,
     **kwargs,
 ):
-    """Convenience function to log the model with information needed by rikai
+    """Convenience function to log the model with information needed by rikai.
+    This should be called during training when the model artifact is produced.
+
 
     Parameters
     ----------
@@ -200,7 +208,29 @@ def log_model(
         Model name in the mlflow model registry
     kwargs: dict
         Passed to `mlflow.<flavor>.log_model`
-    """
+
+    Examples
+    --------
+    # import mlflow.pytorch  <= vanilla mlflow usage
+    from rikai.spark.sql.codegen.mlflow_registry import log_model
+
+    # Log PyTorch model
+    with mlflow.start_run() as run:
+        
+        # Training loop
+        # ...
+
+        # Assume `model` is the trained model from the training loop
+        log_model(model, "model", "pytorch", 
+                  schema=rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.OUTPUT_SCHEMA, 
+                  pre_processing="rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing",
+                  post_processing="rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing",
+                  registered_model_name="MyPytorchModel")        
+        # mlflow.pytorch.log_model(model, "model") <= vanilla mlflow usage
+
+    
+    For more details see `mlflow docs <https://www.mlflow.org/docs/latest/python_api/mlflow.pytorch.html#mlflow.pytorch.log_model>`_.
+    """ # noqa E501
     # no need to set the tracking uri here since this is intended to be called
     # inside the training loop within mlflow.start_run
     getattr(mlflow, flavor).log_model(
@@ -232,9 +262,7 @@ class MlflowRegistry(Registry):
 
     def resolve(self, uri: str, name: str, options: Dict[str, str]):
         logger.info(f"Resolving model {name} from {uri}")
-        tracking_uri = self._spark.conf.get(
-            "rikai.sql.ml.registry.mlflow.tracking_uri"
-        )
+        tracking_uri = self._spark.conf.get(CONF_MLFLOW_TRACKING_URI)
         client = MlflowClient(tracking_uri)
         run = get_run(client, uri)
         func_name = codegen_from_run(

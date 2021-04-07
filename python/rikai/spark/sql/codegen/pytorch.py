@@ -52,14 +52,8 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     def torch_inference_udf(
         iter: Iterator[pd.DataFrame],
     ) -> Iterator[pd.DataFrame]:
-
-        if spec.artifact:
-            model = spec.artifact
-        else:
-            with open_uri(spec.uri) as fobj:
-                model = torch.load(fobj)
         device = torch.device("cuda" if use_gpu else "cpu")
-
+        model = spec.load_model()
         model.to(device)
         model.eval()
 
@@ -79,3 +73,8 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                 yield pd.DataFrame(results)
 
     return pandas_udf(torch_inference_udf, returnType=spec.schema)
+
+
+def load_model_from_uri(uri: str):
+    with open_uri(uri) as fobj:
+        return torch.load(fobj)

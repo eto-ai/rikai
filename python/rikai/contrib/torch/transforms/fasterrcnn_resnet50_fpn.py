@@ -54,3 +54,7 @@ def post_processing(options: Dict[str, Any]) -> Callable:
         return results
 
     return post_process_func
+
+
+OUTPUT_SCHEMA = ("struct<boxes:array<array<float>>, scores:array<float>, "
+                 "labels:array<int>>")

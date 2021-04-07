@@ -125,10 +125,9 @@ class ModelSpec(ABC):
         """Return Model artifact URI"""
         return self._spec["model"]["uri"]
 
-    @property
-    def artifact(self) -> Any:
-        """Return Model artifact"""
-        return None
+    @abstractmethod
+    def load_model(self) -> Any:
+        """Load the model artifact specified in this spec"""
 
     @property
     def flavor(self) -> str:

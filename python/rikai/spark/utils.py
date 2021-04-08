@@ -17,7 +17,7 @@ import uuid
 import pyspark.sql.types as T
 import pyspark.sql.functions as F
 
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import Row, DataFrame, SparkSession
 from pyspark.sql.window import Window
 from pyspark.ml.feature import StringIndexer
 

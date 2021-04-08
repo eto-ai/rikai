@@ -17,6 +17,8 @@
 
 # Standard library
 import os
+from io import IOBase
+from pathlib import Path
 from typing import Union
 
 # Third Party
@@ -47,9 +49,17 @@ __all__ = [
 
 
 @udf(returnType=ImageType())
-def image(uri: str) -> Image:
-    """Build an :py:class:`Image` from a URI."""
-    return Image(uri)
+def image(image: Union[bytes, bytearray, IOBase, str, Path]) -> Image:
+    """Build an :py:class:`Image` from
+    bytes, file-like object, str, or :py:class:`~pathlib.Path`."""
+    data, uri = None, None
+    if isinstance(image, IOBase):
+        data = image.read()
+    elif isinstance(image, (bytes, bytearray)):
+        data = image
+    else:
+        uri = image
+    return Image(data=data, uri=uri)
 
 
 @udf(returnType=ImageType())

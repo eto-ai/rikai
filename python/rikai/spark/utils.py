@@ -17,7 +17,7 @@ import uuid
 import pyspark.sql.types as T
 import pyspark.sql.functions as F
 
-from pyspark.sql import DataFrame
+from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.window import Window
 from pyspark.ml.feature import StringIndexer
 
@@ -77,37 +77,39 @@ annot_schema = T.ArrayType(
 
 
 def track_detections(
-    df, segment_id="vid", frames="frame", detections="detections"
+    spark: SparkSession,
+    df: DataFrame,
+    segment_id="vid",
+    frames="frame",
+    detections="detections",
 ):
-    # utilities
     id_col = "tracker_id"
     frame_window = Window().orderBy(frames)
     value_window = Window().orderBy("value")
     annot_window = Window.partitionBy(segment_id).orderBy(segment_id, frames)
     indexer = StringIndexer(inputCol=segment_id, outputCol="vidIndex")
 
-    # dataframe manipulation
     df = (
         df.select(segment_id, frames, detections)
         .withColumn("bbox", F.explode(detections))
         .withColumn(id_col, F.lit(""))
-        .withColumn("trackables", struct([col("bbox"), col(id_col)]))
+        .withColumn("trackables", F.struct([F.col("bbox"), F.col(id_col)]))
         .groupBy(segment_id, frames, detections)
-        .agg(collect_list("trackables").alias("trackables"))
+        .agg(F.collect_list("trackables").alias("trackables"))
         .withColumn(
-            "old_trackables", lag(col("trackables")).over(annot_window)
+            "old_trackables", F.lag(F.col("trackables")).over(annot_window)
         )
         .withColumn(
-            "matched", tracker_match(col("trackables"), col("old_trackables"))
+            "matched",
+            tracker_match(F.col("trackables"), F.col("old_trackables")),
         )
-        .withColumn("frame_index", row_number().over(frame_window))
+        .withColumn("frame_index", F.row_number().over(frame_window))
     )
 
-    # update ids
     df = (
         indexer.fit(df)
         .transform(df)
-        .withColumn("vidIndex", col("vidIndex").cast(StringType()))
+        .withColumn("vidIndex", F.col("vidIndex").cast(T.StringType()))
     )
     unique_ids = df.select("vidIndex").distinct().count()
     matched = (
@@ -118,21 +120,27 @@ def track_detections(
     )
     matched_annotations = spark.createDataFrame(
         matched, annot_schema
-    ).withColumn("value_index", row_number().over(value_window))
+    ).withColumn("value_index", F.row_number().over(value_window))
 
     return (
-        df.join(matched_annotations, col("value_index") == col("frame_index"))
+        df.join(
+            matched_annotations, F.col("value_index") == F.col("frame_index")
+        )
         .withColumnRenamed("value", "trackers_matched")
-        .withColumn("tracked", explode(col("trackers_matched")))
+        .withColumn("tracked", F.explode(F.col("trackers_matched")))
         .select(
             segment_id,
             frames,
             detections,
-            col("tracked.{}".format("bbox")).alias("bbox"),
-            col("tracked.{}".format(id_col)).alias(id_col),
+            F.col("tracked.{}".format("bbox")).alias("bbox"),
+            F.col("tracked.{}".format(id_col)).alias(id_col),
         )
-        .withColumn(id_col, sha2(concat(col(segment_id), col(id_col)), 256))
-        .withColumn("tracked_detections", struct([col("bbox"), col(id_col)]))
+        .withColumn(
+            id_col, F.sha2(F.concat(F.col(segment_id), F.col(id_col)), 256)
+        )
+        .withColumn(
+            "tracked_detections", F.struct([F.col("bbox"), F.col(id_col)])
+        )
         .groupBy(segment_id, frames, detections)
         .agg(F.collect_list("tracked_detections").alias("tracked_detections"))
         .orderBy(segment_id, frames, detections)

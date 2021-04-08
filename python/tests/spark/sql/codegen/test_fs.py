@@ -80,8 +80,8 @@ def test_validate_yaml_spec():
     )
 
     assert spec.name == "test_yaml_model"
-    assert spec.pre_processing != None
-    assert spec.post_processing != None
+    assert spec.pre_processing is not None
+    assert spec.post_processing is not None
 
 
 def test_validate_misformed_spec():

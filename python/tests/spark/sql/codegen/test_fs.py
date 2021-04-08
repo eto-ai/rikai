@@ -40,8 +40,7 @@ def resnet_spec(tmp_path_factory):
     tmp_path = tmp_path_factory.mktemp(str(uuid.uuid4()))
     # Prepare model
     resnet = torchvision.models.detection.fasterrcnn_resnet50_fpn(
-        pretrained=True,
-        progress=False,
+        pretrained=True, progress=False
     )
     model_uri = tmp_path / "resnet.pth"
     torch.save(resnet, model_uri)
@@ -67,7 +66,7 @@ transforms:
 
 
 def test_validate_yaml_spec():
-    FileModelSpec(
+    spec = FileModelSpec(
         {
             "version": "1.2",
             "name": "test_yaml_model",
@@ -76,12 +75,13 @@ def test_validate_yaml_spec():
                 "uri": "s3://bucket/to/model.pt",
                 "unspecified_field": True,
             },
-            "options": {
-                "gpu": "true",
-                "batch_size": 123,
-            },
-        },
+            "options": {"gpu": "true", "batch_size": 123},
+        }
     )
+
+    assert spec.name == "test_yaml_model"
+    assert spec.pre_processing != None
+    assert spec.post_processing != None
 
 
 def test_validate_misformed_spec():
@@ -94,16 +94,12 @@ def test_validate_misformed_spec():
                 "name": "test_yaml_model",
                 "schema": "long",
                 "model": {"uri": "s3://foo/bar"},
-            },
+            }
         )
 
     with pytest.raises(SpecError, match=".*'model' is a required property.*"):
         FileModelSpec(
-            {
-                "version": "1.0",
-                "name": "test_yaml_model",
-                "schema": "long",
-            },
+            {"version": "1.0", "name": "test_yaml_model", "schema": "long"}
         )
 
     with pytest.raises(SpecError, match=".*'uri' is a required property.*"):
@@ -113,7 +109,7 @@ def test_validate_misformed_spec():
                 "name": "test_yaml_model",
                 "schema": "long",
                 "model": {},
-            },
+            }
         )
 
 
@@ -149,7 +145,7 @@ def test_yaml_model(spark: SparkSession, resnet_spec: str):
             Row(
                 uri="http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg"  # noqa
             ),
-        ],
+        ]
     )
     df.createOrReplaceTempView("df")
 
@@ -164,14 +160,13 @@ def test_yaml_model(spark: SparkSession, resnet_spec: str):
                 StructType(
                     [
                         StructField(
-                            "boxes",
-                            ArrayType(ArrayType(FloatType())),
+                            "boxes", ArrayType(ArrayType(FloatType()))
                         ),
                         StructField("scores", ArrayType(FloatType())),
                         StructField("labels", ArrayType(IntegerType())),
                     ]
                 ),
-            ),
+            )
         ]
     )
     assert predictions.schema == StructType(

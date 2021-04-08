@@ -38,9 +38,10 @@ Roadmap:
 ## Example
 
 ```python
-from pyspark.ml.linalg import DenseMetrix
+from pyspark.ml.linalg import DenseMatrix
 from rikai.types import Image, Box2d
-from rikai import numpy as np
+import numpy as np
+from rikai.numpy import wrap
 
 df = spark.createDataFrame(
     [{
@@ -50,7 +51,7 @@ df = spark.createDataFrame(
         "annotations": [
             {
                 "label": "cat",
-                "mask": np.random(size=(256,256)),
+                "mask": wrap(np.random.rand(256,256)),
                 "bbox": Box2d(xmin=1.0, ymin=2.0, xmax=3.0, ymax=4.0)
             }
         ]

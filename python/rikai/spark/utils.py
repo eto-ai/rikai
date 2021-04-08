@@ -13,13 +13,16 @@
 #  limitations under the License.
 
 import uuid
-from rikai.spark.functions.vision import tracker_match
 
 import pyspark.sql.types as T
 import pyspark.sql.functions as F
+
 from pyspark.sql import DataFrame
 from pyspark.sql.window import Window
 from pyspark.ml.feature import StringIndexer
+
+from rikai.spark.functions.vision import tracker_match
+from rikai.spark.types.geometry import Box2dType
 
 DEFAULT_ROW_GROUP_SIZE_BYTES = 32 * 1024 * 1024
 
@@ -34,6 +37,7 @@ def df_to_rikai(
         .option("parquet.block.size", parquet_row_group_size_bytes)
         .save(uri)
     )
+
 
 def match_annotations(iterator, segment_id="vid", id_col="tracker_id"):
     """
@@ -62,11 +66,11 @@ def match_annotations(iterator, segment_id="vid", id_col="tracker_id"):
     return matched_annots
 
 
-annot_schema = ArrayType(
-    StructType(
+annot_schema = T.ArrayType(
+    T.StructType(
         [
-            StructField("bbox", Box2dType(), False),
-            StructField("tracker_id", StringType(), False),
+            T.StructField("bbox", Box2dType(), False),
+            T.StructField("tracker_id", T.StringType(), False),
         ]
     )
 )

@@ -96,12 +96,12 @@ class MlflowLogger:
 
         try:
             import mlflow
-        except ImportError:
+        except ImportError as e:
             raise ImportError(
                 "Couldn't import mlflow. Please make sure to "
                 "`pip install mlflow` explicitly or install "
                 "the correct extras like `pip install rikai[mlflow]`"
-            )
+            ) from e
 
         # no need to set the tracking uri here since this is intended to be
         # called inside the training loop within mlflow.start_run

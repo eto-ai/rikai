@@ -90,11 +90,7 @@ class ModelSpec(ABC):
         Validate the spec during construction. Default ``True``.
     """
 
-    def __init__(
-        self,
-        spec: Dict[str, Any],
-        validate: bool = True,
-    ):
+    def __init__(self, spec: Dict[str, Any], validate: bool = True):
         self._spec = spec
         self._spec["options"] = self._spec.get("options", {})
         if validate:
@@ -118,6 +114,11 @@ class ModelSpec(ABC):
     def version(self) -> str:
         """Returns spec version."""
         return str(self._spec["version"])
+
+    @property
+    def name(self) -> str:
+        """Return model name"""
+        return self._spec["name"]
 
     @property
     def uri(self) -> str:
@@ -146,7 +147,8 @@ class ModelSpec(ABC):
             "transforms" not in self._spec
             or "pre" not in self._spec["transforms"]
         ):
-            return None
+            # Passthrough
+            return lambda x: x
         f = find_class(self._spec["transforms"]["pre"])
         return f(self.options)
 
@@ -157,7 +159,8 @@ class ModelSpec(ABC):
             "transforms" not in self._spec
             or "post" not in self._spec["transforms"]
         ):
-            return None
+            # Passthrough
+            return lambda x: x
         f = find_class(self._spec["transforms"]["post"])
         return f(self.options)
 

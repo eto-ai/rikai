@@ -27,15 +27,6 @@ from mlflow.exceptions import MlflowException
 from mlflow.tracking import MlflowClient
 from pyspark.sql import SparkSession
 
-from rikai.conf import (
-    CONF_MLFLOW_ARTIFACT_PATH,
-    CONF_MLFLOW_MODEL_FLAVOR,
-    CONF_MLFLOW_OUTPUT_SCHEMA,
-    CONF_MLFLOW_POST_PROCESSING,
-    CONF_MLFLOW_PRE_PROCESSING,
-    CONF_MLFLOW_SPEC_VERSION,
-    CONF_MLFLOW_TRACKING_URI,
-)
 from rikai.logging import logger
 from rikai.spark.sql.codegen.base import (
     ModelSpec,
@@ -43,7 +34,16 @@ from rikai.spark.sql.codegen.base import (
     Registry,
     udf_from_spec,
 )
-from rikai.spark.sql.codegen.mlflow_logger import MlflowLogger
+from rikai.spark.sql.codegen.mlflow_logger import (
+    CONF_MLFLOW_ARTIFACT_PATH,
+    CONF_MLFLOW_MODEL_FLAVOR,
+    CONF_MLFLOW_OUTPUT_SCHEMA,
+    CONF_MLFLOW_POST_PROCESSING,
+    CONF_MLFLOW_PRE_PROCESSING,
+    CONF_MLFLOW_SPEC_VERSION,
+    CONF_MLFLOW_TRACKING_URI,
+    MlflowLogger,
+)
 from rikai.spark.sql.exceptions import SpecError
 
 __all__ = ["MlflowRegistry"]

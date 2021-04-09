@@ -39,11 +39,3 @@ register_option(CONF_RIKAI_CACHEURI, DEFAULT_RIKAI_CACHEURI)
 CONF_PARQUET_BLOCK_SIZE = "parquet.block.size"
 DEFAULT_ROW_GROUP_SIZE_BYTES = 32 * 1024 * 1024
 register_option(CONF_PARQUET_BLOCK_SIZE, DEFAULT_ROW_GROUP_SIZE_BYTES)
-
-CONF_MLFLOW_TRACKING_URI = "rikai.sql.ml.registry.mlflow.tracking_uri"
-CONF_MLFLOW_OUTPUT_SCHEMA = "rikai.output.schema"
-CONF_MLFLOW_SPEC_VERSION = "rikai.spec.version"
-CONF_MLFLOW_PRE_PROCESSING = "rikai.transforms.pre"
-CONF_MLFLOW_POST_PROCESSING = "rikai.transforms.post"
-CONF_MLFLOW_MODEL_FLAVOR = "rikai.model.flavor"
-CONF_MLFLOW_ARTIFACT_PATH = "rikai.model.artifact_path"

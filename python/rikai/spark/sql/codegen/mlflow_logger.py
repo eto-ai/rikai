@@ -18,18 +18,13 @@ from typing import Any, Optional
 
 import mlflow
 
-from rikai.conf import (
-    CONF_MLFLOW_ARTIFACT_PATH,
-    CONF_MLFLOW_MODEL_FLAVOR,
-    CONF_MLFLOW_OUTPUT_SCHEMA,
-    CONF_MLFLOW_POST_PROCESSING,
-    CONF_MLFLOW_PRE_PROCESSING,
-    CONF_MLFLOW_SPEC_VERSION,
-    CONF_MLFLOW_TRACKING_URI,
-)
-
-KNOWN_FLAVORS = ["pytorch"]
-__all__ = KNOWN_FLAVORS
+CONF_MLFLOW_TRACKING_URI = "rikai.sql.ml.registry.mlflow.tracking_uri"
+CONF_MLFLOW_OUTPUT_SCHEMA = "rikai.output.schema"
+CONF_MLFLOW_SPEC_VERSION = "rikai.spec.version"
+CONF_MLFLOW_PRE_PROCESSING = "rikai.transforms.pre"
+CONF_MLFLOW_POST_PROCESSING = "rikai.transforms.post"
+CONF_MLFLOW_MODEL_FLAVOR = "rikai.model.flavor"
+CONF_MLFLOW_ARTIFACT_PATH = "rikai.model.artifact_path"
 
 
 class MlflowLogger:
@@ -119,5 +114,6 @@ class MlflowLogger:
         mlflow.set_tags(tags)
 
 
+KNOWN_FLAVORS = ["pytorch"]
 for flavor in KNOWN_FLAVORS:
     globals()[flavor] = MlflowLogger(flavor)

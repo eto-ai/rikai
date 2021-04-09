@@ -17,7 +17,6 @@
 package ai.eto.rikai.sql.spark.execution
 
 import ai.eto.rikai.SparkTestSession
-import ai.eto.rikai.sql.model.testing.TestModel
 import ai.eto.rikai.sql.model.{Catalog, ModelNotFoundException}
 import org.scalatest.funsuite.AnyFunSuite
 

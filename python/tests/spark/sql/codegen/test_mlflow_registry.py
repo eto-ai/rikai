@@ -11,10 +11,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import os
-import sqlite3
-import uuid
-
 import mlflow
 import pytest
 import torch
@@ -22,7 +18,8 @@ from mlflow.tracking import MlflowClient
 from pyspark.sql import Row, SparkSession
 from utils import check_ml_predict
 
-from rikai.spark.sql.codegen.mlflow_registry import log_model, MlflowModelSpec
+import rikai
+from rikai.spark.sql.codegen.mlflow_registry import MlflowModelSpec
 from rikai.spark.sql.schema import parse_schema
 
 
@@ -54,14 +51,13 @@ def mlflow_client(
             "rikai.contrib.torch.transforms."
             "fasterrcnn_resnet50_fpn.post_processing"
         )
-        log_model(
-            model,
-            artifact_path,
-            "pytorch",
+        rikai.mlflow.pytorch.log_model(
+            model,  # same as vanilla mlflow
+            artifact_path,  # same as vanilla mlflow
             schema,
             pre_processing,
             post_processing,
-            registered_model_name="rikai-test",
+            registered_model_name="rikai-test",  # same as vanilla mlflow
         )
     spark.conf.set("rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri)
     return mlflow.tracking.MlflowClient(tracking_uri)
@@ -70,7 +66,12 @@ def mlflow_client(
 def test_modelspec(mlflow_client, resnet_model_uri):
     run_id = mlflow_client.search_model_versions("name='rikai-test'")[0].run_id
     run = mlflow_client.get_run(run_id=run_id)
-    spec = MlflowModelSpec(run, tracking_uri="fake")
+    spec = MlflowModelSpec(
+        "runs:/{}/model".format(run_id),
+        run.data.tags,
+        run.data.params,
+        tracking_uri="fake",
+    )
     assert spec.flavor == "pytorch"
     assert spec.schema == parse_schema(
         (
@@ -94,11 +95,23 @@ def test_mlflow_model_from_runid(
     spark: SparkSession, mlflow_client: MlflowClient
 ):
     run_id = mlflow_client.search_model_versions("name='rikai-test'")[0].run_id
-    spark.sql("CREATE MODEL resnet_m_foo USING 'mlflow://{}'".format(run_id))
+
+    spark.sql(
+        "CREATE MODEL resnet_m_foo USING 'mlflow://{}/model'".format(run_id)
+    )
     check_ml_predict(spark, "resnet_m_foo")
+
+    # if no path is given but only one artifact exists then use it by default
+    spark.sql("CREATE MODEL resnet_m_bar USING 'mlflow://{}'".format(run_id))
+    check_ml_predict(spark, "resnet_m_bar")
 
 
 @pytest.mark.timeout(60)
 def test_mlflow_model_from_model_version(spark: SparkSession, mlflow_client):
-    spark.sql("CREATE MODEL resnet_m_bar USING 'mlflow://rikai-test/1'")
-    check_ml_predict(spark, "resnet_m_bar")
+    # peg to a particular version of a model
+    spark.sql("CREATE MODEL resnet_m_fizz USING 'mlflow://rikai-test/1'")
+    check_ml_predict(spark, "resnet_m_fizz")
+
+    # use the latest version in a given stage (omitted means none)
+    spark.sql("CREATE MODEL resnet_m_buzz USING 'mlflow://rikai-test/'")
+    check_ml_predict(spark, "resnet_m_buzz")

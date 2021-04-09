@@ -16,7 +16,6 @@
 
 package ai.eto.rikai.sql.model
 
-import ai.eto.rikai.sql.model.testing.TestModel
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.funsuite.AnyFunSuite
 

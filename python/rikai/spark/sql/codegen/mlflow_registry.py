@@ -12,9 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import os
 from typing import Any, Callable, Dict, IO, Mapping, Optional, Union
-from urllib.parse import urlparse
+from urllib.parse import ParseResult, urlparse
 
 try:
     import mlflow
@@ -28,7 +27,15 @@ from mlflow.exceptions import MlflowException
 from mlflow.tracking import MlflowClient
 from pyspark.sql import SparkSession
 
-from rikai.conf import CONF_MLFLOW_TRACKING_URI
+from rikai.conf import (
+    CONF_MLFLOW_ARTIFACT_PATH,
+    CONF_MLFLOW_MODEL_FLAVOR,
+    CONF_MLFLOW_OUTPUT_SCHEMA,
+    CONF_MLFLOW_POST_PROCESSING,
+    CONF_MLFLOW_PRE_PROCESSING,
+    CONF_MLFLOW_SPEC_VERSION,
+    CONF_MLFLOW_TRACKING_URI,
+)
 from rikai.logging import logger
 from rikai.spark.sql.codegen.base import (
     ModelSpec,
@@ -36,6 +43,7 @@ from rikai.spark.sql.codegen.base import (
     Registry,
     udf_from_spec,
 )
+from rikai.spark.sql.codegen.mlflow_logger import MlflowLogger
 from rikai.spark.sql.exceptions import SpecError
 
 __all__ = ["MlflowRegistry"]
@@ -59,34 +67,24 @@ class MlflowModelSpec(ModelSpec):
 
     def __init__(
         self,
-        run: "mlflow.entities.Run",
+        uri: str,
+        tags: dict,
+        params: dict,
         tracking_uri: str,
         options: Optional[Dict[str, Any]] = None,
         validate: bool = True,
     ):
-        self._run = run
-        spec = self._run_to_spec_dict()
-        spec.setdefault("options", {})
-        if options:
-            spec["options"].update(options)
+        self.tracking_uri = tracking_uri
+        spec = self._load_spec_dict(uri, tags, params, options)
         super().__init__(spec, validate=validate)
         self._artifact = None
-        self.tracking_uri = tracking_uri
-
-    @property
-    def run_id(self):
-        return self._run.info.run_id
-
-    @property
-    def start_time(self):
-        return self._run.info.start_time
-
-    @property
-    def end_time(self):
-        return self._run.info.end_time
 
     def load_model(self) -> Any:
         """Load the model artifact specified in this spec"""
+        # Currently mlflow model registry load_model is only accessible
+        # via fluent API `mlflow.<flavor>.load_model`. So let's be a good
+        # samaritan and put the tracking uri back where we found it
+        # (just in case)
         old_uri = mlflow.get_tracking_uri()
         try:
             mlflow.set_tracking_uri(self.tracking_uri)
@@ -94,31 +92,52 @@ class MlflowModelSpec(ModelSpec):
         finally:
             mlflow.set_tracking_uri(old_uri)
 
-    def _run_to_spec_dict(self):
+    def _load_spec_dict(
+        self, uri: str, tags: dict, params: dict, extras=None
+    ) -> dict:
         """Convert the Run into a ModelSpec
+
+        Parameters
+        ----------
+        uri: str
+            Rikai model reference (e.g., mlflow://<model_name>/<version> or
+            mlflow://
+        extras: dict, default None
+            Extra options passed in at model registration time
 
         Returns
         -------
         spec: Dict[str, Any]
         """
-        tags = self._run.data.tags
+        extras = extras or {}
         spec = {
-            "version": tags["rikai.spec.version"],
-            "schema": tags["rikai.output.schema"],
-            "model": {"flavor": tags["rikai.model.flavor"]},
+            "version": _get_model_prop(
+                tags,
+                extras,
+                CONF_MLFLOW_SPEC_VERSION,
+                MlflowLogger._CURRENT_MODEL_SPEC_VERSION,
+            ),
+            "schema": _get_model_prop(tags, extras, CONF_MLFLOW_OUTPUT_SCHEMA),
+            "model": {
+                "flavor": _get_model_prop(
+                    tags, extras, CONF_MLFLOW_MODEL_FLAVOR
+                ),
+                "uri": uri,
+            },
         }
 
         # transforms
-        transforms = {}
-        if "rikai.transforms.pre" in tags:
-            transforms["pre"] = tags["rikai.transforms.pre"]
-        if "rikai.transforms.post" in tags:
-            transforms["post"] = tags["rikai.transforms.post"]
-        if len(transforms) > 0:
-            spec["transforms"] = transforms
+        spec["transforms"] = {
+            "pre": _get_model_prop(
+                tags, extras, CONF_MLFLOW_PRE_PROCESSING, False
+            ),
+            "post": _get_model_prop(
+                tags, extras, CONF_MLFLOW_POST_PROCESSING, False
+            ),
+        }
 
         # options
-        options = dict(self._run.data.params or {})  # for training
+        options = dict(params or {})  # for training
         for key, value in tags.items():
             key = key.lower().strip()
             if key.startswith("rikai.option."):
@@ -127,22 +146,31 @@ class MlflowModelSpec(ModelSpec):
         if len(options) > 0:
             spec["options"] = options
 
-        # uri (to the model artifact)
-        if "rikai.model.artifact_path" in tags:
-            spec["model"]["uri"] = os.path.join(
-                "runs:/",
-                self._run.info.run_id,
-                tags["rikai.model.artifact_path"],
-            )
         return spec
 
 
-def codegen_from_run(
-    spark: SparkSession,
-    run: mlflow.entities.Run,
-    tracking_uri: str,
-    name: Optional[str] = None,
-    options: Optional[Dict[str, str]] = None,
+def _get_model_prop(
+    run_tags: dict,
+    extra_options: dict,
+    conf_name: str,
+    default_value: Any = None,
+    raise_if_absent: bool = True,
+) -> Any:
+    value = run_tags.get(
+        conf_name, extra_options.get(conf_name, default_value)
+    )
+    if not value and raise_if_absent:
+        raise ValueError(
+            (
+                "Please use rikai.mlflow.<flavor>.log_model after "
+                "training, or specify {} in CREATE MODEL OPTIONS"
+            ).format(conf_name)
+        )
+    return value
+
+
+def codegen_from_spec(
+    spark: SparkSession, spec: dict, name: Optional[str] = None
 ) -> str:
     """Generate code from an MLFlow runid
 
@@ -150,104 +178,18 @@ def codegen_from_run(
     ----------
     spark : SparkSession
         A live spark session
-    run : mlflow.entities.Run
-        the mlflow run that produced the model we want to register
-    tracking_uri: str
-        The mlflow tracking uri
+    spec : dict
+        the model spec info dict
     name : str
         The name of the model in the catalog
-    options : dict
-        Optional parameters passed to the model.
 
     Returns
     -------
     str
         Spark UDF function name for the generated data.
     """
-    try:
-        spec = MlflowModelSpec(run, tracking_uri, options=options)
-    except Exception as e:
-        to_spec_msg = (
-            "Could not create well-formed ModelSpec from run {}."
-            "Check MLFlowModelSpec._run_to_spec_dict"
-        ).format(run.run_id)
-        raise SpecError(to_spec_msg) from e
     udf = udf_from_spec(spec)
     return register_udf(spark, udf, name)
-
-
-def log_model(
-    model: Any,
-    artifact_path: str,
-    flavor: str,
-    schema: str,
-    pre_processing: Optional[str] = None,
-    post_processing: Optional[str] = None,
-    registered_model_name: Optional[str] = None,
-    **kwargs,
-):
-    """Convenience function to log the model with information needed by rikai.
-    This should be called during training when the model artifact is produced.
-
-
-    Parameters
-    ----------
-    model: Any
-        The model artifact object
-    artifact_path: str
-        The relative (to the run) artifact path
-    flavor: str
-        A valid Mlflow flavor (e.g., "pytorch")
-    schema: str
-        Output schema (pyspark DataType)
-    pre_processing: str, default None
-        Full python module path of the pre-processing transforms
-    post_processing: str, default None
-        Full python module path of the post-processing transforms
-    registered_model_name: str, default None
-        Model name in the mlflow model registry
-    kwargs: dict
-        Passed to `mlflow.<flavor>.log_model`
-
-    Examples
-    --------
-    # import mlflow.pytorch  <= vanilla mlflow usage
-    from rikai.spark.sql.codegen.mlflow_registry import log_model
-
-    # Log PyTorch model
-    with mlflow.start_run() as run:
-
-        # Training loop
-        # ...
-
-        # Assume `model` is the trained model from the training loop
-        log_model(model, "model", "pytorch",
-                  schema=rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.OUTPUT_SCHEMA,
-                  pre_processing="rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing",
-                  post_processing="rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing",
-                  registered_model_name="MyPytorchModel")
-        # mlflow.pytorch.log_model(model, "model") <= vanilla mlflow usage
-
-
-    For more details see `mlflow docs <https://www.mlflow.org/docs/latest/python_api/mlflow.pytorch.html#mlflow.pytorch.log_model>`_.
-    """  # noqa E501
-    # no need to set the tracking uri here since this is intended to be called
-    # inside the training loop within mlflow.start_run
-    getattr(mlflow, flavor).log_model(
-        model,
-        artifact_path,
-        registered_model_name=registered_model_name,
-        **kwargs,
-    )
-    tags = {
-        "rikai.spec.version": "1.0",
-        "rikai.model.flavor": flavor,
-        "rikai.output.schema": schema,
-        "rikai.transforms.pre": pre_processing,
-        "rikai.transforms.post": post_processing,
-        "rikai.model.artifact_path": artifact_path,
-    }
-    mlflow.set_tags(tags)
 
 
 class MlflowRegistry(Registry):
@@ -256,48 +198,103 @@ class MlflowRegistry(Registry):
     def __init__(self, spark: SparkSession):
         self._spark = spark
         self._jvm = spark.sparkContext._jvm
+        self._mlflow_client = None
 
     def __repr__(self):
         return "MlflowRegistry"
 
+    @property
+    def tracking_client(self):
+        if (
+            not self._mlflow_client
+            or self._mlflow_client._tracking_client.tracking_uri
+            != self.mlflow_tracking_uri
+        ):
+            self._mlflow_client = MlflowClient(self.mlflow_tracking_uri)
+        return self._mlflow_client
+
+    @property
+    def mlflow_tracking_uri(self):
+        return self._spark.conf.get(CONF_MLFLOW_TRACKING_URI)
+
     def resolve(self, uri: str, name: str, options: Dict[str, str]):
         logger.info(f"Resolving model {name} from {uri}")
-        tracking_uri = self._spark.conf.get(CONF_MLFLOW_TRACKING_URI)
-        client = MlflowClient(tracking_uri)
-        run = get_run(client, uri)
-        func_name = codegen_from_run(
-            self._spark, run, tracking_uri, name, options
+        model_uri, tags, params = _get_model_info(uri, self.tracking_client)
+        spec = MlflowModelSpec(
+            model_uri, tags, params, self.mlflow_tracking_uri, options=options
         )
-        model = self._jvm.ai.eto.rikai.sql.model.mlflow.MlflowModel(
-            name, run.info.run_id, func_name
+        func_name = codegen_from_spec(self._spark, spec, name)
+        model = self._jvm.ai.eto.rikai.sql.model.SparkUDFModel(
+            name, uri, func_name
         )
         return model
 
 
-def get_run(client: MlflowClient, uri: str) -> mlflow.entities.Run:
+def _get_model_info(uri: str, client: str) -> str:
+    """Transform the rikai model uri to something that mlflow understands"""
     parsed = urlparse(uri)
-    runid_or_model = parsed.hostname
     try:
-        # we can support a direct reference to runid
-        # 'mlflow://<run_id>'
-        return client.get_run(runid_or_model)
+        client.get_registered_model(parsed.hostname)
+        return _parse_model_ref(parsed, client)
     except MlflowException:
-        if parsed.path and parsed.path[1:].isdigit():
-            # we can support a reference to a registered model and version
-            # 'mlflow://<model_name>/<version>'
-            return client.get_run(
-                client.get_model_version(
-                    runid_or_model, int(parsed.path[1:])
-                ).run_id
-            )
+        return _parse_runid_ref(parsed, client)
 
-        # Or just use the latest version (by stage)
-        if not parsed.path:
-            # 'mlflow://<model_name>'
-            stage = "none"
+
+def _parse_model_ref(parsed: ParseResult, client: MlflowClient):
+    model = parsed.hostname
+    path = parsed.path.lstrip("/")
+    if path.isdigit():
+        mv = client.get_model_version(model, int(path))
+        run = client.get_run(mv.run_id)
+        return (
+            "models:/{}/{}".format(model, path),
+            run.data.tags,
+            run.data.params,
+        )
+    if not path:
+        stage = "none"  # TODO allow setting default stage from config
+    else:
+        stage = path.lower()
+    results = client.get_latest_versions(model, stages=[stage])
+    if not results:
+        raise SpecError(
+            "No versions found for model {} in stage {}".format(model, stage)
+        )
+    run = client.get_run(results[0].run_id)
+    return (
+        "models:/{}/{}".format(model, results[0].version),
+        run.data.tags,
+        run.data.params,
+    )
+
+
+def _parse_runid_ref(parsed: ParseResult, client: MlflowClient):
+    runid = parsed.hostname
+    run = client.get_run(runid)
+    path = parsed.path.lstrip("/")
+    if path:
+        return (
+            "runs:/{}/{}".format(runid, path),
+            run.data.tags,
+            run.data.params,
+        )
+    else:
+        artifacts = client.list_artifacts(runid)
+        if not artifacts:
+            raise SpecError("Run {} has no artifacts".format(runid))
+        elif len(artifacts) == 1:
+            return (
+                "runs:/{}/{}".format(runid, artifacts[0].path),
+                run.data.tags,
+                run.data.params,
+            )
         else:
-            # 'mlflow://<model_name>/<stage>'
-            stage = parsed.path[1:].lower()
-        for x in client.get_registered_model(runid_or_model).latest_versions:
-            if x.current_stage.lower() == stage:
-                return client.get_run(x.run_id)
+            # TODO allow setting default path from config
+            raise SpecError(
+                (
+                    "Run {} has more than 1 artifact ({})."
+                    "Please specify path like "
+                    "mlflows://<runid>/path/to/artifact in "
+                    "CREATE MODEL or ML_PREDICT"
+                ).format(runid, [x.path for x in artifacts])
+            )

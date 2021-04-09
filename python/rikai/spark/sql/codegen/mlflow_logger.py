@@ -94,7 +94,14 @@ class MlflowLogger:
         For more details see `mlflow docs <https://www.mlflow.org/docs/latest/python_api/mlflow.pytorch.html#mlflow.pytorch.log_model>`_.
         """  # noqa E501
 
-        import mlflow
+        try:
+            import mlflow
+        except ImportError:
+            raise ImportError(
+                "Couldn't import mlflow. Please make sure to "
+                "`pip install mlflow` explicitly or install "
+                "the correct extras like `pip install rikai[mlflow]`"
+            )
 
         # no need to set the tracking uri here since this is intended to be
         # called inside the training loop within mlflow.start_run

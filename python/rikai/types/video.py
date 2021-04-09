@@ -20,6 +20,8 @@ import cv2
 from rikai.mixin import Displayable
 from rikai.spark.types import SegmentType, VideoStreamType, YouTubeVideoType
 
+from rikai.video.ffmpeg import VideoFrameSampler
+
 __all__ = [
     "YouTubeVideo",
     "VideoStream",
@@ -186,7 +188,7 @@ class VideoStream(Displayable):
 
     def __iter__(self):
         """Iterate through every frame in the video"""
-        for frame in SingleFrameSampler(self):
+        for frame in VideoFrameSampler(self):
             yield frame
 
 

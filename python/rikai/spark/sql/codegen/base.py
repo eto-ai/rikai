@@ -24,7 +24,6 @@ from rikai.logging import logger
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
 
-
 __all__ = ["Registry", "ModelSpec"]
 
 
@@ -122,8 +121,12 @@ class ModelSpec(ABC):
 
     @property
     def uri(self) -> str:
-        """Return Model URI"""
+        """Return Model artifact URI"""
         return self._spec["model"]["uri"]
+
+    @abstractmethod
+    def load_model(self) -> Any:
+        """Load the model artifact specified in this spec"""
 
     @property
     def flavor(self) -> str:

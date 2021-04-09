@@ -19,6 +19,12 @@ package ai.eto.rikai.sql.model
 import io.circe.syntax._
 import scala.collection.JavaConverters.mapAsJavaMap
 
+import org.apache.spark.sql.catalyst.FunctionIdentifier
+import org.apache.spark.sql.catalyst.analysis.UnresolvedFunction
+import org.apache.spark.sql.catalyst.expressions.Expression
+
+import ai.eto.rikai.sql.spark.SparkRunnable
+
 /**
   * A Machine Learning Model in Rikai Catalog.
   */
@@ -56,3 +62,26 @@ object Model {
 }
 
 class ModelNameException(message: String) extends Exception(message);
+
+/**
+  * A [[Model]] that can be turned into a Spark UDF.
+  *
+  * @param name model name.
+  * @param uri the model uri.
+  * @param funcName the name of a UDF which will be called when this model is invoked.
+  */
+class SparkUDFModel(val name: String, val uri: String, val funcName: String)
+    extends Model
+    with SparkRunnable {
+
+  override def toString: String = s"SparkUDFModel(name=${name}, uri=${uri})"
+
+  /** Convert a [[Model]] to a Spark Expression in Spark SQL's logical plan. */
+  override def asSpark(args: Seq[Expression]): Expression = {
+    new UnresolvedFunction(
+      new FunctionIdentifier(funcName),
+      arguments = args,
+      isDistinct = false
+    )
+  }
+}

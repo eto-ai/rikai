@@ -15,7 +15,7 @@
 
 import numpy as np
 from pyspark.ml.linalg import DenseMatrix
-from pyspark.sql import SparkSession, Row
+from pyspark.sql import Row, SparkSession
 
 # Rikai
 from rikai.numpy import wrap

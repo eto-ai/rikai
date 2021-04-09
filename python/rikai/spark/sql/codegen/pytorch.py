@@ -41,22 +41,19 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     -------
     A Spark Pandas UDF.
     """
-
-    options = {} if spec.options is None else spec.options
-    use_gpu = options.get("device", "cpu") == "gpu"
+    use_gpu = spec.options.get("device", "cpu") == "gpu"
     num_workers = int(
-        options.get("num_workers", min(os.cpu_count(), DEFAULT_NUM_WORKERS))
+        spec.options.get(
+            "num_workers", min(os.cpu_count(), DEFAULT_NUM_WORKERS)
+        )
     )
-    batch_size = int(options.get("batch_size", DEFAULT_BATCH_SIZE))
+    batch_size = int(spec.options.get("batch_size", DEFAULT_BATCH_SIZE))
 
     def torch_inference_udf(
         iter: Iterator[pd.DataFrame],
     ) -> Iterator[pd.DataFrame]:
-
-        with open_uri(spec.uri) as fobj:
-            model = torch.load(fobj)
         device = torch.device("cuda" if use_gpu else "cpu")
-
+        model = spec.load_model()
         model.to(device)
         model.eval()
 
@@ -76,3 +73,8 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                 yield pd.DataFrame(results)
 
     return pandas_udf(torch_inference_udf, returnType=spec.schema)
+
+
+def load_model_from_uri(uri: str):
+    with open_uri(uri) as fobj:
+        return torch.load(fobj)

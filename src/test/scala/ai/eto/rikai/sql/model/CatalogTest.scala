@@ -16,7 +16,6 @@
 
 package ai.eto.rikai.sql.model
 
-import ai.eto.rikai.sql.model.testing.TestModel
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -28,7 +27,7 @@ class CatalogTest extends AnyFunSuite with BeforeAndAfterEach {
 
   test("Test simple catalog") {
     assert(!catalog.modelExists("foo"))
-    val created = catalog.createModel(new TestModel("foo", "bar", null))
+    val created = catalog.createModel(new SparkUDFModel("foo", "bar", null))
     assert(created.name == "foo")
     assert(created.uri == "bar")
     assert(catalog.modelExists("foo"))

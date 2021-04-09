@@ -25,6 +25,7 @@ from rikai.spark.sql.codegen.base import (
     Registry,
     udf_from_spec,
 )
+from rikai.spark.sql.exceptions import SpecError
 
 __all__ = ["FileSystemRegistry"]
 
@@ -55,6 +56,14 @@ class FileModelSpec(ModelSpec):
         if options:
             spec["options"].update(options)
         super().__init__(spec, validate=validate)
+
+    def load_model(self):
+        if self.flavor == "pytorch":
+            from rikai.spark.sql.codegen.pytorch import load_model_from_uri
+
+            return load_model_from_uri(self.uri)
+        else:
+            raise SpecError("Unsupported flavor {}".format(self.flavor))
 
 
 def codegen_from_yaml(
@@ -99,13 +108,12 @@ class FileSystemRegistry(Registry):
 
     def resolve(self, uri: str, name: str, options: Dict[str, str]):
         logger.info(f"Resolving model {name} from {uri}")
-
         if uri.endswith(".yml") or uri.endswith(".yaml"):
             func_name = codegen_from_yaml(self._spark, uri, name, options)
         else:
             raise ValueError(f"Model URI is not supported: {uri}")
 
-        model = self._jvm.ai.eto.rikai.sql.model.fs.FileSystemModel(
+        model = self._jvm.ai.eto.rikai.sql.model.SparkUDFModel(
             name, uri, func_name
         )
         # TODO: set options

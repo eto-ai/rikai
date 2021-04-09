@@ -27,16 +27,6 @@ def resnet_spec(tmp_path_factory, resnet_model_uri):
     # Can not use default pytest fixture `tmp_dir` or `tmp_path` because
     # they do not work with module scoped fixture.
     tmp_path = tmp_path_factory.mktemp(str(uuid.uuid4()))
-<<<<<<< HEAD
-    # Prepare model
-    resnet = torchvision.models.detection.fasterrcnn_resnet50_fpn(
-        pretrained=True, progress=False
-    )
-    model_uri = tmp_path / "resnet.pth"
-    torch.save(resnet, model_uri)
-=======
->>>>>>> Implement MlflowModelSpec and create mlflowmodel spec based on run id
-
     spec_yaml = """
 version: "1.0"
 name: resnet

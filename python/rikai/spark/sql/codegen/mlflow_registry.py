@@ -54,8 +54,12 @@ class MlflowModelSpec(ModelSpec):
 
     Parameters
     ----------
-    run: mlflow.entities.Run
-        The Run object containing the spec info and ref to model artifact
+    uri: str
+        The uri that Mlflow registry knows how to read
+    tags: dict
+        Tags from the Mlflow run
+    params: dict
+        Params from the Mlflow run
     tracking_uri: str
         The mlflow tracking uri
     options: Dict[str, Any], optional
@@ -100,8 +104,11 @@ class MlflowModelSpec(ModelSpec):
         Parameters
         ----------
         uri: str
-            Rikai model reference (e.g., mlflow://<model_name>/<version> or
-            mlflow://
+            Rikai model reference
+        tags: dict
+            Tags from the Mlflow Run
+        params: dict
+            Params from the Mlflow Run
         extras: dict, default None
             Extra options passed in at model registration time
 
@@ -230,7 +237,7 @@ class MlflowRegistry(Registry):
         return model
 
 
-def _get_model_info(uri: str, client: str) -> str:
+def _get_model_info(uri: str, client: MlflowClient) -> str:
     """Transform the rikai model uri to something that mlflow understands"""
     parsed = urlparse(uri)
     try:

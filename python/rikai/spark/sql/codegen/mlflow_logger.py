@@ -16,8 +16,6 @@ Rikai SQL ML
 """
 from typing import Any, Optional
 
-import mlflow
-
 CONF_MLFLOW_TRACKING_URI = "rikai.sql.ml.registry.mlflow.tracking_uri"
 CONF_MLFLOW_OUTPUT_SCHEMA = "rikai.output.schema"
 CONF_MLFLOW_SPEC_VERSION = "rikai.spec.version"
@@ -95,6 +93,9 @@ class MlflowLogger:
 
         For more details see `mlflow docs <https://www.mlflow.org/docs/latest/python_api/mlflow.pytorch.html#mlflow.pytorch.log_model>`_.
         """  # noqa E501
+
+        import mlflow
+
         # no need to set the tracking uri here since this is intended to be
         # called inside the training loop within mlflow.start_run
         getattr(mlflow, flavor).log_model(

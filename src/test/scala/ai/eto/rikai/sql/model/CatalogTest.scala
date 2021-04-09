@@ -27,7 +27,7 @@ class CatalogTest extends AnyFunSuite with BeforeAndAfterEach {
 
   test("Test simple catalog") {
     assert(!catalog.modelExists("foo"))
-    val created = catalog.createModel(new TestModel("foo", "bar", null))
+    val created = catalog.createModel(new SparkUDFModel("foo", "bar", null))
     assert(created.name == "foo")
     assert(created.uri == "bar")
     assert(catalog.modelExists("foo"))

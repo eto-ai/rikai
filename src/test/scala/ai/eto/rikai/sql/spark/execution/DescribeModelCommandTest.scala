@@ -17,7 +17,7 @@
 package ai.eto.rikai.sql.spark.execution
 
 import ai.eto.rikai.SparkTestSession
-import ai.eto.rikai.sql.model.{Catalog, ModelNotFoundException}
+import ai.eto.rikai.sql.model.{Catalog, ModelNotFoundException, SparkUDFModel}
 import org.scalatest.funsuite.AnyFunSuite
 
 class DescribeModelCommandTest extends AnyFunSuite with SparkTestSession {
@@ -26,7 +26,7 @@ class DescribeModelCommandTest extends AnyFunSuite with SparkTestSession {
 
   test("describe model") {
     Catalog.testing.createModel(
-      new TestModel("model_foo", "uri://model/foo", null)
+      new SparkUDFModel("model_foo", "uri://model/foo", null)
     )
 
     val expected = Seq(("model_foo", "uri://model/foo", "")).toDF(

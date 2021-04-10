@@ -288,7 +288,7 @@ def tracker_match(trackers, detections, bbox_col="bbox", threshold=0.3):
             pass
 
     if len(matches) == 0:
-        matches = np.empty((0, 2), dtype=int)
+        return {}
     else:
         matches = np.concatenate(matches, axis=0, dtype=int)
 

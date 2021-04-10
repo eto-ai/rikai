@@ -31,7 +31,7 @@ from rikai.numpy import ndarray
 from rikai.spark.types.vision import ImageType
 from rikai.types.video import (
     Segment,
-    SingleFrameSampler,
+    VideoFrameSampler,
     VideoStream,
     YouTubeVideo,
 )

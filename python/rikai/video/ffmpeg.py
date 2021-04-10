@@ -26,7 +26,9 @@ except ImportError:
         "the correct extras like `pip install rikai[all]`"
     )
 from rikai.types.vision import Image
-from rikai.types.video import VideoSampler
+from rikai.types.video import VideoSampler, VideoStream
+
+__all__ = ["VideoFrameSampler"]
 
 
 class VideoFrameSampler(VideoSampler):

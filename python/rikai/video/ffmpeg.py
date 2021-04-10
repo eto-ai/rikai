@@ -121,9 +121,6 @@ class VideoFrameSampler(VideoSampler):
             .run(capture_stdout=True)
         )
 
-        video_array = np.frombuffer(video_data, np.uint8).reshape(
-            [-1, h, w, 3]
-        )
         return Image(data=img_bytes)
 
     def load_video(self):

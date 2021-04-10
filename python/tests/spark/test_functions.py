@@ -15,7 +15,7 @@
 """Unit tests for Rikai provided spark UDFs."""
 
 import os
-from io import BytesIO, IOBase
+from io import BytesIO
 from pathlib import Path
 
 import numpy as np
@@ -32,7 +32,7 @@ from rikai.spark.functions import (
     area,
     box2d,
     box2d_from_center,
-    to_image
+    to_image,
     image_copy,
     numpy_to_image,
     spectrogram_image,
@@ -118,32 +118,32 @@ def test_image_copy(spark: SparkSession, tmpdir):
     with open(os.path.join(out_file)) as fobj:
         assert fobj.read() == "abc"
 
-def test_to_image(spark: SparkSession, asset_path: Path):
-    """Test casting from data into Image asset.
 
-    """
+def test_to_image(spark: SparkSession, asset_path: Path):
+    """Test casting from data into Image asset."""
     image_uri = str(asset_path / "test_image.jpg")
     image = PILImage.open(image_uri)
 
     image_bytes = BytesIO()
-    image.save(image_byes, format="jpg")
+    image.save(image_bytes, format="jpg")
     image_bytes = image_bytes.getvalue()
+    image_byte_array = bytearray(image_bytes)
 
-    df1 = spark.createDataFrame(
-            [(image_uri)], ["image_uri"]
-    )
-    df2 = spark.createDataFrame(
-            [(image_bytes)], ["image_bytes"]
-    )
+    df1 = spark.createDataFrame([(image_uri)], ["image_uri"])
+    df2 = spark.createDataFrame([(image_bytes)], ["image_bytes"])
+    df3 = spark.createDataFrame([(image_byte_array)], ["image_byte_array"])
 
     df1 = df1.withColumn("image", to_image(col("image_uri")))
     df2 = df2.withColumn("image", to_image(col("image_bytes")))
+    df3 = df3.withColumn("image", to_image(col("image_byte_array")))
 
     uri_sample = df1.first()["image"]
     bytes_sample = df2.first()["image"]
+    byte_array_sample = df3.first()["image"]
 
     assert type(uri_sample) == Image
     assert type(bytes_sample) == Image
+    assert type(byte_array_sample) == Image
 
 
 def test_numpy_to_image(spark: SparkSession, tmp_path: Path):

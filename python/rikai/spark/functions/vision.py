@@ -147,26 +147,18 @@ def video_to_images(
         max_samples = min((segment.end_fno - start_frame), max_samples)
 
     if isinstance(video, YouTubeVideo):
-        video_iterator = SingleFrameSampler(
+        video_iterator = VideoFrameSampler(
             video.get_stream(quality=quality),
             sample_rate,
             start_frame,
             max_samples,
         )
     else:
-        video_iterator = SingleFrameSampler(
+        video_iterator = VideoFrameSampler(
             video, sample_rate, start_frame, max_samples
         )
 
-    return [
-        Image.from_array(
-            img,
-            os.path.join(
-                output_uri, "{}.jpg".format((start_frame + idx) * sample_rate)
-            ),
-        )
-        for idx, img in enumerate(video_iterator)
-    ]
+    return [Image(img_data) for idx, img_data in enumerate(video_iterator)]
 
 
 @udf(returnType=ImageType())

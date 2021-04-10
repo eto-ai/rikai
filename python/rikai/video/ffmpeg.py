@@ -141,11 +141,8 @@ class VideoFrameSampler(VideoSampler):
         ).run(capture_stdout=True)
         h = self.crop_height if not self.scale_height else self.scale_height
         w = self.crop_width if not self.scale_width else self.scale_width
-
-        video_array = np.frombuffer(video_data, np.uint8).reshape(
-            [-1, h, w, 3]
-        )
-        return [Image.from_array(arr) for arr in video_array]
+        img_size = h * w * 3
+        return [Image(data=video_data[i:i+img_size]) for i in range(0, len(video_data), img_size)]
 
     def __iter__(self):
         for frame in iter(self.load_video()):

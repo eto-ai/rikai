@@ -17,7 +17,6 @@
 
 # Standard library
 import os
-from io import IOBase
 from pathlib import Path
 from typing import Union
 
@@ -49,13 +48,11 @@ __all__ = [
 
 
 @udf(returnType=ImageType())
-def to_image(image_data: Union[bytes, bytearray, IOBase, str, Path]) -> Image:
+def to_image(image_data: Union[bytes, bytearray, str, Path]) -> Image:
     """Build an :py:class:`Image` from
     bytes, file-like object, str, or :py:class:`~pathlib.Path`."""
     data, uri = None, None
-    if isinstance(image_data, IOBase):
-        data = image_data.read()
-    elif isinstance(image_data, (bytes, bytearray)):
+    if isinstance(image_data, (bytes, bytearray)):
         data = image_data
     else:
         uri = image_data

@@ -15,11 +15,13 @@
 """Unit tests for Rikai provided spark UDFs."""
 
 import os
+from io import BytesIO, IOBase
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pandas.testing as pdt
+from PIL import Image as PILImage
 from pyspark.sql import Row, SparkSession
 from pyspark.sql.functions import col, concat, lit
 import pytest
@@ -30,6 +32,7 @@ from rikai.spark.functions import (
     area,
     box2d,
     box2d_from_center,
+    to_image
     image_copy,
     numpy_to_image,
     spectrogram_image,
@@ -114,6 +117,33 @@ def test_image_copy(spark: SparkSession, tmpdir):
 
     with open(os.path.join(out_file)) as fobj:
         assert fobj.read() == "abc"
+
+def test_to_image(spark: SparkSession, asset_path: Path):
+    """Test casting from data into Image asset.
+
+    """
+    image_uri = str(asset_path / "test_image.jpg")
+    image = PILImage.open(image_uri)
+
+    image_bytes = BytesIO()
+    image.save(image_byes, format="jpg")
+    image_bytes = image_bytes.getvalue()
+
+    df1 = spark.createDataFrame(
+            [(image_uri)], ["image_uri"]
+    )
+    df2 = spark.createDataFrame(
+            [(image_bytes)], ["image_bytes"]
+    )
+
+    df1 = df1.withColumn("image", to_image(col("image_uri")))
+    df2 = df2.withColumn("image", to_image(col("image_bytes")))
+
+    uri_sample = df1.first()["image"]
+    bytes_sample = df2.first()["image"]
+
+    assert type(uri_sample) == Image
+    assert type(bytes_sample) == Image
 
 
 def test_numpy_to_image(spark: SparkSession, tmp_path: Path):

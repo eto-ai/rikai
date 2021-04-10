@@ -38,23 +38,27 @@ Roadmap:
 ## Example
 
 ```python
+from pyspark.sql import Row
 from pyspark.ml.linalg import DenseMetrix
 from rikai.types import Image, Box2d
-from rikai import numpy as np
+from rikai.numpy import wrap
+import numpy as np
 
 df = spark.createDataFrame(
-    [{
-        "id": 1,
-        "mat": DenseMatrix(2, 2, range(4)),
-        "image": Image("s3://foo/bar/1.png"),
-        "annotations": [
-            {
-                "label": "cat",
-                "mask": np.random(size=(256,256)),
-                "bbox": Box2d(xmin=1.0, ymin=2.0, xmax=3.0, ymax=4.0)
-            }
-        ]
-    }]
+    [
+        {
+            "id": 1,
+            "mat": DenseMatrix(2, 2, range(4)),
+            "image": Image("s3://foo/bar/1.png"),
+            "annotations": [
+                Row(
+                    label="cat",
+                    mask=wrap(np.random.rand(256, 256)),
+                    bbox=Box2d(xmin=1.0, ymin=2.0, xmax=3.0, ymax=4.0),
+                )
+            ],
+        }
+    ]
 )
 
 df.write.format("rikai").save("s3://path/to/features")

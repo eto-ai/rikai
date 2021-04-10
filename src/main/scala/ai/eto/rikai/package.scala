@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql.model
+package ai.eto
 
-import org.scalatest.BeforeAndAfterEach
-import org.scalatest.funsuite.AnyFunSuite
+import org.apache.spark.sql.{DataFrame, DataFrameReader, DataFrameWriter}
 
-class CatalogTest extends AnyFunSuite with BeforeAndAfterEach {
+package object rikai {
+  implicit class RikaiReader(reader: DataFrameReader) {
+    def rikai(path: String): DataFrame = {
+      reader.format("rikai").load(path)
+    }
+  }
 
-  val catalog = Catalog.testing
-
-  override def beforeEach(): Unit = catalog.clear()
-
-  test("Test simple catalog") {
-    assert(!catalog.modelExists("foo"))
-    val created = catalog.createModel(new SparkUDFModel("foo", "bar", null))
-    assert(created.name == "foo")
-    assert(created.uri == "bar")
-    assert(catalog.modelExists("foo"))
+  implicit class RikaiWriter[T](writer: DataFrameWriter[T]) {
+    def rikai(path: String): Unit = {
+      writer.format("rikai").save(path)
+    }
   }
 }

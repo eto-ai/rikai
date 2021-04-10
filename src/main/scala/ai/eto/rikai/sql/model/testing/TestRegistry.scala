@@ -16,7 +16,12 @@
 
 package ai.eto.rikai.sql.model.testing
 
-import ai.eto.rikai.sql.model.{Model, ModelNotFoundException, Registry}
+import ai.eto.rikai.sql.model.{
+  Model,
+  ModelNotFoundException,
+  Registry,
+  SparkUDFModel
+}
 
 import java.io.File
 import java.net.URI
@@ -42,14 +47,14 @@ class TestRegistry(conf: Map[String, String]) extends Registry {
     val parsed = URI.create(uri)
     parsed.getScheme match {
       case this.schema => {
-        val model_name = name match {
+        val model_name: String = name match {
           case Some(name) => name
           case None =>
             new File(
               parsed.getAuthority + "/" + parsed.getPath
             ).getName
         }
-        new TestModel(model_name, uri, this)
+        new SparkUDFModel(model_name, uri, model_name)
       }
       case _ => throw new ModelNotFoundException(s"Fake model ${uri} not found")
     }

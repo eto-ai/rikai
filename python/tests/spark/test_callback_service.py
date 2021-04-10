@@ -27,7 +27,7 @@ def test_cb_service_find_registry(spark: SparkSession, tmp_path: Path):
     with spec_file.open("w") as fobj:
         fobj.write(
             """
-version: 1.0
+version: "1.0"
 schema: long
 model:
     uri: abc.pt

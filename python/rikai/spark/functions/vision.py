@@ -51,12 +51,7 @@ __all__ = [
 def to_image(image_data: Union[bytes, bytearray, str, Path]) -> Image:
     """Build an :py:class:`Image` from
     bytes, file-like object, str, or :py:class:`~pathlib.Path`."""
-    data, uri = None, None
-    if isinstance(image_data, (bytes, bytearray)):
-        data = image_data
-    else:
-        uri = image_data
-    return Image(data=data, uri=uri)
+    return Image(image=image_data)
 
 
 @udf(returnType=ImageType())

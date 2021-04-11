@@ -139,13 +139,10 @@ def test_mlflow_model_without_custom_logger(spark: SparkSession, mlflow_client):
     )
 
     sql = ('CREATE MODEL vanilla_ice ' 
-           'OPTIONS ('
-           '"rikai.model.flavor"="pytorch",'
-           '"rikai.output.schema"="{}",'
-           '"rikai.transforms.pre"="{}",'
-           '"rikai.transforms.post"="{}") '
-           'USING "mlflow://vanilla-mlflow/1"').format(schema, pre_processing,
-                                                       post_processing)
+           'OPTIONS (flavor="pytorch",schema="{}",pre="{}",post="{}") '
+           'USING "mlflow://vanilla-mlflow/1"').format(
+        schema, pre_processing, post_processing)
+
     spark.sql(sql)
     check_ml_predict(spark, "vanilla_ice")
 

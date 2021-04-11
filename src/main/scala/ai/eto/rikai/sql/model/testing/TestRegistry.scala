@@ -43,7 +43,11 @@ class TestRegistry(conf: Map[String, String]) extends Registry {
     * @return [[Model]] if found, ``None`` otherwise.
     */
   @throws[ModelNotFoundException]
-  override def resolve(uri: String, name: Option[String] = None): Model = {
+  override def resolve(
+      uri: String,
+      name: Option[String] = None,
+      options: Option[Map[String, String]] = None
+  ): Model = {
     val parsed = URI.create(uri)
     parsed.getScheme match {
       case this.schema => {

@@ -75,10 +75,10 @@ Rikai extends Spark SQL with four more SQL statements:
         { DESC | DESCRIBE } MODEL model_name;
 
         # Show all models
-        SHOW MODELS
+        SHOW MODELS;
 
         # Delete a model
-        DROP MODEL model_name
+        DROP MODEL model_name;
 
 Rikai uses URL schema to decide which Model Registry to be used to resolve a
 ML Model. Once one ML model is via ``CREATE MODEL``,
@@ -187,11 +187,11 @@ you can always specify schema, pre/post-processing classes in the CREATE MODEL O
         # Create model
         CREATE [OR REPLACE] MODEL model_name
         OPTIONS (
-         'rikai.model.flavor'='pytorch',
-         'rikai.output.schema'='struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>',
-         'rikai.transforms.pre'='rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing',
-         'rikai.transforms.post'='rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing')
-        USING "mlflow://my_resnet_model";
+         flavor='pytorch',
+         schema='struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>',
+         pre='rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing',
+         post='rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing')
+        USING 'mlflow://my_resnet_model';
 
     .. warning::
 

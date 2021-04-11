@@ -119,12 +119,15 @@ class MlflowModelSpec(ModelSpec):
         extras = extras or {}
         spec = {
             "version": _get_model_prop(
-                tags, CONF_MLFLOW_SPEC_VERSION,
-                extras, "spec",
+                tags,
+                CONF_MLFLOW_SPEC_VERSION,
+                extras,
+                "spec",
                 MlflowLogger._CURRENT_MODEL_SPEC_VERSION,
             ),
-            "schema": _get_model_prop(tags, CONF_MLFLOW_OUTPUT_SCHEMA,
-                                      extras, "schema"),
+            "schema": _get_model_prop(
+                tags, CONF_MLFLOW_OUTPUT_SCHEMA, extras, "schema"
+            ),
             "model": {
                 "flavor": _get_model_prop(
                     tags, CONF_MLFLOW_MODEL_FLAVOR, extras, "flavor"
@@ -136,12 +139,18 @@ class MlflowModelSpec(ModelSpec):
         # transforms
         spec["transforms"] = {
             "pre": _get_model_prop(
-                tags, CONF_MLFLOW_PRE_PROCESSING, extras, "pre",
-                raise_if_absent=False
+                tags,
+                CONF_MLFLOW_PRE_PROCESSING,
+                extras,
+                "pre",
+                raise_if_absent=False,
             ),
             "post": _get_model_prop(
-                tags, CONF_MLFLOW_POST_PROCESSING, extras, "post",
-                raise_if_absent=False
+                tags,
+                CONF_MLFLOW_POST_PROCESSING,
+                extras,
+                "post",
+                raise_if_absent=False,
             ),
         }
 

@@ -42,14 +42,6 @@ def spark(tmp_path_factory) -> SparkSession:
             "ai.eto.rikai.sql.model.testing.TestRegistry",
         )
         .config(
-            "rikai.sql.ml.registry.file.impl",
-            "ai.eto.rikai.sql.model.fs.FileSystemRegistry",
-        )
-        .config(
-            "rikai.sql.ml.registry.mlflow.impl",
-            "ai.eto.rikai.sql.model.mlflow.MlflowRegistry",
-        )
-        .config(
             "spark.driver.extraJavaOptions",
             "-Dio.netty.tryReflectionSetAccessible=true",
         )

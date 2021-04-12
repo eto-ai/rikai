@@ -38,9 +38,8 @@ case class CreateModelCommand(
     if (catalog(spark).modelExists(name)) {
       throw new ModelAlreadyExistException(s"Model (${name}) already exists")
     }
-
     val model = uri match {
-      case Some(u) => Registry.resolve(u, Some(name))
+      case Some(u) => Registry.resolve(u, Some(name), Some(options))
       case None =>
         throw new ModelResolveException(
           "Must provide URI to CREATE MODEL (for now)"

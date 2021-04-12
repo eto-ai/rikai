@@ -42,8 +42,12 @@ class MlflowRegistry(val conf: Map[String, String])
     * @return [[Model]] if found.
     */
   @throws[ModelNotFoundException]
-  override def resolve(uri: String, name: Option[String]): Model = {
+  override def resolve(
+      uri: String,
+      name: Option[String],
+      options: Option[Map[String, String]]
+  ): Model = {
     logger.info(s"Resolving ML model from ${uri}")
-    Python.resolve(pyClass, uri, name, Map.empty)
+    Python.resolve(pyClass, uri, name, options.getOrElse(Map.empty))
   }
 }

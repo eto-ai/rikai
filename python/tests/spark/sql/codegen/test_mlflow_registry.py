@@ -59,6 +59,20 @@ def mlflow_client(
             post_processing,
             registered_model_name="rikai-test",  # same as vanilla mlflow
         )
+
+    # vanilla mlflow
+    with mlflow.start_run():
+        mlflow.pytorch.log_model(
+            model, artifact_path, registered_model_name="vanilla-mlflow"
+        )
+        mlflow.set_tags(
+            {
+                "rikai.model.flavor": "pytorch",
+                "rikai.output.schema": schema,
+                "rikai.transforms.pre": pre_processing,
+                "rikai.transforms.post": post_processing,
+            }
+        )
     spark.conf.set("rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri)
     return mlflow.tracking.MlflowClient(tracking_uri)
 
@@ -115,3 +129,11 @@ def test_mlflow_model_from_model_version(spark: SparkSession, mlflow_client):
     # use the latest version in a given stage (omitted means none)
     spark.sql("CREATE MODEL resnet_m_buzz USING 'mlflow://rikai-test/'")
     check_ml_predict(spark, "resnet_m_buzz")
+
+
+@pytest.mark.timeout(60)
+def test_mlflow_model_without_custom_logger(
+    spark: SparkSession, mlflow_client
+):
+    spark.sql("CREATE MODEL vanilla_ice USING 'mlflow://vanilla-mlflow/1'")
+    check_ml_predict(spark, "vanilla_ice")

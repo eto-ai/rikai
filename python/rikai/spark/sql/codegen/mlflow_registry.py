@@ -118,29 +118,19 @@ class MlflowModelSpec(ModelSpec):
         """
         extras = extras or {}
         spec = {
-            "version": _get_model_prop(
-                tags,
-                extras,
+            "version": tags.get(
                 CONF_MLFLOW_SPEC_VERSION,
                 MlflowLogger._CURRENT_MODEL_SPEC_VERSION,
             ),
-            "schema": _get_model_prop(tags, extras, CONF_MLFLOW_OUTPUT_SCHEMA),
+            "schema": _get_model_prop(tags, CONF_MLFLOW_OUTPUT_SCHEMA),
             "model": {
-                "flavor": _get_model_prop(
-                    tags, extras, CONF_MLFLOW_MODEL_FLAVOR
-                ),
+                "flavor": _get_model_prop(tags, CONF_MLFLOW_MODEL_FLAVOR),
                 "uri": uri,
             },
-        }
-
-        # transforms
-        spec["transforms"] = {
-            "pre": _get_model_prop(
-                tags, extras, CONF_MLFLOW_PRE_PROCESSING, False
-            ),
-            "post": _get_model_prop(
-                tags, extras, CONF_MLFLOW_POST_PROCESSING, False
-            ),
+            "transforms": {
+                "pre": tags.get(CONF_MLFLOW_PRE_PROCESSING, None),
+                "post": tags.get(CONF_MLFLOW_POST_PROCESSING, None),
+            },
         }
 
         # options
@@ -158,20 +148,25 @@ class MlflowModelSpec(ModelSpec):
 
 def _get_model_prop(
     run_tags: dict,
-    extra_options: dict,
     conf_name: str,
+    extra_options: dict = None,
+    option_key: str = None,
     default_value: Any = None,
     raise_if_absent: bool = True,
 ) -> Any:
+    extra_options = extra_options or {}
+    option_key = option_key or conf_name
     value = run_tags.get(
-        conf_name, extra_options.get(conf_name, default_value)
+        conf_name, extra_options.get(option_key, default_value)
     )
     if not value and raise_if_absent:
         raise ValueError(
             (
                 "Please use rikai.mlflow.<flavor>.log_model after "
-                "training, or specify {} in CREATE MODEL OPTIONS"
-            ).format(conf_name)
+                "training, or specify {} in CREATE MODEL OPTIONS. "
+                "Tags: {}. "
+                "Options: {}"
+            ).format(conf_name, run_tags, extra_options)
         )
     return value
 

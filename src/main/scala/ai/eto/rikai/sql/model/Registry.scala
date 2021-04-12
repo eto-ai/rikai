@@ -52,6 +52,11 @@ object Registry {
   val REGISTRY_IMPL_PREFIX = "rikai.sql.ml.registry."
   val REGISTRY_IMPL_SUFFIX = ".impl"
 
+  val DEFAULT_REGISTRIES = Map(
+    "rikai.sql.ml.registry.file.impl" -> "ai.eto.rikai.sql.model.fs.FileSystemRegistry",
+    "rikai.sql.ml.registry.mlflow.impl" -> "ai.eto.rikai.sql.model.mlflow.MlflowRegistry"
+  )
+
   /** Mapping from Model URI schema to the registry. */
   private var registryMap: Map[String, Registry] = Map.empty
 
@@ -71,7 +76,8 @@ object Registry {
     * @param conf a mapping of (key, value) pairs
     */
   def registerAll(conf: Map[String, String]): Unit = {
-    for ((key, value) <- conf) {
+    // defaults
+    for ((key, value) <- DEFAULT_REGISTRIES ++ conf) {
       if (
         key.startsWith(REGISTRY_IMPL_PREFIX) &&
         key.endsWith(REGISTRY_IMPL_SUFFIX)
@@ -95,7 +101,6 @@ object Registry {
             .asInstanceOf[Registry])
         logger.debug(s"Model Registry ${schema} registered to: ${value}")
       }
-
     }
   }
 

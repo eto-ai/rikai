@@ -117,42 +117,17 @@ class MlflowModelSpec(ModelSpec):
         spec: Dict[str, Any]
         """
         extras = extras or {}
-        spec = {
-            "version": _get_model_prop(
-                tags,
-                CONF_MLFLOW_SPEC_VERSION,
-                extras,
-                "spec",
-                MlflowLogger._CURRENT_MODEL_SPEC_VERSION,
-            ),
-            "schema": _get_model_prop(
-                tags, CONF_MLFLOW_OUTPUT_SCHEMA, extras, "schema"
-            ),
-            "model": {
-                "flavor": _get_model_prop(
-                    tags, CONF_MLFLOW_MODEL_FLAVOR, extras, "flavor"
-                ),
-                "uri": uri,
-            },
-        }
-
-        # transforms
-        spec["transforms"] = {
-            "pre": _get_model_prop(
-                tags,
-                CONF_MLFLOW_PRE_PROCESSING,
-                extras,
-                "pre",
-                raise_if_absent=False,
-            ),
-            "post": _get_model_prop(
-                tags,
-                CONF_MLFLOW_POST_PROCESSING,
-                extras,
-                "post",
-                raise_if_absent=False,
-            ),
-        }
+        spec = {"version": tags.get(CONF_MLFLOW_SPEC_VERSION,
+                                    MlflowLogger._CURRENT_MODEL_SPEC_VERSION),
+                "schema": _get_model_prop(tags, CONF_MLFLOW_OUTPUT_SCHEMA),
+                "model": {
+                    "flavor": _get_model_prop(tags, CONF_MLFLOW_MODEL_FLAVOR),
+                    "uri": uri,
+                },
+                "transforms": {
+                    "pre": tags.get(CONF_MLFLOW_PRE_PROCESSING, None),
+                    "post": tags.get(CONF_MLFLOW_POST_PROCESSING, None)
+                }}
 
         # options
         options = dict(params or {})  # for training
@@ -170,12 +145,13 @@ class MlflowModelSpec(ModelSpec):
 def _get_model_prop(
     run_tags: dict,
     conf_name: str,
-    extra_options: dict,
+    extra_options: dict = None,
     option_key: str = None,
     default_value: Any = None,
     raise_if_absent: bool = True,
 ) -> Any:
-    option_key = conf_name if not option_key else option_key
+    extra_options = extra_options or {}
+    option_key = option_key or conf_name
     value = run_tags.get(
         conf_name, extra_options.get(option_key, default_value)
     )

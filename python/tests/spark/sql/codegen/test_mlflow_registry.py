@@ -65,6 +65,12 @@ def mlflow_client(
         mlflow.pytorch.log_model(
             model, artifact_path, registered_model_name="vanilla-mlflow"
         )
+        mlflow.set_tags({
+            'rikai.model.flavor': 'pytorch',
+            'rikai.output.schema': schema,
+            'rikai.transforms.pre': pre_processing,
+            'rikai.transforms.post': post_processing
+        })
     spark.conf.set("rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri)
     return mlflow.tracking.MlflowClient(tracking_uri)
 
@@ -127,25 +133,5 @@ def test_mlflow_model_from_model_version(spark: SparkSession, mlflow_client):
 def test_mlflow_model_without_custom_logger(
     spark: SparkSession, mlflow_client
 ):
-    # peg to a particular version of a model
-    schema = (
-        "struct<boxes:array<array<float>>,"
-        "scores:array<float>, labels:array<int>>"
-    )
-    pre_processing = (
-        "rikai.contrib.torch.transforms."
-        "fasterrcnn_resnet50_fpn.pre_processing"
-    )
-    post_processing = (
-        "rikai.contrib.torch.transforms."
-        "fasterrcnn_resnet50_fpn.post_processing"
-    )
-
-    sql = (
-        "CREATE MODEL vanilla_ice "
-        'OPTIONS (flavor="pytorch",schema="{}",pre="{}",post="{}") '
-        'USING "mlflow://vanilla-mlflow/1"'
-    ).format(schema, pre_processing, post_processing)
-
-    spark.sql(sql)
+    spark.sql("CREATE MODEL vanilla_ice USING 'mlflow://vanilla-mlflow/1'")
     check_ml_predict(spark, "vanilla_ice")

@@ -180,18 +180,21 @@ particular version number like `mlflow://my_resnet_model/1` (Rikai distinguishes
 version by checking whether the path component is a number).
 
 If you have existing models already in mlflow model registry that didn't use Rikai's custom logger,
-you can always specify schema, pre/post-processing classes in the CREATE MODEL OPTIONS:
+you can always specify schema, pre/post-processing classes as run tags. For example:
 
-    .. code-block:: sql
+    .. code-block:: python
 
-        # Create model
-        CREATE [OR REPLACE] MODEL model_name
-        OPTIONS (
-         flavor='pytorch',
-         schema='struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>',
-         pre='rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing',
-         post='rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing')
-        USING 'mlflow://my_resnet_model';
+        from mlflow.tracking import MlflowClient
+
+        client = MlflowClient(<tracking_uri>)
+        run_id = client.get_latest_versions("my_resnet_model", stages=['none'])
+        new_tags = {
+         'rikai.model.flavor': 'pytorch',
+         'rikai.output.schema': 'struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>',
+         'rikai.transforms.pre': 'rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing',
+         'rikai.transforms.post': 'rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing'
+         }
+        [client.set_tag(run_id, k, v) for k, v in new_tags.items()]
 
     .. warning::
 

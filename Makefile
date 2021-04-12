@@ -18,12 +18,14 @@ all: antlr
 antlr: python/rikai/spark/sql/generated/RikaiModelSchemaParser.py
 .PHONY: antlr
 
+# On ubuntu apt installs only antlr4 so create symlink like (sudo ln -sf /usr/bin/antlr4 /usr/local/bin/antlr)
 python/rikai/spark/sql/generated/RikaiModelSchemaParser.py: src/main/antlr4/org/apache/spark/sql/ml/parser/RikaiModelSchema.g4
 	antlr -Dlanguage=Python3 \
 		-Xexact-output-dir \
 		-no-listener -visitor \
 		-o python/rikai/spark/sql/generated \
 		src/main/antlr4/org/apache/spark/sql/ml/parser/RikaiModelSchema.g4
+	touch python/rikai/spark/sql/generated/__init__.py
 
 lint:
 	sbt scalafmtCheckAll

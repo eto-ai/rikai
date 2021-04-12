@@ -28,7 +28,8 @@ jupyter = ["matplotlib", "jupyterlab"]
 gcp = ["gcsfs"]
 docs = ["sphinx"]
 youtube = ["pafy", "youtube_dl", "ffmpeg-python"]
-all = torch + jupyter + gcp + docs + youtube
+mlflow = ['mlflow>=1.15']
+all = torch + jupyter + gcp + docs + youtube + mlflow
 
 
 setup(

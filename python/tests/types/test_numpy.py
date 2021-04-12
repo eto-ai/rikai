@@ -14,10 +14,12 @@
 
 
 import numpy as np
-from pyspark.sql import SparkSession
+from pyspark.ml.linalg import DenseMatrix
+from pyspark.sql import Row, SparkSession
 
 # Rikai
 from rikai.numpy import wrap
+from rikai.types import Box2d, Image
 
 
 def test_spark_show_numpy(spark: SparkSession, capsys):
@@ -30,3 +32,23 @@ def test_spark_show_numpy(spark: SparkSession, capsys):
     print(stdout)
     assert "ndarray(float64" in stdout
     assert "ndarray(uint8" in stdout
+
+
+def test_readme_example(spark: SparkSession):
+    df = spark.createDataFrame(
+        [
+            {
+                "id": 1,
+                "mat": DenseMatrix(2, 2, range(4)),
+                "image": Image("s3://foo/bar/1.png"),
+                "annotations": [
+                    Row(
+                        label="cat",
+                        mask=wrap(np.random.rand(256, 256)),
+                        bbox=Box2d(xmin=1.0, ymin=2.0, xmax=3.0, ymax=4.0),
+                    )
+                ],
+            }
+        ]
+    )
+    df.show()

@@ -13,20 +13,15 @@
 #  limitations under the License.
 import re
 
-from pyspark.sql import DataFrame
-
+import rikai
 from rikai.__version__ import version
-from .conf import CONF_PARQUET_BLOCK_SIZE, DEFAULT_ROW_GROUP_SIZE_BYTES
+from rikai.conf import CONF_PARQUET_BLOCK_SIZE
 
 
-def df_to_rikai(
-    df: DataFrame,
-    uri: str,
-    parquet_row_group_size_bytes: int = DEFAULT_ROW_GROUP_SIZE_BYTES,
-):
+def df_to_rikai(df: "pyspark.sql.DataFrame", uri: str):
     (
         df.write.format("rikai")
-        .option(CONF_PARQUET_BLOCK_SIZE, parquet_row_group_size_bytes)
+        .option(CONF_PARQUET_BLOCK_SIZE, rikai.options.parquet.block.size)
         .save(uri)
     )
 

@@ -93,7 +93,9 @@ def image_copy(img: Image, uri: str) -> Image:
 
 
 @udf(returnType=ImageType())
-def numpy_to_image(array: ndarray, uri: str) -> Image:
+def numpy_to_image(
+    array: ndarray, uri: str, format: str = None, **kwargs
+) -> Image:
     """Convert a numpy array to image, and upload to external storage.
 
     Parameters
@@ -102,6 +104,11 @@ def numpy_to_image(array: ndarray, uri: str) -> Image:
         Image data.
     uri : str
         The base directory to copy the image to.
+    format : str, optional
+        The image format to save as. See
+        `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
+    kwargs : dict, optional
+        Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
 
     Return
     ------
@@ -121,8 +128,8 @@ def numpy_to_image(array: ndarray, uri: str) -> Image:
     See Also
     --------
     :py:meth:`rikai.types.vision.Image.from_array`
-    """
-    return Image.from_array(array, uri)
+    """  # noqa: E501
+    return Image.from_array(array, uri, format=format, **kwargs)
 
 
 @udf(returnType=ArrayType(ImageType()))
@@ -133,6 +140,8 @@ def video_to_images(
     sample_rate: int = 1,
     max_samples: int = 15000,
     quality: str = "worst",
+    image_format: str = "png",
+    **image_kwargs,
 ) -> list:
     """Extract video frames into a list of images.
 
@@ -141,7 +150,7 @@ def video_to_images(
     video : Video
         An video object, either YouTubeVideo or VideoStream.
     output_uri: str
-        Frames will be written as <output_uri>/<fno>.jpg
+        Frames will be written as <output_uri>/<fno>.<img_format>
     segment: Segment, default Segment(0, -1)
         A Segment object, localizing video in time to (start_fno, end_fno)
     sample_rate : int, default 1
@@ -151,12 +160,15 @@ def video_to_images(
     quality: str, default 'worst'
         Either 'worst' (lowest bitrate) or 'best' (highest bitrate)
         See: https://pythonhosted.org/Pafy/index.html#Pafy.Pafy.getbest
-
-    Return
+    image_format : str, optional
+        The image format to save as. See
+        `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
+    image_kwargs : dict, optional
+        Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
     ------
     List
         Return a list of images from video indexed by frame number.
-    """
+    """  # noqa: E501
     assert isinstance(
         video, (YouTubeVideo, VideoStream)
     ), "Input type must be YouTubeVideo or VideoStream"
@@ -182,8 +194,13 @@ def video_to_images(
         Image.from_array(
             img,
             os.path.join(
-                output_uri, "{}.jpg".format((start_frame + idx) * sample_rate)
+                output_uri,
+                "{}.{}".format(
+                    (start_frame + idx) * sample_rate, image_format
+                ),
             ),
+            format=image_format,
+            **image_kwargs,
         )
         for idx, img in enumerate(video_iterator)
     ]
@@ -196,6 +213,8 @@ def spectrogram_image(
     segment: Segment = Segment(0, -1),
     size: int = 224,
     max_samples: int = 15000,
+    image_format: str = None,
+    **image_kwargs,
 ) -> Image:
     """Applies ffmpeg filter to generate spectrogram image.
 
@@ -211,12 +230,17 @@ def spectrogram_image(
             Yield at most this many frames (-1 means no max)
     size : Int
         Sets resolution of frequency, time spectrogram image.
+    image_format : str, optional
+        The image format to save as. See
+        `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
+    image_kwargs : dict, optional
+        Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
 
     Return
     ------
     Image
         Return an Image of the audio spectrogram.
-    """
+    """  # noqa: E501
     try:
         import ffmpeg
     except ImportError:
@@ -251,5 +275,8 @@ def spectrogram_image(
         .run(capture_stdout=True)
     )
     return Image.from_array(
-        np.frombuffer(output, np.uint8).reshape([size, size, 3]), output_uri
+        np.frombuffer(output, np.uint8).reshape([size, size, 3]),
+        output_uri,
+        format=image_format,
+        **image_kwargs,
     )

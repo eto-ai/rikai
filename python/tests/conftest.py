@@ -12,12 +12,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import uuid
 from pathlib import Path
 
 # Third Party
 import pytest
-from torch.utils.data import DataLoader  # Prevent DataLoader hangs
+import torch
+import torchvision
 from pyspark.sql import SparkSession
+from torch.utils.data import DataLoader  # Prevent DataLoader hangs
 
 # Rikai
 from rikai.spark.sql import init
@@ -29,7 +32,7 @@ def spark(tmp_path_factory) -> SparkSession:
     version = get_default_jar_version(use_snapshot=True)
     session = (
         SparkSession.builder.appName("spark-test")
-        .config("spark.jars.packages", "ai.eto:rikai_2.12:{}".format(version))
+        .config("spark.jars.packages", f"ai.eto:rikai_2.12:{version}")
         .config(
             "spark.sql.extensions",
             "ai.eto.rikai.sql.spark.RikaiSparkSessionExtensions",
@@ -43,6 +46,10 @@ def spark(tmp_path_factory) -> SparkSession:
             "ai.eto.rikai.sql.model.fs.FileSystemRegistry",
         )
         .config(
+            "rikai.sql.ml.registry.mlflow.impl",
+            "ai.eto.rikai.sql.model.mlflow.MlflowRegistry",
+        )
+        .config(
             "spark.driver.extraJavaOptions",
             "-Dio.netty.tryReflectionSetAccessible=true",
         )
@@ -50,7 +57,6 @@ def spark(tmp_path_factory) -> SparkSession:
             "spark.executor.extraJavaOptions",
             "-Dio.netty.tryReflectionSetAccessible=true",
         )
-        .config("spark.rikai.cacheUri", str(tmp_path_factory.mktemp("data")))
         .master("local[2]")
         .getOrCreate()
     )
@@ -61,3 +67,16 @@ def spark(tmp_path_factory) -> SparkSession:
 @pytest.fixture
 def asset_path() -> Path:
     return Path(__file__).parent / "assets"
+
+
+@pytest.fixture(scope="session")
+def resnet_model_uri(tmp_path_factory):
+    # Prepare model
+    tmp_path = tmp_path_factory.mktemp(str(uuid.uuid4()))
+    resnet = torchvision.models.detection.fasterrcnn_resnet50_fpn(
+        pretrained=True,
+        progress=False,
+    )
+    model_uri = tmp_path / "resnet.pth"
+    torch.save(resnet, model_uri)
+    return model_uri

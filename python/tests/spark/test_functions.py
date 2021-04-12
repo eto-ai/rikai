@@ -17,14 +17,15 @@
 import os
 from io import BytesIO
 from pathlib import Path
+import pytest
 
 import numpy as np
 import pandas as pd
 import pandas.testing as pdt
 from PIL import Image as PILImage
+
 from pyspark.sql import Row, SparkSession
 from pyspark.sql.functions import col, concat, lit
-import pytest
 
 # Rikai
 from rikai.numpy import wrap

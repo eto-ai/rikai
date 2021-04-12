@@ -27,8 +27,11 @@ import semver
 import torch
 from torch.utils.data import IterableDataset
 
-# Rikai
 import rikai.parquet
+
+# Rikai
+from rikai.conf import CONF_RIKAI_CACHEURI
+from rikai.spark.utils import df_to_rikai
 from rikai.torch.transforms import convert_tensor, RikaiToTensor
 
 __all__ = ["DataLoader", "Dataset"]
@@ -310,18 +313,9 @@ def _maybe_cache_df(
                 "Cannot create rikai pytorch dataset from "
                 "Spark DataFrame without pyspark installed."
             )
-        from rikai.spark.utils import CONF_PARQUET_BLOCK_SIZE, df_to_rikai
-
         if isinstance(data_ref, DataFrame):
-            kwargs = {}
-            # TODO also try to get it from rikai.options once #134 is done
-            block_size = data_ref.rdd.ctx.getConf().get(
-                CONF_PARQUET_BLOCK_SIZE, None
-            )
-            if block_size is not None:
-                kwargs["parquet_row_group_size_bytes"] = block_size
             cache_uri = _get_cache_uri(data_ref)
-            df_to_rikai(data_ref, cache_uri, **kwargs)
+            df_to_rikai(data_ref, cache_uri)
         else:
             raise TypeError(
                 (
@@ -346,8 +340,10 @@ def _get_cache_uri(df: "pyspark.sql.DataFrame") -> str:
     cache_uri: str
         The uri to write the DataFrame to
     """
-    # TODO also try to get it from rikai.options once #134 is done
-    from rikai.spark.conf import CONF_SPARK_RIKAI_CACHEURI
-
-    cache_root_uri = df.rdd.ctx.getConf().get(CONF_SPARK_RIKAI_CACHEURI)
+    cache_root_uri = rikai.options.rikai.cache_uri
+    if not cache_root_uri:
+        raise ValueError(
+            "Could not retrieve rikai cache_uri from either "
+            "spark or rikai configurations."
+        )
     return os.path.join(cache_root_uri, str(uuid.uuid4()))

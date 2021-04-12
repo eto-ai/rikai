@@ -18,6 +18,7 @@
 
 from __future__ import annotations
 
+from io import IOBase
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Union
@@ -43,15 +44,24 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
 
     Parameters
     ----------
-    uri : str
-        The URI pointed to an Image stored on external storage.
+    image : bytes, file-like object, str or :py:class:`~pathlib.Path`
+        It can be the content of image, or a URI / Path of an image.
     """
 
     __UDT__ = ImageType()
 
-    def __init__(self, uri: Union[str, Path]):
-        super().__init__(uri)
-        self._cached_data = None
+    def __init__(
+        self,
+        image: Union[bytes, bytearray, IOBase, str, Path],
+    ):
+        data, uri = None, None
+        if isinstance(image, IOBase):
+            data = image.read()
+        elif isinstance(image, (bytes, bytearray)):
+            data = image
+        else:
+            uri = image
+        super().__init__(data=data, uri=uri)
 
     @classmethod
     def from_array(
@@ -59,6 +69,8 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
         array: np.ndarray,
         uri: Union[str, Path],
         mode: str = None,
+        format: str = None,
+        **kwargs,
     ) -> Image:
         """Create an image in memory from numpy array.
 
@@ -71,6 +83,11 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
         mode : str, optional
             The mode which PIL used to create image. See supported
             `modes on PIL document <https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-modes>`_.
+        format : str, optional
+            The image format to save as. See
+            `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
+        kwargs : dict, optional
+            Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
 
         See Also
         --------
@@ -81,10 +98,12 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
 
         assert array is not None
         img = PILImage.fromarray(array, mode=mode)
-        return cls.from_pil(img, uri)
+        return cls.from_pil(img, uri, format=format, **kwargs)
 
     @staticmethod
-    def from_pil(img: PILImage, uri: Union[str, Path]) -> Image:
+    def from_pil(
+        img: PILImage, uri: Union[str, Path], format: str = None, **kwargs
+    ) -> Image:
         """Create an image in memory from a :py:class:`PIL.Image`.
 
         Parameters
@@ -93,13 +112,18 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
             An PIL Image instance
         uri : str or Path
             The URI to store the image externally.
-        """
+        format : str, optional
+            The image format to save as. See
+            `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
+        kwargs : dict, optional
+            Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
+        """  # noqa: E501
         parsed = urlparse(normalize_uri(uri))
         if parsed.scheme == "file":
-            img.save(uri)
+            img.save(uri, format=format, **kwargs)
         else:
             with NamedTemporaryFile() as fobj:
-                img.save(fobj)
+                img.save(fobj, format=format, **kwargs)
                 fobj.flush()
                 copy(fobj.name, uri)
         return Image(uri)
@@ -158,8 +182,5 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
 
     def to_numpy(self) -> np.ndarray:
         """Convert this image into an :py:class:`numpy.ndarray`."""
-        if self._cached_data is None:
-            with self.to_pil() as pil_img:
-                self._cached_data = np.asarray(pil_img)
-        assert self._cached_data is not None
-        return self._cached_data
+        with self.to_pil() as pil_img:
+            return np.asarray(pil_img)

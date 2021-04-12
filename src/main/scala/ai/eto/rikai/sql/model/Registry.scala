@@ -71,7 +71,7 @@ object Registry {
         key.startsWith(REGISTRY_IMPL_PREFIX) &&
         key.endsWith(REGISTRY_IMPL_SUFFIX)
       ) {
-        val schema =
+        val schema: String =
           key.substring(
             REGISTRY_IMPL_PREFIX.length,
             key.length - REGISTRY_IMPL_SUFFIX.length
@@ -112,7 +112,7 @@ object Registry {
   @throws[ModelNotFoundException]
   def resolve(uri: String, name: Option[String] = None): Model = {
     val parsedUri = new URI(uri)
-    val schema = parsedUri.getScheme
+    val schema: String = parsedUri.getScheme
     registryMap.get(schema) match {
       case Some(registry) => registry.resolve(uri, name = name)
       case None =>

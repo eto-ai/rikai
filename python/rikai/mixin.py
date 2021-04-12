@@ -17,8 +17,9 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from io import BytesIO
 from pathlib import Path
-from typing import BinaryIO, Union
+from typing import BinaryIO, Optional, Union
 
 # Third Party
 import numpy as np
@@ -62,14 +63,38 @@ class Asset(ABC):
 
     An asset is also a cell in a DataFrame for analytics. It offers both fast
     query on columnar format and easy tooling to access the actual data.
+
+    Attributes
+    ----------
+    data : bytes, optional
+        Embedded data
+    uri : str
+        URI of the external storage.
     """
 
-    def __init__(self, uri: Union[str, Path]) -> None:
-        self.uri = str(uri)
+    def __init__(
+        self, data: Optional[bytes] = None, uri: Union[str, Path] = None
+    ) -> None:
+        assert (data is None) ^ (uri is None)
+        assert data is None or isinstance(
+            data, (bytes, bytearray)
+        ), f"Expect bytes got {type(data)}"
+        assert uri is None or isinstance(
+            uri, (str, Path)
+        ), f"Expect str/Path for uri, got {type(uri)}"
+        self.data = data
+        self.uri = str(uri) if uri is not None else None
 
     def __eq__(self, o: object) -> bool:
         return isinstance(o, Asset) and uri_equal(self.uri, o.uri)
 
+    @property
+    def is_embedded(self) -> bool:
+        """Returns True if this Asset has embedded data."""
+        return self.data is not None
+
     def open(self, mode="rb") -> BinaryIO:
         """Open the asset and returned as random-accessible file object."""
+        if self.is_embedded:
+            return BytesIO(self.data)
         return open_uri(self.uri, mode=mode)

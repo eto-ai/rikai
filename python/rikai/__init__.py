@@ -14,9 +14,21 @@
 
 """Rikai Feature Store
 """
-
+from rikai.conf import *
 from rikai.numpy import array, empty, wrap
+from rikai.spark.sql.codegen import mlflow_logger as mlflow
 
 from .__version__ import version
 
-__all__ = ["array", "empty", "wrap", "version"]
+__all__ = [
+    "array",
+    "empty",
+    "get_option",
+    "mlflow",
+    "options",
+    "option_context",
+    "reset_option",
+    "set_option",
+    "version",
+    "wrap",
+]

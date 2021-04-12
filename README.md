@@ -103,7 +103,7 @@ SELECT id, ML_PREDICT(yolo5, image) FROM my_dataset
 WHERE split = "train" LIMIT 100;
 ```
 
-As of v0.0.5, Rikai is integrated with mlflow. This allows you to automatically pickup the latest
+Rikai can use Mlflow as its model registry. This allows you to automatically pickup the latest
 model version if you're using the mlflow model registry.
 
 ```sql

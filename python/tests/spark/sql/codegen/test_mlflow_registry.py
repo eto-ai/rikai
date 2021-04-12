@@ -65,12 +65,14 @@ def mlflow_client(
         mlflow.pytorch.log_model(
             model, artifact_path, registered_model_name="vanilla-mlflow"
         )
-        mlflow.set_tags({
-            'rikai.model.flavor': 'pytorch',
-            'rikai.output.schema': schema,
-            'rikai.transforms.pre': pre_processing,
-            'rikai.transforms.post': post_processing
-        })
+        mlflow.set_tags(
+            {
+                "rikai.model.flavor": "pytorch",
+                "rikai.output.schema": schema,
+                "rikai.transforms.pre": pre_processing,
+                "rikai.transforms.post": post_processing,
+            }
+        )
     spark.conf.set("rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri)
     return mlflow.tracking.MlflowClient(tracking_uri)
 

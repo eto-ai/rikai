@@ -117,17 +117,21 @@ class MlflowModelSpec(ModelSpec):
         spec: Dict[str, Any]
         """
         extras = extras or {}
-        spec = {"version": tags.get(CONF_MLFLOW_SPEC_VERSION,
-                                    MlflowLogger._CURRENT_MODEL_SPEC_VERSION),
-                "schema": _get_model_prop(tags, CONF_MLFLOW_OUTPUT_SCHEMA),
-                "model": {
-                    "flavor": _get_model_prop(tags, CONF_MLFLOW_MODEL_FLAVOR),
-                    "uri": uri,
-                },
-                "transforms": {
-                    "pre": tags.get(CONF_MLFLOW_PRE_PROCESSING, None),
-                    "post": tags.get(CONF_MLFLOW_POST_PROCESSING, None)
-                }}
+        spec = {
+            "version": tags.get(
+                CONF_MLFLOW_SPEC_VERSION,
+                MlflowLogger._CURRENT_MODEL_SPEC_VERSION,
+            ),
+            "schema": _get_model_prop(tags, CONF_MLFLOW_OUTPUT_SCHEMA),
+            "model": {
+                "flavor": _get_model_prop(tags, CONF_MLFLOW_MODEL_FLAVOR),
+                "uri": uri,
+            },
+            "transforms": {
+                "pre": tags.get(CONF_MLFLOW_PRE_PROCESSING, None),
+                "post": tags.get(CONF_MLFLOW_POST_PROCESSING, None),
+            },
+        }
 
         # options
         options = dict(params or {})  # for training

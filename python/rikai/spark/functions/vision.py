@@ -50,7 +50,25 @@ __all__ = [
 @udf(returnType=ImageType())
 def to_image(image_data: Union[bytes, bytearray, str, Path]) -> Image:
     """Build an :py:class:`Image` from
-    bytes, file-like object, str, or :py:class:`~pathlib.Path`."""
+    bytes, file-like object, str, or :py:class:`~pathlib.Path`.
+
+    Parameters
+    ----------
+    image_data : bytes, bytearray, str, Path
+        The resource identifier or bytes of the source image.
+
+    Return
+    ------
+    Image
+        Return an Image pointed to the new URI
+
+    Example
+    -------
+
+    >>> df = spark.read.format("image").load("<path-to-data>")
+    >>>
+    >>> df.withColumn("new_image", to_image("image.data"))
+    """
     return Image(image=image_data)
 
 

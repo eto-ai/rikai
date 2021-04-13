@@ -17,6 +17,7 @@
 
 # Standard library
 import os
+from pathlib import Path
 from typing import Union
 
 # Third Party
@@ -38,7 +39,7 @@ from rikai.types.video import (
 from rikai.types.vision import Image
 
 __all__ = [
-    "image",
+    "to_image",
     "image_copy",
     "numpy_to_image",
     "video_to_images",
@@ -47,9 +48,28 @@ __all__ = [
 
 
 @udf(returnType=ImageType())
-def image(uri: str) -> Image:
-    """Build an :py:class:`Image` from a URI."""
-    return Image(uri)
+def to_image(image_data: Union[bytes, bytearray, str, Path]) -> Image:
+    """Build an :py:class:`Image` from
+    bytes, file-like object, str, or :py:class:`~pathlib.Path`.
+
+    Parameters
+    ----------
+    image_data : bytes, bytearray, str, Path
+        The resource identifier or bytes of the source image.
+
+    Return
+    ------
+    img: Image
+        An Image from the given embedded data or URI
+
+    Example
+    -------
+
+    >>> df = spark.read.format("image").load("<path-to-data>")
+    >>>
+    >>> df.withColumn("new_image", to_image("image.data"))
+    """
+    return Image(image_data)
 
 
 @udf(returnType=ImageType())
@@ -145,8 +165,6 @@ def video_to_images(
         `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
     image_kwargs : dict, optional
         Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
-
-    Return
     ------
     List
         Return a list of images from video indexed by frame number.

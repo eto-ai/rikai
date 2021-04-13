@@ -12,14 +12,26 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import secrets
 import uuid
+from pathlib import Path
+from typing import Any, Dict
 
 import pytest
-from pyspark.sql import Row, SparkSession
+import yaml
+from pyspark.sql import SparkSession
 from utils import check_ml_predict
 
 from rikai.spark.sql.codegen.fs import FileModelSpec
 from rikai.spark.sql.exceptions import SpecError
+
+
+def spec_file(content: Dict[str, Any], tmp_path: Path) -> Path:
+    filename = f"{secrets.token_urlsafe(6)}.yml"
+    spec_filepath = tmp_path / filename
+    with spec_filepath.open(mode="w") as fobj:
+        yaml.dump(content, fobj)
+    return spec_filepath
 
 
 @pytest.fixture(scope="module")
@@ -47,18 +59,21 @@ transforms:
     yield spec_file
 
 
-def test_validate_yaml_spec():
+def test_validate_yaml_spec(tmp_path):
     spec = FileModelSpec(
-        {
-            "version": "1.2",
-            "name": "test_yaml_model",
-            "schema": "long",
-            "model": {
-                "uri": "s3://bucket/to/model.pt",
-                "unspecified_field": True,
+        spec_file(
+            {
+                "version": "1.2",
+                "name": "test_yaml_model",
+                "schema": "long",
+                "model": {
+                    "uri": "s3://bucket/to/model.pt",
+                    "unspecified_field": True,
+                },
+                "options": {"gpu": "true", "batch_size": 123},
             },
-            "options": {"gpu": "true", "batch_size": 123},
-        }
+            tmp_path,
+        )
     )
 
     assert spec.name == "test_yaml_model"
@@ -66,46 +81,62 @@ def test_validate_yaml_spec():
     assert spec.post_processing is not None
 
 
-def test_validate_misformed_spec():
+def test_validate_misformed_spec(tmp_path):
     with pytest.raises(SpecError):
-        FileModelSpec({})
+        FileModelSpec(spec_file({}, tmp_path))
 
     with pytest.raises(SpecError, match=".*version' is a required property.*"):
         FileModelSpec(
-            {
-                "name": "test_yaml_model",
-                "schema": "long",
-                "model": {"uri": "s3://foo/bar"},
-            }
+            spec_file(
+                {
+                    "name": "test_yaml_model",
+                    "schema": "long",
+                    "model": {"uri": "s3://foo/bar"},
+                },
+                tmp_path,
+            )
         )
 
     with pytest.raises(SpecError, match=".*'model' is a required property.*"):
         FileModelSpec(
-            {"version": "1.0", "name": "test_yaml_model", "schema": "long"}
+            spec_file(
+                {
+                    "version": "1.0",
+                    "name": "test_yaml_model",
+                    "schema": "long",
+                },
+                tmp_path,
+            )
         )
 
     with pytest.raises(SpecError, match=".*'uri' is a required property.*"):
         FileModelSpec(
-            {
-                "version": "1.0",
-                "name": "test_yaml_model",
-                "schema": "long",
-                "model": {},
-            }
+            spec_file(
+                {
+                    "version": "1.0",
+                    "name": "test_yaml_model",
+                    "schema": "long",
+                    "model": {},
+                },
+                tmp_path,
+            )
         )
 
 
-def test_construct_spec_with_options():
+def test_construct_spec_with_options(tmp_path):
     spec = FileModelSpec(
-        {
-            "version": "1.0",
-            "name": "with_options",
-            "schema": "int",
-            "model": {
-                "uri": "s3://bucket/to/model.pt",
-                "unspecified_field": True,
+        spec_file(
+            {
+                "version": "1.0",
+                "name": "with_options",
+                "schema": "int",
+                "model": {
+                    "uri": "s3://bucket/to/model.pt",
+                    "unspecified_field": True,
+                },
             },
-        },
+            tmp_path,
+        ),
         options={"foo": 1, "bar": "2.3"},
     )
     assert {"foo": 1, "bar": "2.3"} == spec.options

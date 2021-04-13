@@ -12,7 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, IO, Mapping, Optional, Union
+import os
+from pathlib import Path
+from typing import Any, Dict, Optional, Union
 
 import yaml
 from pyspark.sql import SparkSession
@@ -35,8 +37,8 @@ class FileModelSpec(ModelSpec):
 
     Parameters
     ----------
-    spec : str, bytes, dict or file object
-        String content of the serialized spec, or a dict
+    spec_uri : str or Path
+        Spec file URI
     options : Dict[str, Any], optional
         Additionally options. If the same option exists in spec already,
         it will be overridden.
@@ -46,12 +48,13 @@ class FileModelSpec(ModelSpec):
 
     def __init__(
         self,
-        spec: Union[bytes, str, IO, Dict[str, Any]],
+        spec_uri: Union[str, Path],
         options: Optional[Dict[str, Any]] = None,
         validate: bool = True,
     ):
-        if not isinstance(spec, Mapping):
-            spec = yaml.load(spec, Loader=yaml.FullLoader)
+        with open_uri(spec_uri) as fobj:
+            spec = yaml.load(fobj, Loader=yaml.FullLoader)
+        self.base_dir = os.path.dirname(spec_uri)
         spec.setdefault("options", {})
         if options:
             spec["options"].update(options)
@@ -64,6 +67,11 @@ class FileModelSpec(ModelSpec):
             return load_model_from_uri(self.uri)
         else:
             raise SpecError("Unsupported flavor {}".format(self.flavor))
+
+    @property
+    def uri(self):
+        """Model URI"""
+        return super().uri
 
 
 def codegen_from_yaml(
@@ -90,8 +98,7 @@ def codegen_from_yaml(
     str
         Spark UDF function name for the generated data.
     """
-    with open_uri(uri) as fobj:
-        spec = FileModelSpec(fobj, options=options)
+    spec = FileModelSpec(uri, options=options)
     udf = udf_from_spec(spec)
     return register_udf(spark, udf, name)
 

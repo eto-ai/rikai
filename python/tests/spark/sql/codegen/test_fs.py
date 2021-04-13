@@ -146,3 +146,20 @@ def test_construct_spec_with_options(tmp_path):
 def test_yaml_model(spark: SparkSession, resnet_spec: str):
     spark.sql("CREATE MODEL resnet_m USING 'file://{}'".format(resnet_spec))
     check_ml_predict(spark, "resnet_m")
+
+
+def test_relative_model_uri(tmp_path):
+    spec = FileModelSpec(
+        spec_file(
+            {
+                "version": "1.2",
+                "name": "test_yaml_model",
+                "schema": "long",
+                "model": {
+                    "uri": "model.pt",
+                },
+            },
+            tmp_path,
+        )
+    )
+    assert Path(spec.uri) == tmp_path / "model.pt"

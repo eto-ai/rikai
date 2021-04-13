@@ -71,7 +71,10 @@ class FileModelSpec(ModelSpec):
     @property
     def uri(self):
         """Model URI"""
-        return super().uri
+        origin_uri = super().uri
+        if os.path.isabs(origin_uri):
+            return origin_uri
+        return os.path.join(self.base_dir, origin_uri)
 
 
 def codegen_from_yaml(

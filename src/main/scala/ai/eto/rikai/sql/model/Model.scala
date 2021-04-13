@@ -82,7 +82,8 @@ class SparkUDFModel(
     this(name, spec_uri, funcName, None)
   }
 
-  override def toString: String = s"SparkUDFModel(name=${name}, uri=${spec_uri})"
+  override def toString: String =
+    s"SparkUDFModel(name=${name}, uri=${spec_uri})"
 
   /** Convert a [[Model]] to a Spark Expression in Spark SQL's logical plan. */
   override def asSpark(args: Seq[Expression]): Expression = {

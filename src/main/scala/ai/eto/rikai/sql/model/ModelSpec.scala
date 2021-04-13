@@ -34,4 +34,7 @@ class ModelSpec(
 
   def getOptions: java.util.Map[String, String] =
     mapAsJavaMap(options.getOrElse(Map.empty))
+
+  override def toString: String =
+    s"ModelSpec(name=${name}, uri=${uri}, flavor=${flavor})"
 }

@@ -45,9 +45,19 @@ private[parser] class RikaiExtAstBuilder
 
   override def visitCreateModel(ctx: CreateModelContext): LogicalPlan = {
     Model.verifyName(ctx.model.getText)
+
+    val flavor: Option[String] = ctx.flavor match {
+      case null => None
+      case _ =>
+        visit(ctx.flavor) match {
+          case s: String => Some(s)
+          case _         => None
+        }
+    }
+
     CreateModelCommand(
       ctx.model.getText,
-      flavor = Option(ctx.flavor).map(string),
+      flavor = flavor,
       uri = Option(ctx.uri).map(string),
       table = None,
       replace = false,

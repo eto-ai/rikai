@@ -23,6 +23,7 @@ import ai.eto.rikai.sql.model.{
   Registry,
   SparkUDFModel
 }
+import org.apache.logging.log4j.scala.Logging
 
 import java.io.File
 import java.net.URI
@@ -31,13 +32,13 @@ import java.net.URI
   *
   * A valid model URI is: "test://hostname/model_name"
   */
-class TestRegistry(conf: Map[String, String]) extends Registry {
+class TestRegistry(conf: Map[String, String]) extends Registry with Logging {
 
   val schema: String = "test"
 
   /** Resolve a Model from the specific URI.
     *
-    * @param uri is the model registry URI.
+    * @param spec Model Spec
     *
     * @return [[Model]] if found, ``None`` otherwise.
     */
@@ -55,7 +56,8 @@ class TestRegistry(conf: Map[String, String]) extends Registry {
               parsed.getAuthority + "/" + parsed.getPath
             ).getName
         }
-        new SparkUDFModel(model_name, spec.uri, model_name)
+        logger.info(s"Creating Spark UDF model: func=${model_name} ${spec}")
+        new SparkUDFModel(model_name, spec.uri, model_name, spec.flavor)
       }
       case _ =>
         throw new ModelNotFoundException(s"Fake model ${spec.uri} not found")

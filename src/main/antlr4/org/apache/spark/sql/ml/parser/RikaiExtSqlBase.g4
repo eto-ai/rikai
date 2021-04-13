@@ -21,7 +21,7 @@ singleStatement
 
 statement
     : CREATE (OR REPLACE)? MODEL model=qualifiedName
-      (FLAVOR flavor=STRING)?
+      (FLAVOR flavor=identifier)?
       (OPTIONS optionList)?
       (USING uri=STRING)	                        # createModel
     | (DESC | DESCRIBE) MODEL model=qualifiedName   # describeModel

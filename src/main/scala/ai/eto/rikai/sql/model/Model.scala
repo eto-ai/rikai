@@ -16,14 +16,13 @@
 
 package ai.eto.rikai.sql.model
 
+import ai.eto.rikai.sql.spark.SparkRunnable
 import io.circe.syntax._
-import scala.collection.JavaConverters.mapAsJavaMap
-
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.UnresolvedFunction
 import org.apache.spark.sql.catalyst.expressions.Expression
 
-import ai.eto.rikai.sql.spark.SparkRunnable
+import scala.collection.JavaConverters.mapAsJavaMap
 
 /** A Machine Learning Model in Rikai Catalog.
   */
@@ -34,6 +33,9 @@ trait Model {
 
   /** Model URI in the registry */
   val uri: String
+
+  /** Flavor of the model */
+  val flavor: Option[String]
 
   /** Model Options. */
   var options: Map[String, String] = Map.empty
@@ -68,9 +70,17 @@ class ModelNameException(message: String) extends Exception(message);
   * @param uri the model uri.
   * @param funcName the name of a UDF which will be called when this model is invoked.
   */
-class SparkUDFModel(val name: String, val uri: String, val funcName: String)
-    extends Model
+class SparkUDFModel(
+    val name: String,
+    val uri: String,
+    val funcName: String,
+    val flavor: Option[String]
+) extends Model
     with SparkRunnable {
+
+  def this(name: String, uri: String, funcName: String) = {
+    this(name, uri, funcName, None)
+  }
 
   override def toString: String = s"SparkUDFModel(name=${name}, uri=${uri})"
 

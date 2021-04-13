@@ -25,8 +25,7 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 
 import ai.eto.rikai.sql.spark.SparkRunnable
 
-/**
-  * A Machine Learning Model in Rikai Catalog.
+/** A Machine Learning Model in Rikai Catalog.
   */
 trait Model {
 
@@ -63,8 +62,7 @@ object Model {
 
 class ModelNameException(message: String) extends Exception(message);
 
-/**
-  * A [[Model]] that can be turned into a Spark UDF.
+/** A [[Model]] that can be turned into a Spark UDF.
   *
   * @param name model name.
   * @param uri the model uri.

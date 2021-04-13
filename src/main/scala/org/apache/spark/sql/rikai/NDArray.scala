@@ -21,8 +21,7 @@ import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.unsafe.types.UTF8String
 
-/**
-  * NDArray type. Storing the persisted data from numpy ndarray.
+/** NDArray type. Storing the persisted data from numpy ndarray.
   *
   * Note that this class does not support interoperation in scala yet.
   * It will only show a array summary in "df.show()".
@@ -35,8 +34,7 @@ import org.apache.spark.unsafe.types.UTF8String
 @SQLUserDefinedType(udt = classOf[NDArrayType])
 class NDArray(val dtype: String) {
 
-  /**
-    * It will only display a summary using df.show().
+  /** It will only display a summary using df.show().
     */
   override def toString: String = s"ndarray(${dtype}, ...)"
 

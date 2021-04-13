@@ -31,8 +31,7 @@ import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 
 import scala.collection.JavaConverters.asScalaBufferConverter
 
-/**
-  * ```AstBuilder``` for Rikai Spark SQL extensions.
+/** ```AstBuilder``` for Rikai Spark SQL extensions.
   */
 private[parser] class RikaiExtAstBuilder
     extends RikaiExtSqlBaseBaseVisitor[AnyRef] {

@@ -20,8 +20,7 @@ import ai.eto.rikai.sql.model.{Model, ModelNotFoundException, Registry}
 import ai.eto.rikai.sql.spark.Python
 import org.apache.logging.log4j.scala.Logging
 
-/**
-  * Mlflow-based Model [[Registry]].
+/** Mlflow-based Model [[Registry]].
   */
 class MlflowRegistry(val conf: Map[String, String])
     extends Registry
@@ -30,8 +29,7 @@ class MlflowRegistry(val conf: Map[String, String])
   private val pyClass: String =
     "rikai.spark.sql.codegen.mlflow_registry.MlflowRegistry"
 
-  /**
-    * Resolve a [[Model]] from the specific URI.
+  /** Resolve a [[Model]] from the specific URI.
     *
     * @param uri  is the model registry URI.
     * @param name is an optional model name. If provided,

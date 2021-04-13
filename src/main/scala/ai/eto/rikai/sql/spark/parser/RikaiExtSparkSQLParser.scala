@@ -34,8 +34,7 @@ import org.apache.spark.sql.catalyst.{FunctionIdentifier, TableIdentifier}
 import org.apache.spark.sql.types.{DataType, StructType}
 import org.apache.spark.sql.{AnalysisException, SparkSession}
 
-/**
-  * SQL Parser for Rikai Extensions.
+/** SQL Parser for Rikai Extensions.
   *
   * Rikai extends Spark SQL to support ML-related SQL DDL.
   *
@@ -130,8 +129,7 @@ private[spark] class RikaiExtSqlParser(
 }
 
 // scalastyle:off line.size.limit
-/**
-  * Fork from `org.apache.spark.sql.catalyst.parser.UpperCaseCharStream`.
+/** Fork from `org.apache.spark.sql.catalyst.parser.UpperCaseCharStream`.
   *
   * @see https://github.com/apache/spark/blob/v2.4.4/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/parser/ParseDriver.scala#L157
   */

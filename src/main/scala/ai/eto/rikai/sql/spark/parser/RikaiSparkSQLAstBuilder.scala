@@ -29,8 +29,7 @@ import org.apache.spark.sql.catalyst.parser.{AstBuilder, ParseException}
 import java.util.Locale
 import scala.collection.JavaConverters.asScalaBufferConverter
 
-/**
-  * Extends Spark's `AstBuilder` to process the `Expression` within
+/** Extends Spark's `AstBuilder` to process the `Expression` within
   * Spark SQL Select/Where/OrderBy clauses.
   */
 private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
@@ -52,8 +51,7 @@ private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
       }
     }
 
-  /**
-    * Process `ML_PREDICT` Expression.
+  /** Process `ML_PREDICT` Expression.
     */
   def visitMlPredictFunction(ctx: FunctionCallContext): Expression =
     withOrigin(ctx) {

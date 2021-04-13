@@ -35,8 +35,7 @@ class RikaiRelation(val options: RikaiOptions)(
   override def schema: StructType =
     sqlContext.read.parquet(options.path).schema
 
-  /**
-    * Full scan table
+  /** Full scan table
     *
     * @return
     */
@@ -44,8 +43,7 @@ class RikaiRelation(val options: RikaiOptions)(
     sqlContext.read.parquet(options.path).rdd
   }
 
-  /**
-    * Pruned Scan
+  /** Pruned Scan
     *
     * @param requiredColumns the required columns to be loaded
     * @return
@@ -53,8 +51,7 @@ class RikaiRelation(val options: RikaiOptions)(
   override def buildScan(requiredColumns: Array[String]): RDD[Row] =
     buildScan(requiredColumns, Array.empty[Filter])
 
-  /**
-    * Pruned and filtered scan
+  /** Pruned and filtered scan
     *
     * @param requiredColumns
     * @param filters
@@ -74,8 +71,7 @@ class RikaiRelation(val options: RikaiOptions)(
     return df.rdd
   }
 
-  /**
-    * Write data
+  /** Write data
     *
     * @param data
     * @param overwrite

@@ -16,8 +16,7 @@
 
 package ai.eto.rikai.sql.model
 
-/**
-  * FileSystem-based on [[Model]]s.
+/** FileSystem-based on [[Model]]s.
   *
   * It supports the following URIs.
   *

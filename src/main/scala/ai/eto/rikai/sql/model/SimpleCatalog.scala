@@ -16,15 +16,13 @@
 
 package ai.eto.rikai.sql.model
 
-/**
-  * A Simple Catalog in memory. Used for local testing only.
+/** A Simple Catalog in memory. Used for local testing only.
   */
 class SimpleCatalog extends Catalog {
 
   private var models: Map[String, Model] = Map.empty
 
-  /**
-    * Create a ML Model that can be used in SQL ML in the current database.
+  /** Create a ML Model that can be used in SQL ML in the current database.
     */
   override def createModel(model: Model): Model = {
     synchronized {
@@ -33,24 +31,21 @@ class SimpleCatalog extends Catalog {
     model
   }
 
-  /**
-    * Return a list of models available for all Sessions
+  /** Return a list of models available for all Sessions
     */
   override def listModels(): Seq[Model] =
     synchronized {
       models.values.toSeq
     }
 
-  /**
-    * Check a model with the specified name exists.
+  /** Check a model with the specified name exists.
     *
     * @param name is the name of the model.
     */
   override def modelExists(name: String): Boolean =
     synchronized { models.contains(name) }
 
-  /**
-    * Get the model with a specific name.
+  /** Get the model with a specific name.
     *
     * @param name is a qualified name pointed to a Model.
     * @return the model
@@ -60,8 +55,7 @@ class SimpleCatalog extends Catalog {
       models get name
     }
 
-  /**
-    * Drops a model with a specific name
+  /** Drops a model with a specific name
     *
     * @param name the model name
     * @return true of the model is dropped successfully. False otherwise.

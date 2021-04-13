@@ -16,8 +16,7 @@
 
 package ai.eto.rikai
 
-/**
-  * Rikai SQL-ML extension.
+/** Rikai SQL-ML extension.
   *
   * Rikai offers DDL to manipulate ML Models:
   *

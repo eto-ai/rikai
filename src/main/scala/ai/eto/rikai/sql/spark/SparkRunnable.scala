@@ -18,8 +18,7 @@ package ai.eto.rikai.sql.spark
 
 import org.apache.spark.sql.catalyst.expressions.Expression
 
-/**
-  * Make [[ai.eto.rikai.sql.model.Model]] runnable on Spark.
+/** Make [[ai.eto.rikai.sql.model.Model]] runnable on Spark.
   *
   * For a '''ML_PREDICT''' expression in Spark SQL,
   *

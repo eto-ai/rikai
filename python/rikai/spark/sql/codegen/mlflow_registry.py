@@ -54,7 +54,7 @@ class MlflowModelSpec(ModelSpec):
 
     Parameters
     ----------
-    uri: str
+    model_uri: str
         The uri that Mlflow registry knows how to read
     tags: dict
         Tags from the Mlflow run
@@ -71,7 +71,7 @@ class MlflowModelSpec(ModelSpec):
 
     def __init__(
         self,
-        uri: str,
+        model_uri: str,
         tags: dict,
         params: dict,
         tracking_uri: str,
@@ -79,7 +79,7 @@ class MlflowModelSpec(ModelSpec):
         validate: bool = True,
     ):
         self.tracking_uri = tracking_uri
-        spec = self._load_spec_dict(uri, tags, params, options)
+        spec = self._load_spec_dict(model_uri, tags, params, options)
         super().__init__(spec, validate=validate)
         self._artifact = None
 
@@ -92,7 +92,7 @@ class MlflowModelSpec(ModelSpec):
         old_uri = mlflow.get_tracking_uri()
         try:
             mlflow.set_tracking_uri(self.tracking_uri)
-            return getattr(mlflow, self.flavor).load_model(self.uri)
+            return getattr(mlflow, self.flavor).load_model(self.model_uri)
         finally:
             mlflow.set_tracking_uri(old_uri)
 

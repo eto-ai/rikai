@@ -101,7 +101,7 @@ def test_modelspec(mlflow_client, resnet_model_uri):
         "rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn."
         "post_processing"
     )
-    assert spec.uri == "runs:/" + run_id + "/model"
+    assert spec.model_uri == "runs:/" + run_id + "/model"
 
 
 @pytest.mark.timeout(60)

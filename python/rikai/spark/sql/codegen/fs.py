@@ -65,14 +65,14 @@ class FileModelSpec(ModelSpec):
         if self.flavor == "pytorch":
             from rikai.spark.sql.codegen.pytorch import load_model_from_uri
 
-            return load_model_from_uri(self.uri)
+            return load_model_from_uri(self.model_uri)
         else:
             raise SpecError("Unsupported flavor {}".format(self.flavor))
 
     @property
-    def uri(self):
+    def model_uri(self):
         """Absolute model URI."""
-        origin_uri = super().uri
+        origin_uri = super().model_uri
         parsed = urlparse(origin_uri)
         if parsed.scheme or os.path.isabs(origin_uri):
             return origin_uri

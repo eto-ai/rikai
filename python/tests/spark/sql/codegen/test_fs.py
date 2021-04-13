@@ -77,7 +77,7 @@ def test_validate_yaml_spec(tmp_path):
     )
 
     assert spec.name == "test_yaml_model"
-    assert spec.uri == "s3://bucket/to/model.pt"
+    assert spec.model_uri == "s3://bucket/to/model.pt"
     assert spec.pre_processing is not None
     assert spec.post_processing is not None
 
@@ -141,7 +141,7 @@ def test_construct_spec_with_options(tmp_path):
         options={"foo": 1, "bar": "2.3"},
     )
     assert {"foo": 1, "bar": "2.3"} == spec.options
-    assert "s3://bucket/to/model.pt" == spec.uri
+    assert "s3://bucket/to/model.pt" == spec.model_uri
 
 
 @pytest.mark.timeout(60)
@@ -157,11 +157,9 @@ def test_relative_model_uri(tmp_path):
                 "version": "1.2",
                 "name": "test_yaml_model",
                 "schema": "long",
-                "model": {
-                    "uri": "model.pt",
-                },
+                "model": {"uri": "model.pt"},
             },
             tmp_path,
         )
     )
-    assert Path(spec.uri) == tmp_path / "model.pt"
+    assert Path(spec.model_uri) == tmp_path / "model.pt"

@@ -23,10 +23,21 @@ from rikai.spark.sql.codegen.fs import Registry
 
 
 class JvmModelSpec:
+    """Provide a mock object for ai.eto.rikai.sql.model.ModelSpec"""
+
     def __init__(self, uri: str, name: str, options: Dict[str, Any]):
         self.uri = uri
         self.name = name
         self.options = options
+
+    def getUri(self):
+        return self.uri
+
+    def getName(self):
+        return self.name
+
+    def getOptions(self):
+        return self.options
 
 
 def test_cb_service_find_registry(spark: SparkSession, tmp_path: Path):

@@ -31,7 +31,7 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
 
     val model = Catalog.testing.getModel("model_created").get
     assert(model.name == "model_created")
-    assert(model.uri == "test://model/created/from/uri")
+    assert(model.spec_uri == "test://model/created/from/uri")
     assert(model.options.isEmpty)
   }
 

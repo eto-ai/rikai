@@ -32,7 +32,7 @@ trait Model {
   val name: String
 
   /** Model URI in the registry */
-  val uri: String
+  val spec_uri: String
 
   /** Flavor of the model */
   val flavor: Option[String]
@@ -67,22 +67,22 @@ class ModelNameException(message: String) extends Exception(message);
 /** A [[Model]] that can be turned into a Spark UDF.
   *
   * @param name model name.
-  * @param uri the model uri.
+  * @param spec_uri the model uri.
   * @param funcName the name of a UDF which will be called when this model is invoked.
   */
 class SparkUDFModel(
     val name: String,
-    val uri: String,
+    val spec_uri: String,
     val funcName: String,
     val flavor: Option[String]
 ) extends Model
     with SparkRunnable {
 
-  def this(name: String, uri: String, funcName: String) = {
-    this(name, uri, funcName, None)
+  def this(name: String, spec_uri: String, funcName: String) = {
+    this(name, spec_uri, funcName, None)
   }
 
-  override def toString: String = s"SparkUDFModel(name=${name}, uri=${uri})"
+  override def toString: String = s"SparkUDFModel(name=${name}, uri=${spec_uri})"
 
   /** Convert a [[Model]] to a Spark Expression in Spark SQL's logical plan. */
   override def asSpark(args: Seq[Expression]): Expression = {

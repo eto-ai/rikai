@@ -64,11 +64,13 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
   }
 
   test("model flavor") {
-    spark.sql("CREATE MODEL tfmodel " +
-      "FLAVOR tensorflow " +
-      "USING 'test://model/tfmodel'")
+    spark.sql(
+      "CREATE MODEL tfmodel " +
+        "FLAVOR tensorflow " +
+        "USING 'test://model/tfmodel'"
+    )
     val model = Catalog.testing.getModel("tfmodel").get
-    assert (model.flavor.isDefined)
+    assert(model.flavor.isDefined)
     assert(model.flavor.contains("tensorflow"))
   }
 }

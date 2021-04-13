@@ -92,7 +92,8 @@ private[parser] class RikaiExtAstBuilder
     } else {
       string(ctx.value.STRING)
     }
-    ctx.key.getText -> value
+
+    visitQualifiedName(ctx.key.qualifiedName()) -> value
   }
 
   override def visitQualifiedName(ctx: QualifiedNameContext): String =

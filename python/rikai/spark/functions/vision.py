@@ -69,7 +69,7 @@ def to_image(image_data: Union[bytes, bytearray, str, Path]) -> Image:
     >>>
     >>> df.withColumn("new_image", to_image("image.data"))
     """
-    return Image(image=image_data)
+    return Image(image_data)
 
 
 @udf(returnType=ImageType())

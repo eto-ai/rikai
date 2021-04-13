@@ -49,7 +49,7 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
         "foo" -> "bar",
         "num" -> "1.23",
         "flag" -> "true",
-        "rikai.foo.bar" -> "1.23",
+        "rikai.foo.bar" -> "1.23"
       ).toMap
     )
   }

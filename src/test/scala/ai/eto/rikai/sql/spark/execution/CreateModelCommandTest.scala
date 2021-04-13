@@ -39,7 +39,7 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
     spark
       .sql(
         "CREATE MODEL qualified_opt OPTIONS (" +
-          "rikai.foo.bar=1.23, foo='bar', num=1.23, flag=True) " +
+          "rikai.foo.bar=1.23, foo='bar', num=-1.23, flag=True) " +
           "USING 'test://foo/options'"
       )
       .count()
@@ -47,7 +47,7 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
     assert(
       model.options == Seq(
         "foo" -> "bar",
-        "num" -> "1.23",
+        "num" -> "-1.23",
         "flag" -> "true",
         "rikai.foo.bar" -> "1.23"
       ).toMap

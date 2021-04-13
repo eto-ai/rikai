@@ -88,17 +88,17 @@ optionKey
 
 optionValue
     : INTEGER_VALUE
-    | DECIMAL_VALUE
+    | FLOATING_VALUE
     | booleanValue
     | STRING
     ;
 
 INTEGER_VALUE
-    : DIGIT+
+    : MINUS? DIGIT+
     ;
 
-DECIMAL_VALUE
-    : DECIMAL_DIGITS
+FLOATING_VALUE
+    : MINUS? DECIMAL_DIGITS
     ;
 
 booleanValue
@@ -135,4 +135,8 @@ WS  : [ \r\n\t]+ -> channel(HIDDEN)
 
 UNRECOGNIZED
     : .
+    ;
+
+MINUS
+    : '-'
     ;

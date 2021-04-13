@@ -71,7 +71,7 @@ class FileModelSpec(ModelSpec):
 
     @property
     def uri(self):
-        """Model URI"""
+        """Absolute model URI."""
         origin_uri = super().uri
         parsed = urlparse(origin_uri)
         if parsed.scheme or os.path.isabs(origin_uri):

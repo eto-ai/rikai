@@ -130,9 +130,9 @@ def test_to_image(spark: SparkSession, asset_path: Path):
     image_bytes = image_bytes.getvalue()
     image_byte_array = bytearray(image_bytes)
 
-    df1 = spark.createDataFrame([(image_uri)], ["image_uri"])
-    df2 = spark.createDataFrame([(image_bytes)], ["image_bytes"])
-    df3 = spark.createDataFrame([(image_byte_array)], ["image_byte_array"])
+    df1 = spark.createDataFrame([image_uri], ["image_uri"])
+    df2 = spark.createDataFrame([image_bytes], ["image_bytes"])
+    df3 = spark.createDataFrame([image_byte_array], ["image_byte_array"])
 
     df1 = df1.withColumn("image", to_image(col("image_uri")))
     df2 = df2.withColumn("image", to_image(col("image_bytes")))

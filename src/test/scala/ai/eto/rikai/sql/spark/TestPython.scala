@@ -16,7 +16,7 @@
 
 package ai.eto.rikai.sql.spark
 
-import ai.eto.rikai.sql.model.Model
+import ai.eto.rikai.sql.model.{Model, ModelSpec}
 
 /** [[Python]] callback service for unit testing
   */
@@ -26,8 +26,6 @@ class TestPython extends Python {
     */
   override def resolve(
       className: String,
-      uri: String,
-      name: String,
-      options: java.util.Map[String, String]
+      spec: ModelSpec
   ): Model = ???
 }

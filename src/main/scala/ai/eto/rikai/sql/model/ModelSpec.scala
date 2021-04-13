@@ -18,7 +18,8 @@ package ai.eto.rikai.sql.model
 
 import scala.collection.JavaConverters.mapAsJavaMap
 
-/**
+/** Model Spec is used to pass the create model information to
+  * python ModelRegistry.
   */
 class ModelSpec(
     val name: Option[String],

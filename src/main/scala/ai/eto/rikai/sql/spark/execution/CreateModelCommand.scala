@@ -16,12 +16,13 @@
 
 package ai.eto.rikai.sql.spark.execution
 
-import org.apache.logging.log4j.scala.Logging
 import ai.eto.rikai.sql.model.{
-  Registry,
+  ModelAlreadyExistException,
   ModelResolveException,
-  ModelAlreadyExistException
+  ModelSpec,
+  Registry
 }
+import org.apache.logging.log4j.scala.Logging
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.{Row, SparkSession}
 
@@ -40,7 +41,15 @@ case class CreateModelCommand(
       throw new ModelAlreadyExistException(s"Model (${name}) already exists")
     }
     val model = uri match {
-      case Some(u) => Registry.resolve(u, Some(name), Some(options))
+      case Some(u) => {
+        val spec = ModelSpec(
+          name = Some(name),
+          uri = u,
+          flavor = flavor,
+          options = Some(options)
+        )
+        Registry.resolve(spec)
+      }
       case None =>
         throw new ModelResolveException(
           "Must provide URI to CREATE MODEL (for now)"

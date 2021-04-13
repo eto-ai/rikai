@@ -47,6 +47,7 @@ private[parser] class RikaiExtAstBuilder
     Model.verifyName(ctx.model.getText)
     CreateModelCommand(
       ctx.model.getText,
+      flavor = Option(ctx.flavor).map(string),
       uri = Option(ctx.uri).map(string),
       table = None,
       replace = false,

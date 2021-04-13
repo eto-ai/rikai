@@ -62,4 +62,8 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
       spark.sql("CREATE MODEL model_created USING 'test://model/other/uri'")
     }
   }
+
+  test("model flavor") {
+    spark
+  }
 }

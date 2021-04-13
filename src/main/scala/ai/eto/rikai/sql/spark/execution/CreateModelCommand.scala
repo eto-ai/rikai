@@ -27,6 +27,7 @@ import org.apache.spark.sql.{Row, SparkSession}
 
 case class CreateModelCommand(
     name: String,
+    flavor: Option[String],
     uri: Option[String],
     table: Option[TableIdentifier],
     replace: Boolean,

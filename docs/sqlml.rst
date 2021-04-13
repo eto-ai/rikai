@@ -30,18 +30,10 @@ Before we can use ``Rikai SQL-ML``, we need to configure SparkSession:
         SparkSession
         .builder
         .appName("spark-app")
-        .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.2")
+        .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.5")
         .config(
             "spark.sql.extensions",
             "ai.eto.rikai.sql.spark.RikaiSparkSessionExtensions",
-        )
-        .config(
-            "rikai.sql.ml.registry.file.impl",
-            "ai.eto.rikai.sql.model.fs.FileSystemRegistry",
-        )
-        .config(
-            "rikai.sql.ml.registry.mlflow.impl",
-            "ai.eto.rikai.sql.model.mlflow.MlflowRegistry",
         )
         .config(
             "spark.driver.extraJavaOptions",
@@ -118,29 +110,10 @@ the content of "s3://bucket/to/spec.yaml" can be:
 Mlflow Integration
 ------------------
 
-As of v0.0.5, Rikai supports Mlflow Model Registry. Trained models can be logged via Rikai's
-custom model logger OR required attributes can be specified as options in the CREATE MODEL
-statement.
-
-First, the Spark session must be configured to use Rikai's MlflowRegistry as demonstrated above in
-the setup section. Verify that you have the following in your Spark session's configurations:
-
-    .. code-block:: python
-
-        SparkSession
-        .builder
-        .appName("rikai")
-        # other configs
-        .config(
-            "rikai.sql.ml.registry.mlflow.impl",
-            "ai.eto.rikai.sql.model.mlflow.MlflowRegistry",
-        )
-        # other configs
-        .master("local[*]")
-        .getOrCreate()
-
-Rikai comes with a custom model logger to make it easier to add attributes required by Rikai. This
-requires a one-line change from your usual mlflow model logging workflow:
+Rikai supports creating models from a Mlflow model registry as long as a few custom tags are set
+when the model is logged. To make this easier, Rikai comes with a custom model logger to add
+attributes required by Rikai. This requires a simple change from your usual mlflow model logging
+workflow:
 
     .. code-block:: python
 
@@ -172,15 +145,16 @@ Once models are trained, you can add the model to the Rikai model catalog and qu
 
         SELECT id, ML_PREDICT(model_foo, image) FROM df;
 
-If you specify only the mlflow model name as in the above example (i.e., my_resnet_model), Rikai
-will automatically use the latest version. If you have models in different stages as supported by
-mlflow, you can specify the stage like `mlflow://my_resnet_model/production` and Rikai will select
-the latest version whose `current_stage` is "production". Rikai also supports referencing a
-particular version number like `mlflow://my_resnet_model/1` (Rikai distinguishes the stage and
-version by checking whether the path component is a number).
+There are several options to refer to an mlflow model. If you specify only the mlflow model name as
+in the above example (i.e., my_resnet_model), Rikai will automatically use the latest version. If
+you have models in different stages as supported by mlflow, you can specify the stage like
+`mlflow://my_resnet_model/production` and Rikai will select the latest version whose
+`current_stage` is "production". Rikai also supports referencing a particular version number like
+`mlflow://my_resnet_model/1` (Rikai distinguishes the stage and version by checking whether the
+path component is a number).
 
 If you have existing models already in mlflow model registry that didn't use Rikai's custom logger,
-you can always specify schema, pre/post-processing classes as run tags. For example:
+you can always specify flavor, schema, and pre/post-processing classes as run tags. For example:
 
     .. code-block:: python
 

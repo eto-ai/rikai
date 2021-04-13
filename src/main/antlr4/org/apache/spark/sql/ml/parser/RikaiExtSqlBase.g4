@@ -83,7 +83,7 @@ option
     ;
 
 optionKey
-    : identifier
+    : qualifiedName
     ;
 
 optionValue

@@ -16,9 +16,9 @@
 
 package ai.eto.rikai.sql.spark.execution
 
-import org.scalatest.funsuite.AnyFunSuite
 import ai.eto.rikai.SparkTestSession
 import ai.eto.rikai.sql.model.{Catalog, ModelAlreadyExistException}
+import org.scalatest.funsuite.AnyFunSuite
 
 class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
 
@@ -38,16 +38,18 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
   test("create model with options") {
     spark
       .sql(
-        "CREATE MODEL model_options OPTIONS (foo='bar',num=1.2,flag=True) USING 'test://foo'"
+        "CREATE MODEL qualified_opt OPTIONS (" +
+          "rikai.foo.bar=1.23, foo='bar', num=1.23, flag=True) " +
+          "USING 'test://foo/options'"
       )
       .count()
-
-    val model = Catalog.testing.getModel("model_options").get
+    val model = Catalog.testing.getModel("qualified_opt").get
     assert(
       model.options == Seq(
         "foo" -> "bar",
-        "num" -> "1.2",
-        "flag" -> "true"
+        "num" -> "1.23",
+        "flag" -> "true",
+        "rikai.foo.bar" -> "1.23"
       ).toMap
     )
   }

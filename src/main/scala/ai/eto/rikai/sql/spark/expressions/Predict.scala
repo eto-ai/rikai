@@ -20,8 +20,7 @@ import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.catalyst.expressions.ExpressionInfo
 
-/**
-  * '''`ML_PREDICT`''' Expression in Spark SQL.
+/** '''`ML_PREDICT`''' Expression in Spark SQL.
   *
   *  `ML_PREDICT` can be used in `SELECT / WHERE / ORDER BY` clauses. Its SQL syntax
   *  is defined as:

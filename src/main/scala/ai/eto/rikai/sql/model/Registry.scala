@@ -20,13 +20,11 @@ import org.apache.log4j.Logger
 
 import java.net.URI
 
-/**
-  * Model Registry Integrations.
+/** Model Registry Integrations.
   */
 trait Registry {
 
-  /**
-    * Resolve a Model from the specific URI.
+  /** Resolve a Model from the specific URI.
     *
     * @param uri is the model registry URI.
     * @param name is an optional model name. If provided,
@@ -70,8 +68,7 @@ object Registry {
     }
   }
 
-  /**
-    * Register all registry implementations.
+  /** Register all registry implementations.
     *
     * @param conf a mapping of (key, value) pairs
     */
@@ -104,8 +101,7 @@ object Registry {
     }
   }
 
-  /**
-    * Resolve a [[Model]] from a model registry URI.
+  /** Resolve a [[Model]] from a model registry URI.
     *
     * Internally it uses model registry URI to find the appropriated [[Registry]] to run
     * [[Registry.resolve]].

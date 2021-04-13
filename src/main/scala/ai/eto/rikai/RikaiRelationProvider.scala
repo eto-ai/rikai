@@ -23,23 +23,20 @@ import org.apache.spark.sql.sources.{
   RelationProvider
 }
 
-/**
-  * Spark Relation Provider (source and sink) for "rikai" feature store
+/** Spark Relation Provider (source and sink) for "rikai" feature store
   */
 class RikaiRelationProvider
     extends RelationProvider
     with CreatableRelationProvider
     with DataSourceRegister {
 
-  /**
-    * {{{
+  /** {{{
     * spark.read.format("rikai").load("s3://path/to/featurestore")
     * }}}
     */
   override def shortName: String = "rikai"
 
-  /**
-    * Rikai Relation for write
+  /** Rikai Relation for write
     *
     * @param sqlContext Spark SQL context
     * @param mode save mode

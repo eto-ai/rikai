@@ -23,8 +23,7 @@ import org.apache.spark.sql.catalyst.parser.{
   ParserInterface
 }
 
-/**
-  * Spark SQL-ML Parser.
+/** Spark SQL-ML Parser.
   *
   * This parser injects "ML_PREDICT" as a FUNCTION expression, and compiles a LogicalPlan that
   * fits for later implementation-specific model inference physical plan.

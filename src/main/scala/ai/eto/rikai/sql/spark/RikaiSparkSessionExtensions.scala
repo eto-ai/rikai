@@ -18,8 +18,7 @@ import ai.eto.rikai.sql.spark.expressions.Predict
 import ai.eto.rikai.sql.spark.parser.{RikaiExtSqlParser, RikaiSparkSQLParser}
 import org.apache.spark.sql.SparkSessionExtensions
 
-/**
-  * Rikai SparkSession extensions to enable Spark SQL ML.
+/** Rikai SparkSession extensions to enable Spark SQL ML.
   */
 class RikaiSparkSessionExtensions extends (SparkSessionExtensions => Unit) {
 

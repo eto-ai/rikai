@@ -20,8 +20,7 @@ private[rikai] object Utils {
 
   val EqualPrecesion: Double = 1e-8
 
-  /**
-    * Approximated equal of two double values
+  /** Approximated equal of two double values
     *
     * @param x a double number
     * @param y a double number

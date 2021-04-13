@@ -18,8 +18,7 @@ package ai.eto.rikai
 
 private[rikai] class RikaiOptions(parameters: Map[String, String]) {
 
-  /**
-    * Base path for the feature dataset
+  /** Base path for the feature dataset
     */
   val path: String = parameters.getOrElse("path", "")
 }

@@ -26,8 +26,7 @@ import ai.eto.rikai.sql.model.{
 import java.io.File
 import java.net.URI
 
-/**
-  * [[TestRegistry]] is a Registry for the testing purpose.
+/** [[TestRegistry]] is a Registry for the testing purpose.
   *
   * A valid model URI is: "test://hostname/model_name"
   */
@@ -35,8 +34,7 @@ class TestRegistry(conf: Map[String, String]) extends Registry {
 
   val schema: String = "test"
 
-  /**
-    * Resolve a Model from the specific URI.
+  /** Resolve a Model from the specific URI.
     *
     * @param uri is the model registry URI.
     *

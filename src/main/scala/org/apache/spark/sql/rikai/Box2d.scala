@@ -22,8 +22,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 
 import Utils.approxEqual
 
-/**
-  * 2-D Bounding Box
+/** 2-D Bounding Box
   *
   * @constructor Create a 2-D Bounding Box.
   *
@@ -56,8 +55,7 @@ class Box2d(
 
 }
 
-/**
-  * User defined type of 2D Bouding Box
+/** User defined type of 2D Bouding Box
   */
 class Box2dType extends UserDefinedType[Box2d] {
 

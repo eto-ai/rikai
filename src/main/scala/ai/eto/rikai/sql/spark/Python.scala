@@ -20,14 +20,12 @@ import ai.eto.rikai.sql.model.{Model, ModelNotFoundException}
 
 import scala.collection.JavaConverters.mapAsJavaMap
 
-/**
-  * [[Python]] is the callback service to call arbitrary Python code
+/** [[Python]] is the callback service to call arbitrary Python code
   * in the SparkSessions' main python interpreter.
   */
 trait Python {
 
-  /**
-    * Resolve a Model from python.
+  /** Resolve a Model from python.
     *
     * @param uri URL for a model spec or model file.
     * @param name Optional model name. Can be empty.

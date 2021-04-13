@@ -16,38 +16,32 @@
 
 package ai.eto.rikai.sql.model
 
-/**
-  * Catalog for SQL ML.
+/** Catalog for SQL ML.
   */
 trait Catalog {
 
-  /**
-    * Create a ML Model that can be used in SQL ML in the current database.
+  /** Create a ML Model that can be used in SQL ML in the current database.
     */
   def createModel(model: Model): Model
 
-  /**
-    * Return a list of models available for all Sessions
+  /** Return a list of models available for all Sessions
     */
   def listModels(): Seq[Model]
 
-  /**
-    * Check a model with the specified name exists.
+  /** Check a model with the specified name exists.
     *
     * @param name is the name of the model.
     */
   def modelExists(name: String): Boolean
 
-  /**
-    * Get the model with a specific name.
+  /** Get the model with a specific name.
     *
     * @param name is a qualified name pointed to a Model.
     * @return the model
     */
   def getModel(name: String): Option[Model]
 
-  /**
-    * Drops a model with a specific name
+  /** Drops a model with a specific name
     *
     * @param name the model name
     * @return true of the model is dropped successfully. False otherwise.

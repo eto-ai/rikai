@@ -18,13 +18,11 @@ package ai.eto.rikai.sql.spark
 
 import ai.eto.rikai.sql.model.Model
 
-/**
-  * [[Python]] callback service for unit testing
+/** [[Python]] callback service for unit testing
   */
 class TestPython extends Python {
 
-  /**
-    * Resolve a Model from python.
+  /** Resolve a Model from python.
     */
   override def resolve(
       className: String,

@@ -81,7 +81,7 @@ class FileModelSpec(ModelSpec):
 
 def codegen_from_yaml(
     spark: SparkSession,
-    uri: str,
+    spec_uri: str,
     name: Optional[str] = None,
     options: Optional[Dict[str, str]] = None,
 ) -> str:
@@ -91,7 +91,7 @@ def codegen_from_yaml(
     ----------
     spark : SparkSession
         A live spark session
-    uri : str
+    spec_uri : str
         the model spec URI
     name : model name
         The name of the model.
@@ -103,7 +103,7 @@ def codegen_from_yaml(
     str
         Spark UDF function name for the generated data.
     """
-    spec = FileModelSpec(uri, options=options)
+    spec = FileModelSpec(spec_uri, options=options)
     udf = udf_from_spec(spec)
     return register_udf(spark, udf, name)
 

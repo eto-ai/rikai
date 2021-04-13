@@ -33,7 +33,7 @@ trait Python {
   @throws[ModelNotFoundException]
   def resolve(
       className: String,
-      spec: ModelSpec,
+      spec: ModelSpec
   ): Model
 }
 
@@ -56,7 +56,7 @@ object Python {
   @throws[ModelNotFoundException]
   def resolve(
       className: String,
-      spec: ModelSpec,
+      spec: ModelSpec
   ): Model = {
     checkRegistered
     python.get.resolve(

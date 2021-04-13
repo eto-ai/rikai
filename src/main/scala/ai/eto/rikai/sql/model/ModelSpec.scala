@@ -18,6 +18,8 @@ package ai.eto.rikai.sql.model
 
 import scala.collection.JavaConverters.mapAsJavaMap
 
+/**
+  */
 class ModelSpec(
     val name: Option[String],
     val uri: String,
@@ -25,9 +27,10 @@ class ModelSpec(
     val options: Option[Map[String, String]] = None
 ) {
 
-    def getName: String = name.getOrElse("")
+  def getName: String = name.getOrElse("")
 
-    def getUri: String = uri
+  def getUri: String = uri
 
-    def getOptions: java.util.Map[String, String] = mapAsJavaMap(options.getOrElse(Map.empty))
+  def getOptions: java.util.Map[String, String] =
+    mapAsJavaMap(options.getOrElse(Map.empty))
 }

@@ -16,7 +16,12 @@
 
 package ai.eto.rikai.sql.model.fs
 
-import ai.eto.rikai.sql.model.{Model, ModelNotFoundException, ModelSpec, Registry}
+import ai.eto.rikai.sql.model.{
+  Model,
+  ModelNotFoundException,
+  ModelSpec,
+  Registry
+}
 import ai.eto.rikai.sql.spark.Python
 import org.apache.logging.log4j.scala.Logging
 

@@ -34,7 +34,7 @@ trait Registry {
     */
   @throws[ModelNotFoundException]
   def resolve(
-      spec: ModelSpec,
+      spec: ModelSpec
   ): Model
 }
 

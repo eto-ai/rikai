@@ -15,6 +15,7 @@
 import os
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
+from urllib.parse import urlparse
 
 import yaml
 from pyspark.sql import SparkSession
@@ -72,7 +73,8 @@ class FileModelSpec(ModelSpec):
     def uri(self):
         """Model URI"""
         origin_uri = super().uri
-        if os.path.isabs(origin_uri):
+        parsed = urlparse(origin_uri)
+        if parsed.scheme or os.path.isabs(origin_uri):
             return origin_uri
         return os.path.join(self.base_dir, origin_uri)
 

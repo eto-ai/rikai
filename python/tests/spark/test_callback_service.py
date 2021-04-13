@@ -46,7 +46,7 @@ model:
     cb = CallbackService(spark)
     cb.resolve(
         "rikai.spark.sql.codegen.fs.FileSystemRegistry",
-        JvmModelSpec(str(spec_file), "foo", {})
+        JvmModelSpec(str(spec_file), "foo", {}),
     )
     assert isinstance(
         cb.registry_map["rikai.spark.sql.codegen.fs.FileSystemRegistry"],

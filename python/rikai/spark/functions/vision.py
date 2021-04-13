@@ -59,8 +59,8 @@ def to_image(image_data: Union[bytes, bytearray, str, Path]) -> Image:
 
     Return
     ------
-    Image
-        Return an Image pointed to the new URI
+    img: Image
+        An Image from the given embedded data or URI
 
     Example
     -------

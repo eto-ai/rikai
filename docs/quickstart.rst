@@ -28,7 +28,7 @@ Lets get started from the feature engineering in `Spark`_.
         SparkSession
         .builder
         .appName("rikai-quickstart")
-        .config('spark.jars.packages', 'ai.eto:rikai:0.0.5')
+        .config('spark.jars.packages', 'ai.eto:rikai:0.0.1')
         .config("spark.driver.extraJavaOptions", "-Dcom.amazonaws.services.s3.enableV4=true")
         .config('spark.jars.packages', 'org.apache.hadoop:hadoop-aws:2.7.4')
         .master("local[*]")

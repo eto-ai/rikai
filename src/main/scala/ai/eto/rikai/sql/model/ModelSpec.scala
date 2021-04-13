@@ -16,9 +16,18 @@
 
 package ai.eto.rikai.sql.model
 
-case class ModelSpec(
-    name: Option[String],
-    uri: String,
-    flavor: Option[String] = None,
-    options: Option[Map[String, String]] = None
-) {}
+import scala.collection.JavaConverters.mapAsJavaMap
+
+class ModelSpec(
+    val name: Option[String],
+    val uri: String,
+    val flavor: Option[String] = None,
+    val options: Option[Map[String, String]] = None
+) {
+
+    def getName: String = name.getOrElse("")
+
+    def getUri: String = uri
+
+    def getOptions: java.util.Map[String, String] = mapAsJavaMap(options.getOrElse(Map.empty))
+}

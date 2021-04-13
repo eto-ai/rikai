@@ -68,7 +68,7 @@ private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
         case arg: UnresolvedAttribute => catalog.getModel(arg.name)
         case arg: Literal => {
           val model =
-            Registry.resolve(ModelSpec(name = None, uri = arg.toString))
+            Registry.resolve(new ModelSpec(name = None, uri = arg.toString))
           Some(model)
         }
         case _ =>

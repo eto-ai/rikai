@@ -119,9 +119,9 @@ class FileSystemRegistry(Registry):
         return "FileSystemRegistry"
 
     def resolve(self, spec):
-        name = spec.name
-        uri = spec.uri
-        options = spec.options
+        name = spec.getName()
+        uri = spec.getUri()
+        options = spec.getOptions()
         logger.info(f"Resolving model {name} from {uri}")
         if uri.endswith(".yml") or uri.endswith(".yaml"):
             func_name = codegen_from_yaml(self._spark, uri, name, options)

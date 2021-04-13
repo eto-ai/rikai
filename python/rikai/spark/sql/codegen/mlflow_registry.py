@@ -219,7 +219,10 @@ class MlflowRegistry(Registry):
     def mlflow_tracking_uri(self):
         return self._spark.conf.get(CONF_MLFLOW_TRACKING_URI)
 
-    def resolve(self, uri: str, name: str, options: Dict[str, str]):
+    def resolve(self, spec):
+        name = spec.getName()
+        uri = spec.getUri()
+        options = spec.getOptions()
         logger.info(f"Resolving model {name} from {uri}")
         model_uri, tags, params = _get_model_info(uri, self.tracking_client)
         spec = MlflowModelSpec(

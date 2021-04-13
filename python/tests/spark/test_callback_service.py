@@ -13,12 +13,20 @@
 #  limitations under the License.
 
 from pathlib import Path
+from typing import Any, Dict
 
 import pytest
 from pyspark.sql import SparkSession
 
 from rikai.spark.sql.callback_service import CallbackService
 from rikai.spark.sql.codegen.fs import Registry
+
+
+class JvmModelSpec:
+    def __init__(self, uri: str, name: str, options: Dict[str, Any]):
+        self.uri = uri
+        self.name = name
+        self.options = options
 
 
 def test_cb_service_find_registry(spark: SparkSession, tmp_path: Path):
@@ -38,9 +46,7 @@ model:
     cb = CallbackService(spark)
     cb.resolve(
         "rikai.spark.sql.codegen.fs.FileSystemRegistry",
-        str(spec_file),
-        "foo",
-        {},
+        JvmModelSpec(str(spec_file), "foo", {})
     )
     assert isinstance(
         cb.registry_map["rikai.spark.sql.codegen.fs.FileSystemRegistry"],
@@ -48,5 +54,5 @@ model:
     )
 
     with pytest.raises(ModuleNotFoundError):
-        cb.resolve("rikai.spark.not.exist.Registry", "s3://foo", "bar", {})
+        cb.resolve("rikai.spark.not.exist.Registry", None)
     assert len(cb.registry_map) == 1

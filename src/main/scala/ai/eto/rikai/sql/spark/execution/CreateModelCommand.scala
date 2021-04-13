@@ -42,7 +42,7 @@ case class CreateModelCommand(
     }
     val model = uri match {
       case Some(u) => {
-        val spec = ModelSpec(
+        val spec = new ModelSpec(
           name = Some(name),
           uri = u,
           flavor = flavor,

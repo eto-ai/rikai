@@ -84,8 +84,8 @@ private[parser] class RikaiExtAstBuilder
       else {
         "false"
       }
-    } else if (ctx.value.DECIMAL_VALUE() != null) {
-      ctx.value.DECIMAL_VALUE.getSymbol.getText
+    } else if (ctx.value.FLOATING_VALUE() != null) {
+      ctx.value.FLOATING_VALUE.getSymbol.getText
     } else if (ctx.value.INTEGER_VALUE() != null) {
       ctx.value.INTEGER_VALUE.getSymbol.getText
     } else {

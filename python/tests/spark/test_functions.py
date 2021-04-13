@@ -126,7 +126,7 @@ def test_to_image(spark: SparkSession, asset_path: Path):
     image = PILImage.open(image_uri)
 
     image_bytes = BytesIO()
-    image.save(image_bytes, format="jpg")
+    image.save(image_bytes, format="png")
     image_bytes = image_bytes.getvalue()
     image_byte_array = bytearray(image_bytes)
 

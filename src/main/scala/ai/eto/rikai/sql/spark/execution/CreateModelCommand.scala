@@ -31,32 +31,39 @@ case class CreateModelCommand(
     flavor: Option[String],
     returns: Option[String],
     uri: Option[String],
+    preprocessor: Option[String],
+    postprocessor: Option[String],
     table: Option[TableIdentifier],
     replace: Boolean,
     options: Map[String, String]
 ) extends ModelCommand
     with Logging {
 
-  override def run(spark: SparkSession): Seq[Row] = {
-    if (catalog(spark).modelExists(name)) {
-      throw new ModelAlreadyExistException(s"Model (${name}) already exists")
-    }
-    val model = uri match {
-      case Some(u) => {
-        val spec = new ModelSpec(
+  @throws[ModelResolveException]
+  private[spark] def asSpec: ModelSpec =
+    uri match {
+      case Some(u) =>
+        new ModelSpec(
           name = Some(name),
           uri = u,
           flavor = flavor,
           schema = returns,
+          preprocessor = preprocessor,
+          postprocessor = postprocessor,
           options = Some(options)
         )
-        Registry.resolve(spec)
-      }
       case None =>
         throw new ModelResolveException(
           "Must provide URI to CREATE MODEL (for now)"
         )
     }
+
+  @throws[ModelResolveException]
+  override def run(spark: SparkSession): Seq[Row] = {
+    if (catalog(spark).modelExists(name)) {
+      throw new ModelAlreadyExistException(s"Model (${name}) already exists")
+    }
+    val model = Registry.resolve(asSpec)
     model.options ++= options
     catalog(spark).createModel(model)
     logger.info(s"Model ${model} created")

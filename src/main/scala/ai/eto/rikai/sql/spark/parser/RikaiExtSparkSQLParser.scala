@@ -67,7 +67,13 @@ private[spark] class RikaiExtSqlParser(
       {
         builder.visit(parser.singleStatement) match {
           case plan: LogicalPlan => plan
-          case _                 => delegate.parsePlan(sqlText)
+          case _ =>
+            if (delegate != null) { delegate.parsePlan(sqlText) }
+            else {
+              if (!testing)
+                throw new RuntimeException("We should only reach here in test")
+              return null
+            }
         }
       }
     }

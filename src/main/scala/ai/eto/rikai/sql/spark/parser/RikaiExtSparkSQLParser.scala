@@ -43,9 +43,15 @@ import org.apache.spark.sql.{AnalysisException, SparkSession}
   */
 private[spark] class RikaiExtSqlParser(
     val session: SparkSession,
-    val delegate: ParserInterface
+    val delegate: ParserInterface,
+    val testing: Boolean = false
 ) extends ParserInterface
     with Logging {
+
+  /** Used for test only */
+  def this() {
+    this(null, null, true)
+  }
 
   private val builder = new RikaiExtAstBuilder()
 
@@ -54,7 +60,7 @@ private[spark] class RikaiExtSqlParser(
   }
 
   override def parsePlan(sqlText: String): LogicalPlan = {
-    if (!registyInitialized) {
+    if (!testing && !registyInitialized) {
       // not suppose to be here?
     }
     parse(sqlText) { parser =>

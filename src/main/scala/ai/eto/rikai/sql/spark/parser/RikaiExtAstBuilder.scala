@@ -54,31 +54,28 @@ private[parser] class RikaiExtAstBuilder
           case _         => None
         }
     }
+    val returns: Option[String] = ctx.RETURNS() match {
+      case null => None
+      case _ =>
+        visit(ctx.datatype) match {
+          case r: String => Some(r)
+          case _ =>
+            throw new ParseException(
+              s"Expect string type for RETURNS, got ${visit(ctx.datatype)}",
+              ctx
+            )
+        }
+    }
 
     CreateModelCommand(
       ctx.model.getText,
       flavor = flavor,
+      returns = returns,
       uri = Option(ctx.uri).map(string),
       table = None,
       replace = false,
       options = visitOptionList(ctx.optionList())
     )
-  }
-
-  override def visitDescribeModel(ctx: DescribeModelContext): LogicalPlan = {
-    Model.verifyName(ctx.model.getText)
-    DescribeModelCommand(ctx.model.getText)
-  }
-
-  override def visitDropModel(ctx: DropModelContext): LogicalPlan = {
-    Model.verifyName(ctx.model.getText)
-    DropModelCommand(
-      ctx.model.getText
-    )
-  }
-
-  override def visitShowModels(ctx: ShowModelsContext): LogicalPlan = {
-    ShowModelsCommand()
   }
 
   override def visitOptionList(ctx: OptionListContext): Map[String, String] =
@@ -109,6 +106,22 @@ private[parser] class RikaiExtAstBuilder
   override def visitQualifiedName(ctx: QualifiedNameContext): String =
     ctx.getText
 
+  override def visitDescribeModel(ctx: DescribeModelContext): LogicalPlan = {
+    Model.verifyName(ctx.model.getText)
+    DescribeModelCommand(ctx.model.getText)
+  }
+
+  override def visitDropModel(ctx: DropModelContext): LogicalPlan = {
+    Model.verifyName(ctx.model.getText)
+    DropModelCommand(
+      ctx.model.getText
+    )
+  }
+
+  override def visitShowModels(ctx: ShowModelsContext): LogicalPlan = {
+    ShowModelsCommand()
+  }
+
   override def visitUnquotedIdentifier(
       ctx: UnquotedIdentifierContext
   ): String = ctx.getText
@@ -122,6 +135,18 @@ private[parser] class RikaiExtAstBuilder
 
   override def visitNonReserved(ctx: NonReservedContext): AnyRef = ???
 
+  override def visitArrayType(ctx: ArrayTypeContext): String =
+    s"ARRAY<${visit(ctx.dataType)}>"
+
+  override def visitStructType(ctx: StructTypeContext): String =
+    s"STRUCT<${ctx.field().asScala.map(visit).mkString(", ")}>"
+
+  override def visitStructField(ctx: StructFieldContext): String =
+    s"${ctx.identifier().getText}:${visit(ctx.dataType())}"
+
+  override def visitPlainFieldType(ctx: PlainFieldTypeContext): String =
+    ctx.getText
+
   protected def visitTableIdentfier(
       ctx: QualifiedNameContext
   ): TableIdentifier =
@@ -133,4 +158,5 @@ private[parser] class RikaiExtAstBuilder
           throw new ParseException(s"Illegal table name ${ctx.getText}", ctx)
       }
     }
+
 }

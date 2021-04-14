@@ -160,7 +160,7 @@ private[parser] class RikaiExtAstBuilder
     ctx.getText
 
   override def visitProcessorClause(ctx: ProcessorClauseContext): String =
-    ctx.className.getText
+    ctx.className.getText.replaceAll("^[\"']+|[\"']+$", "")
 
   protected def visitTableIdentfier(
       ctx: QualifiedNameContext

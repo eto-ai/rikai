@@ -38,30 +38,20 @@ trait Registry {
   ): Model
 }
 
-object Registry {
-
-  private val logger = Logger.getLogger(Registry.getClass)
+private[rikai] object Registry {
 
   val REGISTRY_IMPL_PREFIX = "rikai.sql.ml.registry."
   val REGISTRY_IMPL_SUFFIX = ".impl"
-
+  val REGISTRY_IMPL_DEFAULT_KEY = "rikai.sql.ml.registry.impl"
   val DEFAULT_REGISTRIES = Map(
+    "rikai.sql.ml.registry.impl" -> "ai.eto.rikai.sql.model.fs.FileSystemRegistry",
     "rikai.sql.ml.registry.file.impl" -> "ai.eto.rikai.sql.model.fs.FileSystemRegistry",
     "rikai.sql.ml.registry.mlflow.impl" -> "ai.eto.rikai.sql.model.mlflow.MlflowRegistry"
   )
+  private val logger = Logger.getLogger(Registry.getClass)
 
-  /** Mapping from Model URI schema to the registry. */
+  /** Mapping from Model URI scheme to the registry. */
   private var registryMap: Map[String, Registry] = Map.empty
-
-  @throws[ModelResolveException]
-  private def verifySchema(schema: String): Unit = {
-    val schemaRegex = """[a-zA-Z][\w\+]{0,255}"""
-    if (!schema.matches(schemaRegex)) {
-      throw new ModelResolveException(
-        s"Schema '${schema}' does not match '${schemaRegex}'"
-      )
-    }
-  }
 
   /** Register all registry implementations.
     *
@@ -74,25 +64,51 @@ object Registry {
         key.startsWith(REGISTRY_IMPL_PREFIX) &&
         key.endsWith(REGISTRY_IMPL_SUFFIX)
       ) {
-        val schema: String =
-          key.substring(
-            REGISTRY_IMPL_PREFIX.length,
-            key.length - REGISTRY_IMPL_SUFFIX.length
-          )
-        verifySchema(schema)
-        if (registryMap.contains(schema)) {
-          throw new ModelRegistryAlreadyExistException(
-            s"ModelRegistry(${schema}) exists"
-          )
+        val scheme: String = key match {
+          case REGISTRY_IMPL_DEFAULT_KEY => null
+          case _ =>
+            key.substring(
+              REGISTRY_IMPL_PREFIX.length,
+              key.length - REGISTRY_IMPL_SUFFIX.length
+            )
         }
-        registryMap += (schema ->
+        verifyScheme(scheme)
+        if (registryMap.contains(scheme))
+          throw new ModelRegistryAlreadyExistException(
+            if (scheme != null) { s"ModelRegistry(${scheme}) exists" }
+            else { s"Default ModelRegistry exists" }
+          )
+        registryMap += (scheme ->
           Class
             .forName(value)
             .getDeclaredConstructor(classOf[Map[String, String]])
             .newInstance(conf)
             .asInstanceOf[Registry])
-        logger.debug(s"Model Registry ${schema} registered to: ${value}")
+        logger.debug(s"Model Registry ${scheme} registered to: ${value}")
       }
+    }
+  }
+
+  @throws[ModelResolveException]
+  private def verifyScheme(scheme: String): Unit = {
+    val schemeRegex = """[a-zA-Z][\w\+]{0,255}"""
+    if (scheme != null && !scheme.matches(schemeRegex)) {
+      throw new ModelResolveException(
+        s"Scheme '${scheme}' does not match '${schemeRegex}'"
+      )
+    }
+  }
+
+  @throws[ModelResolveException]
+  private[model] def getRegistry(uri: String): Registry = {
+    val parsedUri = new URI(uri)
+    val scheme: String = parsedUri.getScheme
+    registryMap.get(scheme) match {
+      case Some(registry) => registry
+      case None =>
+        throw new ModelResolveException(
+          s"Model registry scheme '${scheme}' is not supported"
+        )
     }
   }
 
@@ -112,18 +128,7 @@ object Registry {
   @throws[ModelNotFoundException]
   def resolve(
       spec: ModelSpec
-  ): Model = {
-    val parsedUri = new URI(spec.uri)
-    val schema: String = parsedUri.getScheme
-    registryMap.get(schema) match {
-      case Some(registry) =>
-        registry.resolve(spec)
-      case None =>
-        throw new ModelResolveException(
-          s"Model registry schema '${schema}' is not supported"
-        )
-    }
-  }
+  ): Model = getRegistry(spec.uri).resolve(spec)
 
   /** Used in testing to reset the registry */
   private[sql] def reset: Unit = {

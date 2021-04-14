@@ -34,9 +34,14 @@ trait SparkTestSession extends BeforeAndAfterEach {
       Catalog.SQL_ML_CATALOG_IMPL_DEFAULT
     )
     .config(
+      Registry.REGISTRY_IMPL_DEFAULT_KEY,
+      "ai.eto.rikai.sql.model.testing.TestRegistry"
+    )
+    .config(
       Registry.REGISTRY_IMPL_PREFIX + "test.impl",
       "ai.eto.rikai.sql.model.testing.TestRegistry"
     )
+    .config("spark.driver.host", "127.0.0.1")
     .master("local[*]")
     .getOrCreate
 

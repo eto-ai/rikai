@@ -16,7 +16,12 @@
 
 package ai.eto.rikai.sql.model.fs
 
-import ai.eto.rikai.sql.model.{Model, ModelNotFoundException, Registry}
+import ai.eto.rikai.sql.model.{
+  Model,
+  ModelNotFoundException,
+  ModelSpec,
+  Registry
+}
 import ai.eto.rikai.sql.spark.Python
 import org.apache.logging.log4j.scala.Logging
 
@@ -30,9 +35,7 @@ class FileSystemRegistry(val conf: Map[String, String])
 
   /** Resolve a [[Model]] from the specific URI.
     *
-    * @param uri  is the model registry URI.
-    * @param name is an optional model name. If provided,
-    *             will create the [[Model]] with this name.
+    * @param spec Model Spec of a model
     *
     * @throws ModelNotFoundException if the model does not exist on the registry.
     *
@@ -40,11 +43,9 @@ class FileSystemRegistry(val conf: Map[String, String])
     */
   @throws[ModelNotFoundException]
   override def resolve(
-      uri: String,
-      name: Option[String],
-      options: Option[Map[String, String]]
+      spec: ModelSpec
   ): Model = {
-    logger.info(s"Resolving ML model from ${uri}")
-    Python.resolve(pyClass, uri, name, options.getOrElse(Map.empty))
+    logger.info(s"Resolving ML model from ${spec.uri}")
+    Python.resolve(pyClass, spec)
   }
 }

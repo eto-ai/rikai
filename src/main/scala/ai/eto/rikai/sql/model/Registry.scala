@@ -26,10 +26,7 @@ trait Registry {
 
   /** Resolve a Model from the specific URI.
     *
-    * @param uri is the model registry URI.
-    * @param name is an optional model name. If provided,
-    *             will create the [[Model]] with this name.
-    * @param options is an optional model options Map.
+    * @param spec the spec of a model.
     *
     * @throws ModelNotFoundException if the model does not exist on the registry.
     *
@@ -37,9 +34,7 @@ trait Registry {
     */
   @throws[ModelNotFoundException]
   def resolve(
-      uri: String,
-      name: Option[String] = None,
-      options: Option[Map[String, String]]
+      spec: ModelSpec
   ): Model
 }
 
@@ -106,9 +101,7 @@ object Registry {
     * Internally it uses model registry URI to find the appropriated [[Registry]] to run
     * [[Registry.resolve]].
     *
-    * @param uri the model registry URI
-    * @param name optionally, model name
-    * @param options optionally, extra model options
+    * @param spec Model Spec.
     *
     * @throws ModelNotFoundException if the model not found on the registry.
     * @throws ModelResolveException can not resolve the model due to system issues.
@@ -118,15 +111,13 @@ object Registry {
   @throws[ModelResolveException]
   @throws[ModelNotFoundException]
   def resolve(
-      uri: String,
-      name: Option[String] = None,
-      options: Option[Map[String, String]] = None
+      spec: ModelSpec
   ): Model = {
-    val parsedUri = new URI(uri)
+    val parsedUri = new URI(spec.uri)
     val schema: String = parsedUri.getScheme
     registryMap.get(schema) match {
       case Some(registry) =>
-        registry.resolve(uri, name = name, options = options)
+        registry.resolve(spec)
       case None =>
         throw new ModelResolveException(
           s"Model registry schema '${schema}' is not supported"

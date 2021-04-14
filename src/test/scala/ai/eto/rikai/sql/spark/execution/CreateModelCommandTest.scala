@@ -31,7 +31,7 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
 
     val model = Catalog.testing.getModel("model_created").get
     assert(model.name == "model_created")
-    assert(model.uri == "test://model/created/from/uri")
+    assert(model.spec_uri == "test://model/created/from/uri")
     assert(model.options.isEmpty)
   }
 
@@ -61,5 +61,16 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
     assertThrows[ModelAlreadyExistException] {
       spark.sql("CREATE MODEL model_created USING 'test://model/other/uri'")
     }
+  }
+
+  test("model flavor") {
+    spark.sql(
+      "CREATE MODEL tfmodel " +
+        "FLAVOR tensorflow " +
+        "USING 'test://model/tfmodel'"
+    )
+    val model = Catalog.testing.getModel("tfmodel").get
+    assert(model.flavor.isDefined)
+    assert(model.flavor.contains("tensorflow"))
   }
 }

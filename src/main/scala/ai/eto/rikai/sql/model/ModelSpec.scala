@@ -14,21 +14,27 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql.spark.execution
+package ai.eto.rikai.sql.model
 
-import org.apache.spark.sql.{Row, SparkSession}
-import org.apache.spark.sql.catalyst.expressions.Attribute
-import ai.eto.rikai.sql.model.Model
+import scala.collection.JavaConverters.mapAsJavaMap
 
-case class ShowModelsCommand() extends ModelCommand {
+/** Model Spec is used to pass the create model information to
+  * python ModelRegistry.
+  */
+class ModelSpec(
+    val name: Option[String],
+    val uri: String,
+    val flavor: Option[String] = None,
+    val options: Option[Map[String, String]] = None
+) {
 
-  override val output: Seq[Attribute] = ModelCommand.output
+  def getName: String = name.getOrElse("")
 
-  override def run(spark: SparkSession): Seq[Row] = {
-    val models = catalog(spark).listModels()
+  def getUri: String = uri
 
-    models.map { model: Model =>
-      Row(model.name, model.spec_uri, Model.serializeOptions(model.options))
-    }
-  }
+  def getOptions: java.util.Map[String, String] =
+    mapAsJavaMap(options.getOrElse(Map.empty))
+
+  override def toString: String =
+    s"ModelSpec(name=${name}, uri=${uri}, flavor=${flavor})"
 }

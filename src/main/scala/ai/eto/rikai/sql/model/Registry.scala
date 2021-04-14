@@ -103,7 +103,6 @@ private[rikai] object Registry {
   private[model] def getRegistry(uri: String): Registry = {
     val parsedUri = new URI(uri)
     val scheme: String = parsedUri.getScheme
-    println(s"CURRENT REGISTRY MAP: ${registryMap}")
     registryMap.get(scheme) match {
       case Some(registry) => registry
       case None =>

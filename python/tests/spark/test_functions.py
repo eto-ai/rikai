@@ -17,13 +17,12 @@
 import os
 from io import BytesIO
 from pathlib import Path
-import pytest
 
 import numpy as np
 import pandas as pd
 import pandas.testing as pdt
+import pytest
 from PIL import Image as PILImage
-
 from pyspark.sql import Row, SparkSession
 from pyspark.sql.functions import col, concat, lit
 
@@ -33,10 +32,10 @@ from rikai.spark.functions import (
     area,
     box2d,
     box2d_from_center,
-    to_image,
     image_copy,
     numpy_to_image,
     spectrogram_image,
+    to_image,
     video_to_images,
 )
 from rikai.types import Box2d, Image, Segment, VideoStream, YouTubeVideo

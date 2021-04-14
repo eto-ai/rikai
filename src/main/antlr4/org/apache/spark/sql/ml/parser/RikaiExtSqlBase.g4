@@ -23,6 +23,7 @@ statement
     : CREATE (OR REPLACE)? MODEL model=qualifiedName
       (FLAVOR flavor=identifier)?
       (OPTIONS optionList)?
+      (RETURNS datatype=dataType)?
       (USING uri=STRING)	                        # createModel
     | (DESC | DESCRIBE) MODEL model=qualifiedName   # describeModel
     | SHOW MODELS                                   # showModels
@@ -46,6 +47,7 @@ nonReserved
     : CREATE | DESC | DESCRIBE | MODEL | MODELS | OPTIONS | REPLACE
     ;
 
+ARRAY: 'ARRAY';
 AS: 'AS';
 CREATE: 'CREATE';
 DESC : 'DESC';
@@ -59,7 +61,9 @@ MODELS: 'MODELS';
 OPTIONS: 'OPTIONS';
 OR: 'OR';
 REPLACE: 'REPLACE';
+RETURNS: 'RETURNS';
 SHOW: 'SHOW';
+STRUCT: 'STRUCT';
 TRUE: 'TRUE';
 USING: 'USING';
 
@@ -93,6 +97,24 @@ optionValue
     | FLOATING_VALUE
     | booleanValue
     | STRING
+    ;
+
+struct
+    : STRUCT '<' field (',' field)* '>'  # structType
+    ;
+
+array
+    : ARRAY '<' dataType '>'  # arrayType
+    ;
+
+dataType
+    : struct # nestedStructType
+    | array  # nestedArrayType
+    | identifier  # plainFieldType
+    ;
+
+field
+    : name=identifier ':' dataType   # structField
     ;
 
 INTEGER_VALUE

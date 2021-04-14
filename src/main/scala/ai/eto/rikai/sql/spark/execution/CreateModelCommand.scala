@@ -29,6 +29,7 @@ import org.apache.spark.sql.{Row, SparkSession}
 case class CreateModelCommand(
     name: String,
     flavor: Option[String],
+    returns: Option[String],
     uri: Option[String],
     table: Option[TableIdentifier],
     replace: Boolean,
@@ -46,6 +47,7 @@ case class CreateModelCommand(
           name = Some(name),
           uri = u,
           flavor = flavor,
+          schema = returns,
           options = Some(options)
         )
         Registry.resolve(spec)

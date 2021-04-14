@@ -22,6 +22,8 @@ singleStatement
 statement
     : CREATE (OR REPLACE)? MODEL model=qualifiedName
       (FLAVOR flavor=identifier)?
+      (PREPROCESSOR processor=STRING)?
+      (POSTPROCESSOR processor=STRING)?
       (OPTIONS optionList)?
       (RETURNS datatype=dataType)?
       (USING uri=STRING)	                        # createModel
@@ -60,6 +62,8 @@ MODEL: 'MODEL';
 MODELS: 'MODELS';
 OPTIONS: 'OPTIONS';
 OR: 'OR';
+POSTPROCESSOR: 'POSTPROCESSOR';
+PREPROCESSOR: 'PREPROCESSOR';
 REPLACE: 'REPLACE';
 RETURNS: 'RETURNS';
 SHOW: 'SHOW';

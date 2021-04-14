@@ -22,8 +22,8 @@ singleStatement
 statement
     : CREATE (OR REPLACE)? MODEL model=qualifiedName
       (FLAVOR flavor=identifier)?
-      (PREPROCESSOR processor=STRING)?
-      (POSTPROCESSOR processor=STRING)?
+      (PREPROCESSOR preprocess=processorClause)?
+      (POSTPROCESSOR postprocess=processorClause)?
       (OPTIONS optionList)?
       (RETURNS datatype=dataType)?
       (USING uri=STRING)	                        # createModel
@@ -101,6 +101,10 @@ optionValue
     | FLOATING_VALUE
     | booleanValue
     | STRING
+    ;
+
+processorClause
+    : className=STRING
     ;
 
 struct

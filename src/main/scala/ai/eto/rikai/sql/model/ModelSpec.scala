@@ -18,17 +18,6 @@ package ai.eto.rikai.sql.model
 
 import scala.collection.JavaConverters.mapAsJavaMap
 
-/** Processor Spec.
-  *
-  * @param className the name of the python class/function that
-  *                  process a row in ML_PREDICT.
-  */
-class ProcessorSpec(val className: String) {
-
-  /** Provide access to python. */
-  def getClassName: String = className
-}
-
 /** Model Spec is used to pass the create model information to
   * python ModelRegistry.
   */
@@ -38,8 +27,8 @@ class ModelSpec(
     val flavor: Option[String] = None,
     val schema: Option[String] = None,
     val options: Option[Map[String, String]] = None,
-    val preprocessor: Option[ProcessorSpec] = None,
-    val postprocessor: Option[ProcessorSpec] = None
+    val preprocessor: Option[String] = None,
+    val postprocessor: Option[String] = None
 ) {
 
   def getName: String = name.getOrElse("")
@@ -52,10 +41,10 @@ class ModelSpec(
     mapAsJavaMap(options.getOrElse(Map.empty))
 
   /** Provide access to pre-processor via py4j. It can return Null / None in python. */
-  def getPreprocessor: ProcessorSpec = preprocessor.orNull
+  def getPreprocessor: String = preprocessor.orNull
 
   /** Provide access to post-processor via py4j. It can return Null / None in python. */
-  def getPostprocessor: ProcessorSpec = postprocessor.orNull
+  def getPostprocessor: String = postprocessor.orNull
 
   override def toString: String =
     s"ModelSpec(name=${name}, uri=${uri}, flavor=${flavor})"

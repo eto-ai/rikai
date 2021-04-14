@@ -26,5 +26,7 @@ jobs:
       run: sbt scalafmtCheckAll
     - name: Run Scala tests
       run: sbt test
+      env:
+        SPARK_LOCAL_IP: "127.0.0.1"
     - name: Build Scala Jar
       run: sbt package

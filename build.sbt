@@ -1,3 +1,6 @@
+import java.io.File
+import scala.reflect.io.Directory
+
 scalaVersion := "2.12.11"
 name := "rikai"
 
@@ -94,3 +97,19 @@ Compile / doc / scalacOptions ++= Seq(
   "-skip-packages",
   "ai.eto.rikai.sql.spark.parser"
 )
+
+publishLocal := {
+  val ivyHome = ivyPaths.value.ivyHome.get.getCanonicalPath
+  val cachePath =
+    s"${ivyHome}/cache/${organization.value}/${name.value}_${scalaVersion.value.split('.').slice(0, 2).mkString(".")}"
+  val cache = new Directory(new File(cachePath))
+  if (cache.exists) {
+    println("Rikai found in local cache. Removing...")
+    assert(
+      cache.deleteRecursively(),
+      s"Could not delete Rikai cache ${cachePath}"
+    )
+    println(s"Local Rikai cache removed (${cachePath})")
+  }
+  publishLocal.value
+}

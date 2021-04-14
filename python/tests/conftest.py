@@ -32,7 +32,7 @@ def spark(tmp_path_factory) -> SparkSession:
     version = get_default_jar_version(use_snapshot=True)
     session = (
         SparkSession.builder.appName("spark-test")
-        .config("spark.driver.host", "127.0.0.1")
+        .config("spark.port.maxRetries", 128)
         .config("spark.jars.packages", f"ai.eto:rikai_2.12:{version}")
         .config(
             "spark.sql.extensions",

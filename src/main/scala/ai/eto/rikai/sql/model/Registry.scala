@@ -22,7 +22,7 @@ import java.net.URI
 
 /** Model Registry Integrations.
   */
-private[sql] trait Registry {
+trait Registry {
 
   /** Resolve a Model from the specific URI.
     *

@@ -47,6 +47,7 @@ case class CreateModelCommand(
           name = Some(name),
           uri = u,
           flavor = flavor,
+          schema = returns,
           options = Some(options)
         )
         Registry.resolve(spec)

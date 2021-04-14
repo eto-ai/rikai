@@ -25,12 +25,15 @@ class ModelSpec(
     val name: Option[String],
     val uri: String,
     val flavor: Option[String] = None,
+    val schema: Option[String] = None,
     val options: Option[Map[String, String]] = None
 ) {
 
   def getName: String = name.getOrElse("")
 
   def getUri: String = uri
+
+  def getSchema: String = schema.getOrElse("")
 
   def getOptions: java.util.Map[String, String] =
     mapAsJavaMap(options.getOrElse(Map.empty))

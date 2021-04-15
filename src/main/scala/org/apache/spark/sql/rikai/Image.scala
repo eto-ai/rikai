@@ -70,5 +70,5 @@ private[spark] class ImageType extends UserDefinedType[Image] {
   */
 @SQLUserDefinedType(udt = classOf[ImageType])
 class Image(val data: Option[Array[Byte]], val uri: Option[String]) {
-  override def toString: String = s"Image(uri='$uri')"
+  override def toString: String = s"Image('${uri.getOrElse("<embedded>")}')"
 }

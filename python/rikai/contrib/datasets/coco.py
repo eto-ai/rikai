@@ -113,7 +113,7 @@ def convert(
             annotations = coco.loadAnns(ann_id)
             annos = []
             for ann in annotations:
-                bbox = Box2d(*ann["bbox"])
+                bbox = Box2d.from_top_left(*ann["bbox"])
                 annos.append(
                     {
                         "category_id": ann["category_id"],
@@ -131,8 +131,7 @@ def convert(
                 "image": Image(
                     os.path.abspath(
                         os.path.join(
-                            os.curdir,
-                            "dataset",
+                            dataset_root,
                             "{}2017".format(split),
                             image_payload["file_name"],
                         )

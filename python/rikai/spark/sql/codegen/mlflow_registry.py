@@ -202,6 +202,7 @@ class MlflowRegistry(Registry):
         self._jvm = spark.sparkContext._jvm
         self._mlflow_client = None
 
+
     def __repr__(self):
         return "MlflowRegistry"
 
@@ -224,9 +225,17 @@ class MlflowRegistry(Registry):
         uri = spec.getUri()
         options = spec.getOptions()
         logger.info(f"Resolving model {name} from {uri}")
-        model_uri, tags, params = _get_model_info(uri, self.tracking_client)
+        parsed = urlparse(uri)
+        if not parsed.scheme:
+            raise ValueError("Scheme must be mlflow. How did you get here?")
+        parts = parsed.path.strip('/').split('/', 1)
+        if self.is_model(parts[0]):
+            model_uri, run = self.get_model_version(*parts)
+        else:
+            model_uri, run = self.get_run(*parts)
         spec = MlflowModelSpec(
-            model_uri, tags, params, self.mlflow_tracking_uri, options=options
+            model_uri, run.data.tags, run.data.params,
+            self.mlflow_tracking_uri, options=options
         )
         func_name = codegen_from_spec(self._spark, spec, name)
         model = self._jvm.ai.eto.rikai.sql.model.SparkUDFModel(
@@ -234,65 +243,55 @@ class MlflowRegistry(Registry):
         )
         return model
 
+    def is_model(self, entity_reference):
+        """
+        Returns True is the given mlflow entity reference is a registered model
+        """
+        try:
+            self.tracking_client.get_registered_model(entity_reference)
+            return True
+        except Exception:
+            return False
 
-def _get_model_info(uri: str, client: MlflowClient) -> str:
-    """Transform the rikai model uri to something that mlflow understands"""
-    parsed = urlparse(uri)
-    try:
-        client.get_registered_model(parsed.hostname)
-        return _parse_model_ref(parsed, client)
-    except MlflowException:
-        return _parse_runid_ref(parsed, client)
+    def get_model_version(
+            self, model, stage_or_version=None) -> (str, mlflow.entities.Run):
+        """
+        Get the models:/ uri that mlflow model registry understands for loading
+        a model and the corresponding Run with metadata needed for the spec
+        """
+        if stage_or_version and stage_or_version.isdigit():
+            mv = self.tracking_client.get_model_version(
+                model, int(stage_or_version))
+            run = self.tracking_client.get_run(mv.run_id)
+            return "models:/{}/{}".format(model, stage_or_version), run
+        if not stage_or_version:
+            stage = "none"  # TODO allow setting default stage from config
+        else:
+            stage = stage_or_version.lower()
+        results = self.tracking_client.get_latest_versions(
+            model, stages=[stage])
+        if not results:
+            raise SpecError(
+                "No versions found for model {} in stage {}".format(
+                    model, stage))
+        run = self.tracking_client.get_run(results[0].run_id)
+        return "models:/{}/{}".format(model, results[0].version), run
 
+    def get_run(self, run_id, path=None) -> (str, mlflow.entities.Run):
+        """
+        Get the runs:/ uri that mlflow model registry understands for loading
+        a model and the corresponding Run with metadata needed for the spec
+        """
+        run = self.tracking_client.get_run(run_id)
+        if path:
+            return 'runs:/{}/{}'.format(run_id, path), run
 
-def _parse_model_ref(parsed: ParseResult, client: MlflowClient):
-    model = parsed.hostname
-    path = parsed.path.lstrip("/")
-    if path.isdigit():
-        mv = client.get_model_version(model, int(path))
-        run = client.get_run(mv.run_id)
-        return (
-            "models:/{}/{}".format(model, path),
-            run.data.tags,
-            run.data.params,
-        )
-    if not path:
-        stage = "none"  # TODO allow setting default stage from config
-    else:
-        stage = path.lower()
-    results = client.get_latest_versions(model, stages=[stage])
-    if not results:
-        raise SpecError(
-            "No versions found for model {} in stage {}".format(model, stage)
-        )
-    run = client.get_run(results[0].run_id)
-    return (
-        "models:/{}/{}".format(model, results[0].version),
-        run.data.tags,
-        run.data.params,
-    )
-
-
-def _parse_runid_ref(parsed: ParseResult, client: MlflowClient):
-    runid = parsed.hostname
-    run = client.get_run(runid)
-    path = parsed.path.lstrip("/")
-    if path:
-        return (
-            "runs:/{}/{}".format(runid, path),
-            run.data.tags,
-            run.data.params,
-        )
-    else:
-        artifacts = client.list_artifacts(runid)
+        artifacts = self.tracking_client.list_artifacts(run_id)
         if not artifacts:
-            raise SpecError("Run {} has no artifacts".format(runid))
+            raise SpecError("Run {} has no artifacts".format(run_id))
         elif len(artifacts) == 1:
-            return (
-                "runs:/{}/{}".format(runid, artifacts[0].path),
-                run.data.tags,
-                run.data.params,
-            )
+            return ('runs:/{}/{}'.format(
+                run_id, artifacts[0].path.lstrip('/')), run)
         else:
             # TODO allow setting default path from config
             raise SpecError(
@@ -301,5 +300,5 @@ def _parse_runid_ref(parsed: ParseResult, client: MlflowClient):
                     "Please specify path like "
                     "mlflows://<runid>/path/to/artifact in "
                     "CREATE MODEL or ML_PREDICT"
-                ).format(runid, [x.path for x in artifacts])
+                ).format(run_id, [x.path for x in artifacts])
             )

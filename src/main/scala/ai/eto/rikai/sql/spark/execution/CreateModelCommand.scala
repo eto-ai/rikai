@@ -45,7 +45,7 @@ case class CreateModelCommand(
       case Some(u) =>
         new ModelSpec(
           name = Some(name),
-          uri = u,
+          uri = Registry.normalize_uri(u).toString,
           flavor = flavor,
           schema = returns,
           preprocessor = preprocessor,

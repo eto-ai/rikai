@@ -111,23 +111,23 @@ def test_mlflow_model_from_runid(
     run_id = mlflow_client.search_model_versions("name='rikai-test'")[0].run_id
 
     spark.sql(
-        "CREATE MODEL resnet_m_foo USING 'mlflow://{}/model'".format(run_id)
+        "CREATE MODEL resnet_m_foo USING 'mlflow:/{}/model'".format(run_id)
     )
     check_ml_predict(spark, "resnet_m_foo")
 
     # if no path is given but only one artifact exists then use it by default
-    spark.sql("CREATE MODEL resnet_m_bar USING 'mlflow://{}'".format(run_id))
+    spark.sql("CREATE MODEL resnet_m_bar USING '{}'".format(run_id))
     check_ml_predict(spark, "resnet_m_bar")
 
 
 @pytest.mark.timeout(60)
 def test_mlflow_model_from_model_version(spark: SparkSession, mlflow_client):
     # peg to a particular version of a model
-    spark.sql("CREATE MODEL resnet_m_fizz USING 'mlflow://rikai-test/1'")
+    spark.sql("CREATE MODEL resnet_m_fizz USING 'mlflow:/rikai-test/1'")
     check_ml_predict(spark, "resnet_m_fizz")
 
     # use the latest version in a given stage (omitted means none)
-    spark.sql("CREATE MODEL resnet_m_buzz USING 'mlflow://rikai-test/'")
+    spark.sql("CREATE MODEL resnet_m_buzz USING 'rikai-test'")
     check_ml_predict(spark, "resnet_m_buzz")
 
 
@@ -135,5 +135,5 @@ def test_mlflow_model_from_model_version(spark: SparkSession, mlflow_client):
 def test_mlflow_model_without_custom_logger(
     spark: SparkSession, mlflow_client
 ):
-    spark.sql("CREATE MODEL vanilla_ice USING 'mlflow://vanilla-mlflow/1'")
+    spark.sql("CREATE MODEL vanilla_ice USING 'mlflow:/vanilla-mlflow/1'")
     check_ml_predict(spark, "vanilla_ice")

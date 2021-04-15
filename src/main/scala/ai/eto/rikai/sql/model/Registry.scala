@@ -16,9 +16,11 @@
 
 package ai.eto.rikai.sql.model
 
+import org.apache.http.client.utils.URIUtils
 import org.apache.log4j.Logger
-
 import java.net.URI
+
+import scala.util.{Success, Try}
 
 /** Model Registry Integrations.
   */
@@ -42,9 +44,8 @@ private[rikai] object Registry {
 
   val REGISTRY_IMPL_PREFIX = "rikai.sql.ml.registry."
   val REGISTRY_IMPL_SUFFIX = ".impl"
-  val REGISTRY_IMPL_DEFAULT_KEY = "rikai.sql.ml.registry.impl"
+  val DEFAULT_URI_ROOT_KEY = "rikai.sql.ml.registry.uri.root"
   val DEFAULT_REGISTRIES = Map(
-    "rikai.sql.ml.registry.impl" -> "ai.eto.rikai.sql.model.fs.FileSystemRegistry",
     "rikai.sql.ml.registry.file.impl" -> "ai.eto.rikai.sql.model.fs.FileSystemRegistry",
     "rikai.sql.ml.registry.mlflow.impl" -> "ai.eto.rikai.sql.model.mlflow.MlflowRegistry"
   )
@@ -53,6 +54,9 @@ private[rikai] object Registry {
   /** Mapping from Model URI scheme to the registry. */
   private var registryMap: Map[String, Registry] = Map.empty
 
+  /** by default we assume the Uri is for the local file system */
+  private var defaultUriRoot: URI = new URI("file:/")
+
   /** Register all registry implementations.
     *
     * @param conf a mapping of (key, value) pairs
@@ -60,18 +64,25 @@ private[rikai] object Registry {
   def registerAll(conf: Map[String, String]): Unit = {
     // defaults
     for ((key, value) <- DEFAULT_REGISTRIES ++ conf) {
-      if (
+      if (key == DEFAULT_URI_ROOT_KEY) {
+        Try(new URI(value)) match {
+          case Success(uri)
+              if (uri.getScheme != null && uri.getScheme.nonEmpty) => {
+            defaultUriRoot = uri
+          }
+          case _ =>
+            throw new IllegalArgumentException(
+              s"Default URI root $value is not well-formed or does not specify a scheme"
+            )
+        }
+      } else if (
         key.startsWith(REGISTRY_IMPL_PREFIX) &&
         key.endsWith(REGISTRY_IMPL_SUFFIX)
       ) {
-        val scheme: String = key match {
-          case REGISTRY_IMPL_DEFAULT_KEY => null
-          case _ =>
-            key.substring(
-              REGISTRY_IMPL_PREFIX.length,
-              key.length - REGISTRY_IMPL_SUFFIX.length
-            )
-        }
+        val scheme: String = key.substring(
+          REGISTRY_IMPL_PREFIX.length,
+          key.length - REGISTRY_IMPL_SUFFIX.length
+        )
         verifyScheme(scheme)
         if (registryMap.contains(scheme))
           throw new ModelRegistryAlreadyExistException(
@@ -101,14 +112,22 @@ private[rikai] object Registry {
 
   @throws[ModelResolveException]
   private[model] def getRegistry(uri: String): Registry = {
-    val parsedUri = new URI(uri)
-    val scheme: String = parsedUri.getScheme
+    val parsedNormalizedUri = normalize_uri(uri)
+    val scheme: String = parsedNormalizedUri.getScheme
     registryMap.get(scheme) match {
       case Some(registry) => registry
       case None =>
         throw new ModelResolveException(
           s"Model registry scheme '${scheme}' is not supported"
         )
+    }
+  }
+
+  private[sql] def normalize_uri(uri: String): URI = {
+    val parsedUri = new URI(uri)
+    parsedUri.getScheme match {
+      case s: String if (!s.isEmpty) => parsedUri
+      case _                         => URIUtils.resolve(defaultUriRoot, uri)
     }
   }
 

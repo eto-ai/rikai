@@ -38,7 +38,6 @@ def spark(tmp_path_factory) -> SparkSession:
             "spark.sql.extensions",
             "ai.eto.rikai.sql.spark.RikaiSparkSessionExtensions",
         )
-        .config("rikai.sql.ml.registry.uri.root", "mlflow:/")
         .config(
             "rikai.sql.ml.registry.test.impl",
             "ai.eto.rikai.sql.model.testing.TestRegistry",

@@ -1,13 +1,9 @@
-# Generated from src/main/antlr4/org/apache/spark/sql/ml/parser/RikaiModelSchema.g4 by ANTLR 4.9.1
+# Generated from src/main/antlr4/org/apache/spark/sql/ml/parser/RikaiModelSchema.g4 by ANTLR 4.7.2
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
+from typing.io import TextIO
 import sys
-if sys.version_info[1] > 5:
-	from typing import TextIO
-else:
-	from typing.io import TextIO
-
 
 def serializedATN():
     with StringIO() as buf:
@@ -39,8 +35,8 @@ class RikaiModelSchemaParser ( Parser ):
 
     sharedContextCache = PredictionContextCache()
 
-    literalNames = [ "<INVALID>", "'<'", "','", "'>'", "':'", "'struct'", 
-                     "'array'" ]
+    literalNames = [ "<INVALID>", "'<'", "','", "'>'", "':'", "'STRUCT'", 
+                     "'ARRAY'" ]
 
     symbolicNames = [ "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "STRUCT", "ARRAY", "IDENTIFIER", "WS" ]
@@ -67,15 +63,13 @@ class RikaiModelSchemaParser ( Parser ):
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
-        self.checkVersion("4.9.1")
+        self.checkVersion("4.7.2")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
 
 
 
-
     class SchemaContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -113,9 +107,7 @@ class RikaiModelSchemaParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class IdentifierContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -165,9 +157,7 @@ class RikaiModelSchemaParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class StructContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -242,9 +232,7 @@ class RikaiModelSchemaParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class ArrayContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -303,9 +291,7 @@ class RikaiModelSchemaParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class FieldTypeContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -410,9 +396,7 @@ class RikaiModelSchemaParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class FieldContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)

@@ -26,7 +26,7 @@ from rikai.spark.sql.schema import parse_schema
 @pytest.fixture(scope="module")
 def mlflow_client(
     tmp_path_factory, resnet_model_uri: str, spark: SparkSession
-):
+) -> MlflowClient:
     tmp_path = tmp_path_factory.mktemp("mlflow")
     tmp_path.mkdir(parents=True, exist_ok=True)
     tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
@@ -40,8 +40,8 @@ def mlflow_client(
         artifact_path = "model"
 
         schema = (
-            "struct<boxes:array<array<float>>,"
-            "scores:array<float>, labels:array<int>>"
+            "STRUCT<boxes:ARRAY<ARRAY<float>>,"
+            "scores:ARRAY<float>,labels:ARRAY<int>>"
         )
         pre_processing = (
             "rikai.contrib.torch.transforms."
@@ -73,25 +73,30 @@ def mlflow_client(
                 "rikai.transforms.post": post_processing,
             }
         )
-    spark.conf.set("rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri)
+
+    # vanilla mlflow no tags
+    with mlflow.start_run():
+        mlflow.pytorch.log_model(
+            model, artifact_path, registered_model_name="vanilla-mlflow-no-tags"
+        )
+
+    spark.conf.set("rikai.sql.ml.registry.mlflow.tracking_uri",
+                   tracking_uri)
     return mlflow.tracking.MlflowClient(tracking_uri)
 
 
-def test_modelspec(mlflow_client, resnet_model_uri):
-    run_id = mlflow_client.search_model_versions("name='rikai-test'")[0].run_id
-    run = mlflow_client.get_run(run_id=run_id)
+def test_modelspec(mlflow_client: MlflowClient):
+    mv = mlflow_client.search_model_versions("name='rikai-test'")[0]
+    run = mlflow_client.get_run(run_id=mv.run_id)
     spec = MlflowModelSpec(
-        "runs:/{}/model".format(run_id),
+        "models:/rikai-test/{}".format(mv.version),
         run.data.tags,
-        run.data.params,
         tracking_uri="fake",
     )
     assert spec.flavor == "pytorch"
     assert spec.schema == parse_schema(
-        (
-            "struct<boxes:array<array<float>>, "
-            "scores:array<float>, labels:array<int>>"
-        )
+            "STRUCT<boxes:ARRAY<ARRAY<float>>,"
+            "scores:ARRAY<float>, labels:ARRAY<int>>"
     )
     assert spec._spec["transforms"]["pre"] == (
         "rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn"
@@ -101,39 +106,43 @@ def test_modelspec(mlflow_client, resnet_model_uri):
         "rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn."
         "post_processing"
     )
-    assert spec.model_uri == "runs:/" + run_id + "/model"
+    assert spec.model_uri == "models:/rikai-test/{}".format(mv.version)
 
 
 @pytest.mark.timeout(60)
-def test_mlflow_model_from_runid(
-    spark: SparkSession, mlflow_client: MlflowClient
-):
-    run_id = mlflow_client.search_model_versions("name='rikai-test'")[0].run_id
-
-    spark.sql(
-        "CREATE MODEL resnet_m_foo USING 'mlflow:/{}/model'".format(run_id)
-    )
-    check_ml_predict(spark, "resnet_m_foo")
-
-    # if no path is given but only one artifact exists then use it by default
-    spark.sql("CREATE MODEL resnet_m_bar USING '{}'".format(run_id))
-    check_ml_predict(spark, "resnet_m_bar")
-
-
-@pytest.mark.timeout(60)
-def test_mlflow_model_from_model_version(spark: SparkSession, mlflow_client):
+def test_mlflow_model_from_model_version(
+        spark: SparkSession, mlflow_client: MlflowClient):
     # peg to a particular version of a model
     spark.sql("CREATE MODEL resnet_m_fizz USING 'mlflow:/rikai-test/1'")
     check_ml_predict(spark, "resnet_m_fizz")
 
     # use the latest version in a given stage (omitted means none)
-    spark.sql("CREATE MODEL resnet_m_buzz USING 'rikai-test'")
+    spark.sql("CREATE MODEL resnet_m_buzz USING 'mlflow:/rikai-test'")
     check_ml_predict(spark, "resnet_m_buzz")
 
 
 @pytest.mark.timeout(60)
 def test_mlflow_model_without_custom_logger(
-    spark: SparkSession, mlflow_client
+    spark: SparkSession, mlflow_client: MlflowClient
 ):
-    spark.sql("CREATE MODEL vanilla_ice USING 'mlflow:/vanilla-mlflow/1'")
-    check_ml_predict(spark, "vanilla_ice")
+    schema = (
+        "STRUCT<boxes:ARRAY<ARRAY<float>>,"
+        "scores:ARRAY<float>,labels:ARRAY<int>>"
+    )
+    pre_processing = (
+        "rikai.contrib.torch.transforms."
+        "fasterrcnn_resnet50_fpn.pre_processing"
+    )
+    post_processing = (
+        "rikai.contrib.torch.transforms."
+        "fasterrcnn_resnet50_fpn.post_processing"
+    )
+    spark.sql(("CREATE MODEL vanilla_fire "
+               "FLAVOR pytorch "
+               "PREPROCESSOR '{}' "
+               "POSTPROCESSOR '{}' "
+               "RETURNS {} "
+               "USING 'mlflow:/vanilla-mlflow-no-tags/1'").format(
+        pre_processing, post_processing, schema
+    ))
+    check_ml_predict(spark, "vanilla_fire")

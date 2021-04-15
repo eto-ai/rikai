@@ -237,29 +237,43 @@ class MlflowRegistry(Registry):
 
 def _get_model_info(uri: str, client: MlflowClient) -> str:
     """Transform the rikai model uri to something that mlflow understands"""
-    parsed = urlparse(uri)
+    parts = _split_uri(uri)
     try:
-        client.get_registered_model(parsed.hostname)
-        return _parse_model_ref(parsed, client)
+        model, stage_or_version = parts
+        client.get_registered_model(model)
+        return _parse_model_ref(model, stage_or_version, client)
     except MlflowException:
-        return _parse_runid_ref(parsed, client)
+        runid, path = parts
+        return _parse_runid_ref(runid, path, client)
 
 
-def _parse_model_ref(parsed: ParseResult, client: MlflowClient):
-    model = parsed.hostname
-    path = parsed.path.lstrip("/")
-    if path.isdigit():
-        mv = client.get_model_version(model, int(path))
+def _split_uri(uri: str):
+    parsed = urlparse(uri)
+    if parsed.scheme:
+        if parsed.hostname:
+            return parsed.hostname, parsed.path.strip("/")
+        else:  # mlflow:/foo/bar
+            parts = parsed.path.strip('/').split('/', 1)
+            return tuple(parts) if len(parts) == 2 else (parts[0], '')
+    # default registry
+    parts = parsed.path.strip('/').split('/', 1)
+    return tuple(parts) if len(parts) == 2 else (parts[0], '')
+
+
+def _parse_model_ref(model: str, stage_or_version: str, client: MlflowClient):
+    if stage_or_version and stage_or_version.isdigit():
+        mv = client.get_model_version(model, int(stage_or_version))
         run = client.get_run(mv.run_id)
         return (
-            "models:/{}/{}".format(model, path),
+            "models:/{}/{}".format(model, stage_or_version),
             run.data.tags,
             run.data.params,
         )
-    if not path:
+
+    if not stage_or_version:
         stage = "none"  # TODO allow setting default stage from config
     else:
-        stage = path.lower()
+        stage = stage_or_version.lower()
     results = client.get_latest_versions(model, stages=[stage])
     if not results:
         raise SpecError(
@@ -273,10 +287,8 @@ def _parse_model_ref(parsed: ParseResult, client: MlflowClient):
     )
 
 
-def _parse_runid_ref(parsed: ParseResult, client: MlflowClient):
-    runid = parsed.hostname
+def _parse_runid_ref(runid: str, path: str, client: MlflowClient):
     run = client.get_run(runid)
-    path = parsed.path.lstrip("/")
     if path:
         return (
             "runs:/{}/{}".format(runid, path),

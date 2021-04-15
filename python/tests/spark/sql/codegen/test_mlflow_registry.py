@@ -19,7 +19,7 @@ from pyspark.sql import Row, SparkSession
 from utils import check_ml_predict
 
 import rikai
-from rikai.spark.sql.codegen.mlflow_registry import MlflowModelSpec
+from rikai.spark.sql.codegen.mlflow_registry import MlflowModelSpec, _split_uri
 from rikai.spark.sql.schema import parse_schema
 
 
@@ -137,3 +137,15 @@ def test_mlflow_model_without_custom_logger(
 ):
     spark.sql("CREATE MODEL vanilla_ice USING 'mlflow://vanilla-mlflow/1'")
     check_ml_predict(spark, "vanilla_ice")
+
+
+def test_split_uri(mlflow_client: MlflowClient):
+    run_id = mlflow_client.search_model_versions("name='rikai-test'")[0].run_id
+    for uri, expected in [('rikai-test', ('rikai-test', '')),
+                          ('rikai-test/1', ('rikai-test', '1')),
+                          ('/rikai-test/none/', ('rikai-test', 'none')),
+                          (run_id, (run_id, '')),
+                          ('{}/model'.format(run_id), (run_id, 'model'))]:
+        assert _split_uri(uri) == expected
+        assert _split_uri('mlflow://{}'.format(uri)) == expected
+        assert _split_uri('mlflow:/{}'.format(uri)) == expected

@@ -44,7 +44,17 @@ private[rikai] object Registry {
 
   val REGISTRY_IMPL_PREFIX = "rikai.sql.ml.registry."
   val REGISTRY_IMPL_SUFFIX = ".impl"
+
+  /** To provide convenience when using the CREATE MODEL command we allow the user to specify
+    * a URI root at cluster startup. This URI root will automatically be prepended to the specified
+    * model spec URI from the USING clause of CREATE MODEL. Note that this is evaluated only
+    * when `registerAll` is called so there is no guarantee that changing the value of this
+    * config after cluster startup will have any impact.
+    */
   val DEFAULT_URI_ROOT_KEY = "rikai.sql.ml.registry.uri.root"
+
+  /** Automatically configure registries for file:/ and mlflow:/ model uri's.
+    */
   val DEFAULT_REGISTRIES = Map(
     "rikai.sql.ml.registry.file.impl" -> "ai.eto.rikai.sql.model.fs.FileSystemRegistry",
     "rikai.sql.ml.registry.mlflow.impl" -> "ai.eto.rikai.sql.model.mlflow.MlflowRegistry"
@@ -65,6 +75,7 @@ private[rikai] object Registry {
     // defaults
     for ((key, value) <- DEFAULT_REGISTRIES ++ conf) {
       if (key == DEFAULT_URI_ROOT_KEY) {
+        // The user specified default URI root must be a valid URI with a valid scheme
         Try(new URI(value)) match {
           case Success(uri)
               if (uri.getScheme != null && uri.getScheme.nonEmpty) => {
@@ -123,6 +134,10 @@ private[rikai] object Registry {
     }
   }
 
+  /** Prepend the default URI root if the input uri string does not have a scheme specified
+    * @param uri a user specified uri string
+    * @return a URI guaranteed to have a scheme so that we can look up which Registry can handle it
+    */
   private[sql] def normalize_uri(uri: String): URI = {
     val parsedUri = new URI(uri)
     parsedUri.getScheme match {

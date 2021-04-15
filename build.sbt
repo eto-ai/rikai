@@ -86,7 +86,8 @@ scalacOptions ++= Seq(
   "-Xlint:unused"
 )
 
-Test / parallelExecution := false
+parallelExecution in Test := false
+fork in Test := true
 
 antlr4PackageName in Antlr4 := Some("ai.eto.rikai.sql.spark.parser")
 antlr4GenVisitor in Antlr4 := true

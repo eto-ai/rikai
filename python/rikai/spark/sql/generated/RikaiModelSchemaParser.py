@@ -35,8 +35,7 @@ class RikaiModelSchemaParser ( Parser ):
 
     sharedContextCache = PredictionContextCache()
 
-    literalNames = [ "<INVALID>", "'<'", "','", "'>'", "':'", "'STRUCT'", 
-                     "'ARRAY'" ]
+    literalNames = [ "<INVALID>", "'<'", "','", "'>'", "':'" ]
 
     symbolicNames = [ "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "STRUCT", "ARRAY", "IDENTIFIER", "WS" ]

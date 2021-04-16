@@ -16,9 +16,9 @@
 
 package ai.eto.rikai
 
-private[rikai] class RikaiOptions(parameters: Map[String, String]) {
+import org.apache.spark.sql.execution.datasources.v2.parquet.ParquetDataSourceV2
 
-  /** Base path for the feature dataset
-    */
-  val path: String = parameters.getOrElse("path", "")
+class RikaiDataSourceV2 extends ParquetDataSourceV2 {
+  override def shortName(): String = "rikai"
 }
+

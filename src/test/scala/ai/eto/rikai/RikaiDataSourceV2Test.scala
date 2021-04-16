@@ -17,14 +17,16 @@
 
 package ai.eto.rikai
 
+import org.apache.commons.io.FileUtils
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.io.File
 import java.nio.file.Files
 
-class RikaiRelationTest extends AnyFunSuite with SparkTestSession {
+class RikaiDataSourceV2Test extends AnyFunSuite with SparkTestSession {
 
   import spark.implicits._
+  import ai.eto.rikai._
 
   private val examples = Seq(
     ("123", "car"),
@@ -44,10 +46,11 @@ class RikaiRelationTest extends AnyFunSuite with SparkTestSession {
 
     val df = spark.read.parquet(testDir.toString)
     assert(df.intersectAll(examples).count == 3)
+
+    FileUtils.deleteDirectory(testDir)
   }
 
   test("Use rikai reader and writer") {
-    import ai.eto.rikai._
     examples.write.rikai(testDir.toString)
 
     val numParquetFileds =
@@ -56,5 +59,17 @@ class RikaiRelationTest extends AnyFunSuite with SparkTestSession {
 
     val df = spark.read.rikai(testDir.toString)
     assert(df.intersectAll(examples).count == 3)
+
+    FileUtils.deleteDirectory(testDir)
+  }
+
+  test("Write and read with predicate") {
+    examples.write.rikai(testDir.toString)
+    val df = spark.read.rikai(testDir.toString)
+    df.createOrReplaceTempView("df")
+    val query = spark.sql("select * from df where label = 'car'")
+    assert(query.count() == 1)
+
+    FileUtils.deleteDirectory(testDir)
   }
 }

@@ -104,7 +104,6 @@ class SchemaBuilder(RikaiModelSchemaVisitor):
 
 
 def parse_schema(schema_str: str) -> DataType:
-    print(schema_str)
     input_stream = InputStream(schema_str)
     lexer = RikaiModelSchemaLexer(input_stream)
     stream = CommonTokenStream(lexer)

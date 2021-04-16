@@ -31,16 +31,16 @@ class ModelSpec(
     val postprocessor: Option[String] = None
 ) {
 
-  def getName: String = name.orNull
+  def getName: String = name.getOrElse("")
 
   def getUri: String = uri
 
-  def getSchema: String = schema.orNull
+  def getSchema: String = schema.getOrElse("")
 
   def getOptions: java.util.Map[String, String] =
     mapAsJavaMap(options.getOrElse(Map.empty))
 
-  def getFlavor: String = flavor.orNull
+  def getFlavor: String = flavor.getOrElse("")
 
   /** Provide access to pre-processor via py4j. It can return Null / None in python. */
   def getPreprocessor: String = preprocessor.orNull

@@ -127,6 +127,9 @@ def test_mlflow_model_from_model_version(
 def test_mlflow_model_without_custom_logger(
     spark: SparkSession, mlflow_client: MlflowClient
 ):
+    spark.sql("CREATE MODEL vanilla_ice USING 'mlflow:/vanilla-mlflow/1'")
+    check_ml_predict(spark, "vanilla_ice")
+
     schema = (
         "STRUCT<boxes:ARRAY<ARRAY<float>>,"
         "scores:ARRAY<float>,labels:ARRAY<int>>"

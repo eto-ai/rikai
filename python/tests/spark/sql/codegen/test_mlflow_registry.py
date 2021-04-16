@@ -77,11 +77,12 @@ def mlflow_client(
     # vanilla mlflow no tags
     with mlflow.start_run():
         mlflow.pytorch.log_model(
-            model, artifact_path, registered_model_name="vanilla-mlflow-no-tags"
+            model,
+            artifact_path,
+            registered_model_name="vanilla-mlflow-no-tags",
         )
 
-    spark.conf.set("rikai.sql.ml.registry.mlflow.tracking_uri",
-                   tracking_uri)
+    spark.conf.set("rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri)
     return mlflow.tracking.MlflowClient(tracking_uri)
 
 
@@ -95,8 +96,8 @@ def test_modelspec(mlflow_client: MlflowClient):
     )
     assert spec.flavor == "pytorch"
     assert spec.schema == parse_schema(
-            "STRUCT<boxes:ARRAY<ARRAY<float>>,"
-            "scores:ARRAY<float>, labels:ARRAY<int>>"
+        "STRUCT<boxes:ARRAY<ARRAY<float>>,"
+        "scores:ARRAY<float>, labels:ARRAY<int>>"
     )
     assert spec._spec["transforms"]["pre"] == (
         "rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn"
@@ -111,7 +112,8 @@ def test_modelspec(mlflow_client: MlflowClient):
 
 @pytest.mark.timeout(60)
 def test_mlflow_model_from_model_version(
-        spark: SparkSession, mlflow_client: MlflowClient):
+    spark: SparkSession, mlflow_client: MlflowClient
+):
     # peg to a particular version of a model
     spark.sql("CREATE MODEL resnet_m_fizz USING 'mlflow:/rikai-test/1'")
     check_ml_predict(spark, "resnet_m_fizz")
@@ -137,12 +139,14 @@ def test_mlflow_model_without_custom_logger(
         "rikai.contrib.torch.transforms."
         "fasterrcnn_resnet50_fpn.post_processing"
     )
-    spark.sql(("CREATE MODEL vanilla_fire "
-               "FLAVOR pytorch "
-               "PREPROCESSOR '{}' "
-               "POSTPROCESSOR '{}' "
-               "RETURNS {} "
-               "USING 'mlflow:/vanilla-mlflow-no-tags/1'").format(
-        pre_processing, post_processing, schema
-    ))
+    spark.sql(
+        (
+            "CREATE MODEL vanilla_fire "
+            "FLAVOR pytorch "
+            "PREPROCESSOR '{}' "
+            "POSTPROCESSOR '{}' "
+            "RETURNS {} "
+            "USING 'mlflow:/vanilla-mlflow-no-tags/1'"
+        ).format(pre_processing, post_processing, schema)
+    )
     check_ml_predict(spark, "vanilla_fire")

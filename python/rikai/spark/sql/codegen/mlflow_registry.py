@@ -235,10 +235,12 @@ class MlflowRegistry(Registry):
         """
         Get the configurations needed to specify the model
         """
-        from_spec = [(CONF_MLFLOW_MODEL_FLAVOR, spec.getFlavor()),
-                     (CONF_MLFLOW_PRE_PROCESSING, spec.getPreprocessor()),
-                     (CONF_MLFLOW_POST_PROCESSING, spec.getPostprocessor()),
-                     (CONF_MLFLOW_OUTPUT_SCHEMA, spec.getSchema())]
+        from_spec = [
+            (CONF_MLFLOW_MODEL_FLAVOR, spec.getFlavor()),
+            (CONF_MLFLOW_PRE_PROCESSING, spec.getPreprocessor()),
+            (CONF_MLFLOW_POST_PROCESSING, spec.getPostprocessor()),
+            (CONF_MLFLOW_OUTPUT_SCHEMA, spec.getSchema()),
+        ]
         tags = {k: v for k, v in from_spec if v}
         tags.update(run.data.tags)
         return tags
@@ -261,16 +263,18 @@ class MlflowRegistry(Registry):
         if stage_or_version.isdigit():
             # Pegged to version number
             run_id = self.tracking_client.get_model_version(
-                model, int(stage_or_version)).run_id
+                model, int(stage_or_version)
+            ).run_id
             version = int(stage_or_version)
         else:
             # Latest version in stage
             results = self.tracking_client.get_latest_versions(
                 model, stages=[stage_or_version.lower()]
-                )
+            )
             if not results:
                 msg = "No versions found for model {} in stage {}".format(
-                    model, stage_or_version)
+                    model, stage_or_version
+                )
                 raise SpecError(msg)
             run_id, version = results[0].run_id, results[0].version
 

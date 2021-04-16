@@ -40,6 +40,8 @@ class ModelSpec(
   def getOptions: java.util.Map[String, String] =
     mapAsJavaMap(options.getOrElse(Map.empty))
 
+  def getFlavor: String = flavor.getOrElse("")
+
   /** Provide access to pre-processor via py4j. It can return Null / None in python. */
   def getPreprocessor: String = preprocessor.orNull
 

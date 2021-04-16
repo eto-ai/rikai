@@ -68,7 +68,7 @@ def check_ml_predict(spark: SparkSession, model_name: str):
             StructField(
                 "predictions",
                 parse_schema(
-                    "struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>"  # noqa
+                    "STRUCT<boxes:ARRAY<ARRAY<float>>, scores:ARRAY<float>, labels:ARRAY<int>>"  # noqa
                 ),
             )
         ]

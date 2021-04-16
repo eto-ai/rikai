@@ -104,8 +104,9 @@ class SchemaBuilder(RikaiModelSchemaVisitor):
 
 
 def parse_schema(schema_str: str) -> DataType:
-    input_stream = InputStream(schema_str)
-    lexer = RikaiModelSchemaLexer(input_stream)
+    # input_stream = InputStream(schema_str)
+    upper = CaseChangingStream(InputStream(schema_str), True)
+    lexer = RikaiModelSchemaLexer(upper)
     stream = CommonTokenStream(lexer)
     parser = RikaiModelSchemaParser(stream)
 
@@ -115,3 +116,18 @@ def parse_schema(schema_str: str) -> DataType:
     if schema is None:
         raise SchemaError(f"Invalid schema: '{schema_str}'")
     return schema
+
+
+class CaseChangingStream:
+    def __init__(self, stream, upper=False):
+        self._stream = stream
+        self._upper = upper
+
+    def __getattr__(self, name):
+        return self._stream.__getattribute__(name)
+
+    def LA(self, offset):
+        c = self._stream.LA(offset)
+        if c <= 0:
+            return c
+        return ord(chr(c).upper() if self._upper else chr(c).lower())

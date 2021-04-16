@@ -16,14 +16,19 @@
 
 package ai.eto.rikai.sql.model
 
-import ai.eto.rikai.sql.model.fs.FileSystemRegistry
+import ai.eto.rikai.sql.model.testing.TestRegistry
 import org.scalatest.BeforeAndAfter
 import org.scalatest.funsuite.AnyFunSuite
 
 class RegistryTest extends AnyFunSuite with BeforeAndAfter {
 
   before {
-    Registry.registerAll(Map.empty)
+    Registry.registerAll(
+      Map(
+        Registry.REGISTRY_IMPL_PREFIX + "test.impl" -> "ai.eto.rikai.sql.model.testing.TestRegistry",
+        Registry.DEFAULT_URI_ROOT_KEY -> "test:/"
+      )
+    )
   }
 
   after {
@@ -32,6 +37,9 @@ class RegistryTest extends AnyFunSuite with BeforeAndAfter {
 
   test("Resolve default uri") {
     val registry = Registry.getRegistry("/tmp/foo/bar")
-    assert(registry.isInstanceOf[FileSystemRegistry])
+    assert(registry.isInstanceOf[TestRegistry])
+    val uri = Registry.normalize_uri("/tmp/foo/bar")
+    val expected = "test:/tmp/foo/bar"
+    assert(uri.toString == expected)
   }
 }

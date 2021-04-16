@@ -40,8 +40,8 @@ field
     : name=identifier ':' fieldType   # structField
     ;
 
-STRUCT: 'struct';
-ARRAY: 'array';
+STRUCT: 'STRUCT';
+ARRAY: 'ARRAY';
 
 IDENTIFIER
     : (LETTER | DIGIT | '_')+

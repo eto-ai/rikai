@@ -1,9 +1,8 @@
-# Generated from src/main/antlr4/org/apache/spark/sql/ml/parser/RikaiModelSchema.g4 by ANTLR 4.9.1
+# Generated from src/main/antlr4/org/apache/spark/sql/ml/parser/RikaiModelSchema.g4 by ANTLR 4.7.2
 from antlr4 import *
 from io import StringIO
 from typing.io import TextIO
 import sys
-
 
 
 def serializedATN():
@@ -21,9 +20,9 @@ def serializedATN():
         buf.write("\7\33\3\2\2\2\t\35\3\2\2\2\13\37\3\2\2\2\r&\3\2\2\2\17")
         buf.write("/\3\2\2\2\21\63\3\2\2\2\23\65\3\2\2\2\258\3\2\2\2\27\30")
         buf.write("\7>\2\2\30\4\3\2\2\2\31\32\7.\2\2\32\6\3\2\2\2\33\34\7")
-        buf.write("@\2\2\34\b\3\2\2\2\35\36\7<\2\2\36\n\3\2\2\2\37 \7u\2")
-        buf.write("\2 !\7v\2\2!\"\7t\2\2\"#\7w\2\2#$\7e\2\2$%\7v\2\2%\f\3")
-        buf.write("\2\2\2&\'\7c\2\2\'(\7t\2\2()\7t\2\2)*\7c\2\2*+\7{\2\2")
+        buf.write("@\2\2\34\b\3\2\2\2\35\36\7<\2\2\36\n\3\2\2\2\37 \7U\2")
+        buf.write("\2 !\7V\2\2!\"\7T\2\2\"#\7W\2\2#$\7E\2\2$%\7V\2\2%\f\3")
+        buf.write("\2\2\2&\'\7C\2\2\'(\7T\2\2()\7T\2\2)*\7C\2\2*+\7[\2\2")
         buf.write("+\16\3\2\2\2,\60\5\23\n\2-\60\5\21\t\2.\60\7a\2\2/,\3")
         buf.write("\2\2\2/-\3\2\2\2/.\3\2\2\2\60\61\3\2\2\2\61/\3\2\2\2\61")
         buf.write("\62\3\2\2\2\62\20\3\2\2\2\63\64\t\2\2\2\64\22\3\2\2\2")
@@ -53,7 +52,7 @@ class RikaiModelSchemaLexer(Lexer):
     modeNames = [ "DEFAULT_MODE" ]
 
     literalNames = [ "<INVALID>",
-            "'<'", "','", "'>'", "':'", "'struct'", "'array'" ]
+            "'<'", "','", "'>'", "':'", "'STRUCT'", "'ARRAY'" ]
 
     symbolicNames = [ "<INVALID>",
             "STRUCT", "ARRAY", "IDENTIFIER", "WS" ]
@@ -65,7 +64,7 @@ class RikaiModelSchemaLexer(Lexer):
 
     def __init__(self, input=None, output:TextIO = sys.stdout):
         super().__init__(input, output)
-        self.checkVersion("4.9.1")
+        self.checkVersion("4.7.2")
         self._interp = LexerATNSimulator(self, self.atn, self.decisionsToDFA, PredictionContextCache())
         self._actions = None
         self._predicates = None

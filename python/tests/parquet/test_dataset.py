@@ -31,13 +31,14 @@ def test_select_columns(spark: SparkSession, tmp_path: Path):
             Row(id=2, col1="more", col2=456),
         ]
     )
-    df.write.format("rikai").save(str(tmp_path))
+    rikai_path = str(tmp_path / "test_select_columns")
+    df.write.format("rikai").save(rikai_path)
 
-    dataset = Dataset(str(tmp_path), columns=["id", "col1"])
+    dataset = Dataset(rikai_path, columns=["id", "col1"])
     actual = sorted(list(dataset), key=lambda x: x["id"])
 
     assert_count_equal(
         [{"id": 1, "col1": "value"}, {"id": 2, "col1": "more"}], actual
     )
 
-    shutil.rmtree(tmp_path)
+    shutil.rmtree(rikai_path)

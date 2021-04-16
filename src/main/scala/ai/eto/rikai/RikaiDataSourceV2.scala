@@ -21,4 +21,3 @@ import org.apache.spark.sql.execution.datasources.v2.parquet.ParquetDataSourceV2
 class RikaiDataSourceV2 extends ParquetDataSourceV2 {
   override def shortName(): String = "rikai"
 }
-

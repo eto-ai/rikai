@@ -21,13 +21,14 @@ from rikai.contrib.torch.transforms.utils import uri_to_pil
 __all__ = ["pre_processing", "post_processing"]
 
 DEFAULT_MIN_SCORE = 0.5
+IMAGE_SCALE = 256
 
 
 def pre_processing(options: Dict[str, Any]) -> Callable:
     return T.Compose(
         [
             uri_to_pil,
-            T.Resize(256),
+            T.Resize(IMAGE_SCALE),
             T.CenterCrop(224),
             T.ToTensor(),
         ]
@@ -46,7 +47,7 @@ def post_processing(options: Dict[str, Any]) -> Callable:
                 "scores": [],
             }
             for box, label, score in zip(
-                (predicts["boxes"] / 256).tolist(),
+                (predicts["boxes"] / IMAGE_SCALE).tolist(),
                 predicts["labels"].tolist(),
                 predicts["scores"].tolist(),
             ):

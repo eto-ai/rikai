@@ -55,9 +55,9 @@ jobs:
     - name: Bump version and make tag
       run: make release
     - name: Push new version and tag
-      uses: ad-m/github-push-action@master
+      uses: changhiskhan/github-push-action@master
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.RELEASE_TOKEN }}
         branch: master
         tags: true
     - name: Make new github release
@@ -67,7 +67,7 @@ jobs:
     - name: Bump patch back to dev build
       run: make patch
     - name: Push changes
-      uses: ad-m/github-push-action@master
+      uses: changhiskhan/github-push-action@master
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.RELEASE_TOKEN }}
         branch: master

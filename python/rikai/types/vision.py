@@ -201,6 +201,21 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
     def crop(
         self, box: Union[Box2d, List[Box2d]], format: Optional[str] = None
     ) -> Union[Image, List[Image]]:
+        """Crop image specified by the bounding boxes, and returns the cropped images.
+
+        Support crop images in batch, to save I/O overhead to download the original image.
+
+        Parameters
+        ----------
+        box : :py:class:`Box2d` or :py:class:`List[Box2d]`
+            The bounding box(es) to crop out of this image.
+        format : str, optional
+            The image format to save as
+
+        Returns
+        -------
+        :py:class:`Image` or a list of :py:class:`Image`
+        """
         if isinstance(box, Box2d):
             boxes = [box]
         else:

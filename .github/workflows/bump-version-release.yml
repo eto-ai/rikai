@@ -1,4 +1,4 @@
-name: Make patch release
+name: Bumpversion for patch release
 
 on:
   workflow_dispatch:
@@ -60,14 +60,3 @@ jobs:
         github_token: ${{ secrets.RELEASE_TOKEN }}
         branch: master
         tags: true
-    - name: Make new github release
-      uses: ncipollo/release-action@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Bump patch back to dev build
-      run: make patch
-    - name: Push changes
-      uses: changhiskhan/github-push-action@master
-      with:
-        github_token: ${{ secrets.RELEASE_TOKEN }}
-        branch: master

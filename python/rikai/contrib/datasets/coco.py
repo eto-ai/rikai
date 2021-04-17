@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 from itertools import islice
 from typing import Optional
 
@@ -111,9 +112,20 @@ def convert(
         for image_id in image_ids:
             ann_id = coco.getAnnIds(imgIds=image_id)
             annotations = coco.loadAnns(ann_id)
+            image_payload = coco.loadImgs(ids=image_id)[0]
+
+            img = Image(
+                (
+                    Path(dataset_root)
+                    / f"{split}2017"
+                    / image_payload["file_name"]
+                ).absolute()
+            )
+            with img.to_pil() as pil_img:
+                width, height = pil_img.size
             annos = []
             for ann in annotations:
-                bbox = Box2d.from_top_left(*ann["bbox"])
+                bbox = Box2d.from_top_left(*ann["bbox"]) / (width, height)
                 annos.append(
                     {
                         "category_id": ann["category_id"],
@@ -124,19 +136,10 @@ def convert(
                         "area": float(ann["area"]),
                     }
                 )
-            image_payload = coco.loadImgs(ids=image_id)[0]
             example = {
                 "image_id": image_id,
                 "annotations": annos,
-                "image": Image(
-                    os.path.abspath(
-                        os.path.join(
-                            dataset_root,
-                            "{}2017".format(split),
-                            image_payload["file_name"],
-                        )
-                    )
-                ),
+                "image": img,
                 "split": split,
             }
             examples.append(example)

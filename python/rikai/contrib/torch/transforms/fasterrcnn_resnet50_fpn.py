@@ -20,6 +20,8 @@ from rikai.contrib.torch.transforms.utils import uri_to_pil
 
 __all__ = ["pre_processing", "post_processing"]
 
+DEFAULT_MIN_SCORE = 0.5
+
 
 def pre_processing(options: Dict[str, Any]) -> Callable:
     return T.Compose(
@@ -33,6 +35,8 @@ def pre_processing(options: Dict[str, Any]) -> Callable:
 
 
 def post_processing(options: Dict[str, Any]) -> Callable:
+    min_score = float(options.get("min_score", DEFAULT_MIN_SCORE))
+
     def post_process_func(batch):
         results = []
         for predicts in batch:
@@ -42,10 +46,12 @@ def post_processing(options: Dict[str, Any]) -> Callable:
                 "scores": [],
             }
             for box, label, score in zip(
-                predicts["boxes"].tolist(),
+                (predicts["boxes"] / 256).tolist(),
                 predicts["labels"].tolist(),
                 predicts["scores"].tolist(),
             ):
+                if score < min_score:
+                    continue
                 predict_result["boxes"].append(box)
                 predict_result["labels"].append(label)
                 predict_result["scores"].append(score)

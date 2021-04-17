@@ -14,6 +14,15 @@ jobs:
         ref: master
         persist-credentials: false
         fetch-depth: 0
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Pip install
+      working-directory: python
+      run: |
+        sudo apt-get -y -qq install libsnappy-dev ffmpeg
+        python -m pip install -e .[all,dev]
     - name: Setup Scala
       uses: olafurpg/setup-scala@v10
       with:
@@ -30,15 +39,6 @@ jobs:
         SPARK_LOCAL_IP: "127.0.0.1"
     - name: Install jar for Python tests
       run: sbt publishLocal
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-    - name: Pip install
-      working-directory: python
-      run: |
-        sudo apt-get -y -qq install libsnappy-dev ffmpeg
-        python -m pip install -e .[all,dev]
     - name: Python lint
       working-directory: python
       run: pylint rikai || true

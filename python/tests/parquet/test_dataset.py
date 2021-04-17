@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 from pathlib import Path
-import shutil
 
 # Third Party
 from pyspark.sql import Row, SparkSession
@@ -40,5 +39,3 @@ def test_select_columns(spark: SparkSession, tmp_path: Path):
     assert_count_equal(
         [{"id": 1, "col1": "value"}, {"id": 2, "col1": "more"}], actual
     )
-
-    shutil.rmtree(rikai_path)

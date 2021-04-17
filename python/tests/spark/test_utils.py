@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 from pathlib import Path
-import shutil
 
 from pyspark.sql import DataFrame, Row, SparkSession
 
@@ -31,5 +30,3 @@ def test_df_to_rikai(spark: SparkSession, tmp_path: Path):
     actual_df = spark.read.format("rikai").load(rikai_path)
 
     assert_count_equal(df.collect(), actual_df.collect())
-
-    shutil.rmtree(rikai_path)

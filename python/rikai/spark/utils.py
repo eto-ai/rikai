@@ -89,7 +89,7 @@ class Deduper(Transformer, HasInputCol, HasOutputCol):
         return self.getOrDefault(self.threshold)
 
     def _transform(self, dataframe):
-        uri = self.getInputCol()
+        input_col = self.getInputCol()
         out_col = self.getOutputCol()
         group_id = self.getGroupIdCol()
         threshold = self.getThreshold()
@@ -100,31 +100,33 @@ class Deduper(Transformer, HasInputCol, HasOutputCol):
             dataframe = dataframe.withColumn(group_id, F.lit("1"))
 
         return (
-            dataframe.withColumn("image", to_image(F.col(uri)))
+            dataframe.withColumn("image", to_image(F.col(input_col)))
             .groupBy(group_id)
             .agg(
-                F.collect_list(F.col(uri)).alias(uri),
+                F.collect_list(F.col(input_col)).alias(input_col),
                 F.collect_list(F.col("image")).alias("image"),
             )
             .withColumn(
                 "clusters", img_cluster(F.col("image"), F.lit(threshold))
             )
             .withColumn(
-                "uri_cluster_id",
-                F.explode(F.arrays_zip(F.col(uri), F.col("clusters"))),
+                "image_cluster_id",
+                F.explode(F.arrays_zip(F.col(input_col), F.col("clusters"))),
             )
             .withColumn(
                 out_col,
                 F.sha2(
                     F.concat(
-                        F.col("uri_cluster_id.clusters"), F.col(group_id)
+                        F.col("image_cluster_id.clusters"), F.col(group_id)
                     ),
                     256,
                 ),
             )
             .select(
-                F.col("uri_cluster_id.{}".format(uri)).alias(uri),
+                F.col("image_cluster_id.{}".format(input_col)).alias(
+                    input_col
+                ),
                 F.col(out_col),
             )
-            .join(dataframe.select(*cols), on=uri, how="inner")
+            .join(dataframe.select(*cols), on=input_col, how="inner")
         )

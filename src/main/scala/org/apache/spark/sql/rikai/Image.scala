@@ -20,8 +20,7 @@ import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.unsafe.types.UTF8String
 
-/**
-  * Image User Defined Type
+/** Image User Defined Type
   */
 private[spark] class ImageType extends UserDefinedType[Image] {
 
@@ -65,12 +64,11 @@ private[spark] class ImageType extends UserDefinedType[Image] {
   override def defaultSize: Int = 128
 }
 
-/**
-  * A image where the content are stored externally
+/** A image where the content are stored externally
   *
   * @param uri
   */
 @SQLUserDefinedType(udt = classOf[ImageType])
 class Image(val data: Option[Array[Byte]], val uri: Option[String]) {
-  override def toString: String = s"Image(uri='$uri')"
+  override def toString: String = s"Image('${uri.getOrElse("<embedded>")}')"
 }

@@ -10,5 +10,5 @@ WS=8
 ','=2
 '>'=3
 ':'=4
-'struct'=5
-'array'=6
+'STRUCT'=5
+'ARRAY'=6

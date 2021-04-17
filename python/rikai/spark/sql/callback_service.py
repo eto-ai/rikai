@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from py4j.java_collections import JavaMap
 from py4j.java_gateway import CallbackServerParameters
 from pyspark.sql import SparkSession
 
@@ -52,9 +51,7 @@ class CallbackService:
     def __repr__(self):
         return "PythonCbService"
 
-    def resolve(
-        self, registry_class: str, uri: str, name: str, options: JavaMap
-    ):
+    def resolve(self, registry_class: str, spec):
         """Resolve a ML model.
 
         Parameters
@@ -80,9 +77,7 @@ class CallbackService:
             self.registry_map[registry_class] = cls(self.spark)
 
         registry = self.registry_map[registry_class]
-        # Convert JavaMap to dict
-        options = {key: options[key] for key in options.keys()}
-        return registry.resolve(uri, name, options)
+        return registry.resolve(spec)
 
     def register(self):
         """Register this :py:class:`CallbackService` to SparkSession's JVM."""

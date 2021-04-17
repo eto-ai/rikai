@@ -44,6 +44,8 @@ jobs:
       working-directory: python
       run: |
         pytest -v --durations=10 --ignore=tests/parquet/internal
+      env:
+        SPARK_LOCAL_IP: "127.0.0.1"
   mac-build:
     runs-on: macos-latest
     timeout-minutes: 10

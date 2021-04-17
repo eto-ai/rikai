@@ -16,9 +16,9 @@
 
 package ai.eto.rikai.sql.spark.execution
 
-import org.scalatest.funsuite.AnyFunSuite
 import ai.eto.rikai.SparkTestSession
 import ai.eto.rikai.sql.model.{Catalog, ModelAlreadyExistException}
+import org.scalatest.funsuite.AnyFunSuite
 
 class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
 
@@ -31,23 +31,25 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
 
     val model = Catalog.testing.getModel("model_created").get
     assert(model.name == "model_created")
-    assert(model.uri == "test://model/created/from/uri")
+    assert(model.spec_uri == "test://model/created/from/uri")
     assert(model.options.isEmpty)
   }
 
   test("create model with options") {
     spark
       .sql(
-        "CREATE MODEL model_options OPTIONS (foo='bar',num=1.2,flag=True) USING 'test://foo'"
+        "CREATE MODEL qualified_opt OPTIONS (" +
+          "rikai.foo.bar=1.23, foo='bar', num=-1.23, flag=True) " +
+          "USING 'test://foo/options'"
       )
       .count()
-
-    val model = Catalog.testing.getModel("model_options").get
+    val model = Catalog.testing.getModel("qualified_opt").get
     assert(
       model.options == Seq(
         "foo" -> "bar",
-        "num" -> "1.2",
-        "flag" -> "true"
+        "num" -> "-1.23",
+        "flag" -> "true",
+        "rikai.foo.bar" -> "1.23"
       ).toMap
     )
   }
@@ -59,5 +61,16 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
     assertThrows[ModelAlreadyExistException] {
       spark.sql("CREATE MODEL model_created USING 'test://model/other/uri'")
     }
+  }
+
+  test("model flavor") {
+    spark.sql(
+      "CREATE MODEL tfmodel " +
+        "FLAVOR tensorflow " +
+        "USING 'test://model/tfmodel'"
+    )
+    val model = Catalog.testing.getModel("tfmodel").get
+    assert(model.flavor.isDefined)
+    assert(model.flavor.contains("tensorflow"))
   }
 }

@@ -32,6 +32,7 @@ def spark(tmp_path_factory) -> SparkSession:
     version = get_default_jar_version(use_snapshot=True)
     session = (
         SparkSession.builder.appName("spark-test")
+        .config("spark.port.maxRetries", 128)
         .config("spark.jars.packages", f"ai.eto:rikai_2.12:{version}")
         .config(
             "spark.sql.extensions",
@@ -40,14 +41,6 @@ def spark(tmp_path_factory) -> SparkSession:
         .config(
             "rikai.sql.ml.registry.test.impl",
             "ai.eto.rikai.sql.model.testing.TestRegistry",
-        )
-        .config(
-            "rikai.sql.ml.registry.file.impl",
-            "ai.eto.rikai.sql.model.fs.FileSystemRegistry",
-        )
-        .config(
-            "rikai.sql.ml.registry.mlflow.impl",
-            "ai.eto.rikai.sql.model.mlflow.MlflowRegistry",
         )
         .config(
             "spark.driver.extraJavaOptions",

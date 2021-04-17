@@ -32,7 +32,7 @@ from rikai.spark.sql.schema import parse_schema, SchemaError
 
 
 def test_parse_schema():
-    struct = parse_schema("struct<foo:int, bar:string>")
+    struct = parse_schema("STRUCT<foo:int,bar:string>")
     assert struct == StructType(
         [StructField("foo", IntegerType()), StructField("bar", StringType())]
     )
@@ -65,15 +65,15 @@ def test_nested_array():
     )
 
     assert schema == parse_schema(schema.simpleString())
-    assert schema == parse_schema("struct<id:int, scores:array<bigint>>")
-    assert schema == parse_schema("struct<id:int, scores:array<long>>")
+    assert schema == parse_schema("STRUCT<id:int,scores:ARRAY<bigint>>")
+    assert schema == parse_schema("STRUCT<id:int,scores:ARRAY<long>>")
 
 
 def test_invalid_identifier():
     with pytest.raises(SchemaError, match=r".*can not start with a digit.*"):
-        parse_schema("struct<0id:int>")
+        parse_schema("STRUCT<0id:int>")
     with pytest.raises(SchemaError, match=r".*can not start with a digit.*"):
-        parse_schema("struct<id:8float>")
+        parse_schema("STRUCT<id:8float>")
 
 
 def test_bad_schema():

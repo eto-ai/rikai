@@ -120,7 +120,7 @@ class ModelSpec(ABC):
         return self._spec["name"]
 
     @property
-    def uri(self) -> str:
+    def model_uri(self) -> str:
         """Return Model artifact URI"""
         return self._spec["model"]["uri"]
 

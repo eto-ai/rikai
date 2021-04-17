@@ -21,8 +21,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 
 import Utils.approxEqual
 
-/**
-  * A Point in 3-D space
+/** A Point in 3-D space
   *
   * @constructor create a 3-D Point
   */
@@ -45,8 +44,7 @@ class Point(
   override def toString: String = f"Point($x, $y, $z)"
 }
 
-/**
-  * User defined type for 3-D Point
+/** User defined type for 3-D Point
   */
 private[rikai] class PointType extends UserDefinedType[Point] {
 

@@ -1,11 +1,11 @@
 /*
  * Copyright 2021 Rikai authors
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -21,7 +21,11 @@ singleStatement
 
 statement
     : CREATE (OR REPLACE)? MODEL model=qualifiedName
+      (FLAVOR flavor=identifier)?
+      (PREPROCESSOR preprocess=processorClause)?
+      (POSTPROCESSOR postprocess=processorClause)?
       (OPTIONS optionList)?
+      (RETURNS datatype=dataType)?
       (USING uri=STRING)	                        # createModel
     | (DESC | DESCRIBE) MODEL model=qualifiedName   # describeModel
     | SHOW MODELS                                   # showModels
@@ -45,19 +49,25 @@ nonReserved
     : CREATE | DESC | DESCRIBE | MODEL | MODELS | OPTIONS | REPLACE
     ;
 
+ARRAY: 'ARRAY';
 AS: 'AS';
 CREATE: 'CREATE';
 DESC : 'DESC';
 DESCRIBE : 'DESCRIBE';
 DROP: 'DROP';
 FALSE: 'FALSE';
+FLAVOR: 'FLAVOR';
 LIKE: 'LIKE';
 MODEL: 'MODEL';
 MODELS: 'MODELS';
 OPTIONS: 'OPTIONS';
 OR: 'OR';
+POSTPROCESSOR: 'POSTPROCESSOR';
+PREPROCESSOR: 'PREPROCESSOR';
 REPLACE: 'REPLACE';
+RETURNS: 'RETURNS';
 SHOW: 'SHOW';
+STRUCT: 'STRUCT';
 TRUE: 'TRUE';
 USING: 'USING';
 
@@ -83,22 +93,44 @@ option
     ;
 
 optionKey
-    : identifier
+    : qualifiedName
     ;
 
 optionValue
     : INTEGER_VALUE
-    | DECIMAL_VALUE
+    | FLOATING_VALUE
     | booleanValue
     | STRING
     ;
 
-INTEGER_VALUE
-    : DIGIT+
+processorClause
+    : className=STRING
     ;
 
-DECIMAL_VALUE
-    : DECIMAL_DIGITS
+struct
+    : STRUCT '<' field (',' field)* '>'  # structType
+    ;
+
+array
+    : ARRAY '<' dataType '>'  # arrayType
+    ;
+
+dataType
+    : struct # nestedStructType
+    | array  # nestedArrayType
+    | identifier  # plainFieldType
+    ;
+
+field
+    : name=identifier ':' dataType   # structField
+    ;
+
+INTEGER_VALUE
+    : MINUS? DIGIT+
+    ;
+
+FLOATING_VALUE
+    : MINUS? DECIMAL_DIGITS
     ;
 
 booleanValue
@@ -135,4 +167,8 @@ WS  : [ \r\n\t]+ -> channel(HIDDEN)
 
 UNRECOGNIZED
     : .
+    ;
+
+MINUS
+    : '-'
     ;

@@ -24,8 +24,7 @@ import org.apache.spark.sql.sources.GreaterThanOrEqual
 import org.apache.spark.sql.sources.LessThan
 import org.apache.spark.sql.sources.LessThanOrEqual
 
-/**
-  * Handle Spark Filters
+/** Handle Spark Filters
   */
 object FilterUtils {
 

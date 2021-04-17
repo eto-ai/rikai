@@ -18,7 +18,7 @@ If you're running Spark locally, you'll need to add the rikai jar when creating 
          SparkSession
             .builder
             .appName('rikai-quickstart')
-            .config('spark.jars.packages', 'ai.eto:rikai:0.0.1')
+            .config('spark.jars.packages', 'ai.eto:rikai:0.0.5')
             .master('local[*]')
             .getOrCreate()
       )
@@ -38,7 +38,7 @@ If you want to read/write data from/to S3, you will need additional setup:
          SparkSession
          .builder
          .appName('rikai-quickstart')
-         .config('spark.jars.packages', 'ai.eto:rikai:0.0.1')
+         .config('spark.jars.packages', 'ai.eto:rikai:0.0.5')
          .config("spark.driver.extraJavaOptions", "-Dcom.amazonaws.services.s3.enableV4=true")
          .config("spark.executor.extraJavaOptions", "-Dcom.amazonaws.services.s3.enableV4=true")
          .master("local[*]")

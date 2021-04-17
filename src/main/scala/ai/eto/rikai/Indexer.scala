@@ -18,13 +18,11 @@ package ai.eto.rikai
 
 import org.apache.spark.sql.DataFrame
 
-/**
-  * Indexers
+/** Indexers
   */
 trait Indexer {
 
-  /**
-    * Build an index for dataset
+  /** Build an index for dataset
     *
     * @param uri the URI of the feature dataset.
     * @param df the live DataFrame

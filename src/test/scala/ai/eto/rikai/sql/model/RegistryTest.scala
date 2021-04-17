@@ -16,20 +16,30 @@
 
 package ai.eto.rikai.sql.model
 
-import org.scalatest.BeforeAndAfterEach
+import ai.eto.rikai.sql.model.testing.TestRegistry
+import org.scalatest.BeforeAndAfter
 import org.scalatest.funsuite.AnyFunSuite
 
-class CatalogTest extends AnyFunSuite with BeforeAndAfterEach {
+class RegistryTest extends AnyFunSuite with BeforeAndAfter {
 
-  val catalog = Catalog.testing
+  before {
+    Registry.registerAll(
+      Map(
+        Registry.REGISTRY_IMPL_PREFIX + "test.impl" -> "ai.eto.rikai.sql.model.testing.TestRegistry",
+        Registry.DEFAULT_URI_ROOT_KEY -> "test:/"
+      )
+    )
+  }
 
-  override def beforeEach(): Unit = catalog.clear()
+  after {
+    Registry.reset
+  }
 
-  test("Test simple catalog") {
-    assert(!catalog.modelExists("foo"))
-    val created = catalog.createModel(new SparkUDFModel("foo", "bar", null))
-    assert(created.name == "foo")
-    assert(created.spec_uri == "bar")
-    assert(catalog.modelExists("foo"))
+  test("Resolve default uri") {
+    val registry = Registry.getRegistry("/tmp/foo/bar")
+    assert(registry.isInstanceOf[TestRegistry])
+    val uri = Registry.normalize_uri("/tmp/foo/bar")
+    val expected = "test:/tmp/foo/bar"
+    assert(uri.toString == expected)
   }
 }

@@ -37,6 +37,7 @@ trait SparkTestSession extends BeforeAndAfterEach {
       Registry.REGISTRY_IMPL_PREFIX + "test.impl",
       "ai.eto.rikai.sql.model.testing.TestRegistry"
     )
+    .config("spark.port.maxRetries", 128)
     .master("local[*]")
     .getOrCreate
 

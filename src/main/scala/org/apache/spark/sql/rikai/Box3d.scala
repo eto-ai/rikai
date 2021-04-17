@@ -22,8 +22,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 
 import Utils.approxEqual
 
-/**
-  * 3-D Bounding Box
+/** 3-D Bounding Box
   *
   * @constructor Create a 3-D bounding box.
   * @param center Center [[Point]] ''(x, y, z)'' of the bounding box.
@@ -60,8 +59,7 @@ class Box3d(
     f"Box3d(center=$center, l=$length, w=$width, h=$height, heading=$heading)"
 }
 
-/**
-  * User defined type of 3D Bounding Box
+/** User defined type of 3D Bounding Box
   */
 class Box3dType extends UserDefinedType[Box3d] {
 

@@ -19,44 +19,48 @@ package ai.eto.rikai.sql.model.testing
 import ai.eto.rikai.sql.model.{
   Model,
   ModelNotFoundException,
+  ModelSpec,
   Registry,
   SparkUDFModel
 }
+import org.apache.logging.log4j.scala.Logging
 
 import java.io.File
 import java.net.URI
 
-/**
-  * [[TestRegistry]] is a Registry for the testing purpose.
+/** [[TestRegistry]] is a Registry for the testing purpose.
   *
   * A valid model URI is: "test://hostname/model_name"
   */
-class TestRegistry(conf: Map[String, String]) extends Registry {
+class TestRegistry(conf: Map[String, String]) extends Registry with Logging {
 
   val schema: String = "test"
 
-  /**
-    * Resolve a Model from the specific URI.
+  /** Resolve a Model from the specific URI.
     *
-    * @param uri is the model registry URI.
+    * @param spec Model Spec
     *
     * @return [[Model]] if found, ``None`` otherwise.
     */
   @throws[ModelNotFoundException]
-  override def resolve(uri: String, name: Option[String] = None): Model = {
-    val parsed = URI.create(uri)
+  override def resolve(
+      spec: ModelSpec
+  ): Model = {
+    val parsed = URI.create(spec.uri)
     parsed.getScheme match {
       case this.schema => {
-        val model_name: String = name match {
+        val model_name: String = spec.name match {
           case Some(name) => name
           case None =>
             new File(
               parsed.getAuthority + "/" + parsed.getPath
             ).getName
         }
-        new SparkUDFModel(model_name, uri, model_name)
+        logger.info(s"Creating Spark UDF model: func=${model_name} ${spec}")
+        new SparkUDFModel(model_name, spec.uri, model_name, spec.flavor)
       }
-      case _ => throw new ModelNotFoundException(s"Fake model ${uri} not found")
+      case _ =>
+        throw new ModelNotFoundException(s"Fake model ${spec.uri} not found")
     }
   }
 }

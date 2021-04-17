@@ -31,8 +31,7 @@ import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 
 import scala.collection.JavaConverters.asScalaBufferConverter
 
-/**
-  * ```AstBuilder``` for Rikai Spark SQL extensions.
+/** ```AstBuilder``` for Rikai Spark SQL extensions.
   */
 private[parser] class RikaiExtAstBuilder
     extends RikaiExtSqlBaseBaseVisitor[AnyRef] {
@@ -46,14 +45,78 @@ private[parser] class RikaiExtAstBuilder
 
   override def visitCreateModel(ctx: CreateModelContext): LogicalPlan = {
     Model.verifyName(ctx.model.getText)
+
+    val flavor: Option[String] = ctx.flavor match {
+      case null => None
+      case _ =>
+        visit(ctx.flavor) match {
+          case s: String => Some(s)
+          case _         => None
+        }
+    }
+    val returns: Option[String] = ctx.RETURNS() match {
+      case null => None
+      case _ =>
+        visit(ctx.datatype) match {
+          case r: String => Some(r)
+          case _ =>
+            throw new ParseException(
+              s"Expect string type for RETURNS, got ${visit(ctx.datatype)}",
+              ctx
+            )
+        }
+    }
+    val preprocessor: Option[String] =
+      Option(ctx.preprocess).map(visitProcessorClause) match {
+        case Some(p: String) => Some(p)
+        case _               => None
+      }
+    val postprocessor: Option[String] =
+      Option(ctx.postprocess).map(visitProcessorClause) match {
+        case Some(p: String) => Some(p)
+        case _               => None
+      }
+
     CreateModelCommand(
       ctx.model.getText,
+      flavor = flavor,
+      returns = returns,
       uri = Option(ctx.uri).map(string),
+      preprocessor = preprocessor,
+      postprocessor = postprocessor,
       table = None,
       replace = false,
       options = visitOptionList(ctx.optionList())
     )
   }
+
+  override def visitOptionList(ctx: OptionListContext): Map[String, String] =
+    ctx match {
+      case null => Map.empty
+      case _    => ctx.option().asScala.map(visitOption).toMap
+    }
+
+  override def visitOption(ctx: OptionContext): (String, String) = {
+    // TODO: find a more scala way?
+    val value: String = if (ctx.value.booleanValue() != null) {
+      if (ctx.value.booleanValue().TRUE() != null)
+        "true"
+      else {
+        "false"
+      }
+    } else if (ctx.value.FLOATING_VALUE() != null) {
+      ctx.value.FLOATING_VALUE.getSymbol.getText
+    } else if (ctx.value.INTEGER_VALUE() != null) {
+      ctx.value.INTEGER_VALUE.getSymbol.getText
+    } else {
+      string(ctx.value.STRING)
+    }
+
+    visitQualifiedName(ctx.key.qualifiedName()) -> value
+  }
+
+  override def visitQualifiedName(ctx: QualifiedNameContext): String =
+    ctx.getText
 
   override def visitDescribeModel(ctx: DescribeModelContext): LogicalPlan = {
     Model.verifyName(ctx.model.getText)
@@ -71,33 +134,6 @@ private[parser] class RikaiExtAstBuilder
     ShowModelsCommand()
   }
 
-  override def visitOptionList(ctx: OptionListContext): Map[String, String] =
-    ctx match {
-      case null => Map.empty
-      case _    => ctx.option().asScala.map(visitOption).toMap
-    }
-
-  override def visitOption(ctx: OptionContext): (String, String) = {
-    // TODO: find a more scala way?
-    val value: String = if (ctx.value.booleanValue() != null) {
-      if (ctx.value.booleanValue().TRUE() != null)
-        "true"
-      else {
-        "false"
-      }
-    } else if (ctx.value.DECIMAL_VALUE() != null) {
-      ctx.value.DECIMAL_VALUE.getSymbol.getText
-    } else if (ctx.value.INTEGER_VALUE() != null) {
-      ctx.value.INTEGER_VALUE.getSymbol.getText
-    } else {
-      string(ctx.value.STRING)
-    }
-    ctx.key.getText -> value
-  }
-
-  override def visitQualifiedName(ctx: QualifiedNameContext): String =
-    ctx.getText
-
   override def visitUnquotedIdentifier(
       ctx: UnquotedIdentifierContext
   ): String = ctx.getText
@@ -111,6 +147,21 @@ private[parser] class RikaiExtAstBuilder
 
   override def visitNonReserved(ctx: NonReservedContext): AnyRef = ???
 
+  override def visitArrayType(ctx: ArrayTypeContext): String =
+    s"ARRAY<${visit(ctx.dataType)}>"
+
+  override def visitStructType(ctx: StructTypeContext): String =
+    s"STRUCT<${ctx.field().asScala.map(visit).mkString(", ")}>"
+
+  override def visitStructField(ctx: StructFieldContext): String =
+    s"${ctx.identifier().getText}:${visit(ctx.dataType())}"
+
+  override def visitPlainFieldType(ctx: PlainFieldTypeContext): String =
+    ctx.getText
+
+  override def visitProcessorClause(ctx: ProcessorClauseContext): String =
+    ctx.className.getText.replaceAll("^[\"']+|[\"']+$", "")
+
   protected def visitTableIdentfier(
       ctx: QualifiedNameContext
   ): TableIdentifier =
@@ -122,4 +173,5 @@ private[parser] class RikaiExtAstBuilder
           throw new ParseException(s"Illegal table name ${ctx.getText}", ctx)
       }
     }
+
 }

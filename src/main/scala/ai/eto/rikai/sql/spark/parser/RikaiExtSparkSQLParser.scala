@@ -34,8 +34,7 @@ import org.apache.spark.sql.catalyst.{FunctionIdentifier, TableIdentifier}
 import org.apache.spark.sql.types.{DataType, StructType}
 import org.apache.spark.sql.{AnalysisException, SparkSession}
 
-/**
-  * SQL Parser for Rikai Extensions.
+/** SQL Parser for Rikai Extensions.
   *
   * Rikai extends Spark SQL to support ML-related SQL DDL.
   *
@@ -44,9 +43,15 @@ import org.apache.spark.sql.{AnalysisException, SparkSession}
   */
 private[spark] class RikaiExtSqlParser(
     val session: SparkSession,
-    val delegate: ParserInterface
+    val delegate: ParserInterface,
+    val testing: Boolean = false
 ) extends ParserInterface
     with Logging {
+
+  /** Used for test only */
+  def this() {
+    this(null, null, true)
+  }
 
   private val builder = new RikaiExtAstBuilder()
 
@@ -55,14 +60,20 @@ private[spark] class RikaiExtSqlParser(
   }
 
   override def parsePlan(sqlText: String): LogicalPlan = {
-    if (!registyInitialized) {
+    if (!testing && !registyInitialized) {
       // not suppose to be here?
     }
     parse(sqlText) { parser =>
       {
         builder.visit(parser.singleStatement) match {
           case plan: LogicalPlan => plan
-          case _                 => delegate.parsePlan(sqlText)
+          case _ =>
+            if (delegate != null) { delegate.parsePlan(sqlText) }
+            else {
+              if (!testing)
+                throw new RuntimeException("We should only reach here in test")
+              return null
+            }
         }
       }
     }
@@ -130,8 +141,7 @@ private[spark] class RikaiExtSqlParser(
 }
 
 // scalastyle:off line.size.limit
-/**
-  * Fork from `org.apache.spark.sql.catalyst.parser.UpperCaseCharStream`.
+/** Fork from `org.apache.spark.sql.catalyst.parser.UpperCaseCharStream`.
   *
   * @see https://github.com/apache/spark/blob/v2.4.4/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/parser/ParseDriver.scala#L157
   */

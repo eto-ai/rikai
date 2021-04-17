@@ -16,7 +16,7 @@
 
 package ai.eto.rikai.sql.spark.parser
 
-import ai.eto.rikai.sql.model.{Catalog, Registry}
+import ai.eto.rikai.sql.model.{Catalog, ModelSpec, Registry}
 import ai.eto.rikai.sql.spark.SparkRunnable
 import ai.eto.rikai.sql.spark.expressions.Predict
 import org.apache.spark.sql.SparkSession
@@ -29,8 +29,7 @@ import org.apache.spark.sql.catalyst.parser.{AstBuilder, ParseException}
 import java.util.Locale
 import scala.collection.JavaConverters.asScalaBufferConverter
 
-/**
-  * Extends Spark's `AstBuilder` to process the `Expression` within
+/** Extends Spark's `AstBuilder` to process the `Expression` within
   * Spark SQL Select/Where/OrderBy clauses.
   */
 private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
@@ -52,8 +51,7 @@ private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
       }
     }
 
-  /**
-    * Process `ML_PREDICT` Expression.
+  /** Process `ML_PREDICT` Expression.
     */
   def visitMlPredictFunction(ctx: FunctionCallContext): Expression =
     withOrigin(ctx) {
@@ -69,7 +67,8 @@ private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
       val model = model_name match {
         case arg: UnresolvedAttribute => catalog.getModel(arg.name)
         case arg: Literal => {
-          val model = Registry.resolve(arg.toString)
+          val model =
+            Registry.resolve(new ModelSpec(name = None, uri = arg.toString))
           Some(model)
         }
         case _ =>

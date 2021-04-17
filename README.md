@@ -14,25 +14,25 @@ Join the community:
 # Rikai
 
 Rikai is a [`parquet`](https://parquet.apache.org/) based ML data format built for working with
-unstructured data at scale. Processing large amounts of data for ML is never trivial, but that
-is especially true for images and videos often at the core of deep learning applications. We are
+unstructured data at scale. Processing large amounts of data for ML is never trivial, but is 
+especially true for images and videos often at the core of deep learning applications. We are
 building Rikai with two main goals:
-1. Enable ML engineers/researchers to have a seamless workflow from Feature Engineering (Spark) to Training (PyTorch/Tensorflow),
-   from notebook to production.
+1. Enable ML engineers/researchers to have a seamless workflow from Feature Engineering (Spark) to 
+   Training (PyTorch/Tensorflow), from notebook to production.
 2. Enable advanced analytics capabilities to support much faster active learning, model debugging,
    and monitoring in production pipelines.
 
-Current (v0.0.1) main features:
-1. Native support in Spark and PyTorch for images/videos: reduce ad-hoc type
-   conversions when moving between ETL and training.
-2. Custom functionality for working with images and videos at scale: reduce boilerplate and
-   low-level code currently required to process images, filter/sample videos, etc.
-3. ML-enabled SQL analytics API
+Current (v0.0.5) main features:
+1. Native support in Jupyter, Spark and PyTorch for images, videos and annotations: reduce ad-hoc 
+   type conversions and boilerplate when moving between ETL and training.
+2. Custom functionality for working with images and videos at scale: high-level APIs for 
+   processing, filtering, sampling, and more.
+3. Run ML-models via SQL. Forget Smart Homes, build a Smart Data Warehouse.
 
 Roadmap:
 1. TensorFlow integration
 2. Versioning support built into the dataset
-3. Richer video capabilities (ffmpeg-python integration)
+3. Even richer video capabilities (ffmpeg-python integration)
 4. Declarative annotation API (think vega-lite for annotating images/videos)
 
 ## Example
@@ -103,6 +103,17 @@ SELECT id, ML_PREDICT(yolo5, image) FROM my_dataset
 WHERE split = "train" LIMIT 100;
 ```
 
+Rikai can use Mlflow as its model registry. This allows you to automatically pickup the latest
+model version if you're using the mlflow model registry.
+
+```sql
+CREATE MODEL yolo5
+OPTIONS (min_confidence=0.3, device="gpu", batch_size=32)
+USING "mlflow://yolo5_model/";
+
+SELECT id, ML_PREDICT(yolo5, image) FROM my_dataset
+WHERE split = "train" LIMIT 100;
+```
 
 ## Getting Started
 

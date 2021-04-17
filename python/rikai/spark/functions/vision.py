@@ -25,9 +25,6 @@ import numpy as np
 from pyspark.sql.functions import udf
 from pyspark.sql.types import ArrayType, IntegerType
 
-import pyspark.sql.functions as F
-from pyspark.sql import DataFrame
-
 # Rikai
 from rikai.io import copy as _copy
 from rikai.logging import logger
@@ -288,7 +285,7 @@ def spectrogram_image(
 
 @udf(returnType=T.ArrayType(T.IntegerType()))
 def img_cluster(
-    img_list, similarity=ssim, threshold=0.5, img_shape=(500, 500)
+    img_list, threshold=0.5, similarity=ssim, img_shape=(500, 500)
 ):
     from sklearn.cluster import AgglomerativeClustering
     import image_similarity_measures

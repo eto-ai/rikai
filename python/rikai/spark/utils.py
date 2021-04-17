@@ -55,17 +55,24 @@ class Deduper(Transformer, HasInputCol, HasOutputCol):
     """Within Group Image Deduplication with Hierarchical Clustering by SSIM."""
 
     @keyword_only
-    def __init__(self, inputCol=None, outputCol=None, groupIdCol=None):
+    def __init__(
+        self, inputCol=None, outputCol=None, groupIdCol=None, threshold=None
+    ):
         super(Deduper, self).__init__()
         self.groupIdCol = Param(
             self, "groupIdCol", "Column containing group ids."
         )
-        self._setDefault(groupIdCol=None)
+        self.threshold = Param(
+            self, "threshold", "Threshold float value for clustering."
+        )
+        self._setDefault(groupIdCol="group_id", threshold=0.5)
         kwargs = self._input_kwargs
         self.setParams(**kwargs)
 
     @keyword_only
-    def setParams(self, inputCol=None, outputCol=None, groupIdCol=None):
+    def setParams(
+        self, inputCol=None, outputCol=None, groupIdCol=None, threshold=None
+    ):
         kwargs = self._input_kwargs
         return self._set(**kwargs)
 
@@ -75,10 +82,17 @@ class Deduper(Transformer, HasInputCol, HasOutputCol):
     def getGroupIdCol(self):
         return self.getOrDefault(self.groupIdCol)
 
+    def setThreshold(self, value):
+        return self._set(threshold=value)
+
+    def getThreshold(self):
+        return self.getOrDefault(self.threshold)
+
     def _transform(self, dataframe):
         uri = self.getInputCol()
         out_col = self.getOutputCol()
         group_id = self.getGroupIdCol()
+        threshold = self.getThreshold()
 
         cols = dataframe.columns
 
@@ -92,7 +106,9 @@ class Deduper(Transformer, HasInputCol, HasOutputCol):
                 F.collect_list(F.col(uri)).alias(uri),
                 F.collect_list(F.col("image")).alias("image"),
             )
-            .withColumn("clusters", img_cluster("image"))
+            .withColumn(
+                "clusters", img_cluster(F.col("image"), F.lit(threshold))
+            )
             .withColumn(
                 "uri_cluster_id",
                 F.explode(F.arrays_zip(F.col(uri), F.col("clusters"))),

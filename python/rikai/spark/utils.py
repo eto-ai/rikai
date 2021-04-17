@@ -13,9 +13,15 @@
 #  limitations under the License.
 import re
 
+import pyspark.sql.functions as F
+from pyspark import keyword_only
+from pyspark.ml.pipeline import Transformer
+from pyspark.ml.param.shared import HasInputCol, HasOutputCol, Param
+
 import rikai
 from rikai.__version__ import version
 from rikai.conf import CONF_PARQUET_BLOCK_SIZE
+from rikai.spark.functions import to_image, img_cluster
 
 
 def df_to_rikai(df: "pyspark.sql.DataFrame", uri: str):
@@ -43,3 +49,66 @@ def get_default_jar_version(use_snapshot=True):
     if use_snapshot and (len(match_str) < len(version)):
         return match_str + "-SNAPSHOT"
     return match_str
+
+
+class Deduper(Transformer, HasInputCol, HasOutputCol):
+    """Within Group Image Deduplication with Hierarchical Clustering by SSIM."""
+
+    @keyword_only
+    def __init__(self, inputCol=None, outputCol=None, groupIdCol=None):
+        super(Deduper, self).__init__()
+        self.groupIdCol = Param(
+            self, "groupIdCol", "Column containing group ids."
+        )
+        self._setDefault(groupIdCol=None)
+        kwargs = self._input_kwargs
+        self.setParams(**kwargs)
+
+    @keyword_only
+    def setParams(self, inputCol=None, outputCol=None, groupIdCol=None):
+        kwargs = self._input_kwargs
+        return self._set(**kwargs)
+
+    def setGroupIdCol(self, value):
+        return self._set(groupIdCol=value)
+
+    def getGroupIdCol(self):
+        return self.getOrDefault(self.groupIdCol)
+
+    def _transform(self, dataframe):
+        uri = self.getInputCol()
+        out_col = self.getOutputCol()
+        group_id = self.getGroupIdCol()
+
+        cols = dataframe.columns
+
+        if group_id not in cols:
+            dataframe = dataframe.withColumn(group_id, F.lit("1"))
+
+        return (
+            dataframe.withColumn("image", to_image(F.col(uri)))
+            .groupBy(group_id)
+            .agg(
+                F.collect_list(F.col(uri)).alias(uri),
+                F.collect_list(F.col("image")).alias("image"),
+            )
+            .withColumn("clusters", img_cluster("image"))
+            .withColumn(
+                "uri_cluster_id",
+                F.explode(F.arrays_zip(F.col(uri), F.col("clusters"))),
+            )
+            .withColumn(
+                out_col,
+                F.sha2(
+                    F.concat(
+                        F.col("uri_cluster_id.clusters"), F.col(group_id)
+                    ),
+                    256,
+                ),
+            )
+            .select(
+                F.col("uri_cluster_id.{}".format(uri)).alias(uri),
+                F.col(out_col),
+            )
+            .join(dataframe.select(*cols), on=uri, how="inner")
+        )

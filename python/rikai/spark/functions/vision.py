@@ -23,7 +23,10 @@ from typing import Union
 # Third Party
 import numpy as np
 from pyspark.sql.functions import udf
-from pyspark.sql.types import ArrayType
+from pyspark.sql.types import ArrayType, IntegerType
+
+import pyspark.sql.functions as F
+from pyspark.sql import DataFrame
 
 # Rikai
 from rikai.io import copy as _copy
@@ -41,6 +44,7 @@ from rikai.types.vision import Image
 __all__ = [
     "to_image",
     "image_copy",
+    "img_cluster",
     "numpy_to_image",
     "video_to_images",
     "spectrogram_image",
@@ -280,3 +284,23 @@ def spectrogram_image(
         format=image_format,
         **image_kwargs,
     )
+
+
+@udf(returnType=T.ArrayType(T.IntegerType()))
+def img_cluster(
+    img_list, similarity=ssim, threshold=0.5, img_shape=(500, 500)
+):
+    from sklearn.cluster import AgglomerativeClustering
+    import image_similarity_measures
+    from image_similarity_measures.quality_metrics import ssim
+
+    if len(img_list) == 1:
+        return [0]
+    clustering_model = AgglomerativeClustering(
+        n_clusters=None, distance_threshold=threshold, linkage="ward"
+    )
+    frames = [np.resize(img.to_numpy(), img_shape) for img in img_list]
+    clustering_model.fit(
+        np.array([[similarity(f, ff) for ff in frames] for f in frames])
+    )
+    return clustering_model.labels_.tolist()

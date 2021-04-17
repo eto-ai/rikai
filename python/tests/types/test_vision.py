@@ -15,7 +15,6 @@
 import filecmp
 from binascii import b2a_base64
 from io import BytesIO
-from sys import path
 
 import numpy as np
 import pytest

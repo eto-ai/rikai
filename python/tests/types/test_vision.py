@@ -107,6 +107,19 @@ def test_crop_real_image():
     assert np.array_equal(patch.to_numpy(), data[10:30, 10:30, :])
 
 
+def test_crop_in_batch():
+    uri = "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"
+    img = Image(uri)
+    data = img.to_numpy()
+    patches = img.crop(
+        [Box2d(10, 10, 30, 30), Box2d(15, 15, 35, 35), Box2d(20, 20, 40, 40)]
+    )
+    assert len(patches) == 3
+    assert np.array_equal(patches[0].to_numpy(), data[10:30, 10:30, :])
+    assert np.array_equal(patches[1].to_numpy(), data[15:35, 15:35, :])
+    assert np.array_equal(patches[2].to_numpy(), data[20:40, 20:40, :])
+
+
 @pytest.mark.timeout(30)
 @pytest.mark.webtest
 def test_show_remote_ref():

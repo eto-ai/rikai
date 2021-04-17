@@ -21,13 +21,12 @@ from __future__ import annotations
 from io import BytesIO, IOBase
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Optional, Union
+from typing import List, Optional, Union
 from urllib.parse import urlparse
 
 # Third-party libraries
 import numpy as np
 from PIL import Image as PILImage
-
 
 # Rikai
 from rikai.conf import CONF_RIKAI_IMAGE_DEFAULT_FORMAT, options
@@ -199,7 +198,18 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
         with self.to_pil() as pil_img:
             return np.asarray(pil_img)
 
-    def crop(self, box: Box2d, format: Optional[str] = None) -> Image:
+    def crop(
+        self, box: Union[Box2d, List[Box2d]], format: Optional[str] = None
+    ) -> Union[Image, List[Image]]:
+        if isinstance(box, Box2d):
+            boxes = [box]
+        else:
+            boxes = box
+        crops = []
         with self.to_pil() as img:
-            with img.crop(box) as patch:
-                return Image.from_pil(patch)
+            for bbox in boxes:
+                with img.crop(bbox) as patch:
+                    crops.append(Image.from_pil(patch))
+        if isinstance(box, Box2d):
+            return crops[0]
+        return crops

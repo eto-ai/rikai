@@ -1,0 +1,42 @@
+name: Make GH release from tag
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 30
+    steps:
+    - name: Check out master
+      uses: actions/checkout@v2
+      with:
+        ref: master
+        persist-credentials: false
+        fetch-depth: 0
+    - name: Set git configs for bumpversion
+      run: |
+        git config user.name 'Rikai Release'
+        git config user.email 'rikai-dev@eto.ai'
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+    - name: Pip install
+      working-directory: python
+      run: |
+        sudo apt-get -y -qq install libsnappy-dev ffmpeg
+        python -m pip install -e .[all,dev]
+    - name: Make new github release
+      uses: ncipollo/release-action@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Bump patch back to dev build
+      run: make patch
+    - name: Push changes
+      uses: changhiskhan/github-push-action@master
+      with:
+        github_token: ${{ secrets.RELEASE_TOKEN }}
+        branch: master

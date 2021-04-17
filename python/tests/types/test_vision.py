@@ -15,11 +15,13 @@
 import filecmp
 from binascii import b2a_base64
 from io import BytesIO
+from sys import path
 
 import numpy as np
 import pytest
 from PIL import Image as PILImage
 
+from rikai.types.geometry import Box2d
 from rikai.types.vision import Image
 
 
@@ -87,6 +89,22 @@ def test_embeded_image_from_bytesio():
     buf.seek(0)
     image = Image(buf)
     assert np.array_equal(image.to_numpy(), rescaled)
+
+
+def test_crop_image():
+    data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
+    im = Image.from_array(data)
+    patch = im.crop(Box2d(10, 10, 30, 30))
+    cropped_data = patch.to_numpy()
+    assert np.array_equal(cropped_data, data[10:30, 10:30])
+
+
+def test_crop_real_image():
+    uri = "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"
+    img = Image(uri)
+    data = img.to_numpy()
+    patch = img.crop(Box2d(10, 10, 30, 30))
+    assert np.array_equal(patch.to_numpy(), data[10:30, 10:30, :])
 
 
 @pytest.mark.timeout(30)

@@ -285,7 +285,7 @@ def spectrogram_image(
 
 @udf(returnType=ArrayType(IntegerType()))
 def img_cluster(
-    img_list, threshold=0.5, similarity=ssim, img_shape=(500, 500)
+    img_list, threshold=0.5, img_shape=(500, 500)
 ):
     from sklearn.cluster import AgglomerativeClustering
     import image_similarity_measures

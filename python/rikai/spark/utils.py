@@ -52,7 +52,8 @@ def get_default_jar_version(use_snapshot=True):
 
 
 class Deduper(Transformer, HasInputCol, HasOutputCol):
-    """Within Group Image Deduplication with Hierarchical Clustering by SSIM."""
+    """Within Group Image Deduplication
+    with Hierarchical Clustering by SSIM."""
 
     @keyword_only
     def __init__(

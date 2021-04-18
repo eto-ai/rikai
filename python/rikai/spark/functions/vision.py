@@ -283,7 +283,7 @@ def spectrogram_image(
     )
 
 
-@udf(returnType=T.ArrayType(T.IntegerType()))
+@udf(returnType=ArrayType(IntegerType()))
 def img_cluster(
     img_list, threshold=0.5, similarity=ssim, img_shape=(500, 500)
 ):

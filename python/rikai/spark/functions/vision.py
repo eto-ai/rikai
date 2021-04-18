@@ -284,9 +284,7 @@ def spectrogram_image(
 
 
 @udf(returnType=ArrayType(IntegerType()))
-def img_cluster(
-    img_list, threshold=0.5, img_shape=(300, 300)
-):
+def img_cluster(img_list, threshold=0.5, img_shape=(300, 300)):
     from sklearn.cluster import AgglomerativeClustering
     from skimage.metrics import structural_similarity as ssim
 
@@ -297,6 +295,8 @@ def img_cluster(
     )
     frames = [np.resize(img.to_numpy(), img_shape) for img in img_list]
     clustering_model.fit(
-        np.array([[ssim(f, ff, multichannel=True) for ff in frames] for f in frames])
+        np.array(
+            [[ssim(f, ff, multichannel=True) for ff in frames] for f in frames]
+        )
     )
     return clustering_model.labels_.tolist()

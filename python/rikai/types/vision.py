@@ -21,7 +21,7 @@ from __future__ import annotations
 from io import BytesIO, IOBase
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import List, Optional, Union
+from typing import List, Optional, Sequence, Union
 from urllib.parse import urlparse
 
 # Third-party libraries
@@ -219,14 +219,13 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
         :py:class:`Image` or a list of :py:class:`Image`
         """
         if isinstance(box, Box2d):
-            boxes = [box]
-        else:
-            boxes = box
+            with self.to_pil() as pil_image:
+                return Image.from_pil(pil_image.crop(box))
+
+        assert isinstance(box, Sequence)
         crops = []
-        with self.to_pil() as img:
-            for bbox in boxes:
-                with img.crop(bbox) as patch:
+        with self.to_pil() as pil_image:
+            for bbox in box:
+                with pil_image.crop(bbox) as patch:
                     crops.append(Image.from_pil(patch))
-        if isinstance(box, Box2d):
-            return crops[0]
         return crops

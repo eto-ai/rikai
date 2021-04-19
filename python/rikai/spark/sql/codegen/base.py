@@ -31,18 +31,12 @@ class Registry(ABC):
     """Base class of a Model Registry"""
 
     @abstractmethod
-    def resolve(self, uri: str, name: str, options: Dict[str, str]):
+    def resolve(self, spec: "ModelSpec"):
         """Resolve a model from a model URI.
 
         Parameters
         ----------
-        uri : str
-            Model URI
-        name : str, optional
-            Optional model name. Can be empty or None. If provided, it
-            overrides the model name got from the model URI.
-        options: dict
-            Additional options passed to the model.
+        spec : ModelSpec
         """
 
 

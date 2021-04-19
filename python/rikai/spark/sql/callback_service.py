@@ -77,7 +77,12 @@ class CallbackService:
             self.registry_map[registry_class] = cls(self.spark)
 
         registry = self.registry_map[registry_class]
-        return registry.resolve(spec)
+        try:
+            return registry.resolve(spec)
+        except Exception as e:
+            raise RuntimeError(
+                f"could not resolve {spec} from {registry}"
+            ) from e
 
     def register(self):
         """Register this :py:class:`CallbackService` to SparkSession's JVM."""

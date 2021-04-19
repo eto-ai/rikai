@@ -20,6 +20,7 @@ import os
 from typing import Union
 
 # Third Party
+import cv2
 import numpy as np
 from pyspark.sql.functions import (
     udf,
@@ -44,6 +45,8 @@ from rikai.logging import logger
 from rikai.numpy import ndarray
 from rikai.spark.types.vision import ImageType
 from rikai.types.vision import Image
+from rikai.types.geometry import Box2d
+from rikai.spark.types.geometry import Box2dType
 from rikai.types.video import (
     YouTubeVideo,
     VideoStream,
@@ -55,9 +58,11 @@ from rikai.types.video import (
 __all__ = [
     "image",
     "image_copy",
+    "motion_model",
     "numpy_to_image",
     "video_to_images",
     "spectrogram_image",
+    "tracker_match",
 ]
 
 
@@ -295,3 +300,29 @@ def tracker_match(trackers, detections, bbox_col="bbox", threshold=0.3):
     rows, cols = zip(*np.where(matches))
     idx_map = {cols[idx]: rows[idx] for idx in range(len(rows))}
     return idx_map
+
+
+@udf(returnType=ArrayType(Box2dType()))
+def motion_model(frame, prev_frame, bboxes):
+    if not prev_frame:
+        prev_frame = frame
+    gray = cv2.cvtColor(frame.to_numpy(), cv2.COLOR_BGR2GRAY)
+    prev_gray = cv2.cvtColor(prev_frame.to_numpy(), cv2.COLOR_BGR2GRAY)
+    inst = cv2.DISOpticalFlow.create(cv2.DISOpticalFlow)
+    inst.setUseSpatialPropagation(False)
+    flow = inst.calc(prev_gray, gray, None)
+    h, w = flow.shape[:2]
+    shifted_boxes = []
+    for bbox in bboxes:
+        xmin, ymin, xmax, ymax = bbox
+        img_crop = flow[int(ymin) : int(ymax), int(xmin) : int(xmax), :]
+        avg_y, avg_x = np.mean(flow[:, :, 0]), np.mean(flow[:, :, 1])
+        shifted_boxes.append(
+            Box2d(
+                xmin=max(0, xmin + avg_x),
+                ymin=max(0, ymin + avg_y),
+                xmax=min(w, xmax + avg_x),
+                ymax=min(h, ymax + avg_y),
+            )
+        )
+    return shifted_boxes

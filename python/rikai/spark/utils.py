@@ -21,7 +21,7 @@ from pyspark.sql import Row, DataFrame, SparkSession
 from pyspark.sql.window import Window
 from pyspark.ml.feature import StringIndexer
 
-from rikai.spark.functions.vision import tracker_match
+from rikai.spark.functions import tracker_match, motion_model
 from rikai.spark.types.geometry import Box2dType
 
 DEFAULT_ROW_GROUP_SIZE_BYTES = 32 * 1024 * 1024
@@ -82,12 +82,23 @@ def track_detections(
     segment_id="vid",
     frames="frame",
     detections="detections",
+    use_motion=True,
 ):
     id_col = "tracker_id"
     frame_window = Window().orderBy(frames)
     value_window = Window().orderBy("value")
     annot_window = Window.partitionBy(segment_id).orderBy(segment_id, frames)
     indexer = StringIndexer(inputCol=segment_id, outputCol="vidIndex")
+
+    if use_motion:
+        df = df.withColumn(
+            "prev_frames", F.lag(F.col(frames)).over(annot_window)
+        ).withColumn(
+            detections,
+            motion_model(
+                F.col(frames), F.col("prev_frames"), F.col(detections)
+            ),
+        )
 
     df = (
         df.select(segment_id, frames, detections)

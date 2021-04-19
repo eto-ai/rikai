@@ -18,10 +18,10 @@
 
 from __future__ import annotations
 
-from io import IOBase
+from io import BytesIO, IOBase
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Union
+from typing import List, Optional, Sequence, Union
 from urllib.parse import urlparse
 
 # Third-party libraries
@@ -29,10 +29,12 @@ import numpy as np
 from PIL import Image as PILImage
 
 # Rikai
+from rikai.conf import CONF_RIKAI_IMAGE_DEFAULT_FORMAT, options
 from rikai.internal.uri_utils import normalize_uri
 from rikai.io import copy
 from rikai.mixin import Asset, Displayable, ToNumpy, ToPIL
 from rikai.spark.types import ImageType
+from rikai.types.geometry import Box2d
 
 __all__ = ["Image"]
 
@@ -67,9 +69,9 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
     def from_array(
         cls,
         array: np.ndarray,
-        uri: Union[str, Path],
-        mode: str = None,
-        format: str = None,
+        uri: Optional[Union[str, Path]] = None,
+        mode: Optional[str] = None,
+        format: Optional[str] = None,
         **kwargs,
     ) -> Image:
         """Create an image in memory from numpy array.
@@ -97,12 +99,15 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
         """  # noqa: E501
 
         assert array is not None
-        img = PILImage.fromarray(array, mode=mode)
-        return cls.from_pil(img, uri, format=format, **kwargs)
+        with PILImage.fromarray(array, mode=mode) as img:
+            return cls.from_pil(img, uri, format=format, **kwargs)
 
     @staticmethod
     def from_pil(
-        img: PILImage, uri: Union[str, Path], format: str = None, **kwargs
+        img: PILImage,
+        uri: Optional[Union[str, Path]] = None,
+        format: Optional[str] = None,
+        **kwargs,
     ) -> Image:
         """Create an image in memory from a :py:class:`PIL.Image`.
 
@@ -118,6 +123,14 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
         kwargs : dict, optional
             Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
         """  # noqa: E501
+
+        format = format if format else options.rikai.image.default.format
+
+        if uri is None:
+            buf = BytesIO()
+            img.save(buf, format=format, **kwargs)
+            return Image(buf.getvalue())
+
         parsed = urlparse(normalize_uri(uri))
         if parsed.scheme == "file":
             img.save(uri, format=format, **kwargs)
@@ -184,3 +197,35 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
         """Convert this image into an :py:class:`numpy.ndarray`."""
         with self.to_pil() as pil_img:
             return np.asarray(pil_img)
+
+    def crop(
+        self, box: Union[Box2d, List[Box2d]], format: Optional[str] = None
+    ) -> Union[Image, List[Image]]:
+        """Crop image specified by the bounding boxes, and returns the cropped
+        images.
+
+        Support crop images in batch, to save I/O overhead to download
+        the original image.
+
+        Parameters
+        ----------
+        box : :py:class:`Box2d` or :py:class:`List[Box2d]`
+            The bounding box(es) to crop out of this image.
+        format : str, optional
+            The image format to save as
+
+        Returns
+        -------
+        :py:class:`Image` or a list of :py:class:`Image`
+        """
+        if isinstance(box, Box2d):
+            with self.to_pil() as pil_image:
+                return Image.from_pil(pil_image.crop(box))
+
+        assert isinstance(box, Sequence)
+        crops = []
+        with self.to_pil() as pil_image:
+            for bbox in box:
+                with pil_image.crop(bbox) as patch:
+                    crops.append(Image.from_pil(patch))
+        return crops

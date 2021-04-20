@@ -85,7 +85,7 @@ private[parser] class RikaiExtAstBuilder
       preprocessor = preprocessor,
       postprocessor = postprocessor,
       table = None,
-      replace = false,
+      replace = ctx.REPLACE() != null,
       options = visitOptionList(ctx.optionList())
     )
   }

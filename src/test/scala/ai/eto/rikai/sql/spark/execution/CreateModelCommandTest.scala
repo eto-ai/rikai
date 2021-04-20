@@ -63,6 +63,19 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
     }
   }
 
+  test("create or replace model") {
+    spark.sql(
+      "CREATE OR REPLACE MODEL replace_model USING 'test://model/to_be_replaced'"
+    )
+    val to_be_replaced = Catalog.testing.getModel("replace_model").get
+    assert(to_be_replaced.spec_uri == "test://model/to_be_replaced")
+    spark.sql(
+      "CREATE OR REPLACE MODEL replace_model USING 'test://model/replaced'"
+    )
+    val replaced = Catalog.testing.getModel("replace_model").get
+    assert(replaced.spec_uri == "test://model/replaced")
+  }
+
   test("model flavor") {
     spark.sql(
       "CREATE MODEL tfmodel " +

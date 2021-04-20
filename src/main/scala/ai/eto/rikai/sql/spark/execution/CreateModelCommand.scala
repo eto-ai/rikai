@@ -61,10 +61,15 @@ case class CreateModelCommand(
   @throws[ModelResolveException]
   override def run(spark: SparkSession): Seq[Row] = {
     if (catalog(spark).modelExists(name)) {
-      throw new ModelAlreadyExistException(s"Model (${name}) already exists")
+      if (!replace) {
+        throw new ModelAlreadyExistException(s"Model (${name}) already exists")
+      }
     }
     val model = Registry.resolve(asSpec)
     model.options ++= options
+    if (replace) {
+      catalog(spark).dropModel(name)
+    }
     catalog(spark).createModel(model)
     logger.info(s"Model ${model} created")
     Seq.empty

@@ -13,13 +13,11 @@
 #  limitations under the License.
 
 import os
-from pathlib import Path
-from typing import Any, Callable, Dict, Iterator, Optional, Union
+from typing import Any, Dict, Iterator
 
 import pandas as pd
 import torch
 from pyspark.sql.functions import pandas_udf
-from pyspark.sql.types import DataType
 from torch.utils.data import DataLoader
 
 from rikai.io import open_uri
@@ -66,6 +64,7 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                     batch_size=batch_size,
                     num_workers=num_workers,
                 ):
+                    batch = batch.to(device)
                     predictions = model(batch)
                     if spec.post_processing:
                         predictions = spec.post_processing(predictions)

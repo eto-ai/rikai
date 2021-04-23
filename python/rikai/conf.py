@@ -22,12 +22,20 @@ import os
 import tempfile
 
 import pandas as pd
-from pandas._config.config import (
-    get_option,
-    register_option,
-    reset_option,
-    set_option,
-)
+try:
+    from pandas._config.config import (
+        get_option,
+        register_option,
+        reset_option,
+        set_option,
+    )
+except ModuleNotFoundError:
+    from pandas.core.config import (
+        get_option,
+        register_option,
+        reset_option,
+        set_option,
+    )
 
 options = pd.options
 

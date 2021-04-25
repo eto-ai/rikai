@@ -27,7 +27,7 @@ torch = ["torch>=1.4.0", "torchvision"]
 jupyter = ["matplotlib", "jupyterlab"]
 gcp = ["gcsfs"]
 docs = ["sphinx"]
-youtube = ["pafy", "youtube_dl", "ffmpeg-python"]
+youtube = ["pafy", "youtube_dl"]
 mlflow = ["mlflow>=1.15"]
 all = torch + jupyter + gcp + docs + youtube + mlflow
 
@@ -46,6 +46,7 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         "antlr4-python3-runtime",
+        "ffmpeg-python",
         "ipython",
         "jsonschema",
         "numpy",

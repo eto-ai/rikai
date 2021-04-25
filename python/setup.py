@@ -27,10 +27,10 @@ torch = ["torch>=1.4.0", "torchvision"]
 jupyter = ["matplotlib", "jupyterlab"]
 gcp = ["gcsfs"]
 docs = ["sphinx"]
-youtube = ["pafy", "youtube_dl"]
 video = ["ffmpeg-python"]
+youtube = ["pafy", "youtube_dl"]
 mlflow = ["mlflow>=1.15"]
-all = torch + jupyter + gcp + docs + youtube + mlflow
+all = torch + jupyter + gcp + docs + video + youtube + mlflow
 
 
 setup(

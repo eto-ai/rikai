@@ -274,7 +274,7 @@ def video_metadata(video: Union[str, VideoStream]) -> dict:
     ```
     import rikai.spark.functions as RF
     (spark.createDataFrame([(VideoStream(<uri>),)], ['video'])
-          .withColumn('meta', RF.video_metadata('video').alias('meta'))
+          .withColumn('meta', RF.video_metadata('video'))
           .select('meta.data.frame_rate'))
     ```
     """

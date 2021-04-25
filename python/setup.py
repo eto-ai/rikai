@@ -28,6 +28,7 @@ jupyter = ["matplotlib", "jupyterlab"]
 gcp = ["gcsfs"]
 docs = ["sphinx"]
 youtube = ["pafy", "youtube_dl"]
+video = ["ffmpeg-python"]
 mlflow = ["mlflow>=1.15"]
 all = torch + jupyter + gcp + docs + youtube + mlflow
 
@@ -46,7 +47,6 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         "antlr4-python3-runtime",
-        "ffmpeg-python",
         "ipython",
         "jsonschema",
         "numpy",
@@ -67,6 +67,7 @@ setup(
         "jupyter": jupyter,
         "mlflow": mlflow,
         "pytorch": torch,
+        "video": video,
         "youtube": youtube,
     },
     classifiers=[

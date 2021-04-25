@@ -313,7 +313,14 @@ def video_metadata(video: Union[str, VideoStream]) -> dict:
 
 
 def _probe(video):
-    import ffmpeg
+    try:
+        import ffmpeg
+    except ImportError:
+        raise ValueError(
+            "Couldn't import ffmpeg. Please make sure to "
+            "`pip install ffmpeg-python` explicitly or install "
+            "the correct extras like `pip install rikai[video]`"
+        )
 
     uri = video.uri if isinstance(video, VideoStream) else video
     try:
@@ -395,7 +402,7 @@ def spectrogram_image(
         raise ValueError(
             "Couldn't import ffmpeg. Please make sure to "
             "`pip install ffmpeg-python` explicitly or install "
-            "the correct extras like `pip install rikai[all]`"
+            "the correct extras like `pip install rikai[video]`"
         )
     assert isinstance(
         video, (YouTubeVideo, VideoStream)

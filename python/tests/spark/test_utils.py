@@ -16,9 +16,9 @@ from pathlib import Path
 
 from pyspark.sql import DataFrame, Row, SparkSession
 
-from rikai.spark.utils import df_to_rikai
+from rikai.spark.utils import df_to_rikai, Deduper
 from rikai.testing.asserters import assert_count_equal
-from rikai.types import Box2d
+from rikai.types import Box2d, Image
 
 
 def test_df_to_rikai(spark: SparkSession, tmp_path: Path):
@@ -28,3 +28,22 @@ def test_df_to_rikai(spark: SparkSession, tmp_path: Path):
     df_to_rikai(df, str(tmp_path))
     actual_df = spark.read.format("rikai").load(str(tmp_path))
     assert_count_equal(df.collect(), actual_df.collect())
+
+
+def test_Deduper(spark: SparkSession, asset_path: Path):
+    image_uri = str(asset_path / "test_image.jpg")
+    empty_array = np.zeros((300, 300, 3))
+    _, empty_image = cv2.imencode(".jpg", empty_array)
+    empty_image = empty_image.tostring()
+    df = spark.createDataFrame(
+        [
+            Row(Image(image_uri)),
+            Row(Image(image_uri)),
+            Row(Image(empty_image)),
+        ],
+        ["images"],
+    )
+    deduper = Deduper(inputCol="images", outputCol="uid")
+    df = deduper.transform(df)
+    id_list = df.select("uid").rdd.flatMap(lambda x: x).collect()
+    assert id_list[0] == id_list[1] != id_list[2]

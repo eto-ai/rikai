@@ -271,6 +271,8 @@ def tracker_match(trackers, detections, bbox_col="bbox", threshold=0.3):
             >= threshold
         ):
             return {0: 0}
+        else:
+            return {}
 
     sim_mat = np.array(
         [

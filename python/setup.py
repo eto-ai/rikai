@@ -19,8 +19,9 @@ jupyter = ["matplotlib", "jupyterlab"]
 aws = ["boto"]
 gcp = ["gcsfs"]
 docs = ["sphinx"]
+scipy = ["scipy"]
 youtube = ["pafy", "youtube_dl", "ffmpeg-python"]
-all = test + torch + jupyter + aws + gcp + docs + youtube
+all = test + torch + jupyter + aws + gcp + docs + scipy + youtube
 
 
 setup(

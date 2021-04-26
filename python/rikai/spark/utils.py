@@ -84,6 +84,27 @@ def track_detections(
     detections="detections",
     use_motion=True,
 ):
+
+    """Parameters
+    ----------
+    df : DataFrame
+        A DataFrame of Video Segments exploded to Images with Object Detections as Box2dType
+    segment_id: str
+        The Segment identifier for grouping a continuous sequence of Images from Video
+    frames: ImageType
+            A sequence of Images exploded from Video Segments
+    detections : Box2dType
+            Box2dType designates a region-of-interest to apply tracking over time sequence
+    use_motion : Boolean
+        A flag indicates whether to use `motion_model` to offset Box2d coordinates
+        by the displacement vector obtained via averaging the Dense Optical Flow vector field
+        over the region of interest.
+
+    Return
+    ------
+    StructType
+        Return an StructType organizing Box2d with an Identifier for tracking over time.
+    """
     id_col = "tracker_id"
     frame_window = Window().orderBy(frames)
     value_window = Window().orderBy("value")

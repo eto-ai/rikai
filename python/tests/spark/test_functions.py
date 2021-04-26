@@ -276,11 +276,11 @@ def test_video_metadata(spark: SparkSession, asset_path: Path):
         "frame_rate": 30,
         "codec": "h264",
         "size": 736613,
+        "_errors": None
     }
     pdt.assert_series_equal(
-        pd.Series(result["data"].asDict()), pd.Series(expected)
+        pd.Series(result), pd.Series(expected)
     )
-    assert result["error"] is None
 
     video = "bad_uri"
     result = (
@@ -289,7 +289,6 @@ def test_video_metadata(spark: SparkSession, asset_path: Path):
         .first()["meta"]
         .asDict()
     )
-    assert result["data"] is None
-    err = result["error"].asDict()
+    err = result["_errors"].asDict()
     assert err["message"].startswith("ffprobe error")
     assert "bad_uri: No such file or directory" in err["stderr"]

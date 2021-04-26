@@ -215,37 +215,27 @@ def video_to_images(
     ]
 
 
-video_metadata_schema = StructType(
-    [
-        StructField(
-            "error",
-            StructType(
-                [
-                    StructField("message", StringType(), True),
-                    StructField("stderr", StringType(), True),
-                    StructField("probe", StringType(), True),
-                ]
-            ),
-            True,
+video_metadata_schema = StructType([
+    StructField("width", IntegerType(), True),
+    StructField("height", IntegerType(), True),
+    StructField("num_frames", IntegerType(), True),
+    StructField("duration", FloatType(), True),
+    StructField("bit_rate", IntegerType(), True),
+    StructField("frame_rate", IntegerType(), True),
+    StructField("codec", StringType(), True),
+    StructField("size", IntegerType(), True),
+    StructField(
+        "_errors",
+        StructType(
+            [
+                StructField("message", StringType(), True),
+                StructField("stderr", StringType(), True),
+                StructField("probe", StringType(), True),
+            ]
         ),
-        StructField(
-            "data",
-            StructType(
-                [
-                    StructField("width", IntegerType(), True),
-                    StructField("height", IntegerType(), True),
-                    StructField("num_frames", IntegerType(), True),
-                    StructField("duration", FloatType(), True),
-                    StructField("bit_rate", IntegerType(), True),
-                    StructField("frame_rate", IntegerType(), True),
-                    StructField("codec", StringType(), True),
-                    StructField("size", IntegerType(), True),
-                ]
-            ),
-            True,
-        ),
-    ]
-)
+        True,
+    )
+])
 
 
 @udf(returnType=video_metadata_schema)
@@ -260,9 +250,15 @@ def video_metadata(video: Union[str, VideoStream]) -> dict:
     Returns
     -------
     result: dict
-        { error: dict error info if ffprobe threw; otherwise None,
-          data: { width, height, num_frames, duration, bit_rate, frame_rate,
-                  codec, size}}
+        { width,
+          height,
+          num_frames,
+          duration,
+          bit_rate,
+          frame_rate,
+          codec,
+          size,
+          _errors }
 
     Notes
     -----
@@ -279,13 +275,13 @@ def video_metadata(video: Union[str, VideoStream]) -> dict:
     ```
     """
     probe_result = _probe(video)
-    if probe_result["error"] is not None:
+    if probe_result.get("_errors", None):
         return probe_result
 
     video_stream = next(
         (
             stream
-            for stream in probe_result["data"].get("streams", [])
+            for stream in probe_result.get("streams", [])
             if stream.get("codec_type", None) == "video"
         ),
         None,
@@ -294,8 +290,7 @@ def video_metadata(video: Union[str, VideoStream]) -> dict:
         return _error("No video stream found", probe=probe_result)
 
     try:
-        return _data(
-            {
+        return {
                 "width": _int_or_none(video_stream, "width"),
                 "height": _int_or_none(video_stream, "height"),
                 "num_frames": _int_or_none(video_stream, "nb_frames"),
@@ -304,10 +299,9 @@ def video_metadata(video: Union[str, VideoStream]) -> dict:
                 "bit_rate": _int_or_none(video_stream, "bit_rate"),
                 "codec": video_stream.get("codec_name", None),
                 "size": _int_or_none(
-                    probe_result["data"].get("format", {}), "size"
+                    probe_result.get("format", {}), "size"
                 ),
             }
-        )
     except Exception as e:
         return _error(str(e))
 
@@ -315,16 +309,16 @@ def video_metadata(video: Union[str, VideoStream]) -> dict:
 def _probe(video):
     try:
         import ffmpeg
-    except ImportError:
-        raise ValueError(
+    except ImportError as e:
+        raise ImportError(
             "Couldn't import ffmpeg. Please make sure to "
             "`pip install ffmpeg-python` explicitly or install "
             "the correct extras like `pip install rikai[video]`"
-        )
+        ) from e
 
     uri = video.uri if isinstance(video, VideoStream) else video
     try:
-        return _data(ffmpeg.probe(uri))
+        return ffmpeg.probe(uri)
     except Exception as e:
         return _error(str(e), stderr=getattr(e, "stderr", None))
 
@@ -354,11 +348,7 @@ def _error(message, stderr=None, probe=None):
         err["stderr"] = stderr.decode("utf-8", "backslashreplace")
     if probe is not None:
         err["probe"] = str(probe)
-    return {"data": None, "error": err}
-
-
-def _data(data):
-    return {"error": None, "data": data}
+    return {"_errors": err}
 
 
 @udf(returnType=ImageType())

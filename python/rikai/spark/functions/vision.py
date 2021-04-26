@@ -285,18 +285,37 @@ def spectrogram_image(
 
 @udf(returnType=ArrayType(IntegerType()))
 def img_cluster(img_list, threshold=0.5, img_shape=(300, 300)):
-    from sklearn.cluster import AgglomerativeClustering
-    from skimage.metrics import structural_similarity as ssim
+    """Applies AgglomerativeClustering to images after computing
+    similarity using SSIM
 
-    if len(img_list) == 1:
+    Parameters
+    ----------
+    img_lst : Array of ImageType
+        A group of similar images to deduplicate.
+    threshold: float
+        The `distance_threshold` in AgglomerativeClustering.
+    img_shape: tuple of ints
+        Image shape to compare reference and test images using SSIM.
+    Return
+    ------
+    Image
+        Return an Array of Integers indexing per group cluster id.
+    """
+    from skimage.transform import resize
+    from skimage.metrics import structural_similarity as ssim
+    from sklearn.cluster import AgglomerativeClustering
+
+    N = len(img_list)
+    if N == 1:
         return [0]
     clustering_model = AgglomerativeClustering(
         n_clusters=None, distance_threshold=threshold, linkage="ward"
     )
-    frames = [np.resize(img.to_numpy(), img_shape) for img in img_list]
-    clustering_model.fit(
-        np.array(
-            [[ssim(f, ff, multichannel=True) for ff in frames] for f in frames]
-        )
-    )
+    images = [resize(img.to_numpy(), img_shape) for img in img_list]
+    sim_arr = np.identity(N)
+    for idx in range(N):
+        for jdx in range(idx + 1, N):
+            sim_arr[idx, jdx] = ssim(images[idx], images[jdx])
+    sim_arr += sim_arr.T
+    clustering_model.fit(sim_arr)
     return clustering_model.labels_.tolist()

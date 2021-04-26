@@ -25,10 +25,19 @@ def init_cb_service(spark: SparkSession):
     params = CallbackServerParameters(
         daemonize=True,
         daemonize_connections=True,
+        # https://www.py4j.org/advanced_topics.html#using-py4j-without-pre-determined-ports-dynamic-port-number
+        port=0,
         # Re-use the auth-token from the main java/spark process
         auth_token=jvm.gateway_parameters.auth_token,
     )
+
     jvm.start_callback_server(callback_server_parameters=params)
+
+    python_port = jvm.get_callback_server().get_listening_port()
+    jvm.java_gateway_server.resetCallbackClient(
+        jvm.java_gateway_server.getCallbackClient().getAddress(),
+        python_port,
+    )
     logger.info("Spark callback server started")
 
     cb = CallbackService(spark)

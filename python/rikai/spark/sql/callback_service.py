@@ -25,6 +25,8 @@ def init_cb_service(spark: SparkSession):
     params = CallbackServerParameters(
         daemonize=True,
         daemonize_connections=True,
+        # https://www.py4j.org/advanced_topics.html#using-py4j-without-pre-determined-ports-dynamic-port-number
+        port=0,
         # Re-use the auth-token from the main java/spark process
         auth_token=jvm.gateway_parameters.auth_token,
     )

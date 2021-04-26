@@ -25,6 +25,7 @@ from rikai.torch.pandas import PandasDataset
 
 DEFAULT_NUM_WORKERS = 8
 DEFAULT_BATCH_SIZE = 4
+DEFAULT_PIN_MEMORY = True
 
 
 def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
@@ -46,6 +47,7 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
         )
     )
     batch_size = int(spec.options.get("batch_size", DEFAULT_BATCH_SIZE))
+    pin_memory = bool(spec.options.get("pin_memory", DEFAULT_PIN_MEMORY))
 
     def torch_inference_udf(
         iter: Iterator[pd.DataFrame],
@@ -63,6 +65,7 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                     dataset,
                     batch_size=batch_size,
                     num_workers=num_workers,
+                    pin_memory=pin_memory,
                 ):
                     batch = batch.to(device)
                     predictions = model(batch)

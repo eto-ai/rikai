@@ -215,27 +215,29 @@ def video_to_images(
     ]
 
 
-video_metadata_schema = StructType([
-    StructField("width", IntegerType(), True),
-    StructField("height", IntegerType(), True),
-    StructField("num_frames", IntegerType(), True),
-    StructField("duration", FloatType(), True),
-    StructField("bit_rate", IntegerType(), True),
-    StructField("frame_rate", IntegerType(), True),
-    StructField("codec", StringType(), True),
-    StructField("size", IntegerType(), True),
-    StructField(
-        "_errors",
-        StructType(
-            [
-                StructField("message", StringType(), True),
-                StructField("stderr", StringType(), True),
-                StructField("probe", StringType(), True),
-            ]
+video_metadata_schema = StructType(
+    [
+        StructField("width", IntegerType(), True),
+        StructField("height", IntegerType(), True),
+        StructField("num_frames", IntegerType(), True),
+        StructField("duration", FloatType(), True),
+        StructField("bit_rate", IntegerType(), True),
+        StructField("frame_rate", IntegerType(), True),
+        StructField("codec", StringType(), True),
+        StructField("size", IntegerType(), True),
+        StructField(
+            "_errors",
+            StructType(
+                [
+                    StructField("message", StringType(), True),
+                    StructField("stderr", StringType(), True),
+                    StructField("probe", StringType(), True),
+                ]
+            ),
+            True,
         ),
-        True,
-    )
-])
+    ]
+)
 
 
 @udf(returnType=video_metadata_schema)
@@ -291,17 +293,15 @@ def video_metadata(video: Union[str, VideoStream]) -> dict:
 
     try:
         return {
-                "width": _int_or_none(video_stream, "width"),
-                "height": _int_or_none(video_stream, "height"),
-                "num_frames": _int_or_none(video_stream, "nb_frames"),
-                "frame_rate": _fps_or_none(video_stream),
-                "duration": _float_or_none(video_stream, "duration"),
-                "bit_rate": _int_or_none(video_stream, "bit_rate"),
-                "codec": video_stream.get("codec_name", None),
-                "size": _int_or_none(
-                    probe_result.get("format", {}), "size"
-                ),
-            }
+            "width": _int_or_none(video_stream, "width"),
+            "height": _int_or_none(video_stream, "height"),
+            "num_frames": _int_or_none(video_stream, "nb_frames"),
+            "frame_rate": _fps_or_none(video_stream),
+            "duration": _float_or_none(video_stream, "duration"),
+            "bit_rate": _int_or_none(video_stream, "bit_rate"),
+            "codec": video_stream.get("codec_name", None),
+            "size": _int_or_none(probe_result.get("format", {}), "size"),
+        }
     except Exception as e:
         return _error(str(e))
 

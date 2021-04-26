@@ -276,11 +276,9 @@ def test_video_metadata(spark: SparkSession, asset_path: Path):
         "frame_rate": 30,
         "codec": "h264",
         "size": 736613,
-        "_errors": None
+        "_errors": None,
     }
-    pdt.assert_series_equal(
-        pd.Series(result), pd.Series(expected)
-    )
+    pdt.assert_series_equal(pd.Series(result), pd.Series(expected))
 
     video = "bad_uri"
     result = (

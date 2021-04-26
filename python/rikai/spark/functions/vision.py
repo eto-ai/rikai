@@ -298,8 +298,8 @@ def img_cluster(img_list, threshold=0.5, img_shape=(300, 300)):
         Image shape to compare reference and test images using SSIM.
     Return
     ------
-    Image
-        Return an Array of Integers indexing per group cluster id.
+    List
+        Return an List of Integers indexing per group cluster id.
     """
     from skimage.transform import resize
     from skimage.metrics import structural_similarity as ssim

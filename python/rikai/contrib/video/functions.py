@@ -15,8 +15,10 @@
 Useful functions and features for working with video data
 """
 
-# Standard library
 from typing import Optional, Union
+
+# Standard library
+from urllib.parse import urlparse
 
 # Third Party
 from pyspark.sql.functions import udf
@@ -72,7 +74,8 @@ SCENE_LIST_SCHEMA = ArrayType(
 def scene_detect(
     videos: Union[str, VideoStream, list], threshold=30.0, raise_on_error=True
 ):
-    """Use pyscenedetect to split scenes in a video.
+    """Use `pyscenedetect <https://pyscenedetect.readthedocs.io/en/latest/>`_
+    to split scenes in a video.
 
     Parameters
     ----------
@@ -105,7 +108,7 @@ def scene_detect(
         else:
             video_path = [videos]
 
-        video_manager = VideoManager(video_path)
+        video_manager = VideoManager(normalize_uri(video_path))
         scene_manager = SceneManager()  # TODO add StatsManager later
         scene_manager.add_detector(ContentDetector(threshold=threshold))
         video_manager.set_downscale_factor()
@@ -133,3 +136,15 @@ def scene_detect(
     finally:
         if video_manager is not None:
             video_manager.release()
+
+
+def normalize_uri(uri: Union[str, list]):
+    if isinstance(uri, str):
+        parsed = urlparse(uri)
+        if parsed.scheme == "s3":
+            from rikai.contrib.s3 import create_signed_url
+
+            return create_signed_url(parsed.netloc, parsed.path)
+        return uri
+    else:
+        return [normalize_uri(u) for u in uri]

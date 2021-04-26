@@ -18,12 +18,19 @@
 # Standard library
 import os
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
 # Third Party
 import numpy as np
 from pyspark.sql.functions import udf
-from pyspark.sql.types import ArrayType
+from pyspark.sql.types import (
+    ArrayType,
+    FloatType,
+    IntegerType,
+    StringType,
+    StructField,
+    StructType,
+)
 
 # Rikai
 from rikai.io import copy as _copy
@@ -44,6 +51,8 @@ __all__ = [
     "numpy_to_image",
     "video_to_images",
     "spectrogram_image",
+    "video_metadata",
+    "video_metadata_schema",
 ]
 
 
@@ -206,6 +215,142 @@ def video_to_images(
     ]
 
 
+video_metadata_schema = StructType(
+    [
+        StructField("width", IntegerType(), True),
+        StructField("height", IntegerType(), True),
+        StructField("num_frames", IntegerType(), True),
+        StructField("duration", FloatType(), True),
+        StructField("bit_rate", IntegerType(), True),
+        StructField("frame_rate", IntegerType(), True),
+        StructField("codec", StringType(), True),
+        StructField("size", IntegerType(), True),
+        StructField(
+            "_errors",
+            StructType(
+                [
+                    StructField("message", StringType(), True),
+                    StructField("stderr", StringType(), True),
+                    StructField("probe", StringType(), True),
+                ]
+            ),
+            True,
+        ),
+    ]
+)
+
+
+@udf(returnType=video_metadata_schema)
+def video_metadata(video: Union[str, VideoStream]) -> dict:
+    """Return useful video stream metadata about the given video
+
+    Parameters
+    ----------
+    video: str or VideoStream
+        The video uri or the Video object
+
+    Returns
+    -------
+    result: dict
+        { width,
+          height,
+          num_frames,
+          duration,
+          bit_rate,
+          frame_rate,
+          codec,
+          size,
+          _errors }
+
+    Notes
+    -----
+    The frame_rate is rounded to the nearest whole number of frames per sec
+
+    Examples
+    --------
+    The following returns the fps rounded to the nearest integer
+    ```
+    import rikai.spark.functions as RF
+    (spark.createDataFrame([(VideoStream(<uri>),)], ['video'])
+          .withColumn('meta', RF.video_metadata('video'))
+          .select('meta.data.frame_rate'))
+    ```
+    """
+    probe_result = _probe(video)
+    if probe_result.get("_errors", None):
+        return probe_result
+
+    video_stream = next(
+        (
+            stream
+            for stream in probe_result.get("streams", [])
+            if stream.get("codec_type", None) == "video"
+        ),
+        None,
+    )
+    if video_stream is None:
+        return _error("No video stream found", probe=probe_result)
+
+    try:
+        return {
+            "width": _int_or_none(video_stream, "width"),
+            "height": _int_or_none(video_stream, "height"),
+            "num_frames": _int_or_none(video_stream, "nb_frames"),
+            "frame_rate": _fps_or_none(video_stream),
+            "duration": _float_or_none(video_stream, "duration"),
+            "bit_rate": _int_or_none(video_stream, "bit_rate"),
+            "codec": video_stream.get("codec_name", None),
+            "size": _int_or_none(probe_result.get("format", {}), "size"),
+        }
+    except Exception as e:
+        return _error(str(e))
+
+
+def _probe(video):
+    try:
+        import ffmpeg
+    except ImportError as e:
+        raise ImportError(
+            "Couldn't import ffmpeg. Please make sure to "
+            "`pip install ffmpeg-python` explicitly or install "
+            "the correct extras like `pip install rikai[video]`"
+        ) from e
+
+    uri = video.uri if isinstance(video, VideoStream) else video
+    try:
+        return ffmpeg.probe(uri)
+    except Exception as e:
+        return _error(str(e), stderr=getattr(e, "stderr", None))
+
+
+def _int_or_none(data, key):
+    return int(data[key]) if key in data else None
+
+
+def _float_or_none(data, key):
+    return float(data[key] if key in data else None)
+
+
+def _fps_or_none(data: dict) -> Optional[int]:
+    # ffprobe returns frame rate in timebase units (as a fraction)
+    avg_frame_rate = data.get("avg_frame_rate", None)
+    if avg_frame_rate is None:
+        return None
+    n, d = [int(x) for x in avg_frame_rate.split("/")]
+    if d == 0:
+        raise ValueError("avg_frame_rate had 0 time base")
+    return int(round(n / d))
+
+
+def _error(message, stderr=None, probe=None):
+    err = {"message": message}
+    if stderr is not None:
+        err["stderr"] = stderr.decode("utf-8", "backslashreplace")
+    if probe is not None:
+        err["probe"] = str(probe)
+    return {"_errors": err}
+
+
 @udf(returnType=ImageType())
 def spectrogram_image(
     video: Union[VideoStream, YouTubeVideo],
@@ -247,7 +392,7 @@ def spectrogram_image(
         raise ValueError(
             "Couldn't import ffmpeg. Please make sure to "
             "`pip install ffmpeg-python` explicitly or install "
-            "the correct extras like `pip install rikai[all]`"
+            "the correct extras like `pip install rikai[video]`"
         )
     assert isinstance(
         video, (YouTubeVideo, VideoStream)

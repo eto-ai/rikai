@@ -131,7 +131,7 @@ def getworst(v_pafy, preftype="any", ftypestrict=True, vidonly=False):
         return None
 
     def _sortkey(x, key3d=0, keyres=0, keyftype=0):
-        """ sort function for max(). """
+        """sort function for max()."""
         key3d = "3D" not in x.resolution
         keyres = int(x.resolution.split("x")[0])
         keyftype = preftype == x.extension

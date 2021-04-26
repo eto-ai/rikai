@@ -27,9 +27,10 @@ torch = ["torch>=1.4.0", "torchvision"]
 jupyter = ["matplotlib", "jupyterlab"]
 gcp = ["gcsfs"]
 docs = ["sphinx"]
-youtube = ["pafy", "youtube_dl", "ffmpeg-python"]
+video = ["ffmpeg-python"]
+youtube = ["pafy", "youtube_dl"]
 mlflow = ["mlflow>=1.15"]
-all = torch + jupyter + gcp + docs + youtube + mlflow
+all = torch + jupyter + gcp + docs + video + youtube + mlflow
 
 
 setup(
@@ -66,6 +67,7 @@ setup(
         "jupyter": jupyter,
         "mlflow": mlflow,
         "pytorch": torch,
+        "video": video,
         "youtube": youtube,
     },
     classifiers=[

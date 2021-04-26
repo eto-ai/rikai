@@ -25,12 +25,13 @@ dev = [
 ]
 torch = ["torch>=1.4.0", "torchvision"]
 jupyter = ["matplotlib", "jupyterlab"]
+aws = ["boto3"]
 gcp = ["gcsfs"]
 docs = ["sphinx"]
-video = ["ffmpeg-python"]
+video = ["ffmpeg-python", "scenedetect"]
 youtube = ["pafy", "youtube_dl"]
 mlflow = ["mlflow>=1.15"]
-all = torch + jupyter + gcp + docs + video + youtube + mlflow
+all = torch + jupyter + gcp + docs + video + youtube + mlflow + aws
 
 
 setup(
@@ -69,6 +70,7 @@ setup(
         "pytorch": torch,
         "video": video,
         "youtube": youtube,
+        "aws": aws
     },
     classifiers=[
         "License :: OSI Approved :: Apache Software License",

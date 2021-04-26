@@ -16,13 +16,12 @@ Various s3 utilities for Rikai functionality. For example, libraries like
 OpenCV cannot open s3 url's directly. Instead we make a presigned s3 url.
 """
 import logging
-from urllib.parse import urlparse
 
 try:
     import boto3
     from botocore.exceptions import ClientError
 except ImportError as e:
-    raise ImportError("Please `pip install awscli` to use s3 utils") from e
+    raise ImportError("Please `pip install rikai[aws]` to use s3 utils") from e
 
 
 def create_presigned_url(bucket_name, object_name, expiration=3600):

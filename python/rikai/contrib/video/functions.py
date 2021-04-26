@@ -96,7 +96,7 @@ def scene_detect(
         raise ImportError(
             (
                 "Please make sure you have pyscenedetect installed "
-                "via `pip install scenedetect`"
+                "via `pip install rikai[video]`"
             )
         )
     video_manager = None

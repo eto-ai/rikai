@@ -259,6 +259,22 @@ def spectrogram_image(
 def tracker_match(trackers, detections, bbox_col="bbox", threshold=0.3):
     """
     Match Bounding Boxes across successive image frames.
+
+    Parameters
+        ----------
+        trackers : List of Box2dType with str identifier
+            A column of tracked objects.
+        detections: List of Box2dType without tracker id matching
+            The list of unmatched detections.
+        bbox_col: str
+                A string to name the column of bounding boxes.
+        threshold : Float
+                IOU of Box2d objects exceeding threshold will be matched.
+
+        Return
+        ------
+        MapType
+            Returns a MapType matching indices of trackers and detections.
     """
     from scipy.optimize import linear_sum_assignment
 

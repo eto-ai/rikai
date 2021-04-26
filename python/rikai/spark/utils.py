@@ -52,8 +52,35 @@ def get_default_jar_version(use_snapshot=True):
 
 
 class Deduper(Transformer, HasInputCol, HasOutputCol):
-    """Within Group Image Deduplication
-    with Hierarchical Clustering by SSIM."""
+    """
+    Within Group Image Deduplication via Hierarchical
+    Clustering using SSIM.
+
+    Parameters
+    ----------
+    inputCol: string, default None, Required
+        Name of column containing images to dedupe.
+    outputCol: string, default None, Required
+        Name of output column containing generated cluster ids
+    groupIdCol: string, default "group_id", Optional
+        Name of column containing group ids.
+    threshold: float, default 0.5, Optional
+        Threshold float value for clustering.
+
+    Return
+    ------
+    DataFrame
+        Original dataframe with additional column
+        containing generated cluster ids as string values.
+
+    Example
+    -------
+
+    >>> deduper = Deduper(inputCol="uri", outputCol="cluster_ids",
+    ...                   groupIdCol="group_id", threshold=0.7)
+    >>>
+    >>> deduper.transform(df)
+    """
 
     @keyword_only
     def __init__(

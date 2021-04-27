@@ -115,7 +115,7 @@ def test_crop_in_batch():
     )
     assert len(patches) == 3
     assert np.array_equal(patches[0].to_numpy(), data[15:35, 10:30, :])
-    assert np.array_equal(patches[1].to_numpy(), data[15:35, 15:35, :])
+    assert np.array_equal(patches[1].to_numpy(), data[20:40, 15:35, :])
     assert np.array_equal(patches[2].to_numpy(), data[20:40, 21:41, :])
 
 

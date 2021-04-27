@@ -47,6 +47,7 @@ from rikai.types.video import (
 from rikai.types.vision import Image
 
 __all__ = [
+    "crop",
     "to_image",
     "image_copy",
     "numpy_to_image",
@@ -175,7 +176,9 @@ def video_to_images(
         `supported formats <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_ for details.
     image_kwargs : dict, optional
         Optional arguments to pass to `PIL.Image.save <https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save>`_.
-    ------
+
+    Returns
+    -------
     List
         Return a list of images from video indexed by frame number.
     """  # noqa: E501
@@ -270,12 +273,14 @@ def video_metadata(video: Union[str, VideoStream]) -> dict:
     Examples
     --------
     The following returns the fps rounded to the nearest integer
-    ```
-    import rikai.spark.functions as RF
-    (spark.createDataFrame([(VideoStream(<uri>),)], ['video'])
-          .withColumn('meta', RF.video_metadata('video'))
-          .select('meta.data.frame_rate'))
-    ```
+
+    .. code-block:: python
+
+        import rikai.spark.functions as RF
+        (spark.createDataFrame([(VideoStream(<uri>),)], ['video'])
+            .withColumn('meta', RF.video_metadata('video'))
+            .select('meta.data.frame_rate'))
+
     """
     probe_result = _probe(video)
     if probe_result.get("_errors", None):
@@ -430,4 +435,24 @@ def spectrogram_image(
 
 @udf(returnType=ArrayType(ImageType()))
 def crop(img: Image, boxes: List[Box2d]):
+    """Crop images from the original image
+
+    Parameters
+    ----------
+    img : Image
+        The base image to crop from.
+    boxes : List[Box2d]
+        A list of bounding boxes to specify the area to crop.
+
+    Returns
+    -------
+    list of :py:class:`Image`
+
+    Examples
+    --------
+
+    >>> spark.sql(\"\"\"SELECT crop(image, boxes) as patches FROM image\"\"\")
+
+    """
+
     return img.crop(boxes)

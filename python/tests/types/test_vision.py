@@ -111,12 +111,12 @@ def test_crop_in_batch():
     img = Image(uri)
     data = img.to_numpy()
     patches = img.crop(
-        [Box2d(10, 10, 30, 30), Box2d(15, 15, 35, 35), Box2d(20, 20, 40, 40)]
+        [Box2d(10, 15, 30, 35), Box2d(15, 20, 35, 40), Box2d(21, 20, 41, 40)]
     )
     assert len(patches) == 3
-    assert np.array_equal(patches[0].to_numpy(), data[10:30, 10:30, :])
+    assert np.array_equal(patches[0].to_numpy(), data[15:35, 10:30, :])
     assert np.array_equal(patches[1].to_numpy(), data[15:35, 15:35, :])
-    assert np.array_equal(patches[2].to_numpy(), data[20:40, 20:40, :])
+    assert np.array_equal(patches[2].to_numpy(), data[20:40, 21:41, :])
 
 
 @pytest.mark.timeout(30)

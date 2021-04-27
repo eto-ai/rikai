@@ -187,11 +187,10 @@ def test_crop_images(spark: SparkSession):
         .collect()[0]
         .patches
     )
-    print(patches)
-    assert len(patches) == 2
-    print(patches[0].to_numpy(), image_data[10:20, 20:30])
+
+    assert np.array_equal(df.first().img.to_numpy(), image_data[:, :])
     assert np.array_equal(patches[0].to_numpy(), image_data[20:30, 10:20])
-    assert np.array_equal(patches[1].to_numpy(), image_data[15:25, 40:50])
+    assert np.array_equal(patches[1].to_numpy(), image_data[40:50, 15:25])
 
 
 @pytest.mark.timeout(10)

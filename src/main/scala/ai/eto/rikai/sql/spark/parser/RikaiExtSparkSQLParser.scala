@@ -34,6 +34,8 @@ import org.apache.spark.sql.catalyst.{FunctionIdentifier, TableIdentifier}
 import org.apache.spark.sql.types.{DataType, StructType}
 import org.apache.spark.sql.{AnalysisException, SparkSession}
 
+import java.util.concurrent.atomic.AtomicBoolean
+
 /** SQL Parser for Rikai Extensions.
   *
   * Rikai extends Spark SQL to support ML-related SQL DDL.
@@ -55,13 +57,11 @@ private[spark] class RikaiExtSqlParser(
 
   private val builder = new RikaiExtAstBuilder()
 
-  private lazy val registyInitialized = {
-    Registry.registerAll(session.conf.getAll); true
-  }
-
   override def parsePlan(sqlText: String): LogicalPlan = {
-    if (!testing && !registyInitialized) {
-      // not suppose to be here?
+    import RikaiExtSqlParser._
+
+    if (!registryInitialized.get()) {
+      initRegistry(session)
     }
     parse(sqlText) { parser =>
       {
@@ -138,6 +138,24 @@ private[spark] class RikaiExtSqlParser(
   override def parseDataType(sqlText: String): DataType =
     delegate.parseDataType(sqlText)
 
+}
+
+private[spark] object RikaiExtSqlParser {
+  private val registryInitialized = new AtomicBoolean(false)
+
+  private def runOnce(fun: => Unit): Unit = {
+    if (!registryInitialized.get()) {
+      if (registryInitialized.compareAndSet(false, true)) {
+        fun
+      }
+    }
+  }
+
+  def initRegistry(session: SparkSession): Unit = {
+    runOnce {
+      Registry.registerAll(session.conf.getAll)
+    }
+  }
 }
 
 // scalastyle:off line.size.limit

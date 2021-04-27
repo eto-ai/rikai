@@ -35,3 +35,17 @@ def init(spark: SparkSession):
 
     """
     init_cb_service(spark)
+
+    from rikai.spark.functions.vision import (
+        crop,
+        image_copy,
+        to_image,
+        video_metadata,
+        video_to_images,
+    )
+
+    spark.udf.register("crop", crop)
+    spark.udf.register("image_copy", image_copy)
+    spark.udf.register("to_image", to_image)
+    spark.udf.register("video_metadata", video_metadata)
+    spark.udf.register("video_to_images", video_to_images)

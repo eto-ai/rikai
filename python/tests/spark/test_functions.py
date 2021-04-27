@@ -169,6 +169,31 @@ def test_numpy_to_image(spark: SparkSession, tmp_path: Path):
     assert (tmp_path / "1.png").exists()
 
 
+def test_crop_images(spark: SparkSession):
+    image_data = np.random.randint(0, 255, size=(64, 64), dtype=np.uint8)
+
+    df = spark.createDataFrame(
+        [
+            Row(
+                id=1,
+                img=Image.from_array(image_data),
+                boxes=[Box2d(10, 20, 20, 30), Box2d(15, 40, 25, 50)],
+            )
+        ]
+    )
+    df.registerTempTable("df")
+    patches = (
+        spark.sql("SELECT crop(img, boxes) as patches FROM df")
+        .collect()[0]
+        .patches
+    )
+    print(patches)
+    assert len(patches) == 2
+    print(patches[0].to_numpy(), image_data[10:20, 20:30])
+    assert np.array_equal(patches[0].to_numpy(), image_data[20:30, 10:20])
+    assert np.array_equal(patches[1].to_numpy(), image_data[15:25, 40:50])
+
+
 @pytest.mark.timeout(10)
 @pytest.mark.webtest
 def test_video_to_images(

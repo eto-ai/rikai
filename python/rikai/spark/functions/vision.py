@@ -18,7 +18,7 @@
 # Standard library
 import os
 from pathlib import Path
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 # Third Party
 import numpy as np
@@ -37,6 +37,7 @@ from rikai.io import copy as _copy
 from rikai.logging import logger
 from rikai.numpy import ndarray
 from rikai.spark.types.vision import ImageType
+from rikai.types.geometry import Box2d
 from rikai.types.video import (
     Segment,
     SingleFrameSampler,
@@ -425,3 +426,8 @@ def spectrogram_image(
         format=image_format,
         **image_kwargs,
     )
+
+
+@udf(returnType=ArrayType(ImageType()))
+def crop(img: Image, boxes: List[Box2d]):
+    return img.crop(boxes)

@@ -95,18 +95,15 @@ private[rikai] object Registry {
           key.length - REGISTRY_IMPL_SUFFIX.length
         )
         verifyScheme(scheme)
-        if (registryMap.contains(scheme))
-          throw new ModelRegistryAlreadyExistException(
-            if (scheme != null) { s"ModelRegistry(${scheme}) exists" }
-            else { s"Default ModelRegistry exists" }
-          )
-        registryMap += (scheme ->
-          Class
-            .forName(value)
-            .getDeclaredConstructor(classOf[Map[String, String]])
-            .newInstance(conf)
-            .asInstanceOf[Registry])
-        logger.debug(s"Model Registry ${scheme} registered to: ${value}")
+        if (!registryMap.contains(scheme)) {
+          registryMap += (scheme ->
+            Class
+              .forName(value)
+              .getDeclaredConstructor(classOf[Map[String, String]])
+              .newInstance(conf)
+              .asInstanceOf[Registry])
+          logger.debug(s"Model Registry ${scheme} registered to: ${value}")
+        }
       }
     }
   }

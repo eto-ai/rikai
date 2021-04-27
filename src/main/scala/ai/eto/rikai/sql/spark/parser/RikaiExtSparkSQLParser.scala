@@ -56,6 +56,7 @@ private[spark] class RikaiExtSqlParser(
   private val builder = new RikaiExtAstBuilder()
 
   private lazy val registyInitialized = {
+    logInfo("Register for Rikai")
     Registry.registerAll(session.conf.getAll); true
   }
 

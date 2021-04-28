@@ -143,11 +143,9 @@ private[spark] class RikaiExtSqlParser(
 private[spark] object RikaiExtSqlParser {
   private val registryInitialized = new AtomicBoolean(false)
 
-  private def runOnce(fun: => Unit): Unit = {
-    if (!registryInitialized.get()) {
-      if (registryInitialized.compareAndSet(false, true)) {
-        fun
-      }
+  private def runOnce(func: => Unit): Unit = {
+    if (registryInitialized.compareAndSet(false, true)) {
+      func
     }
   }
 

@@ -442,7 +442,7 @@ def crop(img: Image, boxes: List[Box2d]):
     img : Image
         The base image to crop from.
     boxes : List[Box2d]
-        A list of bounding boxes to specify the area to crop.
+        A list of normalized bounding boxes to specify the area to crop.
 
     Returns
     -------

@@ -177,7 +177,7 @@ def test_crop_images(spark: SparkSession):
             Row(
                 id=1,
                 img=Image.from_array(image_data),
-                boxes=[Box2d(10, 20, 20, 30), Box2d(15, 40, 25, 50)],
+                boxes=[Box2d(10, 20, 20, 30) / 64, Box2d(15, 40, 25, 50) / 64],
             )
         ]
     )

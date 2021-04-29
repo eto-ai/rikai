@@ -200,7 +200,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
             return np.asarray(pil_img)
 
     def crop(
-        self, box: Union[Box2d, List[Box2d]], format: Optional[str] = None
+        self, boxes: Union[Box2d, List[Box2d]], format: Optional[str] = None
     ) -> Union[Image, List[Image]]:
         """Crop image specified by the bounding boxes, and returns the cropped
         images.
@@ -210,8 +210,8 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
 
         Parameters
         ----------
-        box : :py:class:`Box2d` or :py:class:`List[Box2d]`
-            The bounding box(es) to crop out of this image.
+        boxes : :py:class:`Box2d` or :py:class:`List[Box2d]`
+            The normalized bounding box(es) to crop out of this image.
         format : str, optional
             The image format to save as
 
@@ -219,14 +219,21 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
         -------
         :py:class:`Image` or a list of :py:class:`Image`
         """
-        if isinstance(box, Box2d):
+        if isinstance(boxes, Box2d):
             with self.to_pil() as pil_image:
-                return Image.from_pil(pil_image.crop(box))
+                return Image.from_pil(
+                    pil_image.crop(
+                        boxes * (pil_image.width, pil_image.height)
+                    ),
+                    format=format,
+                )
 
-        assert isinstance(box, Sequence)
+        assert isinstance(boxes, Sequence)
         crops = []
         with self.to_pil() as pil_image:
-            for bbox in box:
-                with pil_image.crop(bbox) as patch:
-                    crops.append(Image.from_pil(patch))
+            for bbox in boxes:
+                with pil_image.crop(
+                    bbox * (pil_image.width, pil_image.height)
+                ) as patch:
+                    crops.append(Image.from_pil(patch, format=format))
         return crops

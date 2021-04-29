@@ -93,7 +93,7 @@ def test_embeded_image_from_bytesio():
 def test_crop_image():
     data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
     im = Image.from_array(data)
-    patch = im.crop(Box2d(10, 10, 30, 30))
+    patch = im.crop(Box2d(10, 10, 30, 30) / data.shape)
     cropped_data = patch.to_numpy()
     assert np.array_equal(cropped_data, data[10:30, 10:30])
 
@@ -102,7 +102,8 @@ def test_crop_real_image():
     uri = "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"
     img = Image(uri)
     data = img.to_numpy()
-    patch = img.crop(Box2d(10, 10, 30, 30))
+    size = data.T.shape[1:]
+    patch = img.crop(Box2d(10, 10, 30, 30) / size)
     assert np.array_equal(patch.to_numpy(), data[10:30, 10:30, :])
 
 
@@ -110,8 +111,13 @@ def test_crop_in_batch():
     uri = "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"
     img = Image(uri)
     data = img.to_numpy()
+    size = data.T.shape[1:]
     patches = img.crop(
-        [Box2d(10, 15, 30, 35), Box2d(15, 20, 35, 40), Box2d(21, 20, 41, 40)]
+        [
+            Box2d(10, 15, 30, 35) / size,
+            Box2d(15, 20, 35, 40) / size,
+            Box2d(21, 20, 41, 40) / size,
+        ]
     )
     assert len(patches) == 3
     assert np.array_equal(patches[0].to_numpy(), data[15:35, 10:30, :])

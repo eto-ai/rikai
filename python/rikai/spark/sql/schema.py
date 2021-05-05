@@ -29,15 +29,9 @@ from pyspark.sql.types import (
     StructType,
 )
 
-from rikai.spark.sql.generated.RikaiModelSchemaLexer import (
-    RikaiModelSchemaLexer,
-)
-from rikai.spark.sql.generated.RikaiModelSchemaParser import (
-    RikaiModelSchemaParser,
-)
-from rikai.spark.sql.generated.RikaiModelSchemaVisitor import (
-    RikaiModelSchemaVisitor,
-)
+from rikai.spark.sql.generated.RikaiModelSchemaLexer import RikaiModelSchemaLexer
+from rikai.spark.sql.generated.RikaiModelSchemaParser import RikaiModelSchemaParser
+from rikai.spark.sql.generated.RikaiModelSchemaVisitor import RikaiModelSchemaVisitor
 
 _SPARK_TYPE_MAPPING = {
     "bool": BooleanType(),

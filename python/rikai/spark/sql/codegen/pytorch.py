@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import os
-from typing import Any, Dict, Iterator
+from typing import Iterator
 
 import pandas as pd
 import torch
@@ -25,6 +25,18 @@ from rikai.torch.pandas import PandasDataset
 
 DEFAULT_NUM_WORKERS = 8
 DEFAULT_BATCH_SIZE = 4
+
+
+def collate_fn(items):
+    data = []
+    errors = []
+    for item in items:
+        if "data" in item:
+            data.append(item["data"])
+            errors.append(None)
+        else:
+            errors.append(item)
+    return torch.stack(data), errors
 
 
 def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
@@ -59,10 +71,11 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
             for series in iter:
                 dataset = PandasDataset(series, transform=spec.pre_processing)
                 results = []
-                for batch in DataLoader(
+                for batch, errors in DataLoader(
                     dataset,
                     batch_size=batch_size,
                     num_workers=num_workers,
+                    collate_fn=collate_fn,
                 ):
                     batch = batch.to(device)
                     predictions = model(batch)

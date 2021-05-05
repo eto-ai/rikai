@@ -31,12 +31,7 @@ try:
         set_option,
     )
 except ModuleNotFoundError:
-    from pandas.core.config import (
-        get_option,
-        register_option,
-        reset_option,
-        set_option,
-    )
+    from pandas.core.config import get_option, register_option, reset_option, set_option
 
 options = pd.options
 

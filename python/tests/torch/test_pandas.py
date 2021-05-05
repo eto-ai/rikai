@@ -26,7 +26,7 @@ def test_pandas_dataframe():
 
     dataset = PandasDataset(df)
     assert len(dataset) == 10
-    assert list(dataset) == data
+    assert [d["data"] for d in dataset] == data
 
 
 def test_dataframe_with_udt():
@@ -40,8 +40,8 @@ def test_dataframe_with_udt():
     ]
     for i in range(10):
         row = dataset[i]
-        assert row["id"] == expected[i]["id"]
-        assert np.array_equal(row["box"], expected[i]["box"])
+        assert row["data"]["id"] == expected[i]["id"]
+        assert np.array_equal(row["data"]["box"], expected[i]["box"])
 
 
 def test_pandas_series():
@@ -50,7 +50,7 @@ def test_pandas_series():
 
     dataset = PandasDataset(series)
     assert len(dataset) == 10
-    assert np.array_equal(data, dataset)
+    assert np.array_equal(data, [d["data"] for d in dataset])
 
 
 def test_pandas_series_with_udt():
@@ -58,4 +58,6 @@ def test_pandas_series_with_udt():
     dataset = PandasDataset(data)
     assert len(dataset) == 10
     for i in range(10):
-        assert np.array_equal(dataset[i], np.array([i, i + 1, i + 2, i + 3]))
+        assert np.array_equal(
+            dataset[i]["data"], np.array([i, i + 1, i + 2, i + 3])
+        )

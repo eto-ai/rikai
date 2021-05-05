@@ -19,7 +19,9 @@ from typing import Any, Callable, Optional, Union
 import pandas as pd
 from torch.utils.data import Dataset
 
+
 # Rikai
+from rikai.exceptions import InferenceException
 from rikai.torch.transforms import convert_tensor
 
 __all__ = ["PandasDataset"]
@@ -49,8 +51,11 @@ class PandasDataset(Dataset):
         return self.data.shape[0]
 
     def __getitem__(self, index: int) -> Any:
-        row = self.data.iloc[index]
-        row = convert_tensor(row)
-        if self.transform:
-            row = self.transform(row)
-        return row
+        item = self.data.iloc[index]
+        try:
+            row = convert_tensor(item)
+            if self.transform:
+                row = self.transform(row)
+            return {"data": row}
+        except InferenceException as e:
+            return {"item": item, "exception": e}

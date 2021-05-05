@@ -19,12 +19,7 @@ from __future__ import annotations
 
 # Third-Party
 from pyspark.sql import Row
-from pyspark.sql.types import (
-    DoubleType,
-    StructField,
-    StructType,
-    UserDefinedType,
-)
+from pyspark.sql.types import DoubleType, StructField, StructType, UserDefinedType
 
 # Rikai
 from rikai.logging import logger

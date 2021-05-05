@@ -20,15 +20,7 @@ from pyspark.sql.functions import col
 
 # Rikai
 from rikai.testing.asserters import assert_count_equal
-from rikai.types import (
-    Box2d,
-    Box3d,
-    Image,
-    Point,
-    Segment,
-    VideoStream,
-    YouTubeVideo,
-)
+from rikai.types import Box2d, Box3d, Image, Point, Segment, VideoStream, YouTubeVideo
 
 
 def _check_roundtrip(spark: SparkSession, df: DataFrame, tmp_path: Path):

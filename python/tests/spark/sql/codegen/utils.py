@@ -13,7 +13,13 @@
 #  limitations under the License.
 
 from pyspark.sql import Row, SparkSession
-from pyspark.sql.types import ArrayType, FloatType, IntegerType, StructField, StructType
+from pyspark.sql.types import (
+    ArrayType,
+    FloatType,
+    IntegerType,
+    StructField,
+    StructType,
+)
 
 from rikai.spark.sql.schema import parse_schema
 

@@ -32,7 +32,12 @@ from pyspark.sql.types import (
 )
 
 # Rikai
-from rikai.types.video import Segment, SingleFrameSampler, VideoStream, YouTubeVideo
+from rikai.types.video import (
+    Segment,
+    SingleFrameSampler,
+    VideoStream,
+    YouTubeVideo,
+)
 
 __all__ = ["scene_detect", "SCENE_LIST_SCHEMA"]
 

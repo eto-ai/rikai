@@ -19,7 +19,6 @@ from typing import Any, Callable, Optional, Union
 import pandas as pd
 from torch.utils.data import Dataset
 
-
 # Rikai
 from rikai.exceptions import InferenceException
 from rikai.torch.transforms import convert_tensor

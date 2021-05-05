@@ -60,7 +60,7 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     batch_size = int(spec.options.get("batch_size", DEFAULT_BATCH_SIZE))
 
     def torch_inference_udf(
-        iter: Iterator[pd.DataFrame],
+        df_iter: Iterator[pd.DataFrame],
     ) -> Iterator[pd.DataFrame]:
         device = torch.device("cuda" if use_gpu else "cpu")
         model = spec.load_model()
@@ -68,7 +68,7 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
         model.eval()
 
         with torch.no_grad():
-            for series in iter:
+            for series in df_iter:
                 dataset = PandasDataset(series, transform=spec.pre_processing)
                 results = []
                 for batch, errors in DataLoader(
@@ -81,7 +81,13 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                     predictions = model(batch)
                     if spec.post_processing:
                         predictions = spec.post_processing(predictions)
-                    results.extend(predictions)
+                    ret = errors
+
+                    pred_iter = iter(predictions)
+                    for idx, val in enumerate(ret):
+                        if val is None:
+                            ret[idx] = next(pred_iter)
+                    results.extend(ret)
                 yield pd.DataFrame(results)
 
     return pandas_udf(torch_inference_udf, returnType=spec.schema)

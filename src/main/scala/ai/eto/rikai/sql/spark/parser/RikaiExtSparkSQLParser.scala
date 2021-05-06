@@ -60,7 +60,7 @@ private[spark] class RikaiExtSqlParser(
   override def parsePlan(sqlText: String): LogicalPlan = {
     import RikaiExtSqlParser._
 
-    if (!registryInitialized.get()) {
+    if (!testing && !registryInitialized.get()) {
       initRegistry(session)
     }
     parse(sqlText) { parser =>

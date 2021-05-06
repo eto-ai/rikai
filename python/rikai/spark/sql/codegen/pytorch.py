@@ -28,6 +28,7 @@ DEFAULT_BATCH_SIZE = 4
 
 
 def collate_fn(items):
+    """Collate fn that split data and errors."""
     data = []
     errors = []
     for item in items:
@@ -58,6 +59,7 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
         )
     )
     batch_size = int(spec.options.get("batch_size", DEFAULT_BATCH_SIZE))
+    with_error = bool(spec.options.get("with_error", False))
 
     def torch_inference_udf(
         df_iter: Iterator[pd.DataFrame],
@@ -84,12 +86,23 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                     ret = errors
 
                     pred_iter = iter(predictions)
+                    result = []
                     for idx, val in enumerate(ret):
                         if val is None:
-                            ret[idx] = next(pred_iter)
-                    results.extend(ret)
+                            result.append(next(pred_iter))
+                        else:
+                            if with_error:
+                                result.append(
+                                    {"_error": val["exception"].message}
+                                )
+                            else:
+                                result.append(None)
+                    results.extend(result)
                 yield pd.DataFrame(results)
 
+    schema = spec.schema
+    if with_error:
+        print(schema)
     return pandas_udf(torch_inference_udf, returnType=spec.schema)
 
 

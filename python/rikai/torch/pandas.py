@@ -57,4 +57,4 @@ class PandasDataset(Dataset):
                 row = self.transform(row)
             return {"data": row}
         except InferenceException as e:
-            return {"item": item, "exception": e}
+            return {"exception": e}

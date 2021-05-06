@@ -20,7 +20,8 @@ import pandas as pd
 from torch.utils.data import Dataset
 
 # Rikai
-from rikai.exceptions import InferenceException
+from rikai.exceptions import PredictException
+from rikai.logging import logger
 from rikai.torch.transforms import convert_tensor
 
 __all__ = ["PandasDataset"]
@@ -56,5 +57,6 @@ class PandasDataset(Dataset):
             if self.transform:
                 row = self.transform(row)
             return {"data": row}
-        except InferenceException as e:
-            return {"exception": e}
+        except PredictException as pe:
+            logger.exception(f"Exception on pre-processing {item}")
+            return {"exception": pe}

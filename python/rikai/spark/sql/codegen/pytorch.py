@@ -87,7 +87,7 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
 
                     pred_iter = iter(predictions)
                     result = []
-                    for idx, val in enumerate(ret):
+                    for val in ret:
                         if val is None:
                             result.append(next(pred_iter))
                         else:

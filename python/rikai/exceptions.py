@@ -12,11 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any
 
-
-class InferenceException(Exception):
-    def __init__(self, example, message: str):
+class PredictException(Exception):
+    def __init__(self, message: str):
         super().__init__()
-        self.example = example
         self.message = message

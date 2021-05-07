@@ -83,17 +83,16 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                     predictions = model(batch)
                     if spec.post_processing:
                         predictions = spec.post_processing(predictions)
-                    ret = errors
 
                     pred_iter = iter(predictions)
                     result = []
-                    for val in ret:
-                        if val is None:
+                    for err in errors:
+                        if err is None:
                             result.append(next(pred_iter))
                         else:
                             if with_error:
                                 result.append(
-                                    {"_error": val["exception"].message}
+                                    {"_error": err["exception"].message}
                                 )
                             else:
                                 result.append(None)

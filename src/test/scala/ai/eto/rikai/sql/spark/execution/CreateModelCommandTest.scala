@@ -68,8 +68,10 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
       "CREATE MODEL model_created USING 'test://model/created/from/uri'"
     )
     spark.sql(
-      "CREATE MODEL model_created IF NOT EXISTS " +
-        "USING 'test://model/created/from/uri'"
+      """
+        |CREATE MODEL IF NOT EXISTS model_created
+        |USING 'test://model/created/from/uri'
+        |""".stripMargin
     )
   }
 

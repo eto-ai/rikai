@@ -17,6 +17,7 @@
 package ai.eto.rikai.sql.spark.parser
 
 import ai.eto.rikai.sql.spark.execution.CreateModelCommand
+import org.apache.spark.sql.catalyst.parser.ParseException
 import org.scalatest.funsuite.AnyFunSuite
 
 class RikaiExtAstSqlParserTest extends AnyFunSuite {
@@ -25,11 +26,21 @@ class RikaiExtAstSqlParserTest extends AnyFunSuite {
 
   test("parse create model if not exists") {
     val cmd = parser.parsePlan(
-      "CREATE MODEL foo IF NOT EXISTS USING 's3://tmp/test_model'"
+      "CREATE MODEL IF NOT EXISTS foo USING 's3://tmp/test_model'"
     )
     assert(cmd.isInstanceOf[CreateModelCommand])
     val create = cmd.asInstanceOf[CreateModelCommand]
     assert(create.ifNotExists === true)
+  }
+
+  test("parse create or replace model if not exists") {
+    assertThrows[ParseException] {
+      parser.parsePlan(
+        """
+          |CREATE OR REPLACE MODEL IF NOT EXISTS model_created
+          |USING 'test://model/created/from/uri'
+          |""".stripMargin)
+    }
   }
 
   test("parse returns datatype") {

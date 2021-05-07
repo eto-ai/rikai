@@ -20,8 +20,7 @@ singleStatement
     ;
 
 statement
-    : CREATE (OR REPLACE)? MODEL model=qualifiedName
-      (IF NOT EXISTS)?
+    : CREATE (OR REPLACE)? MODEL (IF NOT EXISTS)? model=qualifiedName
       (FLAVOR flavor=identifier)?
       (PREPROCESSOR preprocess=processorClause)?
       (POSTPROCESSOR postprocess=processorClause)?

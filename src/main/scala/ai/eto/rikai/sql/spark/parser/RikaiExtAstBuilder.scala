@@ -25,7 +25,7 @@ import ai.eto.rikai.sql.spark.execution.{
 }
 import ai.eto.rikai.sql.spark.parser.RikaiExtSqlBaseParser._
 import org.apache.spark.sql.catalyst.TableIdentifier
-import org.apache.spark.sql.catalyst.parser.ParseException
+import org.apache.spark.sql.catalyst.parser.{ParseException, ParserUtils}
 import org.apache.spark.sql.catalyst.parser.ParserUtils.{string, withOrigin}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 
@@ -79,6 +79,14 @@ private[parser] class RikaiExtAstBuilder
         case Some(p: String) => Some(p)
         case _               => None
       }
+    val replace = ctx.REPLACE() != null
+
+    if (ifNotExists && replace) {
+      ParserUtils.operationNotAllowed(
+        "CREATE OR REPLACE MODEL IF NOT EXISTS ...",
+        ctx
+      )
+    }
 
     CreateModelCommand(
       ctx.model.getText,

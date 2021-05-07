@@ -35,8 +35,7 @@ class RikaiExtAstSqlParserTest extends AnyFunSuite {
 
   test("parse create or replace model if not exists") {
     assertThrows[ParseException] {
-      parser.parsePlan(
-        """
+      parser.parsePlan("""
           |CREATE OR REPLACE MODEL IF NOT EXISTS model_created
           |USING 'test://model/created/from/uri'
           |""".stripMargin)

@@ -20,7 +20,7 @@ singleStatement
     ;
 
 statement
-    : CREATE (OR REPLACE)? MODEL model=qualifiedName
+    : CREATE (OR REPLACE)? MODEL (IF NOT EXISTS)? model=qualifiedName
       (FLAVOR flavor=identifier)?
       (PREPROCESSOR preprocess=processorClause)?
       (POSTPROCESSOR postprocess=processorClause)?
@@ -55,11 +55,14 @@ CREATE: 'CREATE';
 DESC : 'DESC';
 DESCRIBE : 'DESCRIBE';
 DROP: 'DROP';
+EXISTS: 'EXISTS';
 FALSE: 'FALSE';
 FLAVOR: 'FLAVOR';
+IF: 'IF';
 LIKE: 'LIKE';
 MODEL: 'MODEL';
 MODELS: 'MODELS';
+NOT: 'NOT';
 OPTIONS: 'OPTIONS';
 OR: 'OR';
 POSTPROCESSOR: 'POSTPROCESSOR';

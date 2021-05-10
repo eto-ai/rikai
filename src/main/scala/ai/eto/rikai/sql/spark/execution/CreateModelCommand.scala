@@ -28,6 +28,7 @@ import org.apache.spark.sql.{Row, SparkSession}
 
 case class CreateModelCommand(
     name: String,
+    ifNotExists: Boolean,
     flavor: Option[String],
     returns: Option[String],
     uri: Option[String],
@@ -60,19 +61,22 @@ case class CreateModelCommand(
 
   @throws[ModelResolveException]
   override def run(spark: SparkSession): Seq[Row] = {
-    if (catalog(spark).modelExists(name)) {
-      if (!replace) {
-        throw new ModelAlreadyExistException(s"Model (${name}) already exists")
+    val isModelExists = catalog(spark).modelExists(name)
+
+    if (isModelExists && ifNotExists) {
+      Seq.empty
+    } else if (isModelExists && !replace) {
+      throw new ModelAlreadyExistException(s"Model (${name}) already exists")
+    } else {
+      val model = Registry.resolve(asSpec)
+      model.options ++= options
+      if (replace) {
+        catalog(spark).dropModel(name)
       }
+      catalog(spark).createModel(model)
+      logger.info(s"Model ${model} created")
+      Seq.empty
     }
-    val model = Registry.resolve(asSpec)
-    model.options ++= options
-    if (replace) {
-      catalog(spark).dropModel(name)
-    }
-    catalog(spark).createModel(model)
-    logger.info(s"Model ${model} created")
-    Seq.empty
   }
 
   override def toString(): String = s"CreateModelCommand(${name}, uri=${uri})"

@@ -82,7 +82,7 @@ STRING
     ;
 
 IDENTIFIER
-    : (LETTER | DIGIT | '_')+
+    : NONDIGIT (LETTER | DIGIT | '_')*
     ;
 
 BACKQUOTED_IDENTIFIER
@@ -151,6 +151,10 @@ fragment EXPONENT
 
 fragment DIGIT
     : [0-9]
+    ;
+
+fragment NONDIGIT
+    :   [a-zA-Z_]
     ;
 
 fragment LETTER

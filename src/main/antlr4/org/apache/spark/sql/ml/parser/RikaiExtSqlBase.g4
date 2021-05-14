@@ -154,7 +154,7 @@ fragment DIGIT
     ;
 
 fragment NONDIGIT
-    :   [a-zA-Z_]
+    : [a-zA-Z_]
     ;
 
 fragment LETTER

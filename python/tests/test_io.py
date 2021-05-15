@@ -12,11 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import base64
 from io import BytesIO
 
 import numpy as np
 import PIL
 import requests
+import requests_mock
 
 from rikai.io import open_uri
 from rikai.types.vision import Image
@@ -41,3 +43,21 @@ def test_image_use_https_uri():
     fobj = BytesIO(requests.get(WIKIPEDIA).content)
     pic = PIL.Image.open(fobj)
     assert np.array_equal(img.to_numpy(), np.array(pic))
+
+
+def test_simple_http_credentials():
+    with requests_mock.Mocker() as mock:
+        mock.get("http://test.com", text="{}")
+        requests.get("http://test.com", auth=("user", "def_not_pass"))
+        req = mock.request_history[0]
+        assert req.headers.get("Authorization") == "Basic {}".format(
+            base64.b64encode(b"user:def_not_pass").decode("utf-8")
+        )
+
+
+def test_no_http_credentials():
+    with requests_mock.Mocker() as mock:
+        mock.get("http://test.com", text="{}")
+        requests.get("http://test.com")
+        req = mock.request_history[0]
+        assert "Authorization" not in req.headers

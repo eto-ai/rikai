@@ -1,5 +1,4 @@
 import pathlib
-import re
 
 from setuptools import find_packages, setup
 
@@ -19,8 +18,9 @@ dev = [
     "flake8",
     "isort",
     "pylint",
-    "pytest",
     "pytest-timeout",
+    "pytest",
+    "requests-mock",
     "wheel",
 ]
 torch = ["torch>=1.4.0", "torchvision"]
@@ -70,7 +70,7 @@ setup(
         "pytorch": torch,
         "video": video,
         "youtube": youtube,
-        "aws": aws
+        "aws": aws,
     },
     classifiers=[
         "License :: OSI Approved :: Apache Software License",

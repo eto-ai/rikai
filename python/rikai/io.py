@@ -145,7 +145,8 @@ def open_uri(
     mode : str
         the file model to open an URI
     http_auth : requests.auth.AuthBase or a tuple of (user, pass), optional
-        Http credentials / auths provider when downloading via http(s) protocols.
+        Http credentials / auth provider when downloading via http(s)
+        protocols.
 
     Return
     ------

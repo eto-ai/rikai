@@ -18,7 +18,7 @@ import shutil
 from io import BytesIO
 from os.path import basename, join
 from pathlib import Path
-from typing import BinaryIO, IO, Union
+from typing import BinaryIO, IO, Optional, Tuple, Union
 from urllib.parse import ParseResult, urlparse
 
 # Third Party
@@ -124,7 +124,11 @@ def copy(source: str, dest: str) -> str:
     return dest
 
 
-def open_uri(uri: Union[str, Path], mode="rb") -> IO:
+def open_uri(
+    uri: Union[str, Path],
+    mode: str = "rb",
+    http_auth: Optional[Union[requests.auth.AuthBase, Tuple[str, str]]] = None,
+) -> IO:
     """Open URI for read.
 
     It supports the following URI pattens:
@@ -138,6 +142,11 @@ def open_uri(uri: Union[str, Path], mode="rb") -> IO:
     ----------
     uri : str or :py:class:`~pathlib.Path`
         URI of the object
+    mode : str
+        the file model to open an URI
+    http_auth : requests.auth.AuthBase or a tuple of (user, pass), optional
+        Http credentials / auth provider when downloading via http(s)
+        protocols.
 
     Return
     ------
@@ -151,7 +160,7 @@ def open_uri(uri: Union[str, Path], mode="rb") -> IO:
         # This is a local file
         return open(uri, mode=mode)
     elif parsed_uri.scheme in ("http", "https"):
-        resp = requests.get(uri)
+        resp = requests.get(uri, auth=http_auth)
         return BytesIO(resp.content)
     elif parsed_uri.scheme == "gs":
         return _gcsfs().open(uri, mode=mode)

@@ -13,11 +13,12 @@
 #  limitations under the License.
 
 import os
-from typing import Any, Dict, Iterator
+from typing import Iterator
 
 import pandas as pd
 import torch
 from pyspark.sql.functions import pandas_udf
+from pyspark.sql.types import StructType
 from torch.utils.data import DataLoader
 
 from rikai.io import open_uri
@@ -47,9 +48,16 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     )
     batch_size = int(spec.options.get("batch_size", DEFAULT_BATCH_SIZE))
 
+    schema = spec.schema
+    return_type = (
+        Iterator[pd.DataFrame]
+        if isinstance(schema, StructType)
+        else Iterator[pd.Series]
+    )
+
     def torch_inference_udf(
         iter: Iterator[pd.DataFrame],
-    ) -> Iterator[pd.DataFrame]:
+    ) -> return_type:
         device = torch.device("cuda" if use_gpu else "cpu")
         model = spec.load_model()
         model.to(device)
@@ -71,7 +79,7 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                     results.extend(predictions)
                 yield pd.DataFrame(results)
 
-    return pandas_udf(torch_inference_udf, returnType=spec.schema)
+    return pandas_udf(torch_inference_udf, returnType=schema)
 
 
 def load_model_from_uri(uri: str):

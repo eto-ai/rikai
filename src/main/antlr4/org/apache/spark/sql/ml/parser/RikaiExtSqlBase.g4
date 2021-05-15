@@ -82,7 +82,7 @@ STRING
     ;
 
 IDENTIFIER
-    : (LETTER | DIGIT | '_')+
+    : (LETTER | '_') (LETTER|DIGIT| '_')*
     ;
 
 BACKQUOTED_IDENTIFIER

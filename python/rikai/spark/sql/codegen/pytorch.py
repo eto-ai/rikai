@@ -49,10 +49,9 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     batch_size = int(spec.options.get("batch_size", DEFAULT_BATCH_SIZE))
 
     schema = spec.schema
+    should_return_df = isinstance(schema, StructType)
     return_type = (
-        Iterator[pd.DataFrame]
-        if isinstance(schema, StructType)
-        else Iterator[pd.Series]
+        Iterator[pd.DataFrame] if should_return_df else Iterator[pd.Series]
     )
 
     def torch_inference_udf(
@@ -77,7 +76,10 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                     if spec.post_processing:
                         predictions = spec.post_processing(predictions)
                     results.extend(predictions)
-                yield pd.DataFrame(results)
+                if should_return_df:
+                    yield pd.DataFrame(results)
+                else:
+                    yield pd.Series(results)
 
     return pandas_udf(torch_inference_udf, returnType=schema)
 

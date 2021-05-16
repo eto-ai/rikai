@@ -1,7 +1,3 @@
-from typing import Any, Callable, Dict
-
-from torch import rsub
-
 #  Copyright 2021 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +11,8 @@ from torch import rsub
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+from typing import Any, Callable, Dict
 
 
 def object_counts(options: Dict[str, Any]) -> Callable:

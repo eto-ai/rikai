@@ -74,7 +74,7 @@ model:
 schema: int
 transforms:
   pre: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing
-  post: rikai.testing.predicts.object_counts
+  post: rikai.testing.predicts.fasterrcnn_resnet_object_counts
     """.format(  # noqa: E501
         resnet_model_uri
     )

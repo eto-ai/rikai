@@ -15,7 +15,7 @@
 from typing import Any, Callable, Dict
 
 
-def object_counts(options: Dict[str, Any]) -> Callable:
+def fasterrcnn_resnet_object_counts(options: Dict[str, Any]) -> Callable:
     def count_objects_func(batch):
         results = []
         for predicts in batch:

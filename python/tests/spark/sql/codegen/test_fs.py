@@ -19,7 +19,8 @@ from typing import Any, Dict
 
 import pytest
 import yaml
-from pyspark.sql import SparkSession
+from pyspark.sql import Row, SparkSession
+from pyspark.sql.types import IntegerType, StructField, StructType
 from utils import check_ml_predict
 
 from rikai.spark.sql.codegen.fs import FileModelSpec
@@ -49,6 +50,31 @@ schema: STRUCT<boxes:ARRAY<ARRAY<float>>, scores:ARRAY<float>, labels:ARRAY<int>
 transforms:
   pre: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing
   post: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing
+    """.format(  # noqa: E501
+        resnet_model_uri
+    )
+
+    spec_file = tmp_path / "spec.yaml"
+    with spec_file.open("w") as fobj:
+        fobj.write(spec_yaml)
+    yield spec_file
+
+
+@pytest.fixture(scope="module")
+def count_objects_spec(tmp_path_factory, resnet_model_uri):
+    # Can not use default pytest fixture `tmp_dir` or `tmp_path` because
+    # they do not work with module scoped fixture.
+    tmp_path = tmp_path_factory.mktemp(str(uuid.uuid4()))
+    spec_yaml = """
+version: "1.0"
+name: resnet
+model:
+  uri: {}
+  flavor: pytorch
+schema: int
+transforms:
+  pre: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing
+  post: rikai.testing.predicts.fasterrcnn_resnet_object_counts
     """.format(  # noqa: E501
         resnet_model_uri
     )
@@ -148,6 +174,37 @@ def test_construct_spec_with_options(tmp_path):
 def test_yaml_model(spark: SparkSession, resnet_spec: str):
     spark.sql("CREATE MODEL resnet_m USING 'file://{}'".format(resnet_spec))
     check_ml_predict(spark, "resnet_m")
+
+
+@pytest.mark.timeout(60)
+def test_count_objects_model(spark: SparkSession, count_objects_spec: str):
+    spark.sql(
+        "CREATE MODEL count_objects USING 'file://{}'".format(
+            count_objects_spec
+        )
+    )
+    df = spark.createDataFrame(
+        [
+            # http://cocodataset.org/#explore?id=484912
+            Row(
+                uri="http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"  # noqa
+            ),
+            # https://cocodataset.org/#explore?id=433013
+            Row(
+                uri="http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg"  # noqa
+            ),
+        ],
+    )
+    df.createOrReplaceTempView("df")
+
+    predictions = spark.sql(
+        "SELECT ML_PREDICT(count_objects, uri) as objects FROM df"
+    )
+    assert predictions.schema == StructType(
+        [StructField("objects", IntegerType())]
+    )
+    assert predictions.count() == 2
+    assert predictions.where("objects > 0").count() == 2
 
 
 def test_relative_model_uri(tmp_path):

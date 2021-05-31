@@ -45,3 +45,20 @@ def test_box2d_as_list():
     draw.rectangle(box)
 
     assert isinstance(box, Sequence)
+
+
+def test_box2d_iou():
+    box1 = Box2d(0, 0, 20, 20)
+    box2 = Box2d(10, 10, 30, 30)
+    assert np.isclose(1 / 7, box1.iou(box2))
+    assert isinstance(box1.iou(box2), float)
+    box3 = Box2d(15, 15, 35, 35)
+    assert np.isclose(5 * 5 / (2 * 20 * 20 - 5 * 5), box1.iou(box3))
+
+
+def test_box2d_vectorize_iou():
+    box1 = Box2d(0, 0, 20, 20)
+    assert np.allclose(
+        [1 / 7, 5 * 5 / (2 * 20 * 20 - 5 * 5)],
+        box1.iou([Box2d(10, 10, 30, 30), Box2d(15, 15, 35, 35)]),
+    )

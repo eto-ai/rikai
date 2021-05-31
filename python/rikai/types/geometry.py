@@ -18,10 +18,9 @@
 from __future__ import annotations
 
 from numbers import Real
-from typing import List, Sequence, Tuple, Union
+from typing import Sequence, Tuple, Union
 
 import numpy as np
-from numpy.lib.arraysetops import isin
 
 from rikai.mixin import ToNumpy
 from rikai.spark.types.geometry import Box2dType, Box3dType, PointType

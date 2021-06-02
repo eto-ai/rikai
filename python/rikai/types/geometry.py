@@ -18,7 +18,7 @@
 from __future__ import annotations
 
 from numbers import Real
-from typing import List, Sequence, Tuple, Union
+from typing import Sequence, Tuple, Union
 
 import numpy as np
 
@@ -263,22 +263,42 @@ class Box2d(ToNumpy, Sequence):
         """Area of the bounding box"""
         return self.width * self.height
 
-    def iou(self, other: "Box2d") -> float:
+    @staticmethod
+    def _area(arr: np.ndarray) -> np.array:
+        """Calculate box area from an array of boxes."""
+        return np.maximum(0, arr[:, 2] - arr[:, 0]) * np.maximum(
+            0, arr[:, 3] - arr[:, 1]
+        )
+
+    def iou(
+        self, other: Union[Box2d, Sequence[Box2d], np.ndarray]
+    ) -> Union[float, np.ndarray]:
         """Compute intersection over union(IOU)."""
         assert isinstance(
-            other, Box2d
+            other, (Box2d, Sequence, np.ndarray)
         ), f"Can only compute iou between Box2d, got {type(other)}"
-        # Find intersection
-        xmin = max(self.xmin, other.xmin)
-        ymin = max(self.ymin, other.ymin)
-        xmax = min(self.xmax, other.xmax)
-        ymax = min(self.ymax, other.ymax)
-        inter_area = max(0, xmax - xmin) * max(0, ymax - ymin)
+        if isinstance(other, Box2d):
+            other_arr = np.array([other])
+        else:
+            other_arr = np.array(other)
 
-        try:
-            return inter_area / (self.area + other.area - inter_area)
-        except ZeroDivisionError:
-            return 0
+        self_arr = np.array(self)
+        # Find intersection
+        xmin = np.maximum(self_arr[0], other_arr[:, 0])
+        ymin = np.maximum(self_arr[1], other_arr[:, 1])
+        xmax = np.minimum(self_arr[2], other_arr[:, 2])
+        ymax = np.minimum(self_arr[3], other_arr[:, 3])
+        inter_arr = np.array([xmin, ymin, xmax, ymax]).T
+        inter_area = self._area(inter_arr)
+
+        iou_arr = inter_area / (
+            self._area(np.array([self_arr]))
+            + self._area(other_arr)
+            - inter_area
+        )
+        if isinstance(other, Box2d):
+            return iou_arr[0]
+        return iou_arr
 
 
 class Box3d(ToNumpy):

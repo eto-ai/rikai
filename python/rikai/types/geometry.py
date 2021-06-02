@@ -270,10 +270,12 @@ class Box2d(ToNumpy, Sequence):
             0, arr[:, 3] - arr[:, 1]
         )
 
-    def iou(self, other: "Box2d") -> float:
+    def iou(
+        self, other: Union[Box2d, Sequence[Box2d], np.ndarray]
+    ) -> Union[float, np.ndarray]:
         """Compute intersection over union(IOU)."""
         assert isinstance(
-            other, (Box2d, list)
+            other, (Box2d, Sequence, np.ndarray)
         ), f"Can only compute iou between Box2d, got {type(other)}"
         if isinstance(other, Box2d):
             other_arr = np.array([other])

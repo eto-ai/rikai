@@ -63,6 +63,7 @@ def test_box2d_vectorize_iou():
         box1.iou([Box2d(10, 10, 30, 30), Box2d(15, 15, 35, 35)]),
     )
 
+
 def test_box2d_empty_iou():
     box1 = Box2d(0, 0, 20, 20)
     assert box1.iou([]).size == 0

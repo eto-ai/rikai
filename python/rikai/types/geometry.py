@@ -281,6 +281,8 @@ class Box2d(ToNumpy, Sequence):
             other_arr = np.array([other])
         else:
             other_arr = np.array(other)
+        if other_arr.size == 0:
+            return np.zeros(0)
 
         self_arr = np.array(self)
         # Find intersection

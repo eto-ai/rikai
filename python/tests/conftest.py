@@ -23,6 +23,7 @@ from pyspark.sql import SparkSession
 from torch.utils.data import DataLoader  # Prevent DataLoader hangs
 
 # Rikai
+from rikai.spark.sql import init
 from rikai.spark.utils import init_spark_session
 
 

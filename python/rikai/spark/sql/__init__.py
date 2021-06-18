@@ -19,7 +19,7 @@ from rikai.spark.sql.callback_service import init_cb_service
 __all__ = ["init"]
 
 
-def init(spark: SparkSession):
+def init(spark: SparkSession, enable_dynamic_port: bool = True):
     """Initialize SQL-ML services.
 
     .. code-block:: python
@@ -34,4 +34,4 @@ def init(spark: SparkSession):
         init(spark)
 
     """
-    init_cb_service(spark)
+    init_cb_service(spark, enable_dynamic_port)

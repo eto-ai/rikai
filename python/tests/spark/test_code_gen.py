@@ -17,9 +17,16 @@ from rikai.spark.sql import init
 
 
 def test_model_codegen_registered(spark: SparkSession):
-    init(spark)
+    init(spark, True)
 
     spark.sql(
-        """CREATE MODEL foo OPTIONS (foo="str",bar=True,max_score=1.23)
+        """CREATE MODEL foo_dynamic OPTIONS (foo="str",bar=True,max_score=1.23)
+         USING 'test://model/a/b/c'"""
+    ).count()
+
+    init(spark, False)
+
+    spark.sql(
+        """CREATE MODEL foo_static OPTIONS (foo="str",bar=True,max_score=1.23)
          USING 'test://model/a/b/c'"""
     ).count()

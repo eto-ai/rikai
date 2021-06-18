@@ -20,24 +20,37 @@ from rikai.logging import logger
 __all__ = ["init_cb_service"]
 
 
-def init_cb_service(spark: SparkSession):
+def init_cb_service(spark: SparkSession, enable_dynamic_port: bool):
     jvm = spark.sparkContext._gateway
-    params = CallbackServerParameters(
-        daemonize=True,
-        daemonize_connections=True,
-        # https://www.py4j.org/advanced_topics.html#using-py4j-without-pre-determined-ports-dynamic-port-number
-        port=0,
-        # Re-use the auth-token from the main java/spark process
-        auth_token=jvm.gateway_parameters.auth_token,
-    )
+
+    # Set port to 0 to enable dynamic port
+    # Re-use the auth-token from the main java/spark process
+    if enable_dynamic_port:
+        params = CallbackServerParameters(
+            daemonize=True,
+            daemonize_connections=True,
+            # https://www.py4j.org/advanced_topics.html#using-py4j-without-pre-determined-ports-dynamic-port-number
+            port=0,
+            auth_token=jvm.gateway_parameters.auth_token,
+        )
+    else:
+        params = CallbackServerParameters(
+            daemonize=True,
+            daemonize_connections=True,
+            auth_token=jvm.gateway_parameters.auth_token,
+        )
 
     jvm.start_callback_server(callback_server_parameters=params)
 
-    python_port = jvm.get_callback_server().get_listening_port()
-    jvm.java_gateway_server.resetCallbackClient(
-        jvm.java_gateway_server.getCallbackClient().getAddress(),
-        python_port,
-    )
+    if enable_dynamic_port:
+        python_port = jvm.get_callback_server().get_listening_port()
+        jvm.java_gateway_server.resetCallbackClient(
+            jvm.java_gateway_server.getCallbackClient().getAddress(),
+            python_port,
+        )
+    else:
+        jvm.start_callback_server(callback_server_parameters=params)
+
     logger.info("Spark callback server started")
 
     cb = CallbackService(spark)

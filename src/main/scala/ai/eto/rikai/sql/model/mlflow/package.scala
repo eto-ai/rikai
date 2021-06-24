@@ -16,7 +16,7 @@
 
 package ai.eto.rikai.sql.model
 
-/** Mlflow-based [[Model]]s.
+/** MLflow-based [[Model]]s.
   *
   * It supports the following URIs.
   *

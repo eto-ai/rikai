@@ -25,7 +25,7 @@ import ai.eto.rikai.sql.model.{
 import ai.eto.rikai.sql.spark.Python
 import org.apache.logging.log4j.scala.Logging
 
-/** Mlflow-based Model [[Registry]].
+/** MLflow-based Model [[Registry]].
   */
 class MlflowRegistry(val conf: Map[String, String])
     extends Registry

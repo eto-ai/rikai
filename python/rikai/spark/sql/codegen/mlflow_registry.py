@@ -215,6 +215,8 @@ class MlflowRegistry(Registry):
         uri = raw_spec.getUri()
         logger.info(f"Resolving model {name} from {uri}")
         parsed = urlparse(uri)
+        if parsed.netloc:
+            raise ValueError("MLflow protocol with 2 forward slashes is not supported")
         if not parsed.scheme:
             raise ValueError("Scheme must be mlflow. How did you get here?")
         parts = parsed.path.strip("/").split("/", 1)

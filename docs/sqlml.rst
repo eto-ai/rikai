@@ -107,10 +107,10 @@ the content of "s3://bucket/to/spec.yaml" can be:
 
         YAML-based model spec is still under heavy development.
 
-Mlflow Integration
+MLflow Integration
 ------------------
 
-Rikai supports creating models from a Mlflow model registry as long as a few custom tags are set
+Rikai supports creating models from a MLflow model registry as long as a few custom tags are set
 when the model is logged. To make this easier, Rikai comes with a custom model logger to add
 attributes required by Rikai. This requires a simple change from your usual mlflow model logging
 workflow:
@@ -141,7 +141,7 @@ Once models are trained, you can add the model to the Rikai model catalog and qu
 
     .. code-block:: sql
 
-        CERATE MODEL model_foo USING 'mlflow://my_resnet_model';
+        CREATE MODEL model_foo USING 'mlflow:///my_resnet_model';
 
         SELECT id, ML_PREDICT(model_foo, image) FROM df;
 

@@ -40,7 +40,9 @@ def test_open_https_uri():
 def test_image_use_https_uri():
     img = Image(WIKIPEDIA)
 
-    fobj = BytesIO(requests.get(WIKIPEDIA).content)
+    fobj = BytesIO(
+        requests.get(WIKIPEDIA, headers={"User-Agent": "curl/7.72.0"}).content
+    )
     pic = PIL.Image.open(fobj)
     assert np.array_equal(img.to_numpy(), np.array(pic))
 

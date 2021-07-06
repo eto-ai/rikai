@@ -20,7 +20,7 @@ from pyspark.sql import Row, SparkSession
 from utils import check_ml_predict
 
 import rikai
-from rikai.spark.sql.codegen.mlflow_registry import MlflowModelSpec, MlflowRegistry
+from rikai.spark.sql.codegen.mlflow_registry import MlflowModelSpec
 from rikai.spark.sql.schema import parse_schema
 
 
@@ -155,18 +155,19 @@ def test_mlflow_model_without_custom_logger(
     )
     check_ml_predict(spark, "vanilla_fire")
 
+
 @pytest.mark.timeout(60)
 def test_mlflow_model_error_handling(
     spark: SparkSession, mlflow_client: MlflowClient
 ):
     with pytest.raises(
         py4j.protocol.Py4JJavaError,
-        match=r".*MLflow protocol with 2 forward slashes is not supported.*"
+        match=r".*URI with 2 forward slashes is not supported.*",
     ):
         spark.sql("CREATE MODEL two_slash USING 'mlflow://vanilla-mlflow/1'")
 
     with pytest.raises(
         py4j.protocol.Py4JJavaError,
-        match=r".*Model registry scheme 'wrong' is not supported.*"
+        match=r".*Model registry scheme 'wrong' is not supported.*",
     ):
-        spark.sql("CREATE MODEL wrong_protocol USING 'wrong://vanilla-mlflow/1'")
+        spark.sql("CREATE MODEL wrong_uri USING 'wrong://vanilla-mlflow/1'")

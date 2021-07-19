@@ -109,7 +109,7 @@ model version if you're using the mlflow model registry.
 ```sql
 CREATE MODEL yolo5
 OPTIONS (min_confidence=0.3, device="gpu", batch_size=32)
-USING "mlflow:///yolo5_model/";
+USING "mlflow://yolo5_model/";
 
 SELECT id, ML_PREDICT(yolo5, image) FROM my_dataset
 WHERE split = "train" LIMIT 100;

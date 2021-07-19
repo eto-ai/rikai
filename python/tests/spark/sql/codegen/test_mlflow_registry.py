@@ -119,10 +119,15 @@ def test_mlflow_model_from_model_version(
     spark.sql("CREATE MODEL resnet_m_fizz USING 'mlflow:/rikai-test/1'")
     check_ml_predict(spark, "resnet_m_fizz")
 
+    spark.sql("CREATE MODEL resnet_m_fizz_2 USING 'mlflow://rikai-test/1'")
+    check_ml_predict(spark, "resnet_m_fizz_2")
+
     # use the latest version in a given stage (omitted means none)
-    spark.sql("CREATE MODEL resnet_m_buzz USING 'mlflow:/rikai-test'")
+    spark.sql("CREATE MODEL resnet_m_buzz using 'mlflow:/rikai-test'")
     check_ml_predict(spark, "resnet_m_buzz")
 
+    spark.sql("CREATE MODEL resnet_m_buzz_2 using 'mlflow://rikai-test'")
+    check_ml_predict(spark, "resnet_m_buzz_2")
 
 @pytest.mark.timeout(60)
 def test_mlflow_model_without_custom_logger(
@@ -154,20 +159,3 @@ def test_mlflow_model_without_custom_logger(
         ).format(pre_processing, post_processing, schema)
     )
     check_ml_predict(spark, "vanilla_fire")
-
-
-@pytest.mark.timeout(60)
-def test_mlflow_model_error_handling(
-    spark: SparkSession, mlflow_client: MlflowClient
-):
-    with pytest.raises(
-        py4j.protocol.Py4JJavaError,
-        match=r".*URI with 2 forward slashes is not supported.*",
-    ):
-        spark.sql("CREATE MODEL two_slash USING 'mlflow://vanilla-mlflow/1'")
-
-    with pytest.raises(
-        py4j.protocol.Py4JJavaError,
-        match=r".*Model registry scheme 'wrong' is not supported.*",
-    ):
-        spark.sql("CREATE MODEL wrong_uri USING 'wrong://vanilla-mlflow/1'")

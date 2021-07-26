@@ -23,7 +23,7 @@ dev = [
     "requests-mock",
     "wheel",
 ]
-torch = ["torch>=1.4.0", "torchvision==0.8.1"]
+torch = ["torch>=1.4.0", "torchvision"]
 jupyter = ["matplotlib", "jupyterlab"]
 aws = ["boto3"]
 gcp = ["gcsfs"]

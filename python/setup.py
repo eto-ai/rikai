@@ -47,7 +47,7 @@ setup(
     include_package_data=True,
     python_requires=">=3.7",
     install_requires=[
-        "antlr4-python3-runtime",
+        "antlr4-python3-runtime==4.8",
         "ipython",
         "jsonschema",
         "numpy",

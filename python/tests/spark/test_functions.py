@@ -228,7 +228,7 @@ def test_video_to_images(
     )
 
 
-@pytest.mark.timeout(10)
+@pytest.mark.timeout(20)
 @pytest.mark.webtest
 def test_spectrogram_image(
     spark: SparkSession, tmp_path: Path, asset_path: Path

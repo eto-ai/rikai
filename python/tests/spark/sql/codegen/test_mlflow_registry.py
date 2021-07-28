@@ -123,12 +123,11 @@ def test_mlflow_model_from_model_version(
     check_ml_predict(spark, "resnet_m_fizz_2")
 
     # use the latest version in a given stage (omitted means none)
-    spark.sql("CREATE MODEL resnet_m_buzz USING 'mlflow:/rikai-test'")
+    spark.sql("CREATE MODEL resnet_m_buzz using 'mlflow:/rikai-test'")
     check_ml_predict(spark, "resnet_m_buzz")
 
-    spark.sql("CREATE MODEL resnet_m_buzz_2 USING 'mlflow://rikai-test'")
+    spark.sql("CREATE MODEL resnet_m_buzz_2 using 'mlflow://rikai-test'")
     check_ml_predict(spark, "resnet_m_buzz_2")
-
 
 @pytest.mark.timeout(60)
 def test_mlflow_model_without_custom_logger(

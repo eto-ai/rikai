@@ -30,3 +30,4 @@ python/rikai/jars/
 .python-version
 
 **/mlruns
+.antlr

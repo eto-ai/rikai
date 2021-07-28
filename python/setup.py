@@ -23,7 +23,7 @@ dev = [
     "requests-mock",
     "wheel",
 ]
-torch = ["torch>=1.4.0", "torchvision==0.8.1"]
+torch = ["torch>=1.4.0", "torchvision"]
 jupyter = ["matplotlib", "jupyterlab"]
 aws = ["boto3"]
 gcp = ["gcsfs"]
@@ -47,7 +47,7 @@ setup(
     include_package_data=True,
     python_requires=">=3.7",
     install_requires=[
-        "antlr4-python3-runtime",
+        "antlr4-python3-runtime==4.8",
         "ipython",
         "jsonschema",
         "numpy",

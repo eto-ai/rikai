@@ -19,7 +19,7 @@
 """
 
 from pathlib import Path
-from typing import Any, Callable, List, Optional, Tuple, Union
+from typing import Callable, Iterator, List, Optional, Union
 
 import PIL
 
@@ -106,7 +106,7 @@ class Dataset(rikai.torch.data.Dataset):
     def __repr__(self) -> str:
         return f"RikaiDataset({self.uri_or_df})"
 
-    def __iter__(self) -> Tuple[PIL.Image.Image, Any]:
+    def __iter__(self) -> Iterator:
         for row in super().__iter__():
             image = row[self.image_column]
             target = tuple([row[col] for col in self.target_columns])

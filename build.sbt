@@ -91,6 +91,7 @@ fork in Test := true
 
 antlr4PackageName in Antlr4 := Some("ai.eto.rikai.sql.spark.parser")
 antlr4GenVisitor in Antlr4 := true
+antlr4Version in Antlr4 := "4.8-1"
 
 enablePlugins(Antlr4Plugin)
 

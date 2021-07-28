@@ -13,6 +13,9 @@
 #  limitations under the License.
 
 
+ANTLR_VERSION=4.8
+ANTLR_JAR=antlr-$(ANTLR_VERSION)-complete.jar
+
 all: antlr
 
 antlr: python/rikai/spark/sql/generated/RikaiModelSchemaParser.py
@@ -20,7 +23,11 @@ antlr: python/rikai/spark/sql/generated/RikaiModelSchemaParser.py
 
 # On ubuntu apt installs only antlr4 so create symlink like (sudo ln -sf /usr/bin/antlr4 /usr/local/bin/antlr)
 python/rikai/spark/sql/generated/RikaiModelSchemaParser.py: src/main/antlr4/org/apache/spark/sql/ml/parser/RikaiModelSchema.g4
-	antlr -Dlanguage=Python3 \
+	if [ ! -f target/$(ANTLR_JAR) ]; then \
+		mkdir -p target; \
+		wget https://www.antlr.org/download/$(ANTLR_JAR) -O target/$(ANTLR_JAR); \
+	fi
+	java -jar target/$(ANTLR_JAR) -Dlanguage=Python3 \
 		-Xexact-output-dir \
 		-no-listener -visitor \
 		-o python/rikai/spark/sql/generated \

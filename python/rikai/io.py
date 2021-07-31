@@ -28,7 +28,7 @@ from pyarrow import fs
 # Rikai
 from rikai.logging import logger
 
-__all__ = ["copy", "open_uri"]
+__all__ = ["copy", "open_uri", "open_output_stream"]
 
 
 def _normalize_uri(uri: str) -> str:
@@ -71,9 +71,10 @@ def open_input_stream(uri: str) -> BinaryIO:
         return filesystem.open_input_file(path)
 
 
-def _open_output_stream(uri: str) -> BinaryIO:
+def open_output_stream(uri: str) -> BinaryIO:
     parsed = urlparse(uri)
     if parsed.scheme == "gs":
+        # TODO(lei): contribute gcs support in pyarrow?
         return _gcsfs().open(uri, mode="wb")
     else:
         filesystem, path = fs.FileSystem.from_uri(uri)
@@ -117,7 +118,7 @@ def copy(source: str, dest: str) -> str:
             _gcsfs().copy(source, dest)
             return dest
 
-    with _open_output_stream(dest) as out_stream, open_input_stream(
+    with open_output_stream(dest) as out_stream, open_input_stream(
         source
     ) as in_stream:
         shutil.copyfileobj(in_stream, out_stream)

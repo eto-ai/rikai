@@ -31,7 +31,7 @@ from PIL import Image as PILImage
 # Rikai
 from rikai.conf import CONF_RIKAI_IMAGE_DEFAULT_FORMAT, options
 from rikai.internal.uri_utils import normalize_uri
-from rikai.io import copy
+from rikai.io import copy, open_output_stream
 from rikai.mixin import Asset, Displayable, ToNumpy, ToPIL
 from rikai.spark.types import ImageType
 from rikai.types.geometry import Box2d
@@ -197,6 +197,27 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
         """Convert this image into an :py:class:`numpy.ndarray`."""
         with self.to_pil() as pil_img:
             return np.asarray(pil_img)
+
+    def save(self, uri: Union[str, Path]) -> Image:
+        """Save the image into a file, specified by the file path or URI.
+
+        Parameters
+        ----------
+        uri : str or Path
+            The external URI to store the image to.
+
+        Returns
+        -------
+        :py:class:`Image`
+            A new image with the new URI / path
+        """
+        uri = str(uri)
+        if self.is_embedded:
+            with open_output_stream(str(uri)) as fobj:
+                fobj.write(self.data)
+        else:
+            copy(self.uri, uri)
+        return Image(uri)
 
     def crop(
         self, box: Union[Box2d, List[Box2d]], format: Optional[str] = None

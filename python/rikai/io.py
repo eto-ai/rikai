@@ -149,7 +149,7 @@ def open_uri(
     http_auth : requests.auth.AuthBase or a tuple of (user, pass), optional
         Http credentials / auth provider when downloading via http(s)
         protocols.
-    http_headers : Dict
+    http_headers : Dict, optional
         Http headers.
 
     Return

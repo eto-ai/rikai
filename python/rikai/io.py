@@ -18,7 +18,7 @@ import shutil
 from io import BytesIO
 from os.path import basename, join
 from pathlib import Path
-from typing import BinaryIO, IO, Optional, Tuple, Union
+from typing import BinaryIO, Dict, IO, Optional, Tuple, Union
 from urllib.parse import ParseResult, urlparse
 
 # Third Party
@@ -129,6 +129,7 @@ def open_uri(
     uri: Union[str, Path],
     mode: str = "rb",
     http_auth: Optional[Union[requests.auth.AuthBase, Tuple[str, str]]] = None,
+    http_headers: Optional[Dict] = None,
 ) -> IO:
     """Open URI for read.
 
@@ -148,6 +149,8 @@ def open_uri(
     http_auth : requests.auth.AuthBase or a tuple of (user, pass), optional
         Http credentials / auth provider when downloading via http(s)
         protocols.
+    http_headers : Dict
+        Http headers.
 
     Return
     ------
@@ -161,7 +164,7 @@ def open_uri(
         # This is a local file
         return open(uri, mode=mode)
     elif parsed_uri.scheme in ("http", "https"):
-        resp = requests.get(uri, auth=http_auth)
+        resp = requests.get(uri, auth=http_auth, headers=http_headers)
         return BytesIO(resp.content)
     elif parsed_uri.scheme == "gs":
         return _gcsfs().open(uri, mode=mode)

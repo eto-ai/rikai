@@ -129,3 +129,14 @@ def test_show_remote_ref():
     # TODO check the actual content
     assert img._repr_html_() == img.display()._repr_html_()
     assert img.display()._repr_html_() == IPyImage(uri)._repr_html_()
+
+
+def test_save_image_as_external(tmp_path):
+    data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
+    img = Image.from_array(data)
+    ext_path = str(tmp_path / "ext.png")
+    ext_img = img.save(ext_path)
+    assert not ext_img.is_embedded
+    assert ext_img.uri == ext_path
+    with img.to_pil() as img1, ext_img.to_pil() as img2:
+        assert img1 == img2

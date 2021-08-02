@@ -30,10 +30,13 @@ WIKIPEDIA = (
 )
 
 
+_WIKIPEDIA_HTTP_HEADER = {"User-Agent": "curl/7.72.0"}
+
+
 def test_open_https_uri():
     """Test support of https URI"""
 
-    with open_uri(WIKIPEDIA) as fobj:
+    with open_uri(WIKIPEDIA, http_headers=_WIKIPEDIA_HTTP_HEADER) as fobj:
         assert len(fobj.read()) > 0
 
 
@@ -41,7 +44,7 @@ def test_image_use_https_uri():
     img = Image(WIKIPEDIA)
 
     fobj = BytesIO(
-        requests.get(WIKIPEDIA, headers={"User-Agent": "curl/7.72.0"}).content
+        requests.get(WIKIPEDIA, headers=_WIKIPEDIA_HTTP_HEADER).content
     )
     pic = PIL.Image.open(fobj)
     assert np.array_equal(img.to_numpy(), np.array(pic))

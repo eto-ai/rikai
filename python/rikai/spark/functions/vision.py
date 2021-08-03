@@ -430,9 +430,7 @@ def spectrogram_image(
 
 @udf(returnType=ArrayType(ImageType(), True))
 def crop(img: Image, box: Union[Box2d, List[Box2d]]):
-    """Crop image specified by the bounding boxes, and returns the cropped
-    images.
-
+    """Crop image specified by the bounding boxes, and returns the cropped images.
 
     Parameters
     ----------

@@ -47,6 +47,7 @@ from rikai.types.video import (
 from rikai.types.vision import Image
 
 __all__ = [
+    "crop",
     "to_image",
     "image_copy",
     "numpy_to_image",

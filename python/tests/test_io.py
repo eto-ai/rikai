@@ -31,13 +31,10 @@ WIKIPEDIA = (
 )
 
 
-_WIKIPEDIA_HTTP_HEADER = {"User-Agent": get_option(CONF_RIKAI_IO_HTTP_AGENT)}
-
-
 def test_open_https_uri():
     """Test support of https URI"""
 
-    with open_uri(WIKIPEDIA, http_headers=_WIKIPEDIA_HTTP_HEADER) as fobj:
+    with open_uri(WIKIPEDIA) as fobj:
         assert len(fobj.read()) > 0
 
 
@@ -47,7 +44,6 @@ def test_image_use_https_uri():
     fobj = BytesIO(
         requests.get(
             WIKIPEDIA,
-            headers=_WIKIPEDIA_HTTP_HEADER,
         ).content
     )
     pic = PIL.Image.open(fobj)

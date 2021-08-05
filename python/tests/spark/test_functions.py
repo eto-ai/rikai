@@ -25,6 +25,7 @@ import pytest
 from PIL import Image as PILImage
 from pyspark.sql import Row, SparkSession
 from pyspark.sql.functions import col, concat, lit
+from pyspark.sql.types import ArrayType, StructField, StructType
 
 # Rikai
 from rikai.numpy import wrap
@@ -39,6 +40,9 @@ from rikai.spark.functions import (
     video_metadata,
     video_to_images,
 )
+from rikai.spark.functions.vision import crop
+from rikai.spark.types.geometry import Box2dType
+from rikai.spark.types.vision import ImageType
 from rikai.types import Box2d, Image, Segment, VideoStream, YouTubeVideo
 
 
@@ -167,6 +171,35 @@ def test_numpy_to_image(spark: SparkSession, tmp_path: Path):
     # print(df.first().image)
     assert Path(df.first().image.uri) == tmp_path / "1.png"
     assert (tmp_path / "1.png").exists()
+
+
+def test_crops(spark: SparkSession, tmp_path: Path):
+    uri = "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"
+    img = Image(uri)
+    data = img.to_numpy()
+    df = spark.createDataFrame(
+        [
+            {
+                "img": img,
+                "boxes": [
+                    Box2d(10, 10, 30, 30),
+                    Box2d(15, 15, 35, 35),
+                    Box2d(20, 20, 40, 40),
+                ],
+            }
+        ],
+        schema=StructType(
+            [
+                StructField("img", ImageType()),
+                StructField("boxes", ArrayType(Box2dType())),
+            ]
+        ),
+    ).withColumn("patches", crop("img", "boxes"))
+    patches = df.first().patches
+    assert len(patches) == 3
+    assert np.array_equal(patches[0].to_numpy(), data[10:30, 10:30, :])
+    assert np.array_equal(patches[1].to_numpy(), data[15:35, 15:35, :])
+    assert np.array_equal(patches[2].to_numpy(), data[20:40, 20:40, :])
 
 
 @pytest.mark.timeout(10)

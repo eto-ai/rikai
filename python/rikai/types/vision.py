@@ -160,7 +160,11 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
             return Image(fobj.read(), **kwargs)
 
     def __repr__(self) -> str:
-        return f"Image(uri={self.uri})"
+        return (
+            f"Image(uri={self.uri})"
+            if not self.is_embedded
+            else "Image(<embedded>)"
+        )
 
     def _repr_html_(self):
         """Default visualizer for remote ref (or local ref under cwd)"""

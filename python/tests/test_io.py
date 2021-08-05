@@ -22,6 +22,7 @@ import requests_mock
 
 from rikai.io import open_uri
 from rikai.types.vision import Image
+from rikai.conf import get_option, CONF_RIKAI_IO_HTTP_AGENT
 
 WIKIPEDIA = (
     "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/"
@@ -30,7 +31,7 @@ WIKIPEDIA = (
 )
 
 
-_WIKIPEDIA_HTTP_HEADER = {"User-Agent": "curl/7.72.0"}
+_WIKIPEDIA_HTTP_HEADER = {"User-Agent": get_option(CONF_RIKAI_IO_HTTP_AGENT)}
 
 
 def test_open_https_uri():
@@ -44,7 +45,10 @@ def test_image_use_https_uri():
     img = Image(WIKIPEDIA)
 
     fobj = BytesIO(
-        requests.get(WIKIPEDIA, headers=_WIKIPEDIA_HTTP_HEADER).content
+        requests.get(
+            WIKIPEDIA,
+            headers=_WIKIPEDIA_HTTP_HEADER,
+        ).content
     )
     pic = PIL.Image.open(fobj)
     assert np.array_equal(img.to_numpy(), np.array(pic))

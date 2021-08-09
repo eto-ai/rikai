@@ -38,6 +38,8 @@ except ModuleNotFoundError:
         set_option,
     )
 
+from rikai.__version__ import version as _rikai_version
+
 options = pd.options
 
 CONF_RIKAI_CACHEURI = "rikai.cache_uri"
@@ -52,3 +54,7 @@ register_option(CONF_PARQUET_BLOCK_SIZE, DEFAULT_ROW_GROUP_SIZE_BYTES)
 CONF_RIKAI_IMAGE_DEFAULT_FORMAT = "rikai.image.default.format"
 DEFAULT_IMAGE_DEFAULT_FORMAT = "PNG"
 register_option(CONF_RIKAI_IMAGE_DEFAULT_FORMAT, DEFAULT_IMAGE_DEFAULT_FORMAT)
+
+CONF_RIKAI_IO_HTTP_AGENT = "rikai.io.http_agent"
+DEFAULT_RIKAI_IO_HTTP_AGENT = f"rikai/{_rikai_version}"
+register_option(CONF_RIKAI_IO_HTTP_AGENT, DEFAULT_RIKAI_IO_HTTP_AGENT)

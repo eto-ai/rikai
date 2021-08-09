@@ -18,7 +18,7 @@
 # Standard library
 import os
 from pathlib import Path
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 # Third Party
 import numpy as np
@@ -37,6 +37,7 @@ from rikai.io import copy as _copy
 from rikai.logging import logger
 from rikai.numpy import ndarray
 from rikai.spark.types.vision import ImageType
+from rikai.types.geometry import Box2d
 from rikai.types.video import (
     Segment,
     SingleFrameSampler,
@@ -46,6 +47,7 @@ from rikai.types.video import (
 from rikai.types.vision import Image
 
 __all__ = [
+    "crop",
     "to_image",
     "image_copy",
     "numpy_to_image",
@@ -425,3 +427,29 @@ def spectrogram_image(
         format=image_format,
         **image_kwargs,
     )
+
+
+@udf(returnType=ArrayType(ImageType(), True))
+def crop(img: Image, box: Union[Box2d, List[Box2d]]):
+    """Crop image specified by the bounding boxes, and returns the cropped
+    images.
+
+    Parameters
+    ----------
+    img : Image
+        An image object to be cropped.
+    box : Box2d or List of Box2d
+        One bound-2d box or a list of such boxes.
+
+    Returns
+    -------
+    [Image]
+        Return a list of cropped images.
+
+    Examples
+    --------
+
+    >>> spark.sql("SELECT crop(img, boxes) as patches FROM detections")
+
+    """
+    return img.crop(box)

@@ -27,6 +27,7 @@ from pyarrow import fs
 
 # Rikai
 from rikai.logging import logger
+import rikai.conf
 
 __all__ = ["copy", "open_uri", "open_output_stream"]
 
@@ -164,6 +165,12 @@ def open_uri(
         # This is a local file
         return open(uri, mode=mode)
     elif parsed_uri.scheme in ("http", "https"):
+        if http_headers is None:
+            http_headers = {}
+        if "User-Agent" not in http_headers:
+            http_headers["User-Agent"] = rikai.conf.get_option(
+                rikai.conf.CONF_RIKAI_IO_HTTP_AGENT
+            )
         resp = requests.get(uri, auth=http_auth, headers=http_headers)
         return BytesIO(resp.content)
     elif parsed_uri.scheme == "gs":

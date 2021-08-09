@@ -160,6 +160,8 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
             return Image(fobj.read(), **kwargs)
 
     def __repr__(self) -> str:
+        if self.is_embedded:
+            return "Image(<embedded>)"
         return f"Image(uri={self.uri})"
 
     def _repr_html_(self):

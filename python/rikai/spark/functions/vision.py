@@ -437,9 +437,14 @@ def crop(img: Image, box: Union[Box2d, List[Box2d]]):
     Parameters
     ----------
     img : Image
-        An image object.
+        An image object to be cropped.
     box : Box2d or List of Box2d
-        One bound-2d box or a list of such boxes
+        One bound-2d box or a list of such boxes.
+
+    Returns
+    -------
+    [Image]
+        Return a list of cropped images.
 
     Examples
     --------

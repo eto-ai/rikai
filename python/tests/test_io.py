@@ -25,9 +25,8 @@ from rikai.types.vision import Image
 from rikai.conf import get_option, CONF_RIKAI_IO_HTTP_AGENT
 
 WIKIPEDIA = (
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/"
-    "Commodore_Grace_M._Hopper%2C_USN_%28covered%29.jpg/819px-Commodore_"
-    "Grace_M._Hopper%2C_USN_%28covered%29.jpg"
+    "https://upload.wikimedia.org/wikipedia/commons/a/ad/"
+    "Commodore_Grace_M._Hopper%2C_USN_%28covered%29.jpg"
 )
 
 

@@ -29,6 +29,8 @@ WIKIPEDIA = (
     "Commodore_Grace_M._Hopper%2C_USN_%28covered%29.jpg"
 )
 
+USER_AGENT = "User-Agent: Rikai/0.0.10 (rikai-dev@eto.ai)"
+
 
 def test_open_https_uri():
     """Test support of https URI"""
@@ -41,9 +43,7 @@ def test_image_use_https_uri():
     img = Image(WIKIPEDIA)
 
     fobj = BytesIO(
-        requests.get(
-            WIKIPEDIA,
-        ).content
+        requests.get(WIKIPEDIA, headers={"User-agent": USER_AGENT}).content
     )
     pic = PIL.Image.open(fobj)
     assert np.array_equal(img.to_numpy(), np.array(pic))

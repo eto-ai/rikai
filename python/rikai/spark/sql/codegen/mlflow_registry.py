@@ -217,7 +217,8 @@ class MlflowRegistry(Registry):
         parsed = urlparse(uri)
         if parsed.netloc:
             raise ValueError(
-                "URI with 2 forward slashes is not supported, try URI with 1 slash instead"
+                "URI with 2 forward slashes is not supported, "
+                "try URI with 1 slash instead"
             )
         if not parsed.scheme:
             raise ValueError("Scheme must be mlflow. How did you get here?")

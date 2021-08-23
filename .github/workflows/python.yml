@@ -31,6 +31,7 @@ jobs:
     - name: Pip install
       working-directory: python
       run: |
+        sudo apt update
         sudo apt-get -y -qq install libsnappy-dev ffmpeg
         python -m pip install -e .[all,dev]
     - name: Python black and flake8

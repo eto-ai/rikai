@@ -27,6 +27,7 @@ python/rikai/jars/
 .idea/
 .vscode/
 .DS_Store
+.python-version
 
 **/mlruns
 .antlr

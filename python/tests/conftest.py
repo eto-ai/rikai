@@ -16,7 +16,6 @@ import logging
 import os
 import random
 import string
-from tempfile import tempdir
 import time
 import uuid
 from pathlib import Path

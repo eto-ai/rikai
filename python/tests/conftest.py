@@ -13,10 +13,10 @@
 #  limitations under the License.
 
 import logging
-from multiprocessing.sharedctypes import Value
 import os
 import random
 import string
+import time
 import uuid
 from pathlib import Path
 from urllib.parse import urlparse
@@ -30,14 +30,26 @@ from torch.utils.data import DataLoader  # Prevent DataLoader hangs
 
 # Rikai
 from rikai.spark.sql import init
-from rikai.spark.utils import init_spark_session
+from rikai.spark.utils import get_default_jar_version, init_spark_session
 
 
 @pytest.fixture(scope="session")
 def spark() -> SparkSession:
+    rikai_version = get_default_jar_version(use_snapshot=True)
+    hadoop_version = "3.2.0"  # TODO(lei): get hadoop version
+
     return init_spark_session(
         dict(
             [
+                (
+                    "spark.jars.packages",
+                    ",".join(
+                        [
+                            f"org.apache.hadoop:hadoop-aws:{hadoop_version}",
+                            "ai.eto:rikai_2.12:{}".format(rikai_version),
+                        ]
+                    ),
+                ),
                 ("spark.port.maxRetries", 128),
                 (
                     "rikai.sql.ml.registry.test.impl",
@@ -51,6 +63,18 @@ def spark() -> SparkSession:
                     "spark.hadoop.google.cloud.auth.service.account.enable",
                     "true",
                 ),
+                ("com.amazonaws.services.s3.enableV4", "true"),
+                (
+                    "fs.s3a.aws.credentials.provider",
+                    "com.amazonaws.auth.InstanceProfileCredentialsProvider,"
+                    "com.amazonaws.auth.DefaultAWSCredentialsProviderChain",
+                ),
+                (
+                    "fs.AbstractFileSystem.s3a.impl",
+                    "org.apache.hadoop.fs.s3a.S3A",
+                ),
+                ("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem"),
+                ("spark.hadoop.fs.s3a.access.key", os.environ.get("AWS")),
             ]
         )
     )
@@ -59,6 +83,34 @@ def spark() -> SparkSession:
 @pytest.fixture
 def asset_path() -> Path:
     return Path(__file__).parent / "assets"
+
+
+@pytest.fixture
+def s3_tmpdir() -> str:
+    """Create a temporary S3 directory to test dataset.
+
+    To enable s3 test, it requires both the AWS credentials, as well as `RIKAI_TEST_S3_BUCKET` being set.
+    """
+    bucket = os.environ.get("RIKAI_TEST_S3_BUCKET", None)
+    if bucket is None:
+        pytest.skip("skip test. RIKAI_TEST_S3_BUCKET is not set")
+    random.seed(time.time())
+
+    try:
+        import boto3
+        import botocore
+
+        sts = boto3.client("sts")
+        try:
+            sts.get_caller_identity()
+        except botocore.exceptions.ClientError:
+            pytest.skip("AWS client can not be authenticated.")
+    except ImportError:
+        pytest.skip("Skip test, rikai[aws] (boto3) is not installed")
+
+    if not bucket.startswith("s3://"):
+        bucket = f"s3://{bucket}"
+    return f"{bucket}/{''.join(random.choices(string.ascii_letters + string.digits, k=6))}"
 
 
 @pytest.fixture(scope="session")

@@ -16,6 +16,7 @@ import logging
 import os
 import random
 import string
+from tempfile import tempdir
 import time
 import uuid
 from pathlib import Path
@@ -89,7 +90,8 @@ def asset_path() -> Path:
 def s3_tmpdir() -> str:
     """Create a temporary S3 directory to test dataset.
 
-    To enable s3 test, it requires both the AWS credentials, as well as `RIKAI_TEST_S3_BUCKET` being set.
+    To enable s3 test, it requires both the AWS credentials,
+    as well as `RIKAI_TEST_S3_BUCKET` being set.
     """
     bucket = os.environ.get("RIKAI_TEST_S3_BUCKET", None)
     if bucket is None:
@@ -110,7 +112,12 @@ def s3_tmpdir() -> str:
 
     if not bucket.startswith("s3://"):
         bucket = f"s3://{bucket}"
-    return f"{bucket}/{''.join(random.choices(string.ascii_letters + string.digits, k=6))}"
+    temp_dir = (
+        bucket
+        + "/"
+        + "".join(random.choices(string.ascii_letters + string.digits, k=6))
+    )
+    return temp_dir
 
 
 @pytest.fixture(scope="session")

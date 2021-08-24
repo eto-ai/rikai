@@ -278,17 +278,6 @@ def test_spectrogram_image(
         .first()["spectrogram"]
     )
     assert type(s1) == Image
-
-    yt = YouTubeVideo(vid="rUWxSEwctFU")
-    s2 = (
-        spark.createDataFrame([(yt,)], ["video"])
-        .withColumn(
-            "spectrogram",
-            spectrogram_image(col("video"), lit(str(tmp_path / "s2.jpg"))),
-        )
-        .first()["spectrogram"]
-    )
-    assert type(s2) == Image
     # TODO include an actual expected answer
 
 

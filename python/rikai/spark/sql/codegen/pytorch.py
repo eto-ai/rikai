@@ -71,7 +71,8 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                     batch_size=batch_size,
                     num_workers=num_workers,
                 ):
-                    batch = batch.to(device)
+                    if isinstance(batch, torch.Tensor):
+                        batch = batch.to(device)
                     predictions = model(batch)
                     if spec.post_processing:
                         predictions = spec.post_processing(predictions)

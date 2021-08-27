@@ -47,6 +47,7 @@ def post_processing(options: Dict[str, Any]) -> Callable:
                 predict_result["boxes"].append(box)
                 predict_result["labels"].append(cls)
                 predict_result["scores"].append(conf)
+            results.append(predict_result)
         return results
 
     return post_process_func

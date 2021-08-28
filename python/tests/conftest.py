@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import logging
 import os
 import random
 import string
@@ -81,12 +82,27 @@ def gcs_tmpdir() -> str:
 
     To enable GCS test, it requires both the AWS credentials,
     as well as `RIKAI_TEST_GCS_BUCKET` being set.
+
+    Examples
+    --------
+
+    .. code-block:: bash
+
+        $ export GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json
+        $ export RIKAI_TEST_GCS_BUCKET=gs://bucket
+        $ pytest python/tests
+
+    References
+    ----------
+    https://cloud.google.com/dataproc/docs/concepts/connectors/cloud-storage
+    https://cloud.google.com/dataproc/docs/concepts/iam/iam
     """
 
     bucket = os.environ.get("RIKAI_TEST_GCS_BUCKET", None)
     if bucket is None:
         pytest.skip("skip test. RIKAI_TEST_GCS_BUCKET is not set")
 
+    fs = None
     try:
         import gcsfs
 
@@ -110,4 +126,13 @@ def gcs_tmpdir() -> str:
         + "/"
         + "".join(random.choices(string.ascii_letters + string.digits, k=6))
     )
-    return temp_dir
+    yield temp_dir
+
+    assert fs is not None, "gcsfs must be initialized by now."
+    parsed = urlparse(temp_dir)
+    gcsfs_path = parsed._replace(scheme='').geturl()  # Erase scheme
+    try:
+        # Best effort to reclaim the data
+        fs.rm(gcsfs_path, recursive=True)
+    except Exception:
+        logging.error("Could not delete directory: %s", gcsfs_path)

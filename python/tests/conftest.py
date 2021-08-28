@@ -16,7 +16,6 @@ import logging
 import os
 import random
 import string
-import time
 import uuid
 from pathlib import Path
 from urllib.parse import urlparse
@@ -32,7 +31,7 @@ from torch.utils.data import DataLoader  # Prevent DataLoader hangs
 from rikai.spark.sql import init
 from rikai.spark.utils import init_spark_session
 
-random.seed(time.time())
+random.seed()
 
 
 @pytest.fixture(scope="session")
@@ -80,7 +79,7 @@ def resnet_model_uri(tmp_path_factory):
 def gcs_tmpdir() -> str:
     """Create a temporary Google Cloud Storage (GCS) directory to test dataset.
 
-    To enable GCS test, it requires both the AWS credentials,
+    To enable GCS test, it requires both the GCS credentials,
     as well as `RIKAI_TEST_GCS_BUCKET` being set.
 
     Examples
@@ -100,7 +99,7 @@ def gcs_tmpdir() -> str:
 
     bucket = os.environ.get("RIKAI_TEST_GCS_BUCKET", None)
     if bucket is None:
-        pytest.skip("skip test. RIKAI_TEST_GCS_BUCKET is not set")
+        pytest.skip("Skipping test. RIKAI_TEST_GCS_BUCKET is not set")
 
     fs = None
     try:
@@ -114,7 +113,7 @@ def gcs_tmpdir() -> str:
         except gcsfs.retry.HttpError as he:
             if he.code == 401:
                 pytest.skip(
-                    "skip test. Google Cloud Credentials are not set up."
+                    "Skipping test. Google Cloud Credentials are not set up."
                 )
             else:
                 raise

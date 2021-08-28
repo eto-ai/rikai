@@ -25,9 +25,8 @@ from urllib.parse import ParseResult, urlparse
 import requests
 from pyarrow import fs
 
-import rikai.conf
-
 # Rikai
+import rikai.conf
 from rikai.logging import logger
 
 __all__ = ["copy", "open_uri", "open_output_stream"]

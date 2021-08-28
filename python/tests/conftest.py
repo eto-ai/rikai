@@ -131,7 +131,7 @@ def gcs_tmpdir() -> str:
     parsed = urlparse(temp_dir)
     gcsfs_path = parsed._replace(scheme="").geturl()  # Erase scheme
     try:
-        # Best effort to reclaim the data
+        # Best effort to clean temp data
         fs.rm(gcsfs_path, recursive=True)
     except Exception:
         logging.error("Could not delete directory: %s", gcsfs_path)

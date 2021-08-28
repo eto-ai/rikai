@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import logging
+from multiprocessing.sharedctypes import Value
 import os
 import random
 import string
@@ -30,8 +31,6 @@ from torch.utils.data import DataLoader  # Prevent DataLoader hangs
 # Rikai
 from rikai.spark.sql import init
 from rikai.spark.utils import init_spark_session
-
-random.seed()
 
 
 @pytest.fixture(scope="session")
@@ -80,7 +79,7 @@ def gcs_tmpdir() -> str:
     """Create a temporary Google Cloud Storage (GCS) directory to test dataset.
 
     To enable GCS test, it requires both the GCS credentials,
-    as well as `RIKAI_TEST_GCS_BUCKET` being set.
+    as well as `RIKAI_TEST_GCS_URL` being set.
 
     Examples
     --------
@@ -88,7 +87,7 @@ def gcs_tmpdir() -> str:
     .. code-block:: bash
 
         $ export GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json
-        $ export RIKAI_TEST_GCS_BUCKET=gs://bucket
+        $ export RIKAI_TEST_GCS_URL=gs://bucket
         $ pytest python/tests
 
     References
@@ -97,15 +96,16 @@ def gcs_tmpdir() -> str:
     https://cloud.google.com/dataproc/docs/concepts/iam/iam
     """
 
-    bucket = os.environ.get("RIKAI_TEST_GCS_BUCKET", None)
-    if bucket is None:
-        pytest.skip("Skipping test. RIKAI_TEST_GCS_BUCKET is not set")
+    base_url = os.environ.get("RIKAI_TEST_GCS_URL", None)
+    if base_url is None:
+        pytest.skip("Skipping test. RIKAI_TEST_GCS_URL is not set")
+    parsed = urlparse(base_url)
+    if parsed.scheme != "gs":
+        raise ValueError("RIKAI_TEST_GCS_URL must be a valid gs:// URL")
 
     fs = None
     try:
         import gcsfs
-
-        parsed = urlparse(bucket)
 
         fs = gcsfs.GCSFileSystem()
         try:
@@ -121,7 +121,7 @@ def gcs_tmpdir() -> str:
         pytest.skip("rikai[gcp] is not installed.")
 
     temp_dir = (
-        bucket
+        base_url
         + "/"
         + "".join(random.choices(string.ascii_letters + string.digits, k=6))
     )

@@ -16,7 +16,6 @@ import logging
 import os
 import random
 import string
-import time
 import uuid
 from pathlib import Path
 from urllib.parse import urlparse
@@ -90,12 +89,14 @@ def s3_tmpdir() -> str:
     """Create a temporary S3 directory to test dataset.
 
     To enable s3 test, it requires both the AWS credentials,
-    as well as `RIKAI_TEST_S3_BUCKET` being set.
+    as well as `RIKAI_TEST_S3_URL` being set.
     """
-    bucket = os.environ.get("RIKAI_TEST_S3_BUCKET", None)
-    if bucket is None:
-        pytest.skip("skip test. RIKAI_TEST_S3_BUCKET is not set")
-    random.seed(time.time())
+    baseurl = os.environ.get("RIKAI_TEST_S3_URL", None)
+    if baseurl is None:
+        pytest.skip("Skipping test. RIKAI_TEST_S3_URL is not set")
+    parsed = urlparse(baseurl)
+    if parsed.scheme != "s3":
+        raise ValueError("RIKAI_TEST_S3_URL must be a valid s3:// URL.")
 
     try:
         import boto3
@@ -109,14 +110,21 @@ def s3_tmpdir() -> str:
     except ImportError:
         pytest.skip("Skip test, rikai[aws] (boto3) is not installed")
 
-    if not bucket.startswith("s3://"):
-        bucket = f"s3://{bucket}"
     temp_dir = (
-        bucket
+        baseurl
         + "/"
         + "".join(random.choices(string.ascii_letters + string.digits, k=6))
     )
-    return temp_dir
+    yield temp_dir
+
+    from pyarrow.fs import S3FileSystem
+
+    s3fs = S3FileSystem()
+    s3fs_path = urlparse(temp_dir)._replace(scheme="").geturl()
+    try:
+        s3fs.rm(s3fs_path, recursive=True)
+    except Exception:
+        logging.warn("Could not delete directory: %s", s3fs_path)
 
 
 @pytest.fixture(scope="session")

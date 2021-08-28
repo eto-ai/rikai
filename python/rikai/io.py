@@ -28,7 +28,6 @@ from pyarrow import fs
 # Rikai
 import rikai.conf
 from rikai.logging import logger
-import rikai.conf
 
 __all__ = ["copy", "open_uri", "open_output_stream"]
 

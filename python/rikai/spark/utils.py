@@ -54,7 +54,17 @@ def init_spark_session(conf=None, app_name="rikai", rikai_version=None):
     builder = (
         SparkSession.builder.appName(app_name)
         .config(
-            "spark.jars.packages", "ai.eto:rikai_2.12:{}".format(rikai_version)
+            "spark.jars.packages",
+            ",".join(
+                [
+                    "ai.eto:rikai_2.12:{}".format(rikai_version),
+                ]
+            ),
+        )
+        .config(  # Sadly we have to use a shaded gcs connector due to guava conflicts with Spark 3.1
+            "spark.jars",
+            "https://repo1.maven.org/maven2/com/google/cloud/bigdataoss/"
+            "gcs-connector/hadoop3-2.2.2/gcs-connector-hadoop3-2.2.2-shaded.jar",
         )
         .config(
             "spark.sql.extensions",

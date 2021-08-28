@@ -14,11 +14,11 @@
 
 import os
 import random
+import string
 import time
 import uuid
-import string
 from pathlib import Path
-from urllib import urlparse
+from urllib.parse import urlparse
 
 # Third Party
 import pytest
@@ -31,6 +31,8 @@ from torch.utils.data import DataLoader  # Prevent DataLoader hangs
 from rikai.spark.sql import init
 from rikai.spark.utils import init_spark_session
 
+random.seed(time.time())
+
 
 @pytest.fixture(scope="session")
 def spark() -> SparkSession:
@@ -41,6 +43,14 @@ def spark() -> SparkSession:
                 (
                     "rikai.sql.ml.registry.test.impl",
                     "ai.eto.rikai.sql.model.testing.TestRegistry",
+                ),
+                (
+                    "spark.hadoop.fs.gs.impl",
+                    "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem",
+                ),
+                (
+                    "spark.hadoop.google.cloud.auth.service.account.enable",
+                    "true",
                 ),
             ]
         )
@@ -76,7 +86,7 @@ def gcs_tmpdir() -> str:
     bucket = os.environ.get("RIKAI_TEST_GCS_BUCKET", None)
     if bucket is None:
         pytest.skip("skip test. RIKAI_TEST_GCS_BUCKET is not set")
-    random.seed(time.time())
+
     try:
         import gcsfs
 
@@ -84,9 +94,9 @@ def gcs_tmpdir() -> str:
 
         fs = gcsfs.GCSFileSystem()
         try:
-            fs.ls(parsed.host)
-        except gcsfs.retry.HttpError as e:
-            if e.code == 401:
+            fs.ls(parsed.netloc)
+        except gcsfs.retry.HttpError as he:
+            if he.code == 401:
                 pytest.skip(
                     "skip test. Google Cloud Credentials are not set up."
                 )

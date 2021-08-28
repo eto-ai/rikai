@@ -12,8 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import logging
+from multiprocessing.sharedctypes import Value
+import os
+import random
+import string
 import uuid
 from pathlib import Path
+from urllib.parse import urlparse
 
 # Third Party
 import pytest
@@ -37,6 +43,14 @@ def spark() -> SparkSession:
                     "rikai.sql.ml.registry.test.impl",
                     "ai.eto.rikai.sql.model.testing.TestRegistry",
                 ),
+                (
+                    "spark.hadoop.fs.gs.impl",
+                    "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem",
+                ),
+                (
+                    "spark.hadoop.google.cloud.auth.service.account.enable",
+                    "true",
+                ),
             ]
         )
     )
@@ -58,3 +72,66 @@ def resnet_model_uri(tmp_path_factory):
     model_uri = tmp_path / "resnet.pth"
     torch.save(resnet, model_uri)
     return model_uri
+
+
+@pytest.fixture
+def gcs_tmpdir() -> str:
+    """Create a temporary Google Cloud Storage (GCS) directory to test dataset.
+
+    To enable GCS test, it requires both the GCS credentials,
+    as well as `RIKAI_TEST_GCS_URL` being set.
+
+    Examples
+    --------
+
+    .. code-block:: bash
+
+        $ export GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json
+        $ export RIKAI_TEST_GCS_URL=gs://bucket
+        $ pytest python/tests
+
+    References
+    ----------
+    https://cloud.google.com/dataproc/docs/concepts/connectors/cloud-storage
+    https://cloud.google.com/dataproc/docs/concepts/iam/iam
+    """
+
+    base_url = os.environ.get("RIKAI_TEST_GCS_URL", None)
+    if base_url is None:
+        pytest.skip("Skipping test. RIKAI_TEST_GCS_URL is not set")
+    parsed = urlparse(base_url)
+    if parsed.scheme != "gs":
+        raise ValueError("RIKAI_TEST_GCS_URL must be a valid gs:// URL")
+
+    fs = None
+    try:
+        import gcsfs
+
+        fs = gcsfs.GCSFileSystem()
+        try:
+            fs.ls(parsed.netloc)
+        except gcsfs.retry.HttpError as he:
+            if he.code == 401:
+                pytest.skip(
+                    "Skipping test. Google Cloud Credentials are not set up."
+                )
+            else:
+                raise
+    except ImportError:
+        pytest.skip("rikai[gcp] is not installed.")
+
+    temp_dir = (
+        base_url
+        + "/"
+        + "".join(random.choices(string.ascii_letters + string.digits, k=6))
+    )
+    yield temp_dir
+
+    assert fs is not None, "gcsfs must be initialized by now."
+    parsed = urlparse(temp_dir)
+    gcsfs_path = parsed._replace(scheme="").geturl()  # Erase scheme
+    try:
+        # Best effort to clean temp data
+        fs.rm(gcsfs_path, recursive=True)
+    except Exception:
+        logging.error("Could not delete directory: %s", gcsfs_path)

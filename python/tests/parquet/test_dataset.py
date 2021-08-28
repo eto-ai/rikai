@@ -22,19 +22,30 @@ from rikai.parquet import Dataset
 from rikai.testing.asserters import assert_count_equal
 
 
-def test_select_columns(spark: SparkSession, tmp_path: Path):
-    """Test reading rikai dataset with selected columns."""
+def _select_columns(spark: SparkSession, tmpdir: str):
     df = spark.createDataFrame(
         [
             Row(id=1, col1="value", col2=123),
             Row(id=2, col1="more", col2=456),
         ]
     )
-    df.write.format("rikai").save(str(tmp_path))
+    if tmpdir.startswith("s3://"):
+        df.write.format("rikai").save("s3a" + tmpdir[2:])
+    else:
+        df.write.format("rikai").save(tmpdir)
 
-    dataset = Dataset(str(tmp_path), columns=["id", "col1"])
+    dataset = Dataset(tmpdir, columns=["id", "col1"])
     actual = sorted(list(dataset), key=lambda x: x["id"])
 
     assert_count_equal(
         [{"id": 1, "col1": "value"}, {"id": 2, "col1": "more"}], actual
     )
+
+
+def test_select_columns(spark: SparkSession, tmp_path: Path):
+    """Test reading rikai dataset with selected columns."""
+    _select_columns(spark, str(tmp_path))
+
+
+def test_select_columns_on_gcs(spark: SparkSession, gcs_tmpdir: str):
+    _select_columns(spark, gcs_tmpdir)

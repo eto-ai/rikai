@@ -20,9 +20,9 @@ import PIL
 import requests
 import requests_mock
 
+from rikai.conf import CONF_RIKAI_IO_HTTP_AGENT, get_option
 from rikai.io import open_uri
 from rikai.types.vision import Image
-from rikai.conf import get_option, CONF_RIKAI_IO_HTTP_AGENT
 
 WIKIPEDIA = (
     "https://upload.wikimedia.org/wikipedia/commons/a/ad/"

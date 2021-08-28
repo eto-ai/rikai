@@ -12,8 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import mlflow
-import pytest
 import py4j
+import pytest
 import torch
 from mlflow.tracking import MlflowClient
 from pyspark.sql import Row, SparkSession

@@ -26,8 +26,8 @@ import requests
 from pyarrow import fs
 
 # Rikai
-from rikai.logging import logger
 import rikai.conf
+from rikai.logging import logger
 
 __all__ = ["copy", "open_uri", "open_output_stream"]
 

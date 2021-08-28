@@ -25,7 +25,7 @@ dev = [
 ]
 torch = ["torch>=1.4.0", "torchvision"]
 jupyter = ["matplotlib", "jupyterlab"]
-aws = ["boto3"]
+aws = ["boto3", "botocore"]
 gcp = ["gcsfs"]
 docs = ["sphinx"]
 video = ["ffmpeg-python", "scenedetect"]

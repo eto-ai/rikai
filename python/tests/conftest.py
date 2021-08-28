@@ -12,8 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import os
+import random
+import time
 import uuid
+import string
 from pathlib import Path
+from urllib import urlparse
 
 # Third Party
 import pytest
@@ -58,3 +63,41 @@ def resnet_model_uri(tmp_path_factory):
     model_uri = tmp_path / "resnet.pth"
     torch.save(resnet, model_uri)
     return model_uri
+
+
+@pytest.fixture
+def gcs_tmpdir() -> str:
+    """Create a temporary Google Cloud Storage (GCS) directory to test dataset.
+
+    To enable GCS test, it requires both the AWS credentials,
+    as well as `RIKAI_TEST_GCS_BUCKET` being set.
+    """
+
+    bucket = os.environ.get("RIKAI_TEST_GCS_BUCKET", None)
+    if bucket is None:
+        pytest.skip("skip test. RIKAI_TEST_GCS_BUCKET is not set")
+    random.seed(time.time())
+    try:
+        import gcsfs
+
+        parsed = urlparse(bucket)
+
+        fs = gcsfs.GCSFileSystem()
+        try:
+            fs.ls(parsed.host)
+        except gcsfs.retry.HttpError as e:
+            if e.code == 401:
+                pytest.skip(
+                    "skip test. Google Cloud Credentials are not set up."
+                )
+            else:
+                raise
+    except ImportError:
+        pytest.skip("rikai[gcp] is not installed.")
+
+    temp_dir = (
+        bucket
+        + "/"
+        + "".join(random.choices(string.ascii_letters + string.digits, k=6))
+    )
+    return temp_dir

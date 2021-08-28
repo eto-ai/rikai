@@ -130,7 +130,7 @@ def gcs_tmpdir() -> str:
 
     assert fs is not None, "gcsfs must be initialized by now."
     parsed = urlparse(temp_dir)
-    gcsfs_path = parsed._replace(scheme='').geturl()  # Erase scheme
+    gcsfs_path = parsed._replace(scheme="").geturl()  # Erase scheme
     try:
         # Best effort to reclaim the data
         fs.rm(gcsfs_path, recursive=True)

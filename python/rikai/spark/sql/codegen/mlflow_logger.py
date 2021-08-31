@@ -123,7 +123,9 @@ class MlflowLogger:
         for k, v in list(tags.items()):
             if v is None:
                 del tags[k]
-                warnings.warn(f"value of {k} is None and will not be tagged on MLflow")
+                warnings.warn(
+                    f"value of {k} is None and will not be tagged on MLflow"
+                )
         mlflow.set_tags(tags)
 
 

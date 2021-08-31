@@ -29,7 +29,7 @@ class ModelTest extends AnyFunSuite {
   }
 
   test("model serialize") {
-    assert(Model.serializeOptions(Map("foo"-> "bar")) == """{"foo":"bar"}""")
+    assert(Model.serializeOptions(Map("foo" -> "bar")) == """{"foo":"bar"}""")
     assert(Model.serializeOptions(Map.empty[String, String]) == "{}")
   }
 }

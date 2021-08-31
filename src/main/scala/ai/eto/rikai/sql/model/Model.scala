@@ -18,6 +18,7 @@ package ai.eto.rikai.sql.model
 
 import ai.eto.rikai.sql.spark.SparkRunnable
 import io.circe.syntax._
+import io.circe.generic.encoding.DerivedAsObjectEncoder._
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.UnresolvedFunction
 import org.apache.spark.sql.catalyst.expressions.Expression
@@ -58,7 +59,7 @@ object Model {
   }
 
   def serializeOptions(options: Map[String, String]): String = {
-    options.asJson.asString.getOrElse("")
+    options.asJson.noSpaces
   }
 }
 

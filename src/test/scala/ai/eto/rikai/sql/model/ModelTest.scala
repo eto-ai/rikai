@@ -27,4 +27,9 @@ class ModelTest extends AnyFunSuite {
     assert(!"123_abc".matches(Model.namePattern.regex))
     assert(!"ab@c".matches(Model.namePattern.regex))
   }
+
+  test("model serialize") {
+    assert(Model.serializeOptions(Map("foo" -> "bar")) == """{"foo":"bar"}""")
+    assert(Model.serializeOptions(Map.empty[String, String]) == "")
+  }
 }

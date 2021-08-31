@@ -15,6 +15,7 @@
 Rikai SQL ML
 """
 from typing import Any, Optional
+import warnings
 
 CONF_MLFLOW_TRACKING_URI = "rikai.sql.ml.registry.mlflow.tracking_uri"
 CONF_MLFLOW_OUTPUT_SCHEMA = "rikai.output.schema"
@@ -119,6 +120,10 @@ class MlflowLogger:
             CONF_MLFLOW_POST_PROCESSING: post_processing,
             CONF_MLFLOW_ARTIFACT_PATH: artifact_path,
         }
+        for k, v in list(tags.items()):
+            if v is None:
+                del tags[k]
+                warnings.warn(f"value of {k} is None and will not be tagged on MLflow")
         mlflow.set_tags(tags)
 
 

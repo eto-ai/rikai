@@ -59,7 +59,8 @@ object Model {
   }
 
   def serializeOptions(options: Map[String, String]): String = {
-    options.asJson.noSpaces
+    if (options.isEmpty) ""
+    else options.asJson.noSpaces
   }
 }
 

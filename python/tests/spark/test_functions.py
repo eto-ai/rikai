@@ -204,6 +204,7 @@ def test_crops(spark: SparkSession, tmp_path: Path):
 
 @pytest.mark.timeout(10)
 @pytest.mark.webtest
+@pytest.mark.skip
 def test_video_to_images(
     spark: SparkSession, tmp_path: Path, asset_path: Path
 ):

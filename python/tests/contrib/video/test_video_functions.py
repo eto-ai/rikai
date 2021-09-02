@@ -24,7 +24,7 @@ from rikai.contrib.video.functions import scene_detect
 from rikai.types import Box2d, Image, Segment, VideoStream
 
 
-@pytest.mark.timeout(20)
+@pytest.mark.timeout(40)
 @pytest.mark.webtest
 def test_scene_detect(spark: SparkSession, asset_path: Path):
     video = VideoStream(str(asset_path / "big_buck_bunny_short.mp4"))

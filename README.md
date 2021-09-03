@@ -22,7 +22,7 @@ building Rikai with two main goals:
 2. Enable advanced analytics capabilities to support much faster active learning, model debugging,
    and monitoring in production pipelines.
 
-Current (v0.0.5) main features:
+Current (v0.0.11) main features:
 1. Native support in Jupyter, Spark and PyTorch for images, videos and annotations: reduce ad-hoc 
    type conversions and boilerplate when moving between ETL and training.
 2. Custom functionality for working with images and videos at scale: high-level APIs for 

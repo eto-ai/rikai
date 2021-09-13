@@ -69,5 +69,6 @@ private[spark] class NDArrayType extends UserDefinedType[NDArray] {
   }
 
   override def userClass: Class[NDArray] = classOf[NDArray]
-
 }
+
+case object NDArrayType extends NDArrayType;

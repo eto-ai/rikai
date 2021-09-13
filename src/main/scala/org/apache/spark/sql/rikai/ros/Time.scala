@@ -44,6 +44,8 @@ private[sql] class TimeType extends UserDefinedType[Time] {
     )
   )
 
+  override def pyUDT: String = "rikai.spark.types.ros.TimeType"
+
   override def serialize(t: Time): Any = {
     val row = new GenericInternalRow(2)
     row.setInt(0, t.seconds)

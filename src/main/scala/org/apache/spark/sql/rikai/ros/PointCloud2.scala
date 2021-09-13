@@ -16,7 +16,9 @@
 
 package org.apache.spark.sql.rikai.ros
 
-import org.apache.spark.sql.rikai.NDArrayType
+import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
+import org.apache.spark.sql.rikai.{NDArray, NDArrayType}
 import org.apache.spark.sql.types.{
   DataType,
   StructField,
@@ -25,7 +27,7 @@ import org.apache.spark.sql.types.{
 }
 
 /** ROS Message - [[http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/PointCloud2.html PointCloud2]] */
-class PointCloud2(val header: Header) {}
+class PointCloud2(val header: Header, val data: NDArray) {}
 
 private[spark] class PointCloud2Type extends UserDefinedType[PointCloud2] {
   override def sqlType: DataType = StructType(
@@ -35,11 +37,28 @@ private[spark] class PointCloud2Type extends UserDefinedType[PointCloud2] {
     )
   )
 
-  override def serialize(obj: PointCloud2): Any = ???
+  override def pyUDT: String = "rikai.spark.types.ros.PointCloud2Type"
 
-  override def deserialize(datum: Any): PointCloud2 = ???
+  override def serialize(cloud: PointCloud2): Any = {
+    val row = new GenericInternalRow(2)
+    row.update(0, cloud.header)
+    row.update(1, cloud.data)
+    row
+  }
 
-  override def userClass: Class[PointCloud2] = ???
+  override def deserialize(datum: Any): PointCloud2 = {
+    datum match {
+      case row: InternalRow => {
+        val headerField = row.getStruct(0, 3)
+        val header = HeaderType.deserialize(headerField)
+        val dataField = row.getStruct(1, 3)
+        val data = NDArrayType.deserialize(dataField)
+        new PointCloud2(header, data)
+      }
+    }
+  }
+
+  override def userClass: Class[PointCloud2] = classOf[PointCloud2]
 }
 
 case object PointCloud2Type extends PointCloud2Type

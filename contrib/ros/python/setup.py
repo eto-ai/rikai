@@ -1,6 +1,14 @@
-import pathlib
-
 from setuptools import find_namespace_packages, setup
+
+dev = [
+    "black",
+    "flake8",
+    "isort",
+    "pylint",
+    "pytest-timeout",
+    "pytest",
+    "wheel",
+]
 
 setup(
     name="rikai-ros",
@@ -16,7 +24,11 @@ setup(
         "pyspark>=3.1,<3.2",
         "rosbag",
         "rospy",
+        "rikai",
     ],
+    extras_require={
+        "dev": dev
+    },
     dependency_links=[
         "https://rospypi.github.io/simple/",
     ],

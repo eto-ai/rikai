@@ -47,6 +47,31 @@ jobs:
           pytest -v --durations=10 --ignore=tests/parquet/internal
         env:
           SPARK_LOCAL_IP: "127.0.0.1"
+  contrib-ros:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@v10
+        with:
+          java-version: adopt@1.11
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: sbt install
+        run: |
+          sbt "project ros" publishLocal
+      - name: Pip install
+        working-directory: contrib/ros/python
+        run: |
+          python -m pip install .[dev]
+      - name: Run python tests
+        working-directory: contrib/ros/python
+        run: pytest -v --durations=10
   mac-build:
     runs-on: macos-latest
     timeout-minutes: 10

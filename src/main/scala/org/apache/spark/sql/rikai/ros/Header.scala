@@ -36,7 +36,7 @@ private[spark] class HeaderType extends UserDefinedType[Header] {
     Seq(
       StructField("seq", IntegerType, false),
       StructField("stamp", TimeType, false),
-      StructField("frameId", StringType, false)
+      StructField("frame_id", StringType, false)
     )
   )
 

@@ -1,13 +1,13 @@
 import pathlib
 
-from setuptools import find_namespace_packages, setup
+from setuptools import find_packages, setup
 
 about = {}
 with open(pathlib.Path("rikai") / "__version__.py", "r") as fh:
     exec(fh.read(), about)
 
 with open(
-    pathlib.Path(__file__).absolute().parent / "README.md", "r"
+    pathlib.Path(__file__).absolute().parent.parent / "README.md", "r"
 ) as fh:
     long_description = fh.read()
 
@@ -31,7 +31,6 @@ docs = ["sphinx"]
 video = ["ffmpeg-python", "scenedetect"]
 youtube = ["pafy", "youtube_dl"]
 mlflow = ["mlflow>=1.15"]
-ros = ["rosbag", "rospy"]
 all = torch + jupyter + gcp + docs + video + youtube + mlflow + aws
 
 
@@ -44,7 +43,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/eto-ai/rikai",
-    packages=find_namespace_packages(include="rikai.*"),
+    packages=find_packages(),
     include_package_data=True,
     python_requires=">=3.7",
     install_requires=[
@@ -72,11 +71,7 @@ setup(
         "video": video,
         "youtube": youtube,
         "aws": aws,
-        "ros": ros,
     },
-    dependency_links=[
-        "https://rospypi.github.io/simple/",
-    ],
     classifiers=[
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",

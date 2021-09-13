@@ -124,7 +124,8 @@ class MlflowLogger:
             if not tags[k]:
                 del tags[k]
                 warnings.warn(
-                    f"value of {k} is None or emtpy and will not be tagged on MLflow"
+                    f"value of {k} is None or empty and "
+                    "will not be populated to MLflow"
                 )
         mlflow.set_tags(tags)
 

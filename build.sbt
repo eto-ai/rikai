@@ -1,7 +1,9 @@
 import java.io.File
 import scala.reflect.io.Directory
 
-scalaVersion := "2.12.11"
+ThisBuild / scalaVersion := "2.12.11"
+ThisBuild / exportJars := true
+
 name := "rikai"
 
 def versionFmt(out: sbtdynver.GitDescribeOutput): String = {
@@ -115,3 +117,12 @@ publishLocal := {
   }
   publishLocal.value
 }
+
+lazy val root = (project).aggregate(rikai, ros)
+
+lazy val rikai = Project("rikai", file("."))
+
+lazy val ros = Project("rikai-ros", file("contrib/ros"))
+  .settings(
+    exportJars := true
+  ).dependsOn(rikai)

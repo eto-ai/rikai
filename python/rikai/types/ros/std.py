@@ -53,6 +53,12 @@ class Time:
 
 
 class Header:
+    """ROS Message Header
+
+    http://docs.ros.org/en/noetic/api/std_msgs/html/msg/Header.html
+
+    """
+
     __UDT__ = HeaderType()
 
     def __init__(self, seq: int, stamp: Time, frame_id: str):

@@ -31,6 +31,7 @@ docs = ["sphinx"]
 video = ["ffmpeg-python", "scenedetect"]
 youtube = ["pafy", "youtube_dl"]
 mlflow = ["mlflow>=1.15"]
+ros = ["rosbag", "rospy"]
 all = torch + jupyter + gcp + docs + video + youtube + mlflow + aws
 
 
@@ -71,7 +72,11 @@ setup(
         "video": video,
         "youtube": youtube,
         "aws": aws,
+        "ros": ros,
     },
+    dependency_links=[
+        "https://rospypi.github.io/simple/",
+    ],
     classifiers=[
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",

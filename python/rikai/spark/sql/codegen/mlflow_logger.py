@@ -120,11 +120,11 @@ class MlflowLogger:
             CONF_MLFLOW_POST_PROCESSING: post_processing,
             CONF_MLFLOW_ARTIFACT_PATH: artifact_path,
         }
-        for k, v in list(tags.items()):
-            if v is None:
+        for k in (CONF_MLFLOW_PRE_PROCESSING, CONF_MLFLOW_POST_PROCESSING):
+            if not tags[k]:
                 del tags[k]
                 warnings.warn(
-                    f"value of {k} is None and will not be tagged on MLflow"
+                    f"value of {k} is None or emtpy and will not be tagged on MLflow"
                 )
         mlflow.set_tags(tags)
 

@@ -12,10 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import mlflow
 from pathlib import Path
-import rikai
+
+import mlflow
 import torch
+
+import rikai
 
 
 def test_none_value_tags(tmp_path: Path, resnet_model_uri):

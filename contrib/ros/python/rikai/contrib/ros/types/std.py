@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import rospy
 
-from rikai.spark.types.ros.std import HeaderType, TimeType
+from rikai.contrib.ros.spark.types.ros.std import HeaderType, TimeType
 
 __all__ = ["Time", "Header"]
 

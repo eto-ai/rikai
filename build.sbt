@@ -118,11 +118,7 @@ publishLocal := {
   publishLocal.value
 }
 
-lazy val root = (project).aggregate(rikai, ros)
-
-lazy val rikai = Project("rikai", file("."))
-
-lazy val ros = Project("rikai-ros", file("contrib/ros"))
-  .settings(
-    exportJars := true
-  ).dependsOn(rikai)
+// TODO: make "sbt package" to build all projects.
+lazy val root = (project in file("."))
+lazy val ros = (project in file("contrib/ros"))
+  .dependsOn(root)

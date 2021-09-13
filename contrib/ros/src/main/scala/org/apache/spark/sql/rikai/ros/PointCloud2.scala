@@ -37,7 +37,7 @@ private[spark] class PointCloud2Type extends UserDefinedType[PointCloud2] {
     )
   )
 
-  override def pyUDT: String = "rikai.spark.types.ros.PointCloud2Type"
+  override def pyUDT: String = "rikai.contrib.ros.spark.types.PointCloud2Type"
 
   override def serialize(cloud: PointCloud2): Any = {
     val row = new GenericInternalRow(2)

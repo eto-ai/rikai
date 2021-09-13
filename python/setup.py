@@ -1,13 +1,13 @@
 import pathlib
 
-from setuptools import find_packages, setup
+from setuptools import find_namespace_packages, setup
 
 about = {}
 with open(pathlib.Path("rikai") / "__version__.py", "r") as fh:
     exec(fh.read(), about)
 
 with open(
-    pathlib.Path(__file__).absolute().parent.parent / "README.md", "r"
+    pathlib.Path(__file__).absolute().parent / "README.md", "r"
 ) as fh:
     long_description = fh.read()
 
@@ -44,7 +44,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/eto-ai/rikai",
-    packages=find_packages(),
+    packages=find_namespace_packages(include="rikai.*"),
     include_package_data=True,
     python_requires=">=3.7",
     install_requires=[

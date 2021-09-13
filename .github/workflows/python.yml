@@ -33,7 +33,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt-get -y -qq install libsnappy-dev ffmpeg
-          python -m pip install -e .[all,dev,ros]
+          python -m pip install --extra-index-url https://rospypi.github.io/simple/ -e .[all,dev,ros]
       - name: Python black and flake8
         if: ${{ matrix.python-version == 3.8 }}
         run: make lint

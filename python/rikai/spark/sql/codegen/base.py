@@ -63,8 +63,8 @@ MODEL_SPEC_SCHEMA = {
         "transforms": {
             "type": "object",
             "properties": {
-                "pre": {"type": ["string", "null"]},
-                "post": {"type": ["string", "null"]},
+                "pre": {"type": ["string"]},
+                "post": {"type": ["string"]},
             },
         },
     },

@@ -104,8 +104,8 @@ def test_validate_yaml_spec(tmp_path):
 
     assert spec.name == "test_yaml_model"
     assert spec.model_uri == "s3://bucket/to/model.pt"
-    assert spec.pre_processing is None
-    assert spec.post_processing is None
+    assert spec.pre_processing is not None
+    assert spec.post_processing is not None
 
 
 def test_validate_misformed_spec(tmp_path):

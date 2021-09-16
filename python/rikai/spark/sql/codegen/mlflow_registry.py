@@ -123,6 +123,13 @@ class MlflowModelSpec(ModelSpec):
                 "post": conf.get(CONF_MLFLOW_POST_PROCESSING, None),
             },
         }
+        
+        # remove none value of pre/post processing
+        if not spec["transforms"]["pre"]:
+            del spec["transforms"]["pre"]
+        if not spec["transforms"]["post"]:
+            del spec["transforms"]["post"]
+
         # options
         for key, value in conf.items():
             key = key.lower().strip()

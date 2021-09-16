@@ -63,8 +63,8 @@ MODEL_SPEC_SCHEMA = {
         "transforms": {
             "type": "object",
             "properties": {
-                "pre": {"type": ["string"]},
-                "post": {"type": ["string"]},
+                "pre": {"type": "string"},
+                "post": {"type": "string"},
             },
         },
     },
@@ -146,7 +146,7 @@ class ModelSpec(ABC):
             or self._spec["transforms"]["pre"] is None
         ):
             # Passthrough
-            return None
+            return lambda x: x
         f = find_class(self._spec["transforms"]["pre"])
         return f(self.options)
 
@@ -159,7 +159,7 @@ class ModelSpec(ABC):
             or self._spec["transforms"]["post"] is None
         ):
             # Passthrough
-            return None
+            return lambda x: x
         f = find_class(self._spec["transforms"]["post"])
         return f(self.options)
 

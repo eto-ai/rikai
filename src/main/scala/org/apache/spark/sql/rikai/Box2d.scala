@@ -16,11 +16,10 @@
 
 package org.apache.spark.sql.rikai
 
-import org.apache.spark.sql.types._
-import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
 import org.apache.spark.sql.catalyst.InternalRow
-
-import Utils.approxEqual
+import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
+import org.apache.spark.sql.rikai.Utils.approxEqual
+import org.apache.spark.sql.types._
 
 /** 2-D Bounding Box
   *
@@ -48,6 +47,39 @@ class Box2d(
           approxEqual(ymax, other.ymax)
       case _ => false,
     }
+  }
+
+  /** Return the intersection/overlap of two bounding boxes if exist. */
+  def ^(that: Box2d): Option[Box2d] = {
+    if (this.xmin > that.xmin) {
+      return that ^ this
+    }
+
+    if (this.xmax <= that.xmin || this.ymax <= that.ymin) {
+      return None
+    }
+
+    Some(
+      new Box2d(
+        xmin = this.xmin max that.xmin,
+        xmax = this.ymax min that.ymax,
+        ymin = this.ymin max that.ymin,
+        ymax = this.ymax min that.ymax
+      )
+    )
+  }
+
+  /** Calculate the size of the bounding box. */
+  def area(): Double = (ymax - ymin) * (xmax - xmin)
+
+  /** Calculate IOU between two Box2d bounding boxes.
+    *
+    * https://www.pyimagesearch.com/2016/11/07/intersection-over-union-iou-for-object-detection/
+    */
+  def iou(that: Box2d): Double = {
+    val interArea: Double = (this ^ that).map(b => b.area()).getOrElse(0);
+
+    interArea / (this.area() + that.area() - interArea)
   }
 
   override def toString: String =

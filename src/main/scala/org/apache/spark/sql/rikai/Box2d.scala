@@ -45,7 +45,7 @@ class Box2d(
           approxEqual(ymin, other.ymin) &&
           approxEqual(xmax, other.xmax) &&
           approxEqual(ymax, other.ymax)
-      case _ => false,
+      case _ => false
     }
   }
 

@@ -49,10 +49,25 @@ class Box2d(
     }
   }
 
-  /** Return the intersection/overlap of two bounding boxes if exist. */
-  def ^(that: Box2d): Option[Box2d] = {
+  /** Return the intersection/overlap of two bounding boxes if exist.
+    *
+    * {{{
+    *  val overlap = box1 & box2
+    *  val overlap_area = overlap.map(b => b.area()).getOrElse(0);
+    * }}}
+    */
+  def &(that: Box2d): Option[Box2d] = intersect(that)
+
+  /** Return the intersection of two bounding boxes if exist.
+    *
+    * {{{
+    *  val overlap = box1 intersect box2
+    *  val overlap_area = overlap.map(b => b.area()).getOrElse(0);
+    * }}}
+    */
+  def intersect(that: Box2d): Option[Box2d] = {
     if (this.xmin > that.xmin) {
-      return that ^ this
+      return that intersect this
     }
 
     if (this.xmax <= that.xmin || this.ymax <= that.ymin) {
@@ -69,6 +84,9 @@ class Box2d(
     )
   }
 
+  /** Return True of the two bounding box overlaps. */
+  def overlaps(that: Box2d): Boolean = (this & that).isDefined
+
   /** Calculate the size of the bounding box. */
   def area(): Double = (ymax - ymin) * (xmax - xmin)
 
@@ -77,7 +95,7 @@ class Box2d(
     * https://www.pyimagesearch.com/2016/11/07/intersection-over-union-iou-for-object-detection/
     */
   def iou(that: Box2d): Double = {
-    val interArea: Double = (this ^ that).map(b => b.area()).getOrElse(0);
+    val interArea: Double = (this & that).map(b => b.area()).getOrElse(0);
 
     interArea / (this.area() + that.area() - interArea)
   }

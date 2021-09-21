@@ -22,7 +22,8 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class Box2dTest extends AnyFunSuite with SparkTestSession {
 
-  implicit val doubleEq: Equality[Double] = TolerantNumerics.tolerantDoubleEquality(1e-4f)
+  implicit val doubleEq: Equality[Double] =
+    TolerantNumerics.tolerantDoubleEquality(1e-4f)
 
   test("overlaps and intersect") {
     val box1 = new Box2d(0, 0, 20, 20)
@@ -42,7 +43,7 @@ class Box2dTest extends AnyFunSuite with SparkTestSession {
 
   test("not overlap") {
     val box1 = new Box2d(0, 0, 10, 10)
-    val box2 = new Box2d(10, 10, 20,20)
+    val box2 = new Box2d(10, 10, 20, 20)
     assert(!(box1 overlaps box2))
     assert(!(box2 overlaps box1))
     assert((box1 & box2).isEmpty)

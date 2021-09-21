@@ -70,7 +70,15 @@ class Box2d(
       return that intersect this
     }
 
-    if (this.xmax <= that.xmin || this.ymax <= that.ymin) {
+    if (this.xmax <= that.xmin) {
+      return None
+    }
+
+    if (this.ymin > that.ymin) {
+      return that intersect this
+    }
+
+    if (this.ymax <= that.ymin) {
       return None
     }
 
@@ -102,7 +110,6 @@ class Box2d(
 
   override def toString: String =
     f"Box2d(xmin=$xmin, ymin=$ymin, xmax=$xmax, ymax=$ymax)"
-
 }
 
 /** User defined type of 2D Bouding Box

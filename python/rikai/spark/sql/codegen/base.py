@@ -143,6 +143,7 @@ class ModelSpec(ABC):
         if (
             "transforms" not in self._spec
             or "pre" not in self._spec["transforms"]
+            or self._spec["transforms"]["pre"] is None
         ):
             # Passthrough
             return lambda x: x
@@ -155,6 +156,7 @@ class ModelSpec(ABC):
         if (
             "transforms" not in self._spec
             or "post" not in self._spec["transforms"]
+            or self._spec["transforms"]["post"] is None
         ):
             # Passthrough
             return lambda x: x

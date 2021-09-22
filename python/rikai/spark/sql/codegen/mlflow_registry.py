@@ -254,8 +254,8 @@ class MlflowRegistry(Registry):
             (CONF_MLFLOW_OUTPUT_SCHEMA, spec.getSchema()),
         ]
         tags = {k: v for k, v in from_spec if v}
-        tags.update(run.data.tags)
-        return tags
+        # PEP 448 syntax, right-to-left priority order
+        return {**run.data.tags, **tags}
 
     def get_options(self, spec, run):
         options = run.data.params

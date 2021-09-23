@@ -26,8 +26,10 @@ from rikai.spark.sql.schema import parse_schema
 
 __all__ = ["Registry", "ModelSpec"]
 
+
 def _identity(x):
     return x
+
 
 class Registry(ABC):
     """Base class of a Model Registry"""

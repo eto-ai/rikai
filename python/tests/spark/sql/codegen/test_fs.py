@@ -16,6 +16,9 @@ import secrets
 import uuid
 from pathlib import Path
 from typing import Any, Dict
+import pandas as pd
+import torch
+from torch.utils.data import DataLoader
 
 import pytest
 import yaml
@@ -25,6 +28,7 @@ from utils import check_ml_predict
 
 from rikai.spark.sql.codegen.fs import FileModelSpec
 from rikai.spark.sql.exceptions import SpecError
+from rikai.torch.pandas import PandasDataset
 
 
 def spec_file(content: Dict[str, Any], tmp_path: Path) -> Path:
@@ -85,6 +89,19 @@ transforms:
     yield spec_file
 
 
+def assert_dataloader_transform(transform):
+    data = [1, 1, 1]
+    df = pd.DataFrame(data)
+    dataset = PandasDataset(df, transform)
+
+    for batch in DataLoader(
+        dataset,
+        batch_size=1,
+        num_workers=1,
+    ):
+        assert batch[0] == torch.tensor([1])
+
+
 def test_validate_yaml_spec(tmp_path):
     spec = FileModelSpec(
         spec_file(
@@ -106,6 +123,8 @@ def test_validate_yaml_spec(tmp_path):
     assert spec.model_uri == "s3://bucket/to/model.pt"
     assert spec.pre_processing is not None
     assert spec.post_processing is not None
+    assert_dataloader_transform(spec.pre_processing)
+    assert_dataloader_transform(spec.post_processing)
 
 
 def test_validate_misformed_spec(tmp_path):

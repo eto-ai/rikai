@@ -1,0 +1,22 @@
+name: ros-test
+channels:
+  - defaults
+  - conda-forge
+  - robostack
+dependencies:
+  - pip
+  - pyspark>=3.1
+  - python==3.8
+  - ros-diagnostic-msgs
+  - ros-genpy
+  - ros-geometry-msgs
+  - ros-genmsg
+  - ros-nav-msgs
+  - ros-noetic-bond
+  - ros-noetic-tf2-msgs
+  - ros-noetic-velodyne-msgs
+  - ros-rosbag
+  - ros-roslz4
+  - ros-rospy
+  - ros-sensor-msgs
+  - ros-trajectory-msgs

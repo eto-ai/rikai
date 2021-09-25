@@ -12,12 +12,39 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+"""Conversion between ROS Message and Rikai types"""
+
 import datetime
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Tuple
+from typing import Any, Optional, Tuple, Generator, Dict
 
 import genpy
+
+
+__all__ = ["as_json"]
+
+
+def parse_array(message_type: str) -> Optional[Tuple[str, Optional[int]]]:
+    """Parse array defination.
+
+    Parameters
+    ----------
+    message_type : str
+        ROS Message type, in str, i.e., `std_msgs/ByteMultiArray`.
+
+    Return
+    ------
+    A tuple of `[element type, array_length]` if it is an fixed-size array.
+    A tuple of `[element type, None]` if it is variable-length array.
+    Return None if it is not an array.
+    """
+    if not isinstance(message_type, str):
+        return None
+    matched = re.match(r"(.*)\[(\d+)?\]", message_type)
+    if matched:
+        return matched[1], matched[2]
+    return None
 
 
 class Converter(ABC):
@@ -25,7 +52,7 @@ class Converter(ABC):
 
     @abstractmethod
     def is_supported(self, message_type: str) -> bool:
-        pass
+        """Returns True if the type is convertable"""
 
     @abstractmethod
     def convert(self, message_type: str, value: genpy.message.Message):
@@ -59,25 +86,39 @@ class JsonConverter(Converter):
         "uint8[]": bytearray,
     }
 
-    def is_convertable(
+    def is_supported(
         self,
-        msg_type: genpy.message.Message,
+        message_type: str,
     ) -> bool:
-        if isinstance(msg_type, str) and msg_type in self.CONVERT_MAP:
+        if message_type in self.CONVERT_MAP:
             return True
+
+        array_type_and_size = parse_array(message_type)
+        if array_type_and_size:
+            return self.is_supported(array_type_and_size[0])
+
         return False
 
-    def convert(self, message_type, value: genpy.message.Message):
-        if value is None:
-            return None
+    def convert(self, message_type: str, value: genpy.message.Message):
         if message_type in self.CONVERT_MAP:
             return self.CONVERT_MAP[message_type](value)
+
+        array_type_and_size = parse_array(message_type)
+        if array_type_and_size:
+            message_type = array_type_and_size[0]
+            return [self.convert(message_type, v) for v in value]
+
+        return None
 
     def array_type(self, value):
         if value is None:
             return []
 
         return list(value)
+
+
+class RikaiConverter(Converter):
+    pass
 
 
 class Visitor:
@@ -87,7 +128,13 @@ class Visitor:
         self.converter = converter
 
     @staticmethod
-    def _parse_array(message_type: str) -> Optional[Tuple[str, Optional[int]]]:
+    def message_fields(
+        message: genpy.message.Message,
+    ):
+        return zip(message.__slots__, message._slot_types)  #
+
+    @staticmethod
+    def parse_array(message_type: str) -> Optional[Tuple[str, Optional[int]]]:
         """Parse array defination.
 
         Parameters
@@ -108,32 +155,26 @@ class Visitor:
             return matched[1], matched[2]
         return None
 
-    def visit(
-        self, message_type, value: Optional[genpy.message.Message] = None
-    ) -> Any:
-        if self.converter.is_convertable(message_type):
-            return self.converter.convert(message_type, value)
-
-        array_type_and_size = self._parse_array(message_type)
-        if array_type_and_size:
-            if value is None:
-                return self.converter.array_type([])
-            return self.converter.array_type(
-                [self.visit(array_type_and_size[0], v) for v in value]
-            )
-
-        if isinstance(
-            message_type, str
-        ):  # By this time this should be an object
-            assert "/" in message_type
-            message_type = _import_message_type(message_type)
-            return self.visit(message_type, value)
-
+    def visit(self, message: genpy.message.Message) -> Any:
         fields = {}
-        for field, field_type in _get_message_fields(message_type):
-            field_value = None
-            if value is not None:
-                field_value = getattr(value, field)
+        for field, field_type in self.message_fields(message):
+            value = getattr(message, field)
+            print("Parsing: ", field, field_type, value)
+            if self.converter.is_supported(field_type):
+                fields[field] = self.converter.convert(field_type, value)
+                continue
 
-            fields[field] = self.visit(field_type, field_value)
+            array_type_and_size = parse_array(field_type)
+            if array_type_and_size:  # is a object array
+                fields[field] = [self.visit(m) for m in value]
+            else:
+                fields[field] = self.visit(value)
+
         return fields
+
+
+visitors = {"json": Visitor(JsonConverter())}
+
+
+def as_json(message: genpy.message.Message) -> Dict:
+    return visitors["json"].visit(message)

@@ -14,8 +14,8 @@
 
 """Conversion between ROS Message and Rikai types"""
 
-import logging
 import importlib
+import logging
 import re
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, Tuple, Type, Union

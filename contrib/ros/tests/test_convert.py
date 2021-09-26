@@ -15,12 +15,12 @@
 
 import std_msgs.msg
 from pyspark.sql.types import (
+    ArrayType,
     BinaryType,
     LongType,
+    StringType,
     StructField,
     StructType,
-    ArrayType,
-    StringType,
 )
 from std_msgs.msg import UInt32
 

@@ -13,7 +13,12 @@
 #  limitations under the License.
 
 
+import datetime
+import time
+
+import rospy
 import std_msgs.msg
+from pyspark.sql import SparkSession
 from pyspark.sql.types import (
     ArrayType,
     BinaryType,
@@ -21,6 +26,7 @@ from pyspark.sql.types import (
     StringType,
     StructField,
     StructType,
+    TimestampType,
 )
 from std_msgs.msg import UInt32
 
@@ -72,6 +78,42 @@ def test_simple_struct():
             "dim": [{"label": "a", "size": 1234, "stride": 18}],
         },
     } == as_json(msg)
+
+
+def test_std_msgs_header(spark: SparkSession, tmp_path):
+    assert (
+        StructType(
+            [
+                StructField("seq", LongType()),
+                StructField("stamp", TimestampType()),
+                StructField("frame_id", StringType()),
+            ]
+        )
+        == as_spark_schema(std_msgs.msg.Header)
+    )
+
+    now = time.time_ns()
+    header = as_json(
+        std_msgs.msg.Header(
+            seq=12345,
+            stamp=rospy.Time(now / 1e9),
+            frame_id="this is some frame",
+        )
+    )
+
+    assert {
+        "seq": 12345,
+        "stamp": datetime.datetime.fromtimestamp(now / 1e9),
+        "frame_id": "this is some frame",
+    } == header
+
+    # Test write timestamp correctly
+    df = spark.createDataFrame(
+        [header], schema=as_spark_schema(std_msgs.msg.Header)
+    )
+    df.show()
+    df.printSchema()
+    df.write.format("rikai").save(str(tmp_path))
 
 
 def test_simple_spark_schema():

@@ -14,6 +14,7 @@
 
 """Conversion between ROS Message and Rikai types"""
 
+import datetime
 import importlib
 import logging
 import re
@@ -115,7 +116,7 @@ class JsonConverter(Converter):
         "float32": float,
         "float64": float,
         "string": str,
-        "time": lambda t: t.to_time(),
+        "time": lambda t: datetime.datetime.fromtimestamp(t.to_time()),
         "duration": lambda dur: dur.to_sec(),
         "byte": int,
         "byte[]": bytearray,

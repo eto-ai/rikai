@@ -9,6 +9,9 @@ on:
 jobs:
   ros:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v2

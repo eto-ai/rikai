@@ -10,6 +10,7 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         "rikai",
+        "numpy",
     ],
     packages=find_namespace_packages(include=["rikai.*"]),
 )

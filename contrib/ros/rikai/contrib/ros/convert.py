@@ -20,6 +20,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, Tuple
 
 import genpy
+import numpy as np
 
 __all__ = ["as_json"]
 
@@ -125,6 +126,10 @@ class JsonConverter(Converter):
 
 
 class RikaiConverter(Converter):
+    pass
+
+
+class SparkSchemaConverter(Converter):
     pass
 
 

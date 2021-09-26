@@ -14,9 +14,17 @@
 
 
 import std_msgs.msg
+from pyspark.sql.types import (
+    BinaryType,
+    LongType,
+    StructField,
+    StructType,
+    ArrayType,
+    StringType,
+)
 from std_msgs.msg import UInt32
 
-from rikai.contrib.ros.convert import as_json
+from rikai.contrib.ros.convert import as_json, as_spark_schema
 
 
 def test_primitive_types():
@@ -64,3 +72,41 @@ def test_simple_struct():
             "dim": [{"label": "a", "size": 1234, "stride": 18}],
         },
     } == as_json(msg)
+
+
+def test_simple_spark_schema():
+    assert StructType([StructField("data", LongType())]) == as_spark_schema(
+        UInt32
+    )
+
+    assert (
+        StructType(
+            [
+                StructField(
+                    "layout",
+                    StructType(
+                        [
+                            StructField(
+                                "dim",
+                                ArrayType(
+                                    StructType(
+                                        [
+                                            StructField("label", StringType()),
+                                            StructField("size", LongType()),
+                                            StructField(
+                                                "stride",
+                                                LongType(),
+                                            ),
+                                        ]
+                                    )
+                                ),
+                            ),
+                            StructField("data_offset", LongType()),
+                        ]
+                    ),
+                ),
+                StructField("data", BinaryType()),
+            ]
+        )
+        == as_spark_schema(std_msgs.msg.ByteMultiArray)
+    )

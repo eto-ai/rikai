@@ -15,14 +15,31 @@
 """Conversion between ROS Message and Rikai types"""
 
 import logging
+import importlib
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple, Type, Union
 
 import genpy
 import numpy as np
+from pyspark.sql.types import (
+    ArrayType,
+    BinaryType,
+    BooleanType,
+    ByteType,
+    DataType,
+    DoubleType,
+    FloatType,
+    IntegerType,
+    LongType,
+    ShortType,
+    StringType,
+    StructField,
+    StructType,
+    TimestampType,
+)
 
-__all__ = ["as_json"]
+__all__ = ["as_json", "as_spark_schema"]
 
 
 def parse_array(message_type: str) -> Optional[Tuple[str, Optional[int]]]:
@@ -47,6 +64,19 @@ def parse_array(message_type: str) -> Optional[Tuple[str, Optional[int]]]:
     return None
 
 
+def import_message_type(message_type: str) -> Type[genpy.message.Message]:
+    modules = message_type.split("/")
+    try:
+        mod = importlib.import_module(".".join(modules[:-1] + ["msg"]))
+        return getattr(mod, modules[-1])
+    except ModuleNotFoundError:
+        logging.error(
+            'Could not load ROS message "%s", please make sure the package is installed.',
+            message_type,
+        )
+        raise
+
+
 class Converter(ABC):
     """Converter translates a ROS message or class to another type"""
 
@@ -56,6 +86,14 @@ class Converter(ABC):
 
     @abstractmethod
     def convert(self, message_type: str, value: genpy.message.Message):
+        pass
+
+    @abstractmethod
+    def get_value(self, value, attr_name):
+        pass
+
+    @abstractmethod
+    def build_record(self, fields):
         pass
 
 
@@ -118,11 +156,17 @@ class JsonConverter(Converter):
 
         return None
 
+    def get_value(self, value, attr_name):
+        return getattr(value, attr_name)
+
     def array_type(self, value):
         if value is None:
             return []
 
         return list(value)
+
+    def build_record(self, fields):
+        return fields
 
 
 class RikaiConverter(Converter):
@@ -130,7 +174,70 @@ class RikaiConverter(Converter):
 
 
 class SparkSchemaConverter(Converter):
-    pass
+    CONVERT_MAP = {
+        "bool": BooleanType,
+        "char": ByteType,
+        "int8": ByteType,
+        "int16": ShortType,
+        "int32": IntegerType,
+        "int64": LongType,
+        # Converting the unsigned numbers might overflow,
+        # Use a large data instead.
+        "uint8": ShortType,
+        "uint16": IntegerType,
+        "uint32": LongType,
+        "float32": FloatType,
+        "float64": DoubleType,
+        "string": StringType,
+        "time": TimestampType,
+        "duration": LongType,
+        "byte": ByteType,
+        "byte[]": BinaryType,
+        "uint8[]": BinaryType,
+    }
+
+    SCHEMA_CACHE = {}
+
+    def is_supported(
+        self,
+        message_type: str,
+    ) -> bool:
+        if message_type in self.CONVERT_MAP:
+            return True
+        if message_type == "uint64":
+            raise ValueError("uint64 is overflow in Spark")
+
+        # TODO: use local assignment after python 3.8
+        array_type_and_size = parse_array(message_type)
+        if array_type_and_size:
+            return self.is_supported(array_type_and_size[0])
+
+        return False
+
+    def convert(self, message_type: str, value: genpy.message.Message):
+        print("CONVERRT: ", message_type, value)
+        if message_type in self.CONVERT_MAP:
+            return self.CONVERT_MAP[message_type]()
+        return None
+
+    def get_value(self, value, attr_name):
+        msg_type = value._slot_types[value.__slots__.index(attr_name)]
+        if msg_type in self.SCHEMA_CACHE:
+            return self.SCHEMA_CACHE[msg_type]
+        if self.is_supported(msg_type):
+            return msg_type
+        if Visitor.parse_array(msg_type):
+            return msg_type
+        modules = msg_type.split("/")
+        try:
+            mod = importlib.import_module(".".join(modules[:-1] + ["msg"]))
+            return getattr(mod, modules[-1])
+        except ModuleNotFoundError:
+            print("Can not find module: ", value, attr_name, msg_type)
+            raise
+
+    def build_record(self, fields):
+        return StructType([StructField(k, v) for k, v in fields.items()])
 
 
 class Visitor:
@@ -181,11 +288,42 @@ class Visitor:
             else:
                 fields[field] = self.visit(value)
 
-        return fields
+        return self.converter.build_record(fields)
+
+    def visit_type(self, message: Union[str, Type[genpy.message.Message]]):
+        if isinstance(message, str):
+            message = import_message_type(message)
+
+        fields = {}
+        for field, field_type in self.message_fields(message):
+            value = self.converter.get_value(message, field)
+            if self.converter.is_supported(field_type):
+                fields[field] = self.converter.convert(field_type, value)
+
+                continue
+
+            array_type_and_size = parse_array(field_type)
+            if array_type_and_size:  # is a object array
+                fields[field] = ArrayType(
+                    self.visit_type(array_type_and_size[0])
+                )
+                print("PARSE ARRAY OBJ: ", fields, field, array_type_and_size)
+                continue
+
+            fields[field] = self.visit_type(value)
+
+        return self.converter.build_record(fields)
 
 
-visitors = {"json": Visitor(JsonConverter())}
+visitors = {
+    "json": Visitor(JsonConverter()),
+    "spark_schema": Visitor(SparkSchemaConverter()),
+}
 
 
 def as_json(message: genpy.message.Message) -> Dict:
     return visitors["json"].visit(message)
+
+
+def as_spark_schema(message: Type[genpy.message.Message]) -> DataType:
+    return visitors["spark_schema"].visit_type(message)

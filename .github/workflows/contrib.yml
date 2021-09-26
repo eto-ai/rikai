@@ -1,4 +1,4 @@
-name: Contrib Packages
+name: Contrib
 
 on:
   push:

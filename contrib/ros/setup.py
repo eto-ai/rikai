@@ -19,6 +19,7 @@ setup(
             "isort",
             "pytest",
             # Install common ROS messages for testing.
+            "actionlib_msgs",
             "diagnostic-msgs",
             "geometry-msgs",
             "rosgraph-msgs",

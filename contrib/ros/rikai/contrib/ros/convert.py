@@ -294,6 +294,20 @@ class Visitor:
         return self.converter.build_record(fields)
 
     def visit_type(self, message: Union[str, Type[genpy.message.Message]]):
+        """Visit a ROS Message Type
+
+        Parameters
+        ----------
+        message: str or Type[genpy.message.Message]
+          A string of ROS message type ``sensor_msgs/Image`` or the actual
+          ROS Message class "sensor_msgs.msg.Image"
+
+        Return
+        ------
+        A target system type, i.e., Spark DataType
+
+        TODO: Converge `visit_type` with `visit` in the future.
+        """
         if isinstance(message, str):
             message = import_message_type(message)
 

@@ -16,8 +16,9 @@
 
 import datetime
 import re
+import logging
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Tuple, Generator, Dict
+from typing import Any, Optional, Tuple, Dict
 
 import genpy
 
@@ -80,8 +81,8 @@ class JsonConverter(Converter):
         "time": lambda rt: datetime.datetime.fromtimestamp(
             rt.secs + rt.nsecs / 1e9
         ),
+        "duration": lambda dur: dur.to_sec(),
         "byte": int,
-        "duration": int,
         "byte[]": bytearray,
         "uint8[]": bytearray,
     }
@@ -101,7 +102,17 @@ class JsonConverter(Converter):
 
     def convert(self, message_type: str, value: genpy.message.Message):
         if message_type in self.CONVERT_MAP:
-            return self.CONVERT_MAP[message_type](value)
+            try:
+                return self.CONVERT_MAP[message_type](value)
+            except TypeError as type_err:
+                logging.error(
+                    "Failed to convert type=%s, value=%s, converter=%s: %s",
+                    message_type,
+                    value,
+                    self.CONVERT_MAP[message_type],
+                    type_err,
+                )
+                raise
 
         array_type_and_size = parse_array(message_type)
         if array_type_and_size:

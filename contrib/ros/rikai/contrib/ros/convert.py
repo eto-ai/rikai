@@ -187,6 +187,7 @@ class SparkSchemaConverter(Converter):
         "uint8": ShortType,
         "uint16": IntegerType,
         "uint32": LongType,
+        "uint64": LongType,
         "float32": FloatType,
         "float64": DoubleType,
         "string": StringType,
@@ -218,6 +219,9 @@ class SparkSchemaConverter(Converter):
     def convert(self, message_type: str, value: genpy.message.Message):
         if message_type in self.CONVERT_MAP:
             return self.CONVERT_MAP[message_type]()
+        array_type_and_size = parse_array(message_type)
+        if array_type_and_size and self.is_supported(array_type_and_size[0]):
+            return ArrayType(self.convert(array_type_and_size[0], value))
         return None
 
     def get_value(self, value, attr_name):

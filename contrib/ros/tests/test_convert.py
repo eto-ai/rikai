@@ -45,9 +45,6 @@ def test_all_msgs_classes():
 
 
 def test_simple_struct():
-
-    assert {"data": 23} == as_json(UInt32(data=23))
-
     msg = std_msgs.msg.ByteMultiArray(
         data=(1, 2, 3, 4),
         layout=std_msgs.msg.MultiArrayLayout(

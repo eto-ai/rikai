@@ -15,13 +15,16 @@ setup(
     ],
     extras_require={
         "dev": [
-            "pytest",
-            "isort",
             "black",
-            "sensor-msgs",
+            "isort",
+            "pytest",
+            # Install common ROS messages for testing.
             "diagnostic-msgs",
-            "trajectory-msgs",
+            "geometry-msgs",
+            "rosgraph-msgs",
+            "sensor-msgs",
             "tf2-msgs",
+            "trajectory-msgs",
         ]
     },
     packages=find_namespace_packages(include=["rikai.*"]),

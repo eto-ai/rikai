@@ -14,14 +14,12 @@
 
 """Conversion between ROS Message and Rikai types"""
 
-import datetime
-import re
 import logging
+import re
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Tuple, Dict
+from typing import Any, Dict, Optional, Tuple
 
 import genpy
-
 
 __all__ = ["as_json"]
 
@@ -78,9 +76,7 @@ class JsonConverter(Converter):
         "float32": float,
         "float64": float,
         "string": str,
-        "time": lambda rt: datetime.datetime.fromtimestamp(
-            rt.secs + rt.nsecs / 1e9
-        ),
+        "time": lambda t: t.to_time(),
         "duration": lambda dur: dur.to_sec(),
         "byte": int,
         "byte[]": bytearray,

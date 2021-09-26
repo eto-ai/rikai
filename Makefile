@@ -1,4 +1,4 @@
-#  Copyright 2021 Rikai Authorsfg
+#  Copyright 2021 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -37,8 +37,7 @@ python/rikai/spark/sql/generated/RikaiModelSchemaParser.py: src/main/antlr4/org/
 lint:
 	sbt scalafmtCheckAll
 	black -l 79 --check python/rikai python/tests contrib/
-	pycodestyle --exclude generated,build \
-	    python/rikai python/tests contrib/
+	pycodestyle python contrib/
 .PHONY: lint
 
 # Fix code style

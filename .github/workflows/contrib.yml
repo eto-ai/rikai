@@ -28,11 +28,11 @@ jobs:
       - name: Install Dependencies
         working-directory: python
         run: |
-          python -m pip install -q . wheel
+          python -m pip install -q --use-feature=in-tree-build . wheel
       - name: Install contrib-ros
         working-directory: contrib/ros
         run: |
-          python -m pip install --extra-index-url https://rospypi.github.io/simple/ .[dev]
+          python -m pip install --extra-index-url https://rospypi.github.io/simple/ --use-feature=in-tree-build .[dev]
       - name: Pytest
         working-directory: contrib/ros
         run: pytest

@@ -73,7 +73,23 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@v10
+        with:
+          java-version: adopt@1.11
       - uses: conda-incubator/setup-miniconda@v2
         with:
           miniconda-version: "latest"
           environment-file: contrib/ros/environment.yml
+      - name: sbt install
+        run: |
+          sbt publishLocal
+      - name: Install Rikai
+        working-directory: python
+        run: python -m pip install .
+      - name: Install contrib-ros
+        working-directory: contrib/ros
+        run: python -m pip install .
+      - name: Pytest
+        working-directory: contrib/ros
+        run: pytest

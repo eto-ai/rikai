@@ -81,6 +81,7 @@ def test_simple_struct():
 
 
 def test_std_msgs_header(spark: SparkSession, tmp_path):
+    """Test `std_msgs/Header` """
     assert (
         StructType(
             [

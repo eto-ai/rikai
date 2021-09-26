@@ -21,7 +21,6 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, Tuple, Type, Union
 
 import genpy
-import numpy as np
 from pyspark.sql.types import (
     ArrayType,
     BinaryType,
@@ -71,7 +70,8 @@ def import_message_type(message_type: str) -> Type[genpy.message.Message]:
         return getattr(mod, modules[-1])
     except ModuleNotFoundError:
         logging.error(
-            'Could not load ROS message "%s", please make sure the package is installed.',
+            'Could not load ROS message "%s", '
+            "please make sure the package is installed.",
             message_type,
         )
         raise
@@ -215,7 +215,6 @@ class SparkSchemaConverter(Converter):
         return False
 
     def convert(self, message_type: str, value: genpy.message.Message):
-        print("CONVERRT: ", message_type, value)
         if message_type in self.CONVERT_MAP:
             return self.CONVERT_MAP[message_type]()
         return None
@@ -233,7 +232,9 @@ class SparkSchemaConverter(Converter):
             mod = importlib.import_module(".".join(modules[:-1] + ["msg"]))
             return getattr(mod, modules[-1])
         except ModuleNotFoundError:
-            print("Can not find module: ", value, attr_name, msg_type)
+            logging.error(
+                "Can not find module: %s, %s, %s", value, attr_name, msg_type
+            )
             raise
 
     def build_record(self, fields):
@@ -241,7 +242,9 @@ class SparkSchemaConverter(Converter):
 
 
 class Visitor:
-    """Visitor walks through a ROS Message and converts it to another type system (i.e., Spark or Numpy)."""
+    """Visitor walks through a ROS Message and converts it to
+    another type system (i.e., Spark or Numpy).
+    """
 
     def __init__(self, converter: Converter) -> None:
         self.converter = converter
@@ -299,7 +302,6 @@ class Visitor:
             value = self.converter.get_value(message, field)
             if self.converter.is_supported(field_type):
                 fields[field] = self.converter.convert(field_type, value)
-
                 continue
 
             array_type_and_size = parse_array(field_type)
@@ -307,10 +309,8 @@ class Visitor:
                 fields[field] = ArrayType(
                     self.visit_type(array_type_and_size[0])
                 )
-                print("PARSE ARRAY OBJ: ", fields, field, array_type_and_size)
-                continue
-
-            fields[field] = self.visit_type(value)
+            else:
+                fields[field] = self.visit_type(value)
 
         return self.converter.build_record(fields)
 

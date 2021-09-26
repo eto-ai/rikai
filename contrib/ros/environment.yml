@@ -6,11 +6,12 @@ channels:
 dependencies:
   - pip
   - pyspark>=3.1
+  - pytest
   - python==3.8
   - ros-diagnostic-msgs
+  - ros-genmsg
   - ros-genpy
   - ros-geometry-msgs
-  - ros-genmsg
   - ros-nav-msgs
   - ros-noetic-bond
   - ros-noetic-tf2-msgs

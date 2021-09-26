@@ -22,13 +22,13 @@ from typing import Sequence, Tuple, Union
 
 import numpy as np
 
-from rikai.mixin import ToNumpy
+from rikai.mixin import ToNumpy, ToDict
 from rikai.spark.types.geometry import Box2dType, Box3dType, PointType
 
 __all__ = ["Point", "Box3d", "Box2d"]
 
 
-class Point(ToNumpy):
+class Point(ToNumpy, ToDict):
     """Point in a 3-D space, specified by ``(x, y, z)`` coordinates.
 
     Attributes
@@ -63,8 +63,11 @@ class Point(ToNumpy):
     def to_numpy(self) -> np.ndarray:
         return np.array([self.x, self.y, self.z])
 
+    def to_dict(self) -> dict:
+        return {"x": self.x, "y": self.y, "z": self.z}
 
-class Box2d(ToNumpy, Sequence):
+
+class Box2d(ToNumpy, Sequence, ToDict):
     """2-D Bounding Box, defined by ``(xmin, ymin, xmax, ymax)``
 
     Attributes
@@ -250,6 +253,14 @@ class Box2d(ToNumpy, Sequence):
         """
         return np.array([self.xmin, self.ymin, self.xmax, self.ymax])
 
+    def to_dict(self) -> dict:
+        return {
+            "xmin": self.xmin,
+            "ymin": self.ymin,
+            "xmax": self.xmax,
+            "ymax": self.ymax,
+        }
+
     @property
     def width(self) -> float:
         return self.xmax - self.xmin
@@ -303,7 +314,7 @@ class Box2d(ToNumpy, Sequence):
         return iou_arr
 
 
-class Box3d(ToNumpy):
+class Box3d(ToNumpy, ToDict):
     """A 3-D bounding box
 
     Attributes
@@ -360,3 +371,12 @@ class Box3d(ToNumpy):
 
     def to_numpy(self) -> np.ndarray:
         return None
+
+    def to_dict(self) -> dict:
+        return {
+            "center": self.center,
+            "length": self.length,
+            "width": self.width,
+            "height": self.height,
+            "heading": self.heading,
+        }

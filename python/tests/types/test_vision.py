@@ -143,3 +143,11 @@ def test_save_image_as_external(tmp_path):
     assert Path(ext_path).exists()
     with img.to_pil() as img1, ext_img.to_pil() as img2:
         assert img1 == img2
+
+
+def test_to_dict():
+    data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
+    img = Image.from_array(data)
+    assert img.to_dict() == {"data": img.data}
+    img = Image("foo")
+    assert img.to_dict() == {"uri": "foo"}

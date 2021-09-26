@@ -22,6 +22,7 @@ jobs:
         with:
           miniconda-version: "latest"
           environment-file: contrib/ros/environment.yml
+          activate-environment: ros-test
       - name: sbt install
         run: |
           sbt publishLocal

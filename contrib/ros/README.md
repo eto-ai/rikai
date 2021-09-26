@@ -1,11 +1,9 @@
 # ROS Bag Message support in Rikai
 
-
 ## Development
 
-We use conda to manage the development and testing environment, because conda has
-common ROS message packages in python.
+Use pip to install ROS dependencies
 
 ```
-conda env create -f environment.yml
+python -m pip install --extra-index-url https://rospypi.github.io/simple/ .[dev]
 ```

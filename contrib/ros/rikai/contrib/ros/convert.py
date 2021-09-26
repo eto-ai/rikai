@@ -170,7 +170,6 @@ class Visitor:
         fields = {}
         for field, field_type in self.message_fields(message):
             value = getattr(message, field)
-            print("Parsing: ", field, field_type, value)
             if self.converter.is_supported(field_type):
                 fields[field] = self.converter.convert(field_type, value)
                 continue

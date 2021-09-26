@@ -11,6 +11,18 @@ setup(
     install_requires=[
         "rikai",
         "numpy",
+        "rosbag",
     ],
+    extras_require={
+        "dev": [
+            "pytest",
+            "isort",
+            "black",
+            "sensor-msgs",
+            "diagnostic-msgs",
+            "trajectory-msgs",
+            "tf2-msgs",
+        ]
+    },
     packages=find_namespace_packages(include=["rikai.*"]),
 )

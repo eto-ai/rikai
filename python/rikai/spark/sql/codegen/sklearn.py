@@ -42,7 +42,7 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     ) -> return_type:
         model = spec.load_model()
         for series in list(iter):
-            assert series.shape[0] == 1
+            assert series.shape == (1,)
             X = [x.tolist() for x in series[0]]
             Y = model.predict(X)
             yield pd.Series([Y.tolist()])

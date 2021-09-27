@@ -19,6 +19,7 @@ import numpy as np
 from pyspark.sql.types import StructType
 from pyspark.sql.functions import pandas_udf
 
+
 def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     """Construct a UDF to run sklearn model.
 
@@ -31,15 +32,7 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     -------
     A Spark Pandas UDF.
     """
-    schema = spec.schema
-    should_return_df = isinstance(schema, StructType)
-    return_type = (
-        Iterator[pd.DataFrame] if should_return_df else Iterator[pd.Series]
-    )
-
-    def sklearn_inference_udf(
-        iter: Iterator[pd.Series]
-    ) -> return_type:
+    def sklearn_inference_udf(iter: Iterator[pd.Series]) -> Iterator[pd.Series]:
         model = spec.load_model()
         for series in list(iter):
             assert series.shape == (1,)
@@ -47,4 +40,4 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
             Y = model.predict(X)
             yield pd.Series([Y.tolist()])
 
-    return pandas_udf(sklearn_inference_udf, returnType=schema)
+    return pandas_udf(sklearn_inference_udf, returnType=spec.schema)

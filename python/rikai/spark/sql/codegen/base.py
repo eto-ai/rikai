@@ -186,6 +186,10 @@ def udf_from_spec(spec: ModelSpec):
         from rikai.spark.sql.codegen.pytorch import generate_udf
 
         return generate_udf(spec)
+    elif spec.flavor == "sklearn":
+        from rikai.spark.sql.codegen.sklearn import generate_udf
+
+        return generate_udf(spec)
     else:
         raise SpecError(f"Unsupported model flavor: {spec.flavor}")
 

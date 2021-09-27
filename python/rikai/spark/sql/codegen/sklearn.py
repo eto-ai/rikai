@@ -32,7 +32,10 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     -------
     A Spark Pandas UDF.
     """
-    def sklearn_inference_udf(iter: Iterator[pd.Series]) -> Iterator[pd.Series]:
+
+    def sklearn_inference_udf(
+        iter: Iterator[pd.Series],
+    ) -> Iterator[pd.Series]:
         model = spec.load_model()
         for series in list(iter):
             assert series.shape == (1,)

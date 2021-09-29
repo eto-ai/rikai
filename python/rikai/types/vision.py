@@ -18,6 +18,7 @@
 
 from __future__ import annotations
 
+import base64
 from io import BytesIO, IOBase
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -202,7 +203,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
 
     def to_dict(self) -> dict:
         if self.is_embedded:
-            return {"data": self.data}
+            return {"data": base64.b64encode(self.data).decode('ascii')}
         return {"uri": self.uri}
 
     def save(self, uri: Union[str, Path]) -> Image:

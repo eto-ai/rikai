@@ -16,7 +16,7 @@
 """
 from __future__ import annotations
 
-from abc import ABC, ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from io import BytesIO
 from pathlib import Path
 from typing import BinaryIO, Optional, Union
@@ -47,7 +47,7 @@ class ToPIL(ABC):
         pass
 
 
-class ToDict(metaclass=ABCMeta):
+class ToDict(ABC):
     """ToDict Mixin"""
 
     @abstractmethod

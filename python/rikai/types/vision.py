@@ -203,7 +203,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
 
     def to_dict(self) -> dict:
         if self.is_embedded:
-            return {"data": base64.b64encode(self.data).decode('ascii')}
+            return {"data": base64.b64encode(self.data).decode("ascii")}
         return {"uri": self.uri}
 
     def save(self, uri: Union[str, Path]) -> Image:

@@ -16,14 +16,14 @@ import secrets
 import uuid
 from pathlib import Path
 from typing import Any, Dict
-import pandas as pd
-import torch
-from torch.utils.data import DataLoader
 
+import pandas as pd
 import pytest
+import torch
 import yaml
 from pyspark.sql import Row, SparkSession
 from pyspark.sql.types import IntegerType, StructField, StructType
+from torch.utils.data import DataLoader
 from utils import check_ml_predict
 
 from rikai.spark.sql.codegen.fs import FileModelSpec

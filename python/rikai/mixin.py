@@ -28,7 +28,7 @@ import numpy as np
 from rikai.internal.uri_utils import uri_equal
 from rikai.io import open_uri
 
-__all__ = ["ToNumpy", "Asset", "Displayable"]
+__all__ = ["ToNumpy", "Asset", "Displayable", "ToDict"]
 
 
 class ToNumpy(ABC):
@@ -44,6 +44,14 @@ class ToPIL(ABC):
 
     @abstractmethod
     def to_pil(self) -> "PIL.Image.Image":
+        pass
+
+
+class ToDict(ABC):
+    """ToDict Mixin"""
+
+    @abstractmethod
+    def to_dict(self) -> dict:
         pass
 
 

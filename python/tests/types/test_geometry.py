@@ -17,7 +17,7 @@ from typing import Sequence
 import numpy as np
 from PIL import Image, ImageDraw
 
-from rikai.types import Box2d
+from rikai.types import Box2d, Point, Box3d
 
 
 def test_scale_box2d():
@@ -67,3 +67,23 @@ def test_box2d_vectorize_iou():
 def test_box2d_empty_iou():
     box1 = Box2d(0, 0, 20, 20)
     assert box1.iou([]).size == 0
+
+
+def test_to_dict():
+    b = Box2d(0, 0, 20, 20)
+    exp = {"xmin": b.xmin, "ymin": b.ymin, "xmax": b.xmax, "ymax": b.ymax}
+    assert b.to_dict() == exp
+
+    p = Point(1, 2, 3)
+    exp = {"x": 1, "y": 2, "z": 3}
+    assert p.to_dict() == exp
+
+    b3 = Box3d(1, 2, 3, 4, 5)
+    exp = {
+        "center": b3.center,
+        "length": b3.length,
+        "width": b3.width,
+        "height": b3.height,
+        "heading": b3.heading,
+    }
+    assert b3.to_dict() == exp

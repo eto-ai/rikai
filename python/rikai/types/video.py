@@ -17,7 +17,7 @@ from abc import ABC, abstractmethod
 
 import cv2
 
-from rikai.mixin import Displayable
+from rikai.mixin import Displayable, ToDict
 from rikai.spark.types import SegmentType, VideoStreamType, YouTubeVideoType
 
 __all__ = [
@@ -145,7 +145,7 @@ def getworst(v_pafy, preftype="any", ftypestrict=True, vidonly=False):
     return r
 
 
-class VideoStream(Displayable):
+class VideoStream(Displayable, ToDict):
     """Represents a particular video stream at a given uri"""
 
     __UDT__ = VideoStreamType()
@@ -188,6 +188,9 @@ class VideoStream(Displayable):
         """Iterate through every frame in the video"""
         for frame in SingleFrameSampler(self):
             yield frame
+
+    def to_dict(self) -> dict:
+        return {"uri": self.uri}
 
 
 class Segment:

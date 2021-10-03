@@ -22,6 +22,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, Tuple, Type, Union
 
 import genpy
+from numpy import array_str
 from pyspark.sql.types import (
     ArrayType,
     BinaryType,
@@ -43,7 +44,7 @@ __all__ = ["as_json", "as_spark_schema"]
 
 
 def parse_array(message_type: str) -> Optional[Tuple[str, Optional[int]]]:
-    """Parse array defination.
+    """Parse array definition.
 
     Parameters
     ----------
@@ -54,17 +55,18 @@ def parse_array(message_type: str) -> Optional[Tuple[str, Optional[int]]]:
     ------
     A tuple of `[element type, array_length]` if it is an fixed-size array.
     A tuple of `[element type, None]` if it is variable-length array.
-    Return None if it is not an array.
+    Return `[None, None]` if it is not an array.
     """
     if not isinstance(message_type, str):
         return None
     matched = re.match(r"(.*)\[(\d+)?\]", message_type)
     if matched:
         return matched[1], matched[2]
-    return None
+    return None, None
 
 
 def import_message_type(message_type: str) -> Type[genpy.message.Message]:
+    """Use Message Type"""
     modules = message_type.split("/")
     try:
         mod = importlib.import_module(".".join(modules[:-1] + ["msg"]))
@@ -130,9 +132,9 @@ class JsonConverter(Converter):
         if message_type in self.CONVERT_MAP:
             return True
 
-        array_type_and_size = parse_array(message_type)
-        if array_type_and_size:
-            return self.is_supported(array_type_and_size[0])
+        arr_type, _ = parse_array(message_type)
+        if arr_type:
+            return self.is_supported(arr_type)
 
         return False
 
@@ -161,10 +163,7 @@ class JsonConverter(Converter):
         return getattr(value, attr_name)
 
     def array_type(self, value):
-        if value is None:
-            return []
-
-        return list(value)
+        return [] if value is None else list(value)
 
     def build_record(self, fields):
         return fields
@@ -206,13 +205,10 @@ class SparkSchemaConverter(Converter):
     ) -> bool:
         if message_type in self.CONVERT_MAP:
             return True
-        if message_type == "uint64":
-            raise ValueError("uint64 is overflow in Spark")
 
-        # TODO: use local assignment after python 3.8
-        array_type_and_size = parse_array(message_type)
-        if array_type_and_size:
-            return self.is_supported(array_type_and_size[0])
+        arr_type, _ = parse_array(message_type)
+        if arr_type:
+            return self.is_supported(arr_type)
 
         return False
 
@@ -232,15 +228,7 @@ class SparkSchemaConverter(Converter):
             return msg_type
         if Visitor.parse_array(msg_type):
             return msg_type
-        modules = msg_type.split("/")
-        try:
-            mod = importlib.import_module(".".join(modules[:-1] + ["msg"]))
-            return getattr(mod, modules[-1])
-        except ModuleNotFoundError:
-            logging.error(
-                "Can not find module: %s, %s, %s", value, attr_name, msg_type
-            )
-            raise
+        return import_message_type(msg_type)
 
     def build_record(self, fields):
         return StructType([StructField(k, v) for k, v in fields.items()])
@@ -290,8 +278,8 @@ class Visitor:
                 fields[field] = self.converter.convert(field_type, value)
                 continue
 
-            array_type_and_size = parse_array(field_type)
-            if array_type_and_size:  # is a object array
+            arr_type, _ = parse_array(field_type)
+            if arr_type:  # is a object array
                 fields[field] = [self.visit(m) for m in value]
             else:
                 fields[field] = self.visit(value)
@@ -323,10 +311,10 @@ class Visitor:
                 fields[field] = self.converter.convert(field_type, value)
                 continue
 
-            array_type_and_size = parse_array(field_type)
-            if array_type_and_size:  # is a object array
+            arr_type, _ = parse_array(field_type)
+            if arr_type:  # is a object array
                 fields[field] = ArrayType(
-                    self.visit_type(array_type_and_size[0])
+                    self.visit_type(arr_type)
                 )
             else:
                 fields[field] = self.visit_type(value)

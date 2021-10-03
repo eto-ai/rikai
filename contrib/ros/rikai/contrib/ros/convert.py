@@ -313,9 +313,7 @@ class Visitor:
 
             arr_type, _ = parse_array(field_type)
             if arr_type:  # is a object array
-                fields[field] = ArrayType(
-                    self.visit_type(arr_type)
-                )
+                fields[field] = ArrayType(self.visit_type(arr_type))
             else:
                 fields[field] = self.visit_type(value)
 

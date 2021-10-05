@@ -15,10 +15,19 @@
 package org.apache.spark.sql.rikai.expressions
 
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.Expression
-import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
+import org.apache.spark.sql.catalyst.expressions.codegen.{
+  CodegenContext,
+  CodegenFallback,
+  ExprCode
+}
+import org.apache.spark.sql.catalyst.expressions.{
+  BinaryExpression,
+  Expression,
+  ImplicitCastInputTypes,
+  NullIntolerant
+}
 import org.apache.spark.sql.rikai.Box2dType
-import org.apache.spark.sql.types.{DataType, DoubleType}
+import org.apache.spark.sql.types.{AbstractDataType, DataType, DoubleType}
 
 case class Area(exprs: Seq[Expression])
     extends Expression
@@ -38,12 +47,27 @@ case class Area(exprs: Seq[Expression])
   override def children: Seq[Expression] = exprs;
 }
 
-case class IOU(exprs: Seq[Expression]) extends Expression with CodegenFallback {
-  override def nullable: Boolean = false;
+case class IOU(leftBox: Expression, rightBox: Expression)
+    extends BinaryExpression
+    with ImplicitCastInputTypes
+    with NullIntolerant {
 
-  override def eval(input: InternalRow): Any = {}
+  override def inputTypes: Seq[AbstractDataType] = Seq(Box2dType, Box2dType)
+
+  override def left: Expression = leftBox
+
+  override def right: Expression = rightBox
 
   override def dataType: DataType = DoubleType
 
-  override def children: Seq[Expression] = exprs
+  override def nullSafeEval(left: Any, right: Any): Any = {
+    Box2dType.deserialize(left).iou(Box2dType.deserialize(right))
+  }
+
+  override protected def doGenCode(
+      ctx: CodegenContext,
+      ev: ExprCode
+  ): ExprCode = ???
+
+  override def prettyName: String = "iou"
 }

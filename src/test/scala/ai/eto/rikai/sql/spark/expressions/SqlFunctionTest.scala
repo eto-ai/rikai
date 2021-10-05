@@ -18,18 +18,27 @@ package ai.eto.rikai.sql.spark.expressions
 
 import ai.eto.rikai.SparkTestSession
 import org.apache.spark.sql.rikai.Box2d
+import org.scalactic.TolerantNumerics
 import org.scalatest.funsuite.AnyFunSuite
 
 class SqlFunctionTest extends AnyFunSuite with SparkTestSession {
   import spark.implicits._
+  implicit val doubleEquality = TolerantNumerics.tolerantDoubleEquality(0.01)
 
   test("test box area function") {
 
     Seq((1, new Box2d(1, 2, 3, 4)))
       .toDF("id", "box")
       .createOrReplaceTempView("boxes")
-    val df = spark.sql("SELECT *, area(box) FROM boxes")
-    df.show()
+    val df = spark.sql("SELECT *, area(box) as area FROM boxes")
+    assert(df.first().getAs[Double]("area") == 4)
   }
 
+  test("test iou function") {
+    Seq((1, new Box2d(0, 0, 20, 20), new Box2d(10, 10, 30, 30)))
+      .toDF("id", "box1", "box2")
+      .createOrReplaceTempView("boxes")
+    val df = spark.sql("SELECT *, iou(box1, box2) as iou FROM boxes")
+    assert(df.first().getAs[Double]("iou") === 1.0 / 7)
+  }
 }

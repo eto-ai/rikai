@@ -112,6 +112,12 @@ class Box2d(
     f"Box2d(xmin=$xmin, ymin=$ymin, xmax=$xmax, ymax=$ymax)"
 }
 
+object Box2dUtils {
+  def iou(left: InternalRow, right: InternalRow): Double = {
+    Box2dType.deserialize(left).iou(Box2dType.deserialize(right))
+  }
+}
+
 /** User defined type of 2D Bouding Box
   */
 class Box2dType extends UserDefinedType[Box2d] {

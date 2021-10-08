@@ -24,10 +24,39 @@ import org.apache.spark.sql.catalyst.expressions.{
   BinaryExpression,
   Expression,
   ImplicitCastInputTypes,
-  NullIntolerant
+  NullIntolerant,
+  QuaternaryExpression
 }
-import org.apache.spark.sql.rikai.Box2dType
+import org.apache.spark.sql.rikai.{Box2d, Box2dType, Box2dUtils}
 import org.apache.spark.sql.types.{AbstractDataType, DataType, DoubleType}
+
+case class CreateBox2d(
+    xmin: Expression,
+    ymin: Expression,
+    xmax: Expression,
+    ymax: Expression
+) extends QuaternaryExpression
+    with CodegenFallback
+    with ImplicitCastInputTypes
+    with NullIntolerant {
+
+  override def eval(input: InternalRow): Any = {
+    val value1 = xmin.eval(input).asInstanceOf[Double]
+    val value2 = ymin.eval(input).asInstanceOf[Double]
+    val value3 = xmax.eval(input).asInstanceOf[Double]
+    val value4 = ymax.eval(input).asInstanceOf[Double]
+    Box2dType.serialize(new Box2d(value1, value2, value3, value4))
+  }
+
+  override def inputTypes: Seq[AbstractDataType] =
+    Seq(DoubleType, DoubleType, DoubleType, DoubleType)
+
+  override def prettyName: String = "box2d"
+
+  override def dataType: DataType = Box2dType
+
+  override def children: Seq[Expression] = Seq(xmin, ymin, xmax, ymax)
+}
 
 case class Area(exprs: Seq[Expression])
     extends Expression
@@ -64,10 +93,13 @@ case class IOU(leftBox: Expression, rightBox: Expression)
     Box2dType.deserialize(left).iou(Box2dType.deserialize(right))
   }
 
-  override protected def doGenCode(
+  override def doGenCode(
       ctx: CodegenContext,
       ev: ExprCode
-  ): ExprCode = ???
+  ): ExprCode = {
+    val box2dObject = Box2dUtils.getClass.getName.stripSuffix("$")
+    defineCodeGen(ctx, ev, (l, r) => s"$box2dObject.iou($l, $r)")
+  }
 
   override def prettyName: String = "iou"
 }

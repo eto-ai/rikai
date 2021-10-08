@@ -20,6 +20,7 @@ import ai.eto.rikai.SparkTestSession
 import org.apache.spark.sql.rikai.Box2d
 import org.scalactic.TolerantNumerics
 import org.scalatest.funsuite.AnyFunSuite
+import org.apache.spark.sql.{functions => F}
 
 class SqlFunctionTest extends AnyFunSuite with SparkTestSession {
   import spark.implicits._
@@ -40,5 +41,27 @@ class SqlFunctionTest extends AnyFunSuite with SparkTestSession {
       .createOrReplaceTempView("boxes")
     val df = spark.sql("SELECT *, iou(box1, box2) as iou FROM boxes")
     assert(df.first().getAs[Double]("iou") === 1.0 / 7)
+  }
+
+  test("codegen explore") {
+    spark.conf.set("spark.sql.codegen.fallback", false)
+    spark.conf.set("spark.sql.codegen.factoryMode", "CODEGEN_ONLY")
+
+    spark.sql("select box2d(0, 0, 20, 20)").show()
+
+    val q = spark.range(2).select(
+      F.col("id").as("id"),
+      F.rand(10).as("xmin"),
+      F.rand(10).as("ymin"),
+      F.lit(100).as("xmax"),
+      F.lit(100).as("ymax"),
+    ).selectExpr(
+      "box2d(xmin, ymin, xmax, ymax) as box1",
+      "box2d(xmin + 1, ymin + 1, xmax, ymax) as box2"
+    ).selectExpr(
+      "iou(box1, box2) as iou"
+    )
+
+    q.show(10, 100, true)
   }
 }

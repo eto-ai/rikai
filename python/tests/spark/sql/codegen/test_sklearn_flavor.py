@@ -37,8 +37,8 @@ def test_sklearn_linear_regression(tmp_path: Path, spark: SparkSession):
         )
         spark.sql(
             f"""
-        CREATE MODEL {model_name} USING 'mlflow:///{registered_model_name}';
-        """
+            CREATE MODEL {model_name} USING 'mlflow:///{registered_model_name}';
+            """
         )
 
         df = spark.range(2).selectExpr("id as x0", "id+1 as x1")
@@ -87,7 +87,7 @@ def test_sklearn_random_forest(tmp_path: Path, spark: SparkSession):
         spark.sql(
             f"""
             CREATE MODEL {model_name} USING 'mlflow:///{registered_model_name}';
-        """
+            """
         )
 
         df = spark.range(2).selectExpr(
@@ -98,7 +98,7 @@ def test_sklearn_random_forest(tmp_path: Path, spark: SparkSession):
         result = spark.sql(
             f"""
             select ML_PREDICT({model_name}, array(x0, x1, x2, x3)) as pred from tbl_X
-        """
+            """
         )
         result.show()
         assert result.schema == StructType([StructField("pred", LongType())])

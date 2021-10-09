@@ -23,13 +23,13 @@ def test_sklearn_linear_regression(tmp_path: Path, spark: SparkSession):
     with mlflow.start_run():
         model.fit(X, y)
 
-        registered_model_name = "sklearn_linear_regression"
+        reg_model_name = "sklearn_linear_regression"
         model_name = "sk_lr_m"
         rikai.mlflow.sklearn.log_model(
             model,
             artifact_path="model",
             schema="double",
-            registered_model_name=registered_model_name,
+            registered_model_name=reg_model_name,
         )
 
         spark.conf.set(
@@ -37,7 +37,7 @@ def test_sklearn_linear_regression(tmp_path: Path, spark: SparkSession):
         )
         spark.sql(
             f"""
-            CREATE MODEL {model_name} USING 'mlflow:///{registered_model_name}';
+            CREATE MODEL {model_name} USING 'mlflow:///{reg_model_name}';
             """
         )
 
@@ -72,13 +72,13 @@ def test_sklearn_random_forest(tmp_path: Path, spark: SparkSession):
     with mlflow.start_run():
         model.fit(X, y)
 
-        registered_model_name = "sklearn_random_forest"
+        reg_model_name = "sklearn_random_forest"
         model_name = "sk_rf_m"
         rikai.mlflow.sklearn.log_model(
             model,
             artifact_path="model",
             schema="long",
-            registered_model_name=registered_model_name,
+            registered_model_name=reg_model_name,
         )
 
         spark.conf.set(
@@ -86,7 +86,7 @@ def test_sklearn_random_forest(tmp_path: Path, spark: SparkSession):
         )
         spark.sql(
             f"""
-            CREATE MODEL {model_name} USING 'mlflow:///{registered_model_name}';
+            CREATE MODEL {model_name} USING 'mlflow:///{reg_model_name}';
             """
         )
 
@@ -97,7 +97,9 @@ def test_sklearn_random_forest(tmp_path: Path, spark: SparkSession):
 
         result = spark.sql(
             f"""
-            select ML_PREDICT({model_name}, array(x0, x1, x2, x3)) as pred from tbl_X
+            select
+                ML_PREDICT({model_name}, array(x0, x1, x2, x3)) as pred
+            from tbl_X
             """
         )
         result.show()

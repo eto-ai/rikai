@@ -83,6 +83,22 @@ def mlflow_client(
             registered_model_name="vanilla-mlflow-no-tags",
         )
 
+    # vanilla mlflow wrong tags
+    with mlflow.start_run():
+        mlflow.pytorch.log_model(
+            model,
+            artifact_path,
+            registered_model_name="vanilla-mlflow-wrong-tags",
+        )
+        mlflow.set_tags(
+            {
+                "rikai.model.flavor": "pytorch",
+                "rikai.output.schema": schema,
+                "rikai.transforms.pre": "wrong_pre",
+                "rikai.transforms.post": "wrong_post",
+            }
+        )
+
     spark.conf.set("rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri)
     return mlflow.tracking.MlflowClient(tracking_uri)
 
@@ -154,6 +170,18 @@ def test_mlflow_model_without_custom_logger(
         ).format(pre_processing, post_processing, schema)
     )
     check_ml_predict(spark, "vanilla_fire")
+
+    spark.sql(
+        (
+            "CREATE MODEL vanilla_fixer "
+            "FLAVOR pytorch "
+            "PREPROCESSOR '{}' "
+            "POSTPROCESSOR '{}' "
+            "RETURNS {} "
+            "USING 'mlflow:/vanilla-mlflow-wrong-tags/1'"
+        ).format(pre_processing, post_processing, schema)
+    )
+    check_ml_predict(spark, "vanilla_fixer")
 
 
 @pytest.mark.timeout(60)

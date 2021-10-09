@@ -18,6 +18,7 @@
 
 from __future__ import annotations
 
+import base64
 from io import BytesIO, IOBase
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -32,14 +33,14 @@ from PIL import Image as PILImage
 from rikai.conf import CONF_RIKAI_IMAGE_DEFAULT_FORMAT, options
 from rikai.internal.uri_utils import normalize_uri
 from rikai.io import copy, open_output_stream
-from rikai.mixin import Asset, Displayable, ToNumpy, ToPIL
+from rikai.mixin import Asset, Displayable, ToNumpy, ToPIL, ToDict
 from rikai.spark.types import ImageType
 from rikai.types.geometry import Box2d
 
 __all__ = ["Image"]
 
 
-class Image(ToNumpy, ToPIL, Asset, Displayable):
+class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
     """An external Image Asset.
 
     It contains a reference URI to an image stored on the remote system.
@@ -199,6 +200,11 @@ class Image(ToNumpy, ToPIL, Asset, Displayable):
         """Convert this image into an :py:class:`numpy.ndarray`."""
         with self.to_pil() as pil_img:
             return np.asarray(pil_img)
+
+    def to_dict(self) -> dict:
+        if self.is_embedded:
+            return {"data": base64.b64encode(self.data).decode("ascii")}
+        return {"uri": self.uri}
 
     def save(self, uri: Union[str, Path]) -> Image:
         """Save the image into a file, specified by the file path or URI.

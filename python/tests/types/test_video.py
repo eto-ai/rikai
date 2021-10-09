@@ -31,6 +31,7 @@ def test_youtube():
     assert YouTubeVideo(vid) != YouTubeVideo("othervid")
 
 
+@pytest.mark.skip(reason="flaky due to youtube changes")
 @pytest.mark.timeout(30)
 @pytest.mark.webtest
 def test_youtube_sample_stream():

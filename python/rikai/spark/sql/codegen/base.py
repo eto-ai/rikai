@@ -27,6 +27,10 @@ from rikai.spark.sql.schema import parse_schema
 __all__ = ["Registry", "ModelSpec"]
 
 
+def _identity(x):
+    return x
+
+
 class Registry(ABC):
     """Base class of a Model Registry"""
 
@@ -146,7 +150,7 @@ class ModelSpec(ABC):
             or self._spec["transforms"]["pre"] is None
         ):
             # Passthrough
-            return lambda x: x
+            return _identity
         f = find_class(self._spec["transforms"]["pre"])
         return f(self.options)
 
@@ -159,7 +163,7 @@ class ModelSpec(ABC):
             or self._spec["transforms"]["post"] is None
         ):
             # Passthrough
-            return lambda x: x
+            return _identity
         f = find_class(self._spec["transforms"]["post"])
         return f(self.options)
 

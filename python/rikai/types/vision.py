@@ -33,7 +33,7 @@ from PIL import Image as PILImage
 from rikai.conf import CONF_RIKAI_IMAGE_DEFAULT_FORMAT, options
 from rikai.internal.uri_utils import normalize_uri
 from rikai.io import copy, open_output_stream
-from rikai.mixin import Asset, Displayable, ToNumpy, ToPIL, ToDict
+from rikai.mixin import Asset, Displayable, ToDict, ToNumpy, ToPIL
 from rikai.spark.types import ImageType
 from rikai.types.geometry import Box2d
 

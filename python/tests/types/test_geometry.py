@@ -17,7 +17,7 @@ from typing import Sequence
 import numpy as np
 from PIL import Image, ImageDraw
 
-from rikai.types import Box2d, Point, Box3d
+from rikai.types import Box2d, Box3d, Point
 
 
 def test_scale_box2d():

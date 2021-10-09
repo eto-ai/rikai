@@ -13,11 +13,11 @@
 #  limitations under the License.
 
 from typing import Iterator
-import pandas as pd
-import numpy as np
 
-from pyspark.sql.types import StructType
+import numpy as np
+import pandas as pd
 from pyspark.sql.functions import pandas_udf, PandasUDFType
+from pyspark.sql.types import StructType
 
 
 def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):

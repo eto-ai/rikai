@@ -17,7 +17,7 @@ import pandas as pd
 import numpy as np
 
 from pyspark.sql.types import StructType
-from pyspark.sql.functions import pandas_udf
+from pyspark.sql.functions import pandas_udf, PandasUDFType
 
 
 def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
@@ -38,9 +38,8 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     ) -> Iterator[pd.Series]:
         model = spec.load_model()
         for series in list(iter):
-            assert series.shape == (1,)
-            X = [x.tolist() for x in series[0]]
-            Y = model.predict(X)
-            yield pd.Series([Y.tolist()])
+            X = np.vstack(series.to_numpy())
+            y = model.predict(X)
+            yield pd.Series(y)
 
     return pandas_udf(sklearn_inference_udf, returnType=spec.schema)

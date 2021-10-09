@@ -17,6 +17,7 @@
 package ai.eto.rikai.sql.spark.expressions
 
 import ai.eto.rikai.SparkTestSession
+import org.apache.spark.sql.AnalysisException
 import org.apache.spark.sql.rikai.Box2d
 import org.scalactic.TolerantNumerics
 import org.scalatest.funsuite.AnyFunSuite
@@ -26,12 +27,25 @@ class SqlFunctionTest extends AnyFunSuite with SparkTestSession {
   implicit val doubleEquality = TolerantNumerics.tolerantDoubleEquality(0.01)
 
   test("test box area function") {
-
     Seq((1, new Box2d(1, 2, 3, 4)))
       .toDF("id", "box")
       .createOrReplaceTempView("boxes")
     val df = spark.sql("SELECT *, area(box) as area FROM boxes")
     assert(df.first().getAs[Double]("area") == 4)
+  }
+
+  test("test box area over null") {
+    assert(spark.sql("SELECT area(null)").first().isNullAt(0))
+  }
+
+  test("test box area with wrong parameters") {
+    assertThrows[AnalysisException] {
+      spark.sql("SELECT area(123)")
+    }
+
+    assertThrows[AnalysisException] {
+      spark.sql("SELECT area('string_val')")
+    }
   }
 
   test("test iou function") {

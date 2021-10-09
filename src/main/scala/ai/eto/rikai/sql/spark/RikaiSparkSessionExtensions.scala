@@ -41,13 +41,13 @@ class RikaiSparkSessionExtensions extends (SparkSessionExtensions => Unit) {
     extensions.injectFunction(
       new FunctionIdentifier("area"),
       new ExpressionInfo("org.apache.spark.sql.rikai.expressions", "Area"),
-      (exprs: Seq[Expression]) => Area(exprs)
+      (exprs: Seq[Expression]) => Area(exprs.head)
     )
 
     extensions.injectFunction(
       new FunctionIdentifier("iou"),
       new ExpressionInfo("org.apache.spark.sql.rikai.expressions", "IOU"),
-      (exprs: Seq[Expression]) => IOU(exprs(0), exprs(1))
+      (exprs: Seq[Expression]) => IOU(exprs.head, exprs(1))
     )
 
   }

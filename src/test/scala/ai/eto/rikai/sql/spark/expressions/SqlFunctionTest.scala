@@ -49,18 +49,22 @@ class SqlFunctionTest extends AnyFunSuite with SparkTestSession {
 
     spark.sql("select box2d(0, 0, 20, 20)").show()
 
-    val q = spark.range(2).select(
-      F.col("id").as("id"),
-      F.rand(10).as("xmin"),
-      F.rand(10).as("ymin"),
-      F.lit(100).as("xmax"),
-      F.lit(100).as("ymax"),
-    ).selectExpr(
-      "box2d(xmin, ymin, xmax, ymax) as box1",
-      "box2d(xmin + 1, ymin + 1, xmax, ymax) as box2"
-    ).selectExpr(
-      "iou(box1, box2) as iou"
-    )
+    val q = spark
+      .range(2)
+      .select(
+        F.col("id").as("id"),
+        F.rand(10).as("xmin"),
+        F.rand(10).as("ymin"),
+        F.lit(100).as("xmax"),
+        F.lit(100).as("ymax")
+      )
+      .selectExpr(
+        "box2d(xmin, ymin, xmax, ymax) as box1",
+        "box2d(xmin + 1, ymin + 1, xmax, ymax) as box2"
+      )
+      .selectExpr(
+        "iou(box1, box2) as iou"
+      )
 
     q.show(10, 100, true)
   }

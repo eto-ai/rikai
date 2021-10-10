@@ -155,3 +155,5 @@ class Box2dType extends UserDefinedType[Box2d] {
 
   override def typeName: String = "box2d"
 }
+
+object Box2dType extends Box2dType

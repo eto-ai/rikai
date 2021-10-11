@@ -117,9 +117,7 @@ def convert(
                 annos.append(
                     {
                         "label_id": ann["category_id"],
-                        "label": categories[ann["category_id"]][
-                            "name"
-                        ],
+                        "label": categories[ann["category_id"]]["name"],
                         "bbox": bbox,
                         "area": float(ann["area"]),
                     }

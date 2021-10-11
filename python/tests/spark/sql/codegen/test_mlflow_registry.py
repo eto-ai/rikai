@@ -42,7 +42,7 @@ def mlflow_client(
 
         schema = (
             "STRUCT<boxes:ARRAY<ARRAY<float>>,"
-            "scores:ARRAY<float>,labels:ARRAY<int>>"
+            "scores:ARRAY<float>,label_ids:ARRAY<int>>"
         )
         pre_processing = (
             "rikai.contrib.torch.transforms."
@@ -114,7 +114,7 @@ def test_modelspec(mlflow_client: MlflowClient):
     assert spec.flavor == "pytorch"
     assert spec.schema == parse_schema(
         "STRUCT<boxes:ARRAY<ARRAY<float>>,"
-        "scores:ARRAY<float>, labels:ARRAY<int>>"
+        "scores:ARRAY<float>, label_ids:ARRAY<int>>"
     )
     assert spec._spec["transforms"]["pre"] == (
         "rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn"
@@ -149,7 +149,7 @@ def test_mlflow_model_without_custom_logger(
 
     schema = (
         "STRUCT<boxes:ARRAY<ARRAY<float>>,"
-        "scores:ARRAY<float>,labels:ARRAY<int>>"
+        "scores:ARRAY<float>,label_ids:ARRAY<int>>"
     )
     pre_processing = (
         "rikai.contrib.torch.transforms."

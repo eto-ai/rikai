@@ -69,7 +69,7 @@ class Dataset(IterableDataset):
     >>> from rikai.torch.data import Dataset
     >>> from torch.utils.data import DataLoader
     >>>
-    >>> dataset = Dataset("dataset", columns=["image", "label"])
+    >>> dataset = Dataset("dataset", columns=["image", "label_id"])
     >>> # dataset = BufferedShuffleDataset(dataset)
     >>> loader = DataLoader(dataset, num_workers=8)
 

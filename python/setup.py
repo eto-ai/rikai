@@ -23,6 +23,7 @@ dev = [
     "requests-mock",
     "wheel",
 ]
+sklearn = ["scikit-learn"]
 torch = ["torch>=1.4.0", "torchvision"]
 jupyter = ["matplotlib", "jupyterlab"]
 aws = ["boto3", "botocore"]
@@ -31,7 +32,7 @@ docs = ["sphinx"]
 video = ["ffmpeg-python", "scenedetect"]
 youtube = ["pafy", "youtube_dl"]
 mlflow = ["mlflow>=1.15"]
-all = torch + jupyter + gcp + docs + video + youtube + mlflow + aws
+all = sklearn + torch + jupyter + gcp + docs + video + youtube + mlflow + aws
 
 
 setup(
@@ -67,6 +68,7 @@ setup(
         "gcp": gcp,
         "jupyter": jupyter,
         "mlflow": mlflow,
+        "sklearn": sklearn,
         "pytorch": torch,
         "video": video,
         "youtube": youtube,

@@ -106,7 +106,7 @@ class MlflowLogger:
 
         # no need to set the tracking uri here since this is intended to be
         # called inside the training loop within mlflow.start_run
-        getattr(mlflow, flavor).log_model(
+        getattr(mlflow, self.flavor).log_model(
             model,
             artifact_path,
             registered_model_name=registered_model_name,
@@ -130,6 +130,6 @@ class MlflowLogger:
         mlflow.set_tags(tags)
 
 
-KNOWN_FLAVORS = ["pytorch"]
+KNOWN_FLAVORS = ["pytorch", "sklearn"]
 for flavor in KNOWN_FLAVORS:
     globals()[flavor] = MlflowLogger(flavor)

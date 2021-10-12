@@ -23,8 +23,8 @@ building Rikai with two main goals:
    and monitoring in production pipelines.
 
 Current (v0.0.11) main features:
-1. Native support in Jupyter, Spark and PyTorch for images, videos and annotations: reduce ad-hoc 
-   type conversions and boilerplate when moving between ETL and training.
+1. Native support in Jupyter, Scikit-learn, Spark and PyTorch for images, videos and annotations:
+   reduce ad-hoc type conversions and boilerplate when moving between ETL and training.
 2. Custom functionality for working with images and videos at scale: high-level APIs for 
    processing, filtering, sampling, and more.
 3. Run ML-models via SQL. Forget Smart Homes, build a Smart Data Warehouse.
@@ -177,3 +177,6 @@ sbt publishLocal
 cd python
 pip install -e . # pip install -e .[all] to install all optional extras (see "Install from pypi")
 ```
+
+## Events
++ Darcy Shen. Large Scale Video Data Analysis at Tubi. [Apache Hadoop Meetup 2021 @ Beijing](https://www.slidestalk.com/m/550)

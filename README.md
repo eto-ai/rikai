@@ -177,6 +177,3 @@ sbt publishLocal
 cd python
 pip install -e . # pip install -e .[all] to install all optional extras (see "Install from pypi")
 ```
-
-## Events
-+ Darcy Shen. Large Scale Video Data Analysis at Tubi. [Apache Hadoop Meetup 2021 @ Beijing](https://www.slidestalk.com/m/550)

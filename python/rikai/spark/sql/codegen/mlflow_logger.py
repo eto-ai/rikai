@@ -14,8 +14,8 @@
 """Custom Mlflow model logger to make sure models have the right logging for
 Rikai SQL ML
 """
-from typing import Any, Optional
 import warnings
+from typing import Any, Optional
 
 CONF_MLFLOW_TRACKING_URI = "rikai.sql.ml.registry.mlflow.tracking_uri"
 CONF_MLFLOW_OUTPUT_SCHEMA = "rikai.output.schema"

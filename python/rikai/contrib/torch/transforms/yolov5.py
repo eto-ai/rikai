@@ -40,12 +40,12 @@ def post_processing(options: Dict[str, Any]) -> Callable:
         for predicts in batch.pred:
             predict_result = {
                 "boxes": [],
-                "labels": [],
+                "label_ids": [],
                 "scores": [],
             }
             for *box, conf, cls in predicts.tolist():
                 predict_result["boxes"].append(box)
-                predict_result["labels"].append(cls)
+                predict_result["label_ids"].append(cls)
                 predict_result["scores"].append(conf)
             results.append(predict_result)
         return results
@@ -55,5 +55,5 @@ def post_processing(options: Dict[str, Any]) -> Callable:
 
 OUTPUT_SCHEMA = (
     "struct<boxes:array<array<float>>, scores:array<float>, "
-    "labels:array<int>>"
+    "label_ids:array<int>>"
 )

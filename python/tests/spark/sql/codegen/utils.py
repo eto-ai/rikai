@@ -57,7 +57,7 @@ def check_ml_predict(spark: SparkSession, model_name: str):
                             ArrayType(ArrayType(FloatType())),
                         ),
                         StructField("scores", ArrayType(FloatType())),
-                        StructField("labels", ArrayType(IntegerType())),
+                        StructField("label_ids", ArrayType(IntegerType())),
                     ]
                 ),
             ),
@@ -68,7 +68,7 @@ def check_ml_predict(spark: SparkSession, model_name: str):
             StructField(
                 "predictions",
                 parse_schema(
-                    "STRUCT<boxes:ARRAY<ARRAY<float>>, scores:ARRAY<float>, labels:ARRAY<int>>"  # noqa
+                    "STRUCT<boxes:ARRAY<ARRAY<float>>, scores:ARRAY<float>, label_ids:ARRAY<int>>"  # noqa
                 ),
             )
         ]

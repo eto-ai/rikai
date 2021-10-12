@@ -116,10 +116,8 @@ def convert(
                 bbox = Box2d.from_top_left(*ann["bbox"])
                 annos.append(
                     {
-                        "category_id": ann["category_id"],
-                        "category_text": categories[ann["category_id"]][
-                            "name"
-                        ],
+                        "label_id": ann["category_id"],
+                        "label": categories[ann["category_id"]]["name"],
                         "bbox": bbox,
                         "area": float(ann["area"]),
                     }
@@ -149,8 +147,8 @@ def convert(
                 ArrayType(
                     StructType(
                         [
-                            StructField("category_id", IntegerType()),
-                            StructField("category_text", StringType()),
+                            StructField("label_id", IntegerType()),
+                            StructField("label", StringType()),
                             StructField("area", FloatType()),
                             StructField("bbox", Box2dType()),
                         ]

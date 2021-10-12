@@ -22,7 +22,7 @@ from typing import Sequence, Tuple, Union
 
 import numpy as np
 
-from rikai.mixin import ToNumpy, ToDict
+from rikai.mixin import ToDict, ToNumpy
 from rikai.spark.types.geometry import Box2dType, Box3dType, PointType
 
 __all__ = ["Point", "Box3d", "Box2d"]

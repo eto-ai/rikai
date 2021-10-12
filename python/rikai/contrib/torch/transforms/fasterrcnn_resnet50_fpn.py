@@ -40,7 +40,7 @@ def post_processing(options: Dict[str, Any]) -> Callable:
         for predicts in batch:
             predict_result = {
                 "boxes": [],
-                "labels": [],
+                "label_ids": [],
                 "scores": [],
             }
             for box, label, score in zip(
@@ -51,7 +51,7 @@ def post_processing(options: Dict[str, Any]) -> Callable:
                 if score < min_score:
                     continue
                 predict_result["boxes"].append(box)
-                predict_result["labels"].append(label)
+                predict_result["label_ids"].append(label)
                 predict_result["scores"].append(score)
 
             results.append(predict_result)
@@ -62,5 +62,5 @@ def post_processing(options: Dict[str, Any]) -> Callable:
 
 OUTPUT_SCHEMA = (
     "struct<boxes:array<array<float>>, scores:array<float>, "
-    "labels:array<int>>"
+    "label_ids:array<int>>"
 )

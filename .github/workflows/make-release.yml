@@ -30,10 +30,6 @@ jobs:
         sudo apt update
         sudo apt-get -y -qq install libsnappy-dev ffmpeg
         python -m pip install -e .[all,dev]
-    - name: Make new github release
-      uses: ncipollo/release-action@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
     - name: Bump patch back to dev build
       run: make patch
     - name: Push changes

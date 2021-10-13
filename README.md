@@ -23,8 +23,8 @@ building Rikai with two main goals:
    and monitoring in production pipelines.
 
 Current (v0.0.11) main features:
-1. Native support in Jupyter, Spark and PyTorch for images, videos and annotations: reduce ad-hoc 
-   type conversions and boilerplate when moving between ETL and training.
+1. Native support in Jupyter, Scikit-learn, Spark and PyTorch for images, videos and annotations:
+   reduce ad-hoc type conversions and boilerplate when moving between ETL and training.
 2. Custom functionality for working with images and videos at scale: high-level APIs for 
    processing, filtering, sampling, and more.
 3. Run ML-models via SQL. Forget Smart Homes, build a Smart Data Warehouse.
@@ -103,8 +103,10 @@ SELECT id, ML_PREDICT(yolo5, image) FROM my_dataset
 WHERE split = "train" LIMIT 100;
 ```
 
-Rikai can use Mlflow as its model registry. This allows you to automatically pickup the latest
-model version if you're using the mlflow model registry.
+Rikai can use MLflow as its model registry. This allows you to automatically pickup the latest
+model version if you're using the mlflow model registry. Here is a list of supported model flavors:
++ PyTorch (pytorch)
++ Scikit-learn (sklearn)
 
 ```sql
 CREATE MODEL yolo5

@@ -34,7 +34,7 @@ class Box2dTest extends AnyFunSuite with SparkTestSession {
 
     val interBox = box1 & box2
     assert(interBox.isDefined)
-    assert(interBox.map(b => b.area()).getOrElse(0) == 100)
+    assert(interBox.map(b => b.area).getOrElse(0) == 100)
 
     val big = new Box2d(0, 0, 100, 100)
     assert((box2 & big).isDefined)

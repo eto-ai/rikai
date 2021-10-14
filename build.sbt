@@ -1,7 +1,7 @@
 import java.io.File
 import scala.reflect.io.Directory
 
-scalaVersion := "2.12.11"
+scalaVersion := "2.12.15"
 name := "rikai"
 
 def versionFmt(out: sbtdynver.GitDescribeOutput): String = {

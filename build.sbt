@@ -51,7 +51,7 @@ scmInfo := Some(
 )
 
 libraryDependencies ++= {
-  val sparkVersion = "3.1.1"
+  val sparkVersion = "3.2.0"
   val awsVersion = "2.15.69"
   val log4jVersion = "2.15.0"
   val scalaLoggingVersion = "3.9.4"

@@ -42,6 +42,9 @@ case class Area(child: Expression)
   override def dataType: DataType = DoubleType
 
   override def prettyName: String = "area"
+
+  override def withNewChildInternal(newChild: Expression): Expression =
+    copy(child = newChild)
 }
 
 case class IOU(leftBox: Expression, rightBox: Expression)
@@ -63,4 +66,10 @@ case class IOU(leftBox: Expression, rightBox: Expression)
   }
 
   override def prettyName: String = "iou"
+
+  override def withNewChildrenInternal(
+      newLeft: Expression,
+      newRight: Expression
+  ): Expression =
+    copy(leftBox = newLeft, rightBox = newRight)
 }

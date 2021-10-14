@@ -19,10 +19,10 @@ package ai.eto.rikai.sql.spark.execution
 import ai.eto.rikai.sql.model.Catalog
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.expressions.AttributeReference
-import org.apache.spark.sql.execution.command.RunnableCommand
+import org.apache.spark.sql.execution.command.LeafRunnableCommand
 import org.apache.spark.sql.types.StringType
 
-trait ModelCommand extends RunnableCommand {
+trait ModelCommand extends LeafRunnableCommand {
 
   def catalog(session: SparkSession): Catalog = {
     val catalog = Catalog.getOrCreate(session.sparkContext.getConf)

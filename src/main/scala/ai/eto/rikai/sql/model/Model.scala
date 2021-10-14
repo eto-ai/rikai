@@ -93,7 +93,7 @@ class SparkUDFModel(
 
   /** Convert a [[Model]] to a Spark Expression in Spark SQL's logical plan. */
   override def asSpark(args: Seq[Expression]): Expression = {
-    new UnresolvedFunction(
+    UnresolvedFunction(
       new FunctionIdentifier(funcName),
       arguments = args,
       isDistinct = false

@@ -16,6 +16,7 @@ from typing import Iterator
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import udf
 
+
 def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     """Construct a UDF to run sparkml model.
 

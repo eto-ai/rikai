@@ -11,14 +11,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 from typing import Iterator
 
-import numpy as np
-import pandas as pd
-from pyspark.sql.functions import pandas_udf, PandasUDFType
-from pyspark.sql.types import StructType
-
+from pyspark.sql import DataFrame
+from pyspark.sql.functions import udf
 
 def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     """Construct a UDF to run sparkml model.
@@ -32,4 +28,13 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     -------
     A Spark ML UDF.
     """
-    return None  #TODO implement
+
+    def spark_ml_udf(
+            iter: Iterator[DataFrame],
+    ) -> Iterator[DataFrame]:
+        model = spec.load_model()
+        for old_frame in list(iter):
+            new_frame = model.transform(old_frame)
+            yield new_frame
+
+    return udf(spark_ml_udf, returnType=spec.schema)

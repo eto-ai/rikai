@@ -130,6 +130,6 @@ class MlflowLogger:
         mlflow.set_tags(tags)
 
 
-KNOWN_FLAVORS = ["pytorch", "sklearn", "sparkml"]
+KNOWN_FLAVORS = ["pytorch", "sklearn", "spark"]
 for flavor in KNOWN_FLAVORS:
     globals()[flavor] = MlflowLogger(flavor)

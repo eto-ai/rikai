@@ -194,7 +194,7 @@ def udf_from_spec(spec: ModelSpec):
         from rikai.spark.sql.codegen.sklearn import generate_udf
 
         return generate_udf(spec)
-    elif spec.flavor == "sparkml":
+    elif spec.flavor == "spark":
         from rikai.spark.sql.codegen.sparkml import generate_udf
 
         return generate_udf(spec)

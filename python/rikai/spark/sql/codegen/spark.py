@@ -15,6 +15,9 @@ from typing import Iterator
 
 import pandas as pd
 from pyspark.sql.functions import pandas_udf
+from pyspark import SparkContext
+from rikai.spark.utils import init_spark_session
+
 
 def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     """Construct a UDF to run sparkml model.
@@ -32,6 +35,11 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     def spark_ml_udf(
             iter: Iterator[pd.DataFrame],
     ) -> Iterator[pd.DataFrame]:
+        # init_spark_session()
+        print("context context context")
+        print(SparkContext)
+        print(SparkContext._gateway)
+        # print(SparkContext._gateway.jvm)
         model = spec.load_model()
         for old_frame in list(iter):
             new_frame = model.transform(old_frame)

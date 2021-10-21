@@ -23,8 +23,8 @@ pip install yolov5
 ```
 """  # noqa E501
 
-from typing import Any, Callable, Dict
 import pickle
+from typing import Any, Callable, Dict
 
 __all__ = ["pre_processing", "post_processing", "OUTPUT_SCHEMA"]
 

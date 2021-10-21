@@ -27,8 +27,10 @@ from rikai.torch.pandas import PandasDataset
 DEFAULT_NUM_WORKERS = 8
 DEFAULT_BATCH_SIZE = 4
 
+
 def _identity(x):
     return x
+
 
 def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     """Construct a UDF to run pytorch model.
@@ -81,7 +83,7 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                         dataset,
                         batch_size=batch_size,
                         num_workers=num_workers,
-                        collate_fn=_identity
+                        collate_fn=_identity,
                     )
 
                 results = []

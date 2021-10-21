@@ -32,6 +32,7 @@ __all__ = ["pre_processing", "post_processing", "OUTPUT_SCHEMA"]
 def _pre_process_func(image_binary):
     return pickle.loads(image_binary)
 
+
 def pre_processing(options: Dict[str, Any]) -> Callable:
     return _pre_process_func
 

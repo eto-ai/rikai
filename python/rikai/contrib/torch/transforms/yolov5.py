@@ -24,8 +24,16 @@ pip install yolov5
 """  # noqa E501
 
 from typing import Any, Callable, Dict
+import pickle
 
-__all__ = ["post_processing", "OUTPUT_SCHEMA"]
+__all__ = ["pre_processing", "post_processing", "OUTPUT_SCHEMA"]
+
+
+def _pre_process_func(image_binary):
+    return pickle.loads(image_binary)
+
+def pre_processing(options: Dict[str, Any]) -> Callable:
+    return _pre_process_func
 
 
 def post_processing(options: Dict[str, Any]) -> Callable:

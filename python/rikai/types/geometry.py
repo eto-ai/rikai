@@ -18,7 +18,7 @@
 from __future__ import annotations
 
 from numbers import Real
-from typing import Sequence, Tuple, Union
+from typing import Sequence, Tuple, Union, List
 
 import numpy as np
 
@@ -280,6 +280,24 @@ class Box2d(ToNumpy, Sequence, ToDict):
         return np.maximum(0, arr[:, 2] - arr[:, 0]) * np.maximum(
             0, arr[:, 3] - arr[:, 1]
         )
+
+    @staticmethod
+    def iou(box_list1: List[Box2d], box_list2: List[Box2d]) -> np.ndarray:
+        def getvalue(boxa: Box2d, boxb: Box2d):
+            xmin = max(boxa.xmin, boxb.xmin)
+            ymin = max(boxa.ymin, boxb.ymin)
+            xmax = min(boxa.xmax, boxb.xmax)
+            ymax = min(boxa.ymax, boxb.ymax)
+            inter_area = max(0.0, xmax - xmin) * max(0.0, ymax - ymin)
+            return inter_area / (boxa.area + boxb.area - inter_area)
+
+        result = list()
+        for a in box_list1:
+            row = list()
+            for b in box_list2:
+                row.append(getvalue(a, b))
+            result.append(np.asarray(row))
+        return np.asarray(result)
 
     def iou(
         self, other: Union[Box2d, Sequence[Box2d], np.ndarray]

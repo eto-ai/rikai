@@ -64,6 +64,16 @@ def test_box2d_vectorize_iou():
     )
 
 
+def test_box2d_matrix_iou():
+    vec1 = [Box2d(0, 0, 10, 10), Box2d(0, 0, 20, 20)]
+    vec2 = [Box2d(5, 5, 10, 10), Box2d(10, 10, 20, 20)]
+    assert np.allclose(
+        [[0.25, 0.0],
+         [0.0625, 0.25]],
+        Box2d.iou(vec1, vec2)
+    )
+
+
 def test_box2d_empty_iou():
     box1 = Box2d(0, 0, 20, 20)
     assert box1.iou([]).size == 0

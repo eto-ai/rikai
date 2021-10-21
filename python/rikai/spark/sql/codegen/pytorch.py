@@ -77,8 +77,8 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                         num_workers=num_workers,
                     )
                 else:
-                    # Keep the data type as it is and avoid the collate_fn
-                    # of DataLoader from converting numpy.ndarray to torch.Tensor
+                    # Keep the data type as it is and avoid the collate_fn of
+                    # DataLoader from converting numpy.ndarray to torch.Tensor
                     dataloader = DataLoader(
                         dataset,
                         batch_size=batch_size,

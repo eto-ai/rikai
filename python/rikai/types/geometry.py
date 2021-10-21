@@ -282,7 +282,7 @@ class Box2d(ToNumpy, Sequence, ToDict):
         )
 
     @staticmethod
-    def iou(box_list1: List[Box2d], box_list2: List[Box2d]) -> np.ndarray:
+    def iou_matrix(box_list1: List[Box2d], box_list2: List[Box2d]) -> np.ndarray:
         def getvalue(boxa: Box2d, boxb: Box2d):
             xmin = max(boxa.xmin, boxb.xmin)
             ymin = max(boxa.ymin, boxb.ymin)

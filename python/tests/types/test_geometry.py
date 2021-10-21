@@ -70,7 +70,7 @@ def test_box2d_matrix_iou():
     assert np.allclose(
         [[0.25, 0.0],
          [0.0625, 0.25]],
-        Box2d.iou(vec1, vec2)
+        Box2d.iou_matrix(vec1, vec2)
     )
 
 

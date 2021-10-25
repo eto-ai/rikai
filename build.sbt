@@ -61,6 +61,7 @@ libraryDependencies ++= {
 
   Seq(
     "org.apache.spark" %% "spark-sql" % sparkVersion % "provided",
+    "org.apache.spark" %% "spark-mllib" % sparkVersion % "provided",
     "software.amazon.awssdk" % "s3" % awsVersion % "provided",
     "org.xerial.snappy" % "snappy-java" % snappyVersion,
     "org.apache.logging.log4j" %% "log4j-api-scala" % log4jScalaVersion,

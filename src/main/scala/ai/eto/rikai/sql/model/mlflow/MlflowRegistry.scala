@@ -19,7 +19,9 @@ package ai.eto.rikai.sql.model.mlflow
 import ai.eto.rikai.sql.model.{Model, ModelNotFoundException, ModelSpec, Registry}
 import ai.eto.rikai.sql.spark.Python
 import org.apache.logging.log4j.scala.Logging
+import org.apache.spark.ml.PipelineModel
 import org.mlflow.tracking.MlflowContext
+
 import scala.collection.JavaConverters._
 
 /** MLflow-based Model [[Registry]].
@@ -34,9 +36,7 @@ class MlflowRegistry(val conf: Map[String, String])
   /** Resolve a [[Model]] from the specific URI.
     *
     * @param spec Model Spec to send to python.
-    *
     * @throws ModelNotFoundException if the model does not exist on the registry.
-    *
     * @return [[Model]] if found.
     */
   @throws[ModelNotFoundException]
@@ -54,10 +54,20 @@ class MlflowRegistry(val conf: Map[String, String])
     println(s"runId $runId")
     val run = mlflowClient.getRun(runId)
     val flavor = run.getData.getTagsList.asScala.find(_.getKey == "rikai.model.flavor").map(_.getValue)
-//    val schema = run.getData.getTagsList.asScala.find(_.getKey == "rikai.output.schema").map(_.getValue)
+    //    val schema = run.getData.getTagsList.asScala.find(_.getKey == "rikai.output.schema").map(_.getValue)
     println(s"get flavor from run $flavor")
     flavor match {
-      case Some("spark") => ???
+      case Some("spark") =>
+        try {
+          val artifacts = mlflowClient.downloadArtifacts(runId)
+          println(s"artifacts: $artifacts")
+          val transformer = PipelineModel.load(artifacts.toURI.toString + "/model/sparkml")
+          println(s"tran tran tran ${transformer.getClass}")
+        } catch {
+          case e: Exception =>
+            e.printStackTrace()
+        }
+        null
       case _ =>
         Python.resolve(pyClass, spec)
     }

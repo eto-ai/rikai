@@ -16,19 +16,16 @@
 
 package ai.eto.rikai.sql.model.mlflow
 
-import ai.eto.rikai.sql.model.{
-  Model,
-  ModelNotFoundException,
-  ModelSpec,
-  Registry
-}
+import ai.eto.rikai.sql.model.{Model, ModelNotFoundException, ModelSpec, Registry}
 import ai.eto.rikai.sql.spark.Python
 import org.apache.logging.log4j.scala.Logging
+import org.mlflow.tracking.MlflowContext
+import scala.collection.JavaConverters._
 
 /** MLflow-based Model [[Registry]].
   */
 class MlflowRegistry(val conf: Map[String, String])
-    extends Registry
+  extends Registry
     with Logging {
 
   private val pyClass: String =
@@ -44,9 +41,25 @@ class MlflowRegistry(val conf: Map[String, String])
     */
   @throws[ModelNotFoundException]
   override def resolve(
-      spec: ModelSpec
-  ): Model = {
-    logger.info(s"Resolving ML model from ${spec.uri}")
-    Python.resolve(pyClass, spec)
+                        spec: ModelSpec
+                      ): Model = {
+    val trackingUri = conf("rikai.sql.ml.registry.mlflow.tracking_uri")
+    val mlflowContext = new MlflowContext(trackingUri)
+    val mlflowClient = mlflowContext.getClient
+    val modelName = if (spec.getUri.startsWith("mlflow:///")) spec.getUri.drop("mlflow:///".length) else spec.getUri
+    val versions =
+      mlflowClient.getLatestVersions(modelName, List("None", "Staging", "Production").asJava).asScala
+    val newest = versions.maxBy(_.getVersion.toInt)
+    val runId = newest.getRunId
+    println(s"runId $runId")
+    val run = mlflowClient.getRun(runId)
+    val flavor = run.getData.getTagsList.asScala.find(_.getKey == "rikai.model.flavor").map(_.getValue)
+//    val schema = run.getData.getTagsList.asScala.find(_.getKey == "rikai.output.schema").map(_.getValue)
+    println(s"get flavor from run $flavor")
+    flavor match {
+      case Some("spark") => ???
+      case _ =>
+        Python.resolve(pyClass, spec)
+    }
   }
 }

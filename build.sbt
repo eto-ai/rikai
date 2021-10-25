@@ -66,6 +66,7 @@ libraryDependencies ++= {
     "org.apache.logging.log4j" %% "log4j-api-scala" % log4jScalaVersion,
     "org.apache.logging.log4j" % "log4j-core" % log4jVersion % Runtime,
     "org.scalatest" %% "scalatest-funsuite" % scalatestVersion % "test",
+    "org.mlflow" % "mlflow-client" % "1.16.0",
     "io.circe" %% "circe-core" % circeVersion,
     "io.circe" %% "circe-generic" % circeVersion,
     "io.circe" %% "circe-parser" % circeVersion

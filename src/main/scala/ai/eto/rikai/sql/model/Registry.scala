@@ -107,6 +107,7 @@ private[rikai] object Registry {
             .newInstance(conf)
             .asInstanceOf[Registry])
         logger.debug(s"Model Registry ${scheme} registered to: ${value}")
+        println(s"Model Registry ${scheme} registered to: ${value}")
       }
     }
   }
@@ -123,8 +124,11 @@ private[rikai] object Registry {
 
   @throws[ModelResolveException]
   private[model] def getRegistry(uri: String): Registry = {
+    println(s"uri uri uri: $uri")
     val parsedNormalizedUri = normalize_uri(uri)
+    println(s"parsed uri: $parsedNormalizedUri")
     val scheme: String = parsedNormalizedUri.getScheme
+    println(s"scheme: $scheme")
     registryMap.get(scheme) match {
       case Some(registry) => registry
       case None =>

@@ -18,8 +18,9 @@ package ai.eto.rikai.sql.model
 
 import org.apache.http.client.utils.URIUtils
 import org.apache.log4j.Logger
-import java.net.URI
+import org.apache.spark.sql.SparkSession
 
+import java.net.URI
 import scala.util.{Success, Try}
 
 /** Model Registry Integrations.
@@ -71,7 +72,7 @@ private[rikai] object Registry {
     *
     * @param conf a mapping of (key, value) pairs
     */
-  def registerAll(conf: Map[String, String]): Unit = {
+  def registerAll(conf: Map[String, String], session: SparkSession): Unit = {
     // defaults
     for ((key, value) <- DEFAULT_REGISTRIES ++ conf) {
       if (key == DEFAULT_URI_ROOT_KEY) {
@@ -103,8 +104,8 @@ private[rikai] object Registry {
         registryMap += (scheme ->
           Class
             .forName(value)
-            .getDeclaredConstructor(classOf[Map[String, String]])
-            .newInstance(conf)
+            .getDeclaredConstructor(classOf[Map[String, String]],classOf[SparkSession])
+            .newInstance(conf, session)
             .asInstanceOf[Registry])
         logger.debug(s"Model Registry ${scheme} registered to: ${value}")
         println(s"Model Registry ${scheme} registered to: ${value}")

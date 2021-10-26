@@ -16,18 +16,14 @@
 
 package ai.eto.rikai.sql.model.fs
 
-import ai.eto.rikai.sql.model.{
-  Model,
-  ModelNotFoundException,
-  ModelSpec,
-  Registry
-}
+import ai.eto.rikai.sql.model.{Model, ModelNotFoundException, ModelSpec, Registry}
 import ai.eto.rikai.sql.spark.Python
 import org.apache.logging.log4j.scala.Logging
+import org.apache.spark.sql.SparkSession
 
 /** FileSystem-based Model [[Registry]].
   */
-class FileSystemRegistry(val conf: Map[String, String])
+class FileSystemRegistry(val conf: Map[String, String], session: SparkSession)
     extends Registry
     with Logging {
 

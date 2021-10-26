@@ -151,7 +151,7 @@ private[spark] object RikaiExtSqlParser {
 
   def initRegistry(session: SparkSession): Unit = {
     runOnce {
-      Registry.registerAll(session.conf.getAll)
+      Registry.registerAll(session.conf.getAll, session)
     }
   }
 }

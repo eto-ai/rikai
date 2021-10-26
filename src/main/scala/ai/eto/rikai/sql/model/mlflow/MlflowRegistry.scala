@@ -16,17 +16,19 @@
 
 package ai.eto.rikai.sql.model.mlflow
 
-import ai.eto.rikai.sql.model.{Model, ModelNotFoundException, ModelSpec, Registry}
+import ai.eto.rikai.sql.model.{Model, ModelNotFoundException, ModelSpec, Registry, SparkUDFModel}
 import ai.eto.rikai.sql.spark.Python
 import org.apache.logging.log4j.scala.Logging
 import org.apache.spark.ml.PipelineModel
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.mlflow.tracking.MlflowContext
 
 import scala.collection.JavaConverters._
+import scala.util.Random
 
 /** MLflow-based Model [[Registry]].
   */
-class MlflowRegistry(val conf: Map[String, String])
+class MlflowRegistry(val conf: Map[String, String], session: SparkSession)
   extends Registry
     with Logging {
 
@@ -58,16 +60,17 @@ class MlflowRegistry(val conf: Map[String, String])
     println(s"get flavor from run $flavor")
     flavor match {
       case Some("spark") =>
-        try {
           val artifacts = mlflowClient.downloadArtifacts(runId)
           println(s"artifacts: $artifacts")
           val transformer = PipelineModel.load(artifacts.toURI.toString + "/model/sparkml")
           println(s"tran tran tran ${transformer.getClass}")
-        } catch {
-          case e: Exception =>
-            e.printStackTrace()
-        }
-        null
+          def func(frames : Iterable[DataFrame]) : Iterable[DataFrame] = {
+            frames.map(transformer.transform)
+          }
+          //replace with generated udf
+          val funcName = modelName + Random.nextInt(0xffff)
+          session.udf.register(funcName, func _)
+          new SparkUDFModel(modelName,spec.getUri,funcName,Some("spark"))
       case _ =>
         Python.resolve(pyClass, spec)
     }

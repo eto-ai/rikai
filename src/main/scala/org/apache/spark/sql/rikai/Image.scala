@@ -22,7 +22,7 @@ import org.apache.spark.unsafe.types.UTF8String
 
 /** Image User Defined Type
   */
-private[spark] class ImageType extends UserDefinedType[Image] {
+class ImageType extends UserDefinedType[Image] {
 
   override def sqlType: DataType =
     StructType(

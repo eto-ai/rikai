@@ -50,6 +50,10 @@ scmInfo := Some(
   )
 )
 
+fork := true
+javaCppVersion := "1.5.6"
+javaCppPresetLibs ++= Seq("opencv" -> "4.5.3", "openblas" -> "0.3.17")
+
 libraryDependencies ++= {
   val sparkVersion = "3.1.1"
   val awsVersion = "2.15.69"
@@ -58,7 +62,6 @@ libraryDependencies ++= {
   val snappyVersion = "1.1.8.4" // Support Apple Silicon
   val scalatestVersion = "3.2.0"
   val circeVersion = "0.12.3"
-  val javacvVersion = "1.5.6"
 
   Seq(
     "org.apache.spark" %% "spark-sql" % sparkVersion % "provided",
@@ -70,7 +73,7 @@ libraryDependencies ++= {
     "io.circe" %% "circe-core" % circeVersion,
     "io.circe" %% "circe-generic" % circeVersion,
     "io.circe" %% "circe-parser" % circeVersion,
-    "org.bytedeco" % "javacv-platform" % javacvVersion
+    "org.bytedeco" % "javacv-platform" % javaCppVersion.value,
   )
 }
 
@@ -96,6 +99,8 @@ antlr4GenVisitor in Antlr4 := true
 antlr4Version in Antlr4 := "4.8-1"
 
 enablePlugins(Antlr4Plugin)
+enablePlugins(JavaAppPackaging)
+
 
 Compile / doc / scalacOptions ++= Seq(
   "-skip-packages",

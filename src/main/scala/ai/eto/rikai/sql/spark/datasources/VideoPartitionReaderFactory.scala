@@ -1,5 +1,6 @@
 package ai.eto.rikai.sql.spark.datasources
 
+import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
@@ -10,12 +11,14 @@ import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.sources.Filter
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.util.SerializableConfiguration
+import org.apache.spark.sql.rikai.{Image, ImageType}
+
 import org.bytedeco.opencv.opencv_core.Mat
 import org.bytedeco.opencv.opencv_videoio.VideoCapture
-
-import org.apache.spark.sql.rikai.{ImageType, Image}
+import org.bytedeco.javacv.{Java2DFrameConverter, OpenCVFrameConverter}
 
 import java.net.URI
+import javax.imageio.ImageIO
 
 case class VideoPartitionReaderFactory(
     sqlConf: SQLConf,
@@ -31,26 +34,30 @@ case class VideoPartitionReaderFactory(
   ): PartitionReader[InternalRow] = {
     val uri = new URI(file.filePath)
     val camera = new VideoCapture(uri.getPath)
-    val frame = new Mat()
+    val mat = new Mat()
     var frame_id = 0
     var hasNext = true
     while (hasNext && (frame_id < file.start)) {
-      hasNext = camera.read(frame)
+      hasNext = camera.read(mat)
       frame_id = frame_id + 1
     }
 
     new PartitionReader[InternalRow] {
       override def next(): Boolean = {
+        hasNext = camera.read(mat)
         frame_id = frame_id + 1
-        hasNext = camera.read(frame)
         hasNext && (frame_id < file.start + file.length)
       }
 
       override def get(): InternalRow = {
         val row = new GenericInternalRow(2)
         row.setLong(0, frame_id)
-        val image =
-          new Image(data = Some(frame.data().getStringBytes), uri = None)
+        val mat2frame = new OpenCVFrameConverter.ToMat
+        val frame2java = new Java2DFrameConverter
+        val javaImage = frame2java.convert(mat2frame.convert(mat))
+        val bos = new ByteArrayOutputStream()
+        ImageIO.write(javaImage, "png", bos)
+        val image = new Image(data = Some(bos.toByteArray), uri = None)
         val imageType = new ImageType
         row.update(1, imageType.serialize(image))
         row

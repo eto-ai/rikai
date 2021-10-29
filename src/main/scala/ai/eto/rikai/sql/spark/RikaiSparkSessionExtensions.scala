@@ -49,6 +49,5 @@ class RikaiSparkSessionExtensions extends (SparkSessionExtensions => Unit) {
       new ExpressionInfo("org.apache.spark.sql.rikai.expressions", "IOU"),
       (exprs: Seq[Expression]) => IOU(exprs.head, exprs(1))
     )
-
   }
 }

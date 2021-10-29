@@ -64,6 +64,8 @@ class ImageType extends UserDefinedType[Image] {
   override def defaultSize: Int = 128
 }
 
+object ImageType extends ImageType
+
 /** A image where the content are stored externally
   *
   * @param uri

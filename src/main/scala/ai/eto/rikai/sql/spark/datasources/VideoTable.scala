@@ -33,7 +33,7 @@ case class VideoTable(
     StructType(
       Seq(
         StructField("frame_id", LongType, nullable = false),
-        StructField("image", new ImageType, nullable = false)
+        StructField("image", ImageType, nullable = false)
       )
     )
   }

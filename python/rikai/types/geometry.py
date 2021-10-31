@@ -18,7 +18,7 @@
 from __future__ import annotations
 
 from numbers import Real
-from typing import Sequence, Tuple, Union, List
+from typing import Sequence, Tuple, Union
 
 import numpy as np
 
@@ -282,22 +282,38 @@ class Box2d(ToNumpy, Sequence, ToDict):
         )
 
     @staticmethod
-    def iou_matrix(box_list1: List[Box2d], box_list2: List[Box2d]) -> np.ndarray:
-        def getvalue(boxa: Box2d, boxb: Box2d):
-            xmin = max(boxa.xmin, boxb.xmin)
-            ymin = max(boxa.ymin, boxb.ymin)
-            xmax = min(boxa.xmax, boxb.xmax)
-            ymax = min(boxa.ymax, boxb.ymax)
-            inter_area = max(0.0, xmax - xmin) * max(0.0, ymax - ymin)
-            return inter_area / (boxa.area + boxb.area - inter_area)
+    def iou_matrix(box_list1: Union[Sequence[Box2d], np.ndarray],
+                   box_list2: Union[Sequence[Box2d], np.ndarray]) -> np.ndarray:
+        """Compute intersection over union(IOU).
+           For two lists of box2ds, which have the length of N, and M respectively,
+            this function should return a N*M matrix, each element is the iou value (float,[0, 1]).
+        """
+        assert isinstance(box_list1, (Sequence, np.ndarray))
+        assert isinstance(box_list2, (Sequence, np.ndarray))
 
-        result = list()
-        for a in box_list1:
-            row = list()
-            for b in box_list2:
-                row.append(getvalue(a, b))
-            result.append(np.asarray(row))
-        return np.asarray(result)
+        if not isinstance(box_list1, np.ndarray):
+            box_list1 = np.array(box_list1)
+        if not isinstance(box_list2, np.ndarray):
+            box_list2 = np.array(box_list2)
+
+        def iou_a_row(a: np.ndarray,  # one box2d
+                      b_row: np.ndarray  # array of box2d
+                      ):
+            xmin = np.maximum(a[0], b_row[:, 0])
+            ymin = np.maximum(a[1], b_row[:, 1])
+            xmax = np.minimum(a[2], b_row[:, 2])
+            ymax = np.minimum(a[3], b_row[:, 3])
+            inter_arr = np.array([xmin, ymin, xmax, ymax]).T
+            inter_area = Box2d._area(inter_arr)
+            iou_arr = inter_area / (
+                    Box2d._area(np.array([a]))
+                    + Box2d._area(b_row)
+                    - inter_area
+            )
+            return iou_arr
+
+        v_iou_a_row = np.vectorize(iou_a_row)
+        return v_iou_a_row(box_list1, box_list2)
 
     def iou(
         self, other: Union[Box2d, Sequence[Box2d], np.ndarray]

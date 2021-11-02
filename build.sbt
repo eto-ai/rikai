@@ -52,7 +52,7 @@ scmInfo := Some(
 
 fork := true
 javaCppVersion := "1.5.6"
-javaCppPresetLibs ++= Seq("opencv" -> "4.5.3", "openblas" -> "0.3.17")
+javaCppPresetLibs ++= Seq("ffmpeg" -> "4.4")
 
 libraryDependencies ++= {
   val sparkVersion = "3.1.1"
@@ -73,7 +73,7 @@ libraryDependencies ++= {
     "io.circe" %% "circe-core" % circeVersion,
     "io.circe" %% "circe-generic" % circeVersion,
     "io.circe" %% "circe-parser" % circeVersion,
-    "org.bytedeco" % "javacv-platform" % javaCppVersion.value,
+    "org.bytedeco" % "javacv" % javaCppVersion.value,
   )
 }
 

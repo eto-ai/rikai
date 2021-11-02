@@ -28,10 +28,7 @@ import org.apache.spark.sql.sources.Filter
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.util.SerializableConfiguration
 import org.apache.spark.sql.rikai.{Image, ImageType}
-
-import org.bytedeco.opencv.opencv_core.Mat
-import org.bytedeco.opencv.opencv_videoio.VideoCapture
-import org.bytedeco.javacv.{Java2DFrameConverter, OpenCVFrameConverter}
+import org.bytedeco.javacv.{FFmpegFrameGrabber, Frame, Java2DFrameConverter}
 
 import java.net.URI
 import javax.imageio.ImageIO
@@ -49,28 +46,24 @@ case class VideoPartitionReaderFactory(
       file: PartitionedFile
   ): PartitionReader[InternalRow] = {
     val uri = new URI(file.filePath)
-    val camera = new VideoCapture(uri.getPath)
-    val mat = new Mat()
-    var frame_id = 0
-    var hasNext = true
-    while (hasNext && (frame_id < file.start)) {
-      hasNext = camera.read(mat)
-      frame_id = frame_id + 1
-    }
+    val grabber = new FFmpegFrameGrabber(uri.getPath)
+    val converter = new Java2DFrameConverter
+    grabber.start()
+    grabber.setFrameNumber(file.start.toInt)
+    var frame: Frame = null
+    var frame_id = file.start
 
     new PartitionReader[InternalRow] {
       override def next(): Boolean = {
-        hasNext = camera.read(mat)
+        frame = grabber.grabImage()
         frame_id = frame_id + 1
-        hasNext && (frame_id < file.start + file.length)
+        frame != null && (frame_id < file.start + file.length)
       }
 
       override def get(): InternalRow = {
         val row = new GenericInternalRow(2)
         row.setLong(0, frame_id)
-        val mat2frame = new OpenCVFrameConverter.ToMat
-        val frame2java = new Java2DFrameConverter
-        val javaImage = frame2java.convert(mat2frame.convert(mat))
+        val javaImage = converter.convert(frame)
         val bos = new ByteArrayOutputStream()
         ImageIO.write(javaImage, "png", bos)
         val image = new Image(data = Some(bos.toByteArray), uri = None)
@@ -80,7 +73,8 @@ case class VideoPartitionReaderFactory(
       }
 
       override def close(): Unit = {
-        camera.release()
+        grabber.stop()
+        converter.close()
       }
     }
   }

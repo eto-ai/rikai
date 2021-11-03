@@ -28,10 +28,6 @@ DEFAULT_NUM_WORKERS = 8
 DEFAULT_BATCH_SIZE = 4
 
 
-def _identity(x):
-    return x
-
-
 def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     """Construct a UDF to run pytorch model.
 
@@ -69,25 +65,12 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
         with torch.no_grad():
             for series in iter:
                 dataset = PandasDataset(series, transform=spec.pre_processing)
-
-                if isinstance(dataset[0], torch.Tensor):
-                    dataloader = DataLoader(
-                        dataset,
-                        batch_size=batch_size,
-                        num_workers=num_workers,
-                    )
-                else:
-                    # Keep the data type as it is and avoid the collate_fn of
-                    # DataLoader from converting numpy.ndarray to torch.Tensor
-                    dataloader = DataLoader(
-                        dataset,
-                        batch_size=batch_size,
-                        num_workers=num_workers,
-                        collate_fn=_identity,
-                    )
-
                 results = []
-                for batch in dataloader:
+                for batch in DataLoader(
+                    dataset,
+                    batch_size=batch_size,
+                    num_workers=num_workers,
+                ):
                     if isinstance(batch, torch.Tensor):
                         batch = batch.to(device)
                     predictions = model(batch)

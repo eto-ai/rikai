@@ -54,10 +54,10 @@ class Point(ToNumpy, ToDict):
 
     def __eq__(self, o: object) -> bool:
         return (
-            isinstance(o, Point)
-            and self.x == o.x
-            and self.y == o.y
-            and self.z == o.z
+                isinstance(o, Point)
+                and self.x == o.x
+                and self.y == o.y
+                and self.z == o.z
         )
 
     def to_numpy(self) -> np.ndarray:
@@ -98,10 +98,10 @@ class Box2d(ToNumpy, Sequence, ToDict):
 
     def __init__(self, xmin: float, ymin: float, xmax: float, ymax: float):
         assert (
-            0 <= xmin <= xmax
+                0 <= xmin <= xmax
         ), f"xmin({xmin}) and xmax({xmax}) must satisfy 0 <= xmin <= xmax"
         assert (
-            0 <= ymin <= ymax
+                0 <= ymin <= ymax
         ), f"ymin({ymin}) and ymax({ymax}) must satisfy 0 <= ymin <= ymax"
         self.xmin = float(xmin)
         self.ymin = float(ymin)
@@ -110,7 +110,7 @@ class Box2d(ToNumpy, Sequence, ToDict):
 
     @classmethod
     def from_center(
-        cls, center_x: float, center_y: float, width: float, height: float
+            cls, center_x: float, center_y: float, width: float, height: float
     ) -> Box2d:
         """Factory method to construct a :py:class:`Box2d` from
         the center point coordinates: ``{center_x, center_y, width, height}``.
@@ -132,7 +132,7 @@ class Box2d(ToNumpy, Sequence, ToDict):
         Box2d
         """
         assert (
-            width >= 0 and height >= 0
+                width >= 0 and height >= 0
         ), f"Box2d width({width}) and height({height}) must be non-negative."
         return Box2d(
             center_x - width / 2,
@@ -143,7 +143,7 @@ class Box2d(ToNumpy, Sequence, ToDict):
 
     @classmethod
     def from_top_left(
-        cls, xmin: float, ymin: float, width: float, height: float
+            cls, xmin: float, ymin: float, width: float, height: float
     ) -> Box2d:
         """Construct a :py:class:`Box2d` from
         the top-left based coordinates: ``{x0, y0, width, height}``.
@@ -172,14 +172,14 @@ class Box2d(ToNumpy, Sequence, ToDict):
         .. _Coco Dataset: https://cocodataset.org/
         """
         assert (
-            width >= 0 and height >= 0
+                width >= 0 and height >= 0
         ), f"Box2d width({width}) and height({height}) must be non-negative."
         return Box2d(xmin, ymin, xmin + width, ymin + height)
 
     def __repr__(self) -> str:
         return (
-            f"Box2d(xmin={self.xmin}, ymin={self.ymin}, xmax={self.xmax}"
-            + f", ymax={self.ymax})"
+                f"Box2d(xmin={self.xmin}, ymin={self.ymin}, xmax={self.xmax}"
+                + f", ymax={self.ymax})"
         )
 
     def __eq__(self, o: Box2d) -> bool:
@@ -195,16 +195,16 @@ class Box2d(ToNumpy, Sequence, ToDict):
 
     @staticmethod
     def _verified_scale(
-        scale: Union[Real, Tuple[float, float]]
+            scale: Union[Real, Tuple[float, float]]
     ) -> Tuple[float, float]:
         if isinstance(scale, Real):
             assert scale > 0, f"scale must be positive, got {scale}"
             return scale, scale
         assert (
-            type(scale) == tuple and len(scale) == 2
+                type(scale) == tuple and len(scale) == 2
         ), f"scale must be either a number or a 2-element tuple, got {scale}"
         assert (
-            scale[0] > 0 and scale[1] > 0
+                scale[0] > 0 and scale[1] > 0
         ), f"scale must be positive, got {scale}"
         return scale
 
@@ -295,28 +295,24 @@ class Box2d(ToNumpy, Sequence, ToDict):
             box_list1 = np.array(box_list1)
         if not isinstance(box_list2, np.ndarray):
             box_list2 = np.array(box_list2)
+        row_count = box_list1.shape[0]
+        area1 = Box2d._area(box_list1).reshape(row_count,-1)
+        area2 = Box2d._area(box_list2)
 
-        def iou_a_row(a: np.ndarray,  # one box2d
-                      b_row: np.ndarray  # array of box2d
-                      ):
-            xmin = np.maximum(a[0], b_row[:, 0])
-            ymin = np.maximum(a[1], b_row[:, 1])
-            xmax = np.minimum(a[2], b_row[:, 2])
-            ymax = np.minimum(a[3], b_row[:, 3])
-            inter_arr = np.array([xmin, ymin, xmax, ymax]).T
-            inter_area = Box2d._area(inter_arr)
-            iou_arr = inter_area / (
-                    Box2d._area(np.array([a]))
-                    + Box2d._area(b_row)
-                    - inter_area
-            )
-            return iou_arr
+        xmin = np.maximum(box_list1[:, 0].reshape((row_count, -1)), box_list2[:, 0])
+        ymin = np.maximum(box_list1[:, 1].reshape((row_count, -1)), box_list2[:, 1])
+        xmax = np.minimum(box_list1[:, 2].reshape((row_count, -1)), box_list2[:, 2])
+        ymax = np.minimum(box_list1[:, 3].reshape((row_count, -1)), box_list2[:, 3])
 
-        v_iou_a_row = np.vectorize(iou_a_row)
-        return v_iou_a_row(box_list1, box_list2)
+        inter_area = np.maximum(0, xmax - xmin) * np.maximum(
+            0, ymax - ymin)
+
+        iou_mat = inter_area / (area1 + area2 - inter_area)
+
+        return iou_mat
 
     def iou(
-        self, other: Union[Box2d, Sequence[Box2d], np.ndarray]
+            self, other: Union[Box2d, Sequence[Box2d], np.ndarray]
     ) -> Union[float, np.ndarray]:
         """Compute intersection over union(IOU)."""
         assert isinstance(
@@ -339,9 +335,9 @@ class Box2d(ToNumpy, Sequence, ToDict):
         inter_area = self._area(inter_arr)
 
         iou_arr = inter_area / (
-            self._area(np.array([self_arr]))
-            + self._area(other_arr)
-            - inter_area
+                self._area(np.array([self_arr]))
+                + self._area(other_arr)
+                - inter_area
         )
         if isinstance(other, Box2d):
             return iou_arr[0]
@@ -374,12 +370,12 @@ class Box3d(ToNumpy, ToDict):
     __UDT__ = Box3dType()
 
     def __init__(
-        self,
-        center: Point,
-        length: float,
-        width: float,
-        height: float,
-        heading: float,
+            self,
+            center: Point,
+            length: float,
+            width: float,
+            height: float,
+            heading: float,
     ):
         self.center = center
         self.length = float(length)
@@ -389,18 +385,18 @@ class Box3d(ToNumpy, ToDict):
 
     def __repr__(self) -> str:
         return (
-            f"Box3d(center={self.center}, l={self.length}, "
-            + f"h={self.height}, w={self.width}, heading={self.heading})"
+                f"Box3d(center={self.center}, l={self.length}, "
+                + f"h={self.height}, w={self.width}, heading={self.heading})"
         )
 
     def __eq__(self, o: object) -> bool:
         return (
-            isinstance(o, Box3d)
-            and self.center == o.center
-            and self.length == o.length
-            and self.width == o.width
-            and self.height == o.height
-            and self.heading == o.heading
+                isinstance(o, Box3d)
+                and self.center == o.center
+                and self.length == o.length
+                and self.width == o.width
+                and self.height == o.height
+                and self.heading == o.heading
         )
 
     def to_numpy(self) -> np.ndarray:

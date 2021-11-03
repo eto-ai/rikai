@@ -23,14 +23,14 @@ pip install yolov5
 ```
 """  # noqa E501
 
-import pickle
 from typing import Any, Callable, Dict
+from rikai.types.vision import Image
 
 __all__ = ["pre_processing", "post_processing", "OUTPUT_SCHEMA"]
 
 
-def _pre_process_func(image_binary):
-    return pickle.loads(image_binary)
+def _pre_process_func(image_data):
+    return Image(image_data).to_numpy()
 
 
 def pre_processing(options: Dict[str, Any]) -> Callable:

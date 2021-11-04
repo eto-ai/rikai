@@ -15,10 +15,11 @@
 import datetime
 import random
 import sys
+from datetime import datetime
 from typing import Sequence
 
 import numpy as np
-from datetime import datetime
+
 from rikai.types import Box2d
 
 

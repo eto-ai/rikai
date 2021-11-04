@@ -282,27 +282,27 @@ class Box2d(ToNumpy, Sequence, ToDict):
         )
 
     @staticmethod
-    def iou_matrix(box_list1: Union[Sequence[Box2d], np.ndarray],
-                   box_list2: Union[Sequence[Box2d], np.ndarray]) -> np.ndarray:
+    def ious(boxes1: Union[Sequence[Box2d], np.ndarray],
+             boxes2: Union[Sequence[Box2d], np.ndarray]) -> np.ndarray:
         """Compute intersection over union(IOU).
            For two lists of box2ds, which have the length of N, and M respectively,
             this function should return a N*M matrix, each element is the iou value (float,[0, 1]).
         """
-        assert isinstance(box_list1, (Sequence, np.ndarray))
-        assert isinstance(box_list2, (Sequence, np.ndarray))
+        assert isinstance(boxes1, (Sequence, np.ndarray))
+        assert isinstance(boxes2, (Sequence, np.ndarray))
 
-        if not isinstance(box_list1, np.ndarray):
-            box_list1 = np.array(box_list1)
-        if not isinstance(box_list2, np.ndarray):
-            box_list2 = np.array(box_list2)
-        row_count = box_list1.shape[0]
-        area1 = Box2d._area(box_list1).reshape(row_count, -1)
-        area2 = Box2d._area(box_list2)
+        if not isinstance(boxes1, np.ndarray):
+            boxes1 = np.array(boxes1)
+        if not isinstance(boxes2, np.ndarray):
+            boxes2 = np.array(boxes2)
+        row_count = boxes1.shape[0]
+        area1 = Box2d._area(boxes1).reshape(row_count, -1)
+        area2 = Box2d._area(boxes2)
 
-        xmin = np.maximum(box_list1[:, 0].reshape((row_count, -1)), box_list2[:, 0])
-        ymin = np.maximum(box_list1[:, 1].reshape((row_count, -1)), box_list2[:, 1])
-        xmax = np.minimum(box_list1[:, 2].reshape((row_count, -1)), box_list2[:, 2])
-        ymax = np.minimum(box_list1[:, 3].reshape((row_count, -1)), box_list2[:, 3])
+        xmin = np.maximum(boxes1[:, 0].reshape((row_count, -1)), boxes2[:, 0])
+        ymin = np.maximum(boxes1[:, 1].reshape((row_count, -1)), boxes2[:, 1])
+        xmax = np.minimum(boxes1[:, 2].reshape((row_count, -1)), boxes2[:, 2])
+        ymax = np.minimum(boxes1[:, 3].reshape((row_count, -1)), boxes2[:, 3])
 
         inter_area = np.maximum(0, xmax - xmin) * np.maximum(
             0, ymax - ymin)

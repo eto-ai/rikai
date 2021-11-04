@@ -62,7 +62,7 @@ def benchmark(list1_len: int, list2_len: int, times: int):
     count = 0
     while count < times:
         count += 1
-        Box2d.iou_matrix(list1, list2)
+        Box2d.ious(list1, list2)
 
     time2 = datetime.now()
     naive_seconds = (time1 - time0).total_seconds()

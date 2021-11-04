@@ -12,10 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import datetime
 import random
 import sys
-from datetime import datetime
+import timeit
 from typing import Sequence
 
 import numpy as np
@@ -52,21 +51,9 @@ def benchmark(list1_len: int, list2_len: int, times: int):
     list1 = [a_random_box2d() for _ in range(0, list1_len)]
     list2 = [a_random_box2d() for _ in range(0, list2_len)]
 
-    time0 = datetime.now()
-    count = 0
-    while count < times:
-        count += 1
-        iou_matrix_naive_version(list1, list2)
+    naive_seconds = timeit.timeit(lambda: iou_matrix_naive_version(list1, list2), number=times)
+    vectorized_seconds = timeit.timeit(lambda: Box2d.ious(list1, list2), number=times)
 
-    time1 = datetime.now()
-    count = 0
-    while count < times:
-        count += 1
-        Box2d.ious(list1, list2)
-
-    time2 = datetime.now()
-    naive_seconds = (time1 - time0).total_seconds()
-    vectorized_seconds = (time2 - time1).total_seconds()
     print("naive method cost {} seconds".format(naive_seconds))
     print("vectorized method cost {} seconds".format(vectorized_seconds))
     print("naive/vectorized {}".format(naive_seconds / vectorized_seconds))

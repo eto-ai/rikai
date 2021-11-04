@@ -282,10 +282,12 @@ class Box2d(ToNumpy, Sequence, ToDict):
         )
 
     @staticmethod
-    def ious(boxes1: Union[Sequence[Box2d], np.ndarray],
-             boxes2: Union[Sequence[Box2d], np.ndarray]) -> np.ndarray:
+    def ious(
+        boxes1: Union[Sequence[Box2d], np.ndarray],
+        boxes2: Union[Sequence[Box2d], np.ndarray],
+    ) -> np.ndarray:
         """Compute intersection over union(IOU).
-            
+
         Parameters
         ----------
         boxes1 : :py:class:`numpy.ndarray`
@@ -297,23 +299,23 @@ class Box2d(ToNumpy, Sequence, ToDict):
         :py:class:`numpy.ndarray`
              For two lists of box2ds, which have the length of N, and M respectively, this function should return a N*M matrix,
               each element is the iou value (float,[0, 1]).
-        
+
         Example
         -------
-    
+
         >>> import random
-        >>> 
+        >>>
         >>> def a_random_box2d():
         ...   x_min = random.uniform(0, 1)
         ...   y_min = random.uniform(0, 1)
         ...   x_max = random.uniform(x_min, 1)
         ...   y_max = random.uniform(y_min, 1)
         ...  return Box2d(x_min, y_min, x_max, y_max)
-        >>> 
+        >>>
         >>> list1 = [a_random_box2d() for _ in range(0, 2)]
-        >>> 
+        >>>
         >>> list2 = [a_random_box2d() for _ in range(0, 3)]
-        >>> 
+        >>>
         >>> Box2d.ious(list1, list2)
         """  # noqa: E501
 
@@ -333,8 +335,7 @@ class Box2d(ToNumpy, Sequence, ToDict):
         xmax = np.minimum(boxes1[:, 2].reshape((row_count, -1)), boxes2[:, 2])
         ymax = np.minimum(boxes1[:, 3].reshape((row_count, -1)), boxes2[:, 3])
 
-        inter_area = np.maximum(0, xmax - xmin) * np.maximum(
-            0, ymax - ymin)
+        inter_area = np.maximum(0, xmax - xmin) * np.maximum(0, ymax - ymin)
 
         iou_mat = inter_area / (area1 + area2 - inter_area)
 

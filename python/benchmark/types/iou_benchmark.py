@@ -22,7 +22,9 @@ import numpy as np
 from rikai.types import Box2d
 
 
-def iou_matrix_naive_version(box_list1: Sequence[Box2d], box_list2: Sequence[Box2d]) -> np.ndarray:
+def iou_matrix_naive_version(
+    box_list1: Sequence[Box2d], box_list2: Sequence[Box2d]
+) -> np.ndarray:
     def getvalue(boxa: Box2d, boxb: Box2d):
         xmin = max(boxa.xmin, boxb.xmin)
         ymin = max(boxa.ymin, boxb.ymin)
@@ -51,13 +53,17 @@ def benchmark(list1_len: int, list2_len: int, times: int):
     list1 = [a_random_box2d() for _ in range(0, list1_len)]
     list2 = [a_random_box2d() for _ in range(0, list2_len)]
 
-    naive_seconds = timeit.timeit(lambda: iou_matrix_naive_version(list1, list2), number=times)
-    vectorized_seconds = timeit.timeit(lambda: Box2d.ious(list1, list2), number=times)
+    naive_seconds = timeit.timeit(
+        lambda: iou_matrix_naive_version(list1, list2), number=times
+    )
+    vectorized_seconds = timeit.timeit(
+        lambda: Box2d.ious(list1, list2), number=times
+    )
 
     print("naive method cost {} seconds".format(naive_seconds))
     print("vectorized method cost {} seconds".format(vectorized_seconds))
     print("naive/vectorized {}".format(naive_seconds / vectorized_seconds))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     benchmark(*[int(x) for x in sys.argv[1:]])

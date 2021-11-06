@@ -2,4 +2,5 @@ version: "3.9"
 services:
   mlflow:
     build:
+      context: .
       dockerfile: Dockerfile.mlflow

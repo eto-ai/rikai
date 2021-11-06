@@ -44,7 +44,12 @@ class MlflowCatalog(val mlflowClient: MlflowClient) extends Catalog {
     val modelFilter = "tag.`rikai.output.schema` != \"\"";
     val defaultExperiments = new util.ArrayList[String](1);
     defaultExperiments.add("0")
-    val results = mlflowClient.searchRuns(defaultExperiments, modelFilter, ViewType.ACTIVE_ONLY, 100)
+    val results = mlflowClient.searchRuns(
+      defaultExperiments,
+      modelFilter,
+      ViewType.ACTIVE_ONLY,
+      100
+    )
     println(results)
     Seq()
   }

@@ -18,7 +18,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Start containers
-        run: docker-compose -f .github/docker-compose.yml up -d --build
+        run: docker-compose -f .github/docker-compose.yml up --build -d
       - name: Setup Scala
         uses: olafurpg/setup-scala@v10
         with:

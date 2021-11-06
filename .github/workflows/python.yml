@@ -18,7 +18,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Start containers
-        run: docker-compose -f .github/docker-compose.yml -d --build
+        run: docker-compose -f .github/docker-compose.yml up -d --build
       - name: Setup Scala
         uses: olafurpg/setup-scala@v10
         with:
@@ -51,7 +51,7 @@ jobs:
           SPARK_LOCAL_IP: "127.0.0.1"
       - name: Tear down
         if: always()
-        run: docker-compose -f ".github/docker-compose.yml" down
+        run: docker-compose -f .github/docker-compose.yml down
   mac-build:
     runs-on: macos-latest
     timeout-minutes: 10

@@ -17,7 +17,6 @@
 package ai.eto.rikai.sql.model.mlflow
 
 import ai.eto.rikai.sql.model.{Catalog, Model}
-import org.mlflow.api.proto.Service.ViewType
 import org.mlflow.tracking.MlflowClient
 
 import java.util
@@ -42,12 +41,13 @@ class MlflowCatalog(val mlflowClient: MlflowClient) extends Catalog {
   /** Return a list of models available for all Sessions
     */
   override def listModels(): Seq[Model] = {
-    val modelFilter = "tag.`rikai.model.flavor` != \"\"";
+    val rikaiTagIdentifier = "rikai.model.flavor"
+    val modelFilter = f"""tag.`${rikaiTagIdentifier}` != "" """
     val defaultExperiments = util.Arrays.asList("0")
     val results = mlflowClient.searchRuns(
       defaultExperiments,
       modelFilter,
-      ViewType.ACTIVE_ONLY,
+      null,
       100
     )
     println(results)

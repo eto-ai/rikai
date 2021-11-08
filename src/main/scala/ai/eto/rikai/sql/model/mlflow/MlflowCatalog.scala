@@ -16,10 +16,11 @@
 
 package ai.eto.rikai.sql.model.mlflow
 
-import ai.eto.rikai.sql.model.{Catalog, Model}
+import ai.eto.rikai.sql.model.{Catalog, Model, SparkUDFModel}
 import org.mlflow.tracking.MlflowClient
 
 import java.util
+import scala.collection.JavaConverters
 
 /** Use MLflow as a persisted backend for Model Catalog */
 class MlflowCatalog(val mlflowClient: MlflowClient) extends Catalog {
@@ -38,8 +39,7 @@ class MlflowCatalog(val mlflowClient: MlflowClient) extends Catalog {
   override def createModel(model: Model): Model =
     throw new NotImplementedError()
 
-  /** Return a list of models available for all Sessions
-    */
+  /** Return a list of models available for all Sessions */
   override def listModels(): Seq[Model] = {
     val rikaiTagIdentifier = "rikai.model.flavor"
     val modelFilter = f"""tag.`${rikaiTagIdentifier}` != "" """
@@ -50,8 +50,20 @@ class MlflowCatalog(val mlflowClient: MlflowClient) extends Catalog {
       null,
       100
     )
-    println(results)
-    Seq()
+    JavaConverters
+      .collectionAsScalaIterable(results.getItems)
+      .map(r => {
+        val tags = JavaConverters
+          .collectionAsScalaIterable(r.getData.getTagsList)
+          .map(runTag => (runTag.getKey, runTag.getValue))
+          .toMap
+        println("tags:", tags)
+        val runInfo = r.getInfo
+        val modelName = runInfo.getArtifactUri
+        new SparkUDFModel()
+      })
+      .filter(m => m != null)
+      .collect()
   }
 
   /** Check a model with the specified name exists.

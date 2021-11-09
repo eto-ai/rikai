@@ -23,7 +23,8 @@ import org.mlflow.tracking.{MlflowClient, MlflowClientException}
 import org.mlflow_project.google.protobuf.Message.Builder
 import org.mlflow_project.google.protobuf.util.JsonFormat
 
-/** Use MLflow as a persisted backend for Model Catalog */
+/** Use MLflow as a persisted backend for Model Catalog
+  */
 class MlflowCatalog(val mlflowClient: MlflowClient) extends Catalog {
 
   /** Use default trackingUri to build Mlflow Catalog */
@@ -42,8 +43,9 @@ class MlflowCatalog(val mlflowClient: MlflowClient) extends Catalog {
 
   /** Return a list of models available for all Sessions */
   override def listModels(): Seq[Model] = {
-    val models = searchRegisteredModels()
-    println(models)
+    val response = searchRegisteredModels()
+    println(response)
+    response.getRegisteredModelsList()
     Seq()
   }
 
@@ -82,7 +84,7 @@ class MlflowCatalog(val mlflowClient: MlflowClient) extends Catalog {
 
 object MlflowCatalog {
 
-  /** Merge json payload to the protobuf builder */
+  /** Merge json payload to the protobuf builder. */
   private def merge(
       jsonPayload: String,
       builder: Builder

@@ -16,11 +16,12 @@
 
 package ai.eto.rikai.sql.model.mlflow
 
-import ai.eto.rikai.sql.model.{Catalog, Model, SparkUDFModel}
-import org.mlflow.tracking.MlflowClient
-
-import java.util
-import scala.collection.JavaConverters
+import ai.eto.rikai.sql.model.{Catalog, Model}
+import com.google.protobuf.InvalidProtocolBufferException
+import com.google.protobuf.Message.Builder
+import com.google.protobuf.util.JsonFormat
+import org.mlflow.api.proto.ModelRegistry.SearchRegisteredModels
+import org.mlflow.tracking.{MlflowClient, MlflowClientException}
 
 /** Use MLflow as a persisted backend for Model Catalog */
 class MlflowCatalog(val mlflowClient: MlflowClient) extends Catalog {
@@ -41,29 +42,20 @@ class MlflowCatalog(val mlflowClient: MlflowClient) extends Catalog {
 
   /** Return a list of models available for all Sessions */
   override def listModels(): Seq[Model] = {
-    val rikaiTagIdentifier = "rikai.model.flavor"
-    val modelFilter = f"""tag.`${rikaiTagIdentifier}` != "" """
-    val defaultExperiments = util.Arrays.asList("0")
-    val results = mlflowClient.searchRuns(
-      defaultExperiments,
-      modelFilter,
-      null,
-      100
-    )
-    JavaConverters
-      .collectionAsScalaIterable(results.getItems)
-      .map(r => {
-        val tags = JavaConverters
-          .collectionAsScalaIterable(r.getData.getTagsList)
-          .map(runTag => (runTag.getKey, runTag.getValue))
-          .toMap
-        println("tags:", tags)
-        val runInfo = r.getInfo
-        val modelName = runInfo.getArtifactUri
-        new SparkUDFModel()
-      })
-      .filter(m => m != null)
-      .collect()
+    val models = searchRegisteredModels()
+    println(models)
+    Seq()
+  }
+
+  /** Query models from mlflow
+    *
+    * TODO: contribute this back to mlflow.
+    */
+  private def searchRegisteredModels(): SearchRegisteredModels.Response = {
+    val payload = mlflowClient.sendGet("registered-models/search")
+    val builder = SearchRegisteredModels.Response.newBuilder()
+    MlflowCatalog.merge(payload, builder)
+    builder.build()
   }
 
   /** Check a model with the specified name exists.
@@ -86,4 +78,23 @@ class MlflowCatalog(val mlflowClient: MlflowClient) extends Catalog {
     */
   override def dropModel(name: String): Boolean =
     throw new NotImplementedError()
+}
+
+object MlflowCatalog {
+
+  /** Merge json payload to the protobuf builder */
+  private def merge[B](
+      jsonPayload: String,
+      builder: B
+  ) = {
+    try {
+      JsonFormat.parser.ignoringUnknownFields.merge(jsonPayload, builder)
+    } catch {
+      case e: InvalidProtocolBufferException =>
+        throw new MlflowClientException(
+          "Failed to serialize json " + jsonPayload + " into " + builder,
+          e
+        )
+    }
+  }
 }

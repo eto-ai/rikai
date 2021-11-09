@@ -239,7 +239,7 @@ class MlflowRegistry(Registry):
         )
         func_name = codegen_from_spec(self._spark, spec, name)
         model = self._jvm.ai.eto.rikai.sql.model.SparkUDFModel(
-            name, uri, func_name
+            name, uri, func_name, raw_spec.getFlavor()
         )
         return model
 

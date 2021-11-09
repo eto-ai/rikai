@@ -83,9 +83,9 @@ class MlflowCatalog(val mlflowClient: MlflowClient) extends Catalog {
 object MlflowCatalog {
 
   /** Merge json payload to the protobuf builder */
-  private def merge[B](
+  private def merge(
       jsonPayload: String,
-      builder: B
+      builder: Builder
   ) = {
     try {
       JsonFormat.parser.ignoringUnknownFields.merge(jsonPayload, builder)

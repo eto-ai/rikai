@@ -28,7 +28,12 @@ case class ShowModelsCommand() extends ModelCommand {
     val models = catalog(spark).listModels()
 
     models.map { model: Model =>
-      Row(model.name, model.spec_uri, Model.serializeOptions(model.options))
+      Row(
+        model.name,
+        model.flavor.getOrElse(""),
+        model.spec_uri,
+        Model.serializeOptions(model.options)
+      )
     }
   }
 }

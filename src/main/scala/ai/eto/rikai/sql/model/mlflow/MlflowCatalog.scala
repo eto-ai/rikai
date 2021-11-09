@@ -18,10 +18,10 @@ package ai.eto.rikai.sql.model.mlflow
 
 import ai.eto.rikai.sql.model.{Catalog, Model}
 import com.google.protobuf.InvalidProtocolBufferException
-import com.google.protobuf.Message.Builder
-import com.google.protobuf.util.JsonFormat
 import org.mlflow.api.proto.ModelRegistry.SearchRegisteredModels
 import org.mlflow.tracking.{MlflowClient, MlflowClientException}
+import org.mlflow_project.google.protobuf.Message.Builder
+import org.mlflow_project.google.protobuf.util.JsonFormat
 
 /** Use MLflow as a persisted backend for Model Catalog */
 class MlflowCatalog(val mlflowClient: MlflowClient) extends Catalog {

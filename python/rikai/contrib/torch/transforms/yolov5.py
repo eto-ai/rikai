@@ -25,7 +25,17 @@ pip install yolov5
 
 from typing import Any, Callable, Dict
 
-__all__ = ["post_processing", "OUTPUT_SCHEMA"]
+from rikai.types.vision import Image
+
+__all__ = ["pre_processing", "post_processing", "OUTPUT_SCHEMA"]
+
+
+def _pre_process_func(image_data):
+    return Image(image_data).to_pil()
+
+
+def pre_processing(options: Dict[str, Any]) -> Callable:
+    return _pre_process_func
 
 
 def post_processing(options: Dict[str, Any]) -> Callable:

@@ -26,7 +26,9 @@ class ShowModelsCommandTest extends AnyFunSuite with SparkTestSession {
 
   test("show empty") {
     val expected =
-      Seq.empty[(String, String, String)].toDF("name", "uri", "options")
+      Seq
+        .empty[(String, String, String, String)]
+        .toDF("name", "flavor", "uri", "options")
     assertEqual(spark.sql("SHOW MODELS"), expected)
   }
 
@@ -37,7 +39,12 @@ class ShowModelsCommandTest extends AnyFunSuite with SparkTestSession {
       )
 
     val expected =
-      Seq(("model_foo", "test://model/foo", "")).toDF("name", "uri", "options")
+      Seq(("model_foo", "", "test://model/foo", "")).toDF(
+        "name",
+        "flavor",
+        "uri",
+        "options"
+      )
     val result = spark.sql("SHOW MODELS")
     assertEqual(result, expected)
   }
@@ -45,7 +52,7 @@ class ShowModelsCommandTest extends AnyFunSuite with SparkTestSession {
   test("show models with options") {
     spark
       .sql(
-        "CREATE MODEL model_options OPTIONS (foo='bar',num=1.2,flag=True) USING 'test://foo'"
+        "CREATE MODEL model_options FLAVOR pytorch OPTIONS (foo='bar',num=1.2,flag=True) USING 'test://foo'"
       )
 
     val expected_options = Seq(
@@ -54,8 +61,13 @@ class ShowModelsCommandTest extends AnyFunSuite with SparkTestSession {
       "flag" -> "true"
     ).toMap
     val expected = Seq(
-      ("model_options", "test://foo", Model.serializeOptions(expected_options))
-    ).toDF("name", "uri", "options")
+      (
+        "model_options",
+        "pytorch",
+        "test://foo",
+        Model.serializeOptions(expected_options)
+      )
+    ).toDF("name", "flavor", "uri", "options")
     assertEqual(spark.sql("SHOW MODELS"), expected)
   }
 

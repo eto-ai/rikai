@@ -28,7 +28,12 @@ case class DescribeModelCommand(name: String) extends ModelCommand {
     catalog(session).getModel(name) match {
       case Some(model) =>
         Seq(
-          Row(model.name, model.spec_uri, Model.serializeOptions(model.options))
+          Row(
+            model.name,
+            model.flavor.getOrElse(""),
+            model.spec_uri,
+            Model.serializeOptions(model.options)
+          )
         )
       case None =>
         throw new ModelNotFoundException(s"Model '${name}' not found")

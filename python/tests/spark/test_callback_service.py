@@ -39,6 +39,9 @@ class JvmModelSpec:
     def getOptions(self):
         return self.options
 
+    def getFlavor(self):
+        return "jvm"
+
 
 def test_cb_service_find_registry(spark: SparkSession, tmp_path: Path):
 

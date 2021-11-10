@@ -38,6 +38,7 @@ object ModelCommand {
   // Shared between "DESCRIBE MODEL" and "SHOW MODELS"
   val output = Seq(
     AttributeReference("name", StringType, nullable = false)(),
+    AttributeReference("flavor", StringType, nullable = false)(),
     AttributeReference("uri", StringType, nullable = false)(),
     AttributeReference("options", StringType, nullable = true)()
   )

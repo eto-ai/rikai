@@ -84,6 +84,10 @@ class SparkUDFModel(
     this(name, spec_uri, funcName, None)
   }
 
+  def this(name: String, spec_uri: String, funcName: String, flavor: String) = {
+    this(name, spec_uri, funcName, Some(flavor))
+  }
+
   override def toString: String =
     s"SparkUDFModel(name=${name}, uri=${spec_uri})"
 

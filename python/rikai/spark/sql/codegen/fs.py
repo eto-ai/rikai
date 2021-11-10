@@ -129,7 +129,7 @@ class FileSystemRegistry(Registry):
             raise ValueError(f"Model URI is not supported: {uri}")
 
         model = self._jvm.ai.eto.rikai.sql.model.SparkUDFModel(
-            name, uri, func_name
+            name, uri, func_name, spec.getFlavor()
         )
         # TODO: set options
         return model

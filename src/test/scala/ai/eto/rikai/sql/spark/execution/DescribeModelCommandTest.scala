@@ -29,13 +29,35 @@ class DescribeModelCommandTest extends AnyFunSuite with SparkTestSession {
       new SparkUDFModel("model_foo", "uri://model/foo", null)
     )
 
-    val expected = Seq(("model_foo", "uri://model/foo", "")).toDF(
+    val expected = Seq(("model_foo", "", "uri://model/foo", "")).toDF(
       "model",
+      "flavor",
       "uri",
       "options"
     )
     assertEqual(spark.sql("DESCRIBE MODEL model_foo"), expected)
     assertEqual(spark.sql("DESC MODEL model_foo"), expected)
+  }
+
+  test("describe model with flavor") {
+    Catalog.testing.createModel(
+      new SparkUDFModel(
+        "model_flavor",
+        "uri://model/withflavor",
+        null,
+        "some_flavor"
+      )
+    )
+
+    val expected =
+      Seq(("model_flavor", "some_flavor", "uri://model/withflavor", ""))
+        .toDF(
+          "model",
+          "flavor",
+          "uri",
+          "options"
+        )
+    assertEqual(spark.sql("DESCRIBE MODEL model_flavor"), expected)
   }
 
   test("describe non-exist model") {

@@ -24,7 +24,7 @@ dev = [
     "wheel",
 ]
 sklearn = ["scikit-learn"]
-torch = ["torch>=1.4.0", "torchvision"]
+torch = ["torch>=1.9.0", "torchvision>=0.11.0"]
 jupyter = ["matplotlib", "jupyterlab"]
 aws = ["boto3", "botocore"]
 gcp = ["gcsfs"]

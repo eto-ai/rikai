@@ -16,12 +16,18 @@
 
 package ai.eto.rikai.sql.model.mlflow
 
-import ai.eto.rikai.sql.model.{Catalog, Model}
+import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.{
+  ArtifactPathKey,
+  ModelFlavorKey
+}
+import ai.eto.rikai.sql.model.{Catalog, Model, SparkUDFModel}
 import com.google.protobuf.InvalidProtocolBufferException
 import org.mlflow.api.proto.ModelRegistry.SearchRegisteredModels
 import org.mlflow.tracking.{MlflowClient, MlflowClientException}
 import org.mlflow_project.google.protobuf.Message.Builder
 import org.mlflow_project.google.protobuf.util.JsonFormat
+
+import scala.collection.JavaConverters._
 
 /** Use MLflow as a persisted backend for Model Catalog
   */
@@ -45,8 +51,34 @@ class MlflowCatalog(val mlflowClient: MlflowClient) extends Catalog {
   override def listModels(): Seq[Model] = {
     val response = searchRegisteredModels()
     println(response)
-    response.getRegisteredModelsList()
-    Seq()
+    response.getRegisteredModelsList.asScala
+      .map(model => {
+        model.getLatestVersionsCount match {
+          case 0 => None
+          case _ => {
+            val latestVersion = model.getLatestVersions(0)
+            val tagsMap = latestVersion.getTagsList.asScala
+              .map(t => t.getKey -> t.getValue)
+              .toMap
+            val name = model.getName
+            if (tagsMap.contains(ArtifactPathKey)) {
+              val flavor = tagsMap.getOrElse(ModelFlavorKey, "")
+              Some(
+                new SparkUDFModel(
+                  name,
+                  s"mlflow://$name",
+                  "<anonymous>",
+                  flavor
+                )
+              )
+            } else {
+              None
+            }
+          }
+        }
+      })
+      .filter(m => m.isDefined)
+      .map(m => m.get)
   }
 
   /** Query models from mlflow
@@ -83,6 +115,15 @@ class MlflowCatalog(val mlflowClient: MlflowClient) extends Catalog {
 }
 
 object MlflowCatalog {
+
+  val TrackingUriKey = "rikai.sql.ml.registry.mlflow.tracking_uri"
+
+  val ArtifactPathKey = "rikai.model.artifact_path"
+  val ModelFlavorKey = "rikai.model.flavor"
+  val OutputSchemaKey = "rikai.output.schema"
+  val SpecVersionKey = "rikai.spec.version"
+  val PreProcessingKey = "rikai.transforms.pre"
+  val PostProcessingKey = "rikai.transforms.post"
 
   /** Merge json payload to the protobuf builder. */
   private def merge(

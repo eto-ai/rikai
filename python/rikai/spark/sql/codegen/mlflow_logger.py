@@ -97,6 +97,7 @@ class MlflowLogger:
 
         try:
             import mlflow
+            from mlflow.tracking import MlflowClient
         except ImportError as e:
             raise ImportError(
                 "Couldn't import mlflow. Please make sure to "
@@ -128,6 +129,9 @@ class MlflowLogger:
                     "will not be populated to MLflow"
                 )
         mlflow.set_tags(tags)
+        model_registry_client = MlflowClient()._get_registry_client()
+        for key, value in tags.items():
+            model_registry_client.set_registered_model_tag(registered_model_name, key, value)
 
 
 KNOWN_FLAVORS = ["pytorch", "sklearn"]

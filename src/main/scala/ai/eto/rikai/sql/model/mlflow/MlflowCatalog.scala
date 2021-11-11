@@ -36,6 +36,7 @@ class MlflowCatalog(val mlflowClient: MlflowClient) extends Catalog {
   /** Use default trackingUri to build Mlflow Catalog */
   def this() = {
     this(new MlflowClient())
+    println("Hey, I was created")
   }
 
   def this(trackingUri: String) = {
@@ -124,6 +125,8 @@ object MlflowCatalog {
   val SpecVersionKey = "rikai.spec.version"
   val PreProcessingKey = "rikai.transforms.pre"
   val PostProcessingKey = "rikai.transforms.post"
+
+  val SQL_ML_CATALOG_IMPL_MLFLOW = "ai.eto.rikai.sql.model.mlflow.MlflowCatalog"
 
   /** Merge json payload to the protobuf builder. */
   private def merge(

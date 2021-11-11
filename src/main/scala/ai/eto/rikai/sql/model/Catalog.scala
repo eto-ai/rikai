@@ -58,11 +58,7 @@ object Catalog {
 
   /** A Catalog for local testing. */
   private[rikai] def testing: SimpleCatalog = {
-    val conf = new SparkConf().set(
-      SQL_ML_CATALOG_IMPL_KEY,
-      SQL_ML_CATALOG_IMPL_DEFAULT
-    )
-    getOrCreate(conf).asInstanceOf[SimpleCatalog]
+    getOrCreate(new SparkConf()).asInstanceOf[SimpleCatalog]
   }
 
   private var catalog: Option[Catalog] = None

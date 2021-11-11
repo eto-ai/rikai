@@ -36,12 +36,7 @@ private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
     extends AstBuilder {
 
   val catalog: Catalog =
-    Catalog.getOrCreate(
-      session.conf.get(
-        Catalog.SQL_ML_CATALOG_IMPL_KEY,
-        Catalog.SQL_ML_CATALOG_IMPL_DEFAULT
-      )
-    )
+    Catalog.getOrCreate(session.sparkContext.getConf)
 
   override def visitFunctionCall(ctx: FunctionCallContext): Expression =
     withOrigin(ctx) {

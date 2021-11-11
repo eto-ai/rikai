@@ -16,6 +16,8 @@
 
 package ai.eto.rikai.sql.model
 
+import org.apache.spark.SparkConf
+
 /** Catalog for SQL ML.
   */
 trait Catalog {
@@ -56,19 +58,27 @@ object Catalog {
 
   /** A Catalog for local testing. */
   private[rikai] def testing: SimpleCatalog = {
-    getOrCreate(SQL_ML_CATALOG_IMPL_DEFAULT).asInstanceOf[SimpleCatalog]
+    val conf = new SparkConf().set(
+      SQL_ML_CATALOG_IMPL_KEY,
+      SQL_ML_CATALOG_IMPL_DEFAULT
+    )
+    getOrCreate(conf).asInstanceOf[SimpleCatalog]
   }
 
-  private var catalog: Catalog = null
+  private var catalog: Option[Catalog] = None
 
-  def getOrCreate(className: String): Catalog = {
-    if (catalog == null) {
-      catalog = Class
-        .forName(className)
-        .getDeclaredConstructor()
-        .newInstance()
-        .asInstanceOf[Catalog]
+  def getOrCreate(conf: SparkConf): Catalog = {
+    val className =
+      conf.get(SQL_ML_CATALOG_IMPL_KEY, SQL_ML_CATALOG_IMPL_DEFAULT)
+    if (catalog.isEmpty) {
+      catalog = Some(
+        Class
+          .forName(className)
+          .getDeclaredConstructor(classOf[SparkConf])
+          .newInstance(conf)
+          .asInstanceOf[Catalog]
+      )
     }
-    catalog
+    catalog.get
   }
 }

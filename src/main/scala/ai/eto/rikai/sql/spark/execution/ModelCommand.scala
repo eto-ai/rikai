@@ -25,12 +25,8 @@ import org.apache.spark.sql.types.StringType
 trait ModelCommand extends RunnableCommand {
 
   def catalog(session: SparkSession): Catalog =
-    Catalog.getOrCreate(
-      session.conf.get(
-        Catalog.SQL_ML_CATALOG_IMPL_KEY,
-        Catalog.SQL_ML_CATALOG_IMPL_DEFAULT
-      )
-    )
+    Catalog.getOrCreate(session.sparkContext.getConf)
+
 }
 
 object ModelCommand {

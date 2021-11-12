@@ -16,7 +16,11 @@
 
 package ai.eto.rikai.sql.model.mlflow
 
-import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.{ArtifactPathKey, ModelFlavorKey, TrackingUriKey}
+import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.{
+  ArtifactPathKey,
+  ModelFlavorKey,
+  TrackingUriKey
+}
 import ai.eto.rikai.sql.model.{Catalog, Model, SparkUDFModel}
 import com.google.protobuf.InvalidProtocolBufferException
 import org.apache.spark.SparkConf

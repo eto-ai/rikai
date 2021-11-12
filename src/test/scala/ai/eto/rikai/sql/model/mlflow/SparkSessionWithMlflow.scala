@@ -18,11 +18,7 @@ package ai.eto.rikai.sql.model.mlflow
 
 import ai.eto.rikai.sql.model.{Catalog, Registry}
 import org.apache.spark.sql.SparkSession
-import org.mlflow.tracking.MlflowClient
 import org.scalatest.{BeforeAndAfterEach, Suite}
-
-import java.net.ServerSocket
-import scala.sys.process._
 
 trait SparkSessionWithMlflow extends BeforeAndAfterEach {
 
@@ -37,6 +33,10 @@ trait SparkSessionWithMlflow extends BeforeAndAfterEach {
       MlflowCatalog.SQL_ML_CATALOG_IMPL_MLFLOW
     )
     .config(
+      MlflowCatalog.TrackingUriKey,
+      sys.env.getOrElse("TEST_MLFLOW_TRACKING_URI", ""),
+    )
+    .config(
       Registry.REGISTRY_IMPL_PREFIX + "test.impl",
       "ai.eto.rikai.sql.model.testing.TestRegistry"
     )
@@ -46,30 +46,6 @@ trait SparkSessionWithMlflow extends BeforeAndAfterEach {
 
   spark.sparkContext.setLogLevel("WARN")
 
-  lazy val mlflowClient: MlflowClient = startMlflowServer()
+  val testMlflowTrackingUri: String = sys.env.getOrElse("TEST_MLFLOW_TRACKING_URI", "")
 
-  private var process: Option[Process] = None
-
-  def destroy = {
-    process.foreach(p => p.destroy())
-    process = None
-  }
-
-  /** Start python-based mlflow server in a process, and returns the connected MlflowClient */
-  private def startMlflowServer(): MlflowClient = {
-    val port = getFreePort
-    process = Some(
-      Seq("mlflow", "server", "--host", "127.0.0.1", "--port", s"$port").run()
-    )
-    new MlflowClient(s"http://127.0.0.1:$port")
-  }
-
-  private def getFreePort: Int = {
-    // *nix systems rarely reuse recently allocated ports,
-    // so we allocate one and then release it.
-    val sock = new ServerSocket(0)
-    val port = sock.getLocalPort
-    sock.close()
-    port
-  }
 }

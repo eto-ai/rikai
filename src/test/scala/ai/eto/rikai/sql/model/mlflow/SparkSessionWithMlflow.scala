@@ -34,7 +34,7 @@ trait SparkSessionWithMlflow extends BeforeAndAfterEach {
     )
     .config(
       MlflowCatalog.TrackingUriKey,
-      sys.env.getOrElse("TEST_MLFLOW_TRACKING_URI", ""),
+      sys.env.getOrElse("TEST_MLFLOW_TRACKING_URI", "")
     )
     .config(
       Registry.REGISTRY_IMPL_PREFIX + "test.impl",
@@ -46,6 +46,7 @@ trait SparkSessionWithMlflow extends BeforeAndAfterEach {
 
   spark.sparkContext.setLogLevel("WARN")
 
-  val testMlflowTrackingUri: String = sys.env.getOrElse("TEST_MLFLOW_TRACKING_URI", "")
+  val testMlflowTrackingUri: String =
+    sys.env.getOrElse("TEST_MLFLOW_TRACKING_URI", "")
 
 }

@@ -22,12 +22,7 @@ import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.{
   TrackingUriKey
 }
 import ai.eto.rikai.sql.model.{Catalog, Model, SparkUDFModel}
-import com.google.protobuf.InvalidProtocolBufferException
 import org.apache.spark.SparkConf
-import org.mlflow.api.proto.ModelRegistry.SearchRegisteredModels
-import org.mlflow.tracking.{MlflowClient, MlflowClientException}
-import org.mlflow_project.google.protobuf.Message.Builder
-import org.mlflow_project.google.protobuf.util.JsonFormat
 
 import scala.collection.JavaConverters._
 
@@ -35,7 +30,7 @@ import scala.collection.JavaConverters._
   */
 class MlflowCatalog(val conf: SparkConf) extends Catalog {
 
-  private val mlflowClient = new MlflowClient(conf.get(TrackingUriKey))
+  private val mlflowClient = new MlflowClientExt(conf.get(TrackingUriKey))
 
   /** Create a ML Model that can be used in SQL ML in the current database.
     */
@@ -44,8 +39,8 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
 
   /** Return a list of models available for all Sessions */
   override def listModels(): Seq[Model] = {
-    val response = searchRegisteredModels()
-    println(response)
+    val response = mlflowClient.searchRegisteredModels()
+    println("Response: ", response)
     response.getRegisteredModelsList.asScala
       .map(model => {
         model.getLatestVersionsCount match {
@@ -74,17 +69,6 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
       })
       .filter(m => m.isDefined)
       .map(m => m.get)
-  }
-
-  /** Query models from mlflow
-    *
-    * TODO: contribute this back to mlflow.
-    */
-  private def searchRegisteredModels(): SearchRegisteredModels.Response = {
-    val payload = mlflowClient.sendGet("registered-models/search")
-    val builder = SearchRegisteredModels.Response.newBuilder()
-    MlflowCatalog.merge(payload, builder)
-    builder.build()
   }
 
   /** Check a model with the specified name exists.
@@ -121,20 +105,4 @@ object MlflowCatalog {
   val PostProcessingKey = "rikai.transforms.post"
 
   val SQL_ML_CATALOG_IMPL_MLFLOW = "ai.eto.rikai.sql.model.mlflow.MlflowCatalog"
-
-  /** Merge json payload to the protobuf builder. */
-  private def merge(
-      jsonPayload: String,
-      builder: Builder
-  ) = {
-    try {
-      JsonFormat.parser.ignoringUnknownFields.merge(jsonPayload, builder)
-    } catch {
-      case e: InvalidProtocolBufferException =>
-        throw new MlflowClientException(
-          "Failed to serialize json " + jsonPayload + " into " + builder,
-          e
-        )
-    }
-  }
 }

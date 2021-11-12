@@ -16,11 +16,31 @@
 
 package ai.eto.rikai.sql.model.mlflow
 
+import org.mlflow.api.proto.Service.RunInfo
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.funsuite.AnyFunSuite
 
-class MlflowCatalogTest extends AnyFunSuite with SparkSessionWithMlflow {
+class MlflowCatalogTest
+    extends AnyFunSuite
+    with SparkSessionWithMlflow
+    with BeforeAndAfterEach {
+
+  var run: RunInfo = null
+
+  override def beforeEach(): Unit = {
+    run = mlflowClient.client.createRun()
+    super.beforeEach()
+  }
+
+  override def afterEach(): Unit = {
+    mlflowClient.client.deleteRun(run.getRunId)
+    clearModels()
+    super.afterEach()
+  }
 
   test("test list registered models") {
-    spark.sql("SHOW MODELS").show()
+    mlflowClient.createModel("testModel1")
+    val models = spark.sql("SHOW MODELS")
+    models.show()
   }
 }

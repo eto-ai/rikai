@@ -21,6 +21,6 @@ import org.scalatest.funsuite.AnyFunSuite
 class MlflowCatalogTest extends AnyFunSuite with SparkSessionWithMlflow {
 
   test("test list registered models") {
-    spark.sql("SHOW MODELS")
+    spark.sql("SHOW MODELS").show()
   }
 }

@@ -16,12 +16,10 @@
 
 package ai.eto.rikai.sql.model.mlflow
 
-import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.{
-  ArtifactPathKey,
-  ModelFlavorKey
-}
+import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.{ArtifactPathKey, ModelFlavorKey, TrackingUriKey}
 import ai.eto.rikai.sql.model.{Catalog, Model, SparkUDFModel}
 import com.google.protobuf.InvalidProtocolBufferException
+import org.apache.spark.SparkConf
 import org.mlflow.api.proto.ModelRegistry.SearchRegisteredModels
 import org.mlflow.tracking.{MlflowClient, MlflowClientException}
 import org.mlflow_project.google.protobuf.Message.Builder
@@ -31,17 +29,9 @@ import scala.collection.JavaConverters._
 
 /** Use MLflow as a persisted backend for Model Catalog
   */
-class MlflowCatalog(val mlflowClient: MlflowClient) extends Catalog {
+class MlflowCatalog(val conf: SparkConf) extends Catalog {
 
-  /** Use default trackingUri to build Mlflow Catalog */
-  def this() = {
-    this(new MlflowClient())
-    println("Hey, I was created")
-  }
-
-  def this(trackingUri: String) = {
-    this(new MlflowClient(trackingUri))
-  }
+  private val mlflowClient = new MlflowClient(conf.get(TrackingUriKey))
 
   /** Create a ML Model that can be used in SQL ML in the current database.
     */

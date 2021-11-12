@@ -17,10 +17,13 @@
 package ai.eto.rikai.sql.model.mlflow
 
 import ai.eto.rikai.sql.model.{Catalog, Registry}
+import org.apache.logging.log4j.scala.Logging
 import org.apache.spark.sql.SparkSession
 import org.scalatest.{BeforeAndAfterEach, Suite}
 
-trait SparkSessionWithMlflow extends BeforeAndAfterEach {
+import scala.collection.JavaConverters._
+
+trait SparkSessionWithMlflow extends Logging with BeforeAndAfterEach {
 
   this: Suite =>
   lazy val spark: SparkSession = SparkSession.builder
@@ -46,7 +49,16 @@ trait SparkSessionWithMlflow extends BeforeAndAfterEach {
 
   spark.sparkContext.setLogLevel("WARN")
 
+  lazy val mlflowClient = new MlflowClientExt(testMlflowTrackingUri)
+
   val testMlflowTrackingUri: String =
     sys.env.getOrElse("TEST_MLFLOW_TRACKING_URI", "")
 
+  private[mlflow] def clearModels(): Unit = {
+    mlflowClient
+      .searchRegisteredModels()
+      .getRegisteredModelsList
+      .asScala
+      .map(m => mlflowClient.deleteModel(m.getName))
+  }
 }

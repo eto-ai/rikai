@@ -14,15 +14,14 @@
 
 from __future__ import annotations
 
-
 import mlflow
 import pytest
 import torch
 from mlflow.tracking import MlflowClient
 from pyspark.sql import SparkSession
 
-from rikai.spark.utils import get_default_jar_version, init_spark_session
 import rikai
+from rikai.spark.utils import get_default_jar_version, init_spark_session
 
 
 @pytest.fixture(scope="module")

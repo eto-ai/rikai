@@ -105,10 +105,11 @@ def mlflow_client(
 
 @pytest.fixture()
 def spark_with_mlflow(mlflow_client) -> SparkSession:
+    mlflow_tracking_uri = mlflow.get_tracking_uri()
     active_session = SparkSession.getActiveSession()
     if (
         active_session
-        and active_session.conf.get("rikai.sql.ml.catalog.impl")
+        and active_session.conf.get("rikai.sql.ml.catalog.impl", None)
         != "ai.eto.rikai.sql.model.mlflow.MlflowCatalog"
     ):
         active_session.stop()
@@ -137,7 +138,7 @@ def spark_with_mlflow(mlflow_client) -> SparkSession:
             ]
         )
     )
-    yield spark, mlflow_client
+    yield spark
 
     try:
         for model in mlflow_client.list_registered_models():

@@ -12,10 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import numpy as np
-
-from sklearn.linear_model import LinearRegression
 import mlflow
+import numpy as np
+from sklearn.linear_model import LinearRegression
 
 
 def test_list_models(spark_with_mlflow, mlflow_client):

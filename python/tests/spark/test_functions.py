@@ -49,12 +49,15 @@ from rikai.types import Box2d, Image, Segment, VideoStream, YouTubeVideo
 
 def test_init(spark):
     init(spark)
-    rikai_udf_class_names = [
-        x.className
+    rikai_udf_names = [
+        x.name
         for x in spark.catalog.listFunctions()
-        if not x.className.startswith("org")
+        if x.className.startswith("org.apache.spark.sql.UDFRegistration")
     ]
-    assert len(rikai_udf_class_names) > 10
+    assert "area" in rikai_udf_names
+    assert "copy" in rikai_udf_names
+    assert "to_image" in rikai_udf_names
+    assert len(rikai_udf_names) > 10
 
 
 def assert_area_equals(array, df):

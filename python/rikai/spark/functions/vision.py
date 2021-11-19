@@ -22,6 +22,7 @@ from typing import List, Optional, Union
 
 # Third Party
 import numpy as np
+from PIL import ImageDraw
 from pyspark.sql.functions import udf
 from pyspark.sql.types import (
     ArrayType,
@@ -50,6 +51,7 @@ __all__ = [
     "crop",
     "to_image",
     "image_copy",
+    "inspect_bbox",
     "numpy_to_image",
     "video_to_images",
     "spectrogram_image",
@@ -453,3 +455,36 @@ def crop(img: Image, box: Union[Box2d, List[Box2d]]):
 
     """
     return img.crop(box)
+
+
+@udf(returnType=ImageType())
+def inspect_bbox(img: Image, boxes: List[Box2d], labels: List[str]):
+    """Draw bounding boxes on the image, and the returns the inpected image
+
+    Parameters
+    ----------
+    img : Image
+        An image object to be cropped.
+    boxes : List of Box2d
+        List of bound-2d boxes.
+    labels: List of string
+        List of labels.
+
+    Returns
+    -------
+    [Image]
+        Return a list of inspected images.
+
+    Examples
+    --------
+
+    >>> spark.sql("SELECT inspect_bbox(img, boxes, labels) as bbox FROM detections")
+
+    """
+    assert len(boxes) == len(labels), "length of boxes and labeles must match"
+    pil_image = img.to_pil()
+    draw = ImageDraw.Draw(pil_image)
+    for (bbox, label) in zip(boxes, labels):
+        draw.rectangle(bbox.to_numpy().tolist(), outline="green", width=2)
+        draw.text([bbox.xmin + 5, bbox.ymin - 10], label, fill="red")
+    return Image.from_pil(pil_image)

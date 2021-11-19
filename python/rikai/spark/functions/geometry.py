@@ -14,9 +14,12 @@
 
 """Geometry related PySpark UDF"""
 
+# Standard library
+from typing import List
+
 # Third Party
 from pyspark.sql.functions import udf
-from pyspark.sql.types import FloatType
+from pyspark.sql.types import ArrayType, FloatType
 
 # Rikai
 from rikai.logging import logger
@@ -30,6 +33,15 @@ __all__ = ["area", "box2d", "box2d_from_center", "box2d_from_top_left"]
 def box2d(coords) -> Box2d:
     """Build a Box2d from ``[xmin,ymin,xmax,ymax]`` array."""
     return Box2d(coords[0], coords[1], coords[2], coords[3])
+
+
+@udf(returnType=ArrayType(Box2dType()))
+def array_box2d(arr_coords) -> List[Box2d]:
+    """Build a Box2d from array of ``[xmin,ymin,xmax,ymax]`` arrays."""
+    result = []
+    for coords in arr_coords:
+        result.append(Box2d(coords[0], coords[1], coords[2], coords[3]))
+    return result
 
 
 @udf(returnType=Box2dType())

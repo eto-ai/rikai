@@ -15,6 +15,22 @@
 """Domain-specific Pyspark UDFs
 """
 
+from pyspark.sql import SparkSession
+
 from rikai.spark.functions.geometry import *
 from rikai.spark.functions.io import *
 from rikai.spark.functions.vision import *
+
+__all__ = ["init"]
+
+
+def init(spark: SparkSession):
+    """Register all rikai UDFs"""
+    from rikai.spark.functions import geometry, io, vision
+
+    for name in geometry.__all__:
+        spark.udf.register(name, getattr(geometry, name))
+    for name in io.__all__:
+        spark.udf.register(name, getattr(io, name))
+    for name in vision.__all__:
+        spark.udf.register(name, getattr(vision, name))

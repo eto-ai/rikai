@@ -33,17 +33,28 @@ from rikai.spark.functions import (
     area,
     box2d,
     box2d_from_center,
+    crop,
     image_copy,
+    init,
     numpy_to_image,
     spectrogram_image,
     to_image,
     video_metadata,
     video_to_images,
 )
-from rikai.spark.functions.vision import crop
 from rikai.spark.types.geometry import Box2dType
 from rikai.spark.types.vision import ImageType
 from rikai.types import Box2d, Image, Segment, VideoStream, YouTubeVideo
+
+
+def test_init(spark):
+    init(spark)
+    rikai_udf_class_names = [
+        x.className
+        for x in spark.catalog.listFunctions()
+        if not x.className.startswith("org")
+    ]
+    assert len(rikai_udf_class_names) > 10
 
 
 def assert_area_equals(array, df):

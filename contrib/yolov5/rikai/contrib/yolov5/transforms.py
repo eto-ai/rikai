@@ -1,41 +1,42 @@
-#  Copyright 2021 Rikai Authors
+#  Copyright (c) 2021 Rikai Authors
 #
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#      http://www.apache.org/licenses/LICENSE-2.0
 #
 #  Unless required by applicable law or agreed to in writing, software
 #  distributed under the License is distributed on an "AS IS" BASIS,
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""
-This is the implementation at https://pytorch.org/hub/ultralytics_yolov5/
-With autoShape it does not require pre-processing
-However it is NOT testable as it is not packaged as a python repository.
-To use this make sure you install yolov5 and yolov5 requirements
 
-```
-pip install -qr https://raw.githubusercontent.com/ultralytics/yolov5/master/requirements.txt
-pip install yolov5
-```
-"""  # noqa E501
+from typing import Any, Callable, Dict, Tuple
 
-from typing import Any, Callable, Dict
+import numpy as np
+import torch
+from PIL import Image
+from yolov5.utils.datasets import exif_transpose
 
 from rikai.types.vision import Image
 
 __all__ = ["pre_processing", "post_processing", "OUTPUT_SCHEMA"]
 
 
-def _pre_process_func(image_data):
-    return Image(image_data).to_pil()
+def pre_process_func(im):
+    im = Image(im).to_pil()
+    im = np.asarray(exif_transpose(im))
+    if im.shape[0] < 5:  # image in CHW
+        im = im.transpose((1, 2, 0))  # reverse dataloader .transpose(2, 0, 1)
+    im = (
+        im[..., :3] if im.ndim == 3 else np.tile(im[..., None], 3)
+    )  # enforce 3ch input
+    return torch.from_numpy(im)
 
 
 def pre_processing(options: Dict[str, Any]) -> Callable:
-    return _pre_process_func
+    return pre_process_func
 
 
 def post_processing(options: Dict[str, Any]) -> Callable:

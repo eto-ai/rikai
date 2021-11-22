@@ -21,6 +21,7 @@ from pyspark.sql.functions import pandas_udf
 from pyspark.sql.types import StructType
 from torch.utils.data import DataLoader
 
+from rikai.contrib.torch import RikaiModule
 from rikai.io import open_uri
 from rikai.torch.pandas import PandasDataset
 
@@ -71,9 +72,11 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                     batch_size=batch_size,
                     num_workers=num_workers,
                 ):
-                    if isinstance(batch, torch.Tensor):
-                        batch = batch.to(device)
-                    predictions = model(batch)
+                    batch = batch.to(device)
+                    if isinstance(model, RikaiModule):
+                        predictions = model(spec.options, batch)
+                    else:
+                        predictions = model(batch)
                     if spec.post_processing:
                         predictions = spec.post_processing(predictions)
                     results.extend(predictions)

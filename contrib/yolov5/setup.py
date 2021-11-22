@@ -8,12 +8,14 @@ setup(
     author_email="rikai-dev@eto.ai",
     url="https://github.com/eto-ai/rikai",
     python_requires=">=3.7",
-    install_requires=["rikai", "yolov5"],
+    install_requires=["rikai", "yolov5==5.0.8"],
     extras_require={
         "dev": [
             "black",
             "isort",
+            # for testing
             "pytest",
+            "mlflow",
         ]
     },
     packages=find_namespace_packages(include=["rikai.*"]),

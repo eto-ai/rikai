@@ -37,15 +37,16 @@ def test_yolov5(spark: SparkSession):
         # Part 1: Train the model and register it on MLflow
         ####
         pretrained = "yolov5s.pt"
-        url = "https://github.com/ultralytics/yolov5/releases/download/v5.0/yolov5s.pt"
+        url = (
+            "https://github.com/ultralytics/yolov5/"
+            + "releases/download/v5.0/yolov5s.pt"
+        )
         if os.path.exists(pretrained):
             urllib.request.urlretrieve(url, pretrained)
         model = RikaiYolov5Model(yolov5.load(pretrained))
         pre = "rikai.contrib.yolov5.transforms.pre_processing"
         post = "rikai.contrib.yolov5.transforms.post_processing"
 
-        # Rikai's logger adds output_schema, pre_pocessing, and post_processing as additional
-        # arguments and automatically adds the flavor / rikai model spec version
         rikai.mlflow.pytorch.log_model(
             model,
             "model",
@@ -70,7 +71,9 @@ def test_yolov5(spark: SparkSession):
         )
         spark.sql(
             f"""
-        CREATE MODEL mlflow_yolov5_m OPTIONS (device='{device}') USING 'mlflow:///{registered_model_name}';
+        CREATE MODEL mlflow_yolov5_m
+        OPTIONS (device='{device}')
+        USING 'mlflow:///{registered_model_name}';
         """
         )
 
@@ -80,9 +83,10 @@ def test_yolov5(spark: SparkSession):
         spark.sql("show models").show(1, vertical=False, truncate=False)
 
         work_dir = pathlib.Path().absolute().parent.parent
+        image_path = f"{work_dir}/python/tests/assets/test_image.jpg"
         result = spark.sql(
             f"""
-        select ML_PREDICT(mlflow_yolov5_m, '{work_dir}/python/tests/assets/test_image.jpg')
+        select ML_PREDICT(mlflow_yolov5_m, '{image_path}')
         """
         )
 

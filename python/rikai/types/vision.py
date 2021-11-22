@@ -155,16 +155,17 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
         -------
         img: IPython.display.Image
         """
-        from IPython.core.display import Image
+        from IPython.display import Image
 
         if not self.is_embedded and self.uri.startswith("http"):
             return Image(url=self.uri)
         else:
             with self.open() as fobj:
                 data = fobj.read()
+                inferred_format = Image(data).format
                 encoded = base64.b64encode(data).decode("utf-8")
                 url = f"data:image;base64,{encoded}"
-                return Image(data=data, url=url)
+                return Image(url=url, embed=True, format=inferred_format)
 
     def __repr__(self) -> str:
         if self.is_embedded:

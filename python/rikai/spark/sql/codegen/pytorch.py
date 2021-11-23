@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import os
+from inspect import signature
 from typing import Iterator
 
 import pandas as pd
@@ -74,7 +75,9 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                     if isinstance(batch, torch.Tensor):
                         batch = batch.to(device)
                     predictions = model(batch)
-                    if spec.post_processing:
+                    if _number_of_params(spec.post_processing) == 2:
+                        predictions = spec.post_processing(batch, predictions)
+                    else:
                         predictions = spec.post_processing(predictions)
                     results.extend(predictions)
                 if should_return_df:
@@ -83,6 +86,11 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                     yield pd.Series(results)
 
     return pandas_udf(torch_inference_udf, returnType=schema)
+
+
+def _number_of_params(func):
+    sig = signature(func)
+    return len(sig.parameters)
 
 
 def load_model_from_uri(uri: str):

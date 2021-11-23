@@ -17,6 +17,7 @@ import pathlib
 import urllib
 
 import mlflow
+import pytest
 import torch
 import yolov5
 from pyspark.sql.session import SparkSession
@@ -90,8 +91,11 @@ def test_yolov5(spark: SparkSession):
         """
         )
         row = result.first()
-        assert row.pred.boxes == [
-            [33.568233489990234, 37.97309875488281, 1024.0, 1017.457275390625]
+        assert pytest.approx(row.pred.boxes[0], abs=1e-3) == [
+            33.568,
+            37.973,
+            1024.0,
+            1017.457,
         ]
-        assert row.pred.scores == [0.41329362988471985]
+        assert pytest.approx(row.pred.scores, abs=1e-3) == [0.413]
         assert row.pred.label_ids == [0]

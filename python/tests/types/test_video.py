@@ -56,6 +56,7 @@ def test_youtube_show():
     assert result == expected
 
 
+@pytest.mark.skip(reason="flaky due to youtube changes")
 @pytest.mark.timeout(30)
 @pytest.mark.webtest
 def test_video_show():

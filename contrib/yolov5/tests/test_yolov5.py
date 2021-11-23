@@ -86,9 +86,12 @@ def test_yolov5(spark: SparkSession):
         image_path = f"{work_dir}/python/tests/assets/test_image.jpg"
         result = spark.sql(
             f"""
-        select ML_PREDICT(mlflow_yolov5_m, '{image_path}')
+        select ML_PREDICT(mlflow_yolov5_m, '{image_path}') as pred
         """
         )
-
-        result.printSchema()
-        result.show(1, vertical=False, truncate=False)
+        row = result.first()
+        assert row.pred.boxes == [
+            [33.568233489990234, 37.97309875488281, 1024.0, 1017.457275390625]
+        ]
+        assert row.pred.scores == [0.41329362988471985]
+        assert row.pred.label_ids == [0]

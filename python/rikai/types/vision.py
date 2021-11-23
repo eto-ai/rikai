@@ -160,6 +160,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
         if not self.is_embedded and self.uri.startswith("http"):
             return Image(url=self.uri, **kwargs)
         else:
+            # Using Data URIs for Databricks Notebook
             with self.open() as fobj:
                 data = fobj.read()
                 inferred_format = Image(data).format

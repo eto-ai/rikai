@@ -130,7 +130,7 @@ def test_show_remote_ref():
     img = Image(uri)
     # TODO check the actual content
     assert img._repr_html_() == img.display()._repr_html_()
-    assert img.display()._repr_html_() == IPyImage(uri)._repr_html_()
+    assert img.display()._repr_html_() == IPyImage(url=uri)._repr_html_()
 
 
 def test_save_image_as_external(tmp_path):

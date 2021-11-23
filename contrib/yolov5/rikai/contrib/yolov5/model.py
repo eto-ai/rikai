@@ -14,7 +14,7 @@ from yolov5.utils.torch_utils import time_sync
 from rikai.contrib.torch import RikaiModule
 
 
-class RikaiYolov5Model(nn.Module, RikaiModule):
+class Yolov5(nn.Module, RikaiModule):
     def __init__(self, model):
         super().__init__()
         self.model = model.eval()

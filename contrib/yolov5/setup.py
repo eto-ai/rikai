@@ -8,7 +8,7 @@ setup(
     author_email="rikai-dev@eto.ai",
     url="https://github.com/eto-ai/rikai",
     python_requires=">=3.7",
-    install_requires=["rikai", "yolov5==5.0.8"],
+    install_requires=["rikai", "yolov5 >=5.0.0, <6.0.0"],
     extras_require={
         "dev": [
             "black",

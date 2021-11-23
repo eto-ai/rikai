@@ -22,7 +22,7 @@ import yolov5
 from pyspark.sql.session import SparkSession
 
 import rikai
-from rikai.contrib.yolov5.model import RikaiYolov5Model
+from rikai.contrib.yolov5.model import Yolov5
 from rikai.contrib.yolov5.transforms import OUTPUT_SCHEMA
 
 
@@ -43,7 +43,7 @@ def test_yolov5(spark: SparkSession):
         )
         if os.path.exists(pretrained):
             urllib.request.urlretrieve(url, pretrained)
-        model = RikaiYolov5Model(yolov5.load(pretrained))
+        model = Yolov5(yolov5.load(pretrained))
         pre = "rikai.contrib.yolov5.transforms.pre_processing"
         post = "rikai.contrib.yolov5.transforms.post_processing"
 

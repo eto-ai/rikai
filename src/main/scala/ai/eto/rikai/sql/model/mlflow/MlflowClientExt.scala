@@ -20,7 +20,6 @@ import com.google.protobuf.InvalidProtocolBufferException
 import org.apache.logging.log4j.scala.Logging
 import org.mlflow.api.proto.ModelRegistry.{
   CreateRegisteredModel,
-  DeleteRegisteredModel,
   SearchRegisteredModels
 }
 import org.mlflow.tracking.{MlflowClient, MlflowClientException}
@@ -32,7 +31,7 @@ import java.net.http.HttpClient
 
 /** Extension to MlflowClient to add necessary APIs for Rikai */
 private[mlflow] class MlflowClientExt(val trackingUri: String) extends Logging {
-
+  println(s"tracking uri: $trackingUri")
   val client = new MlflowClient(trackingUri)
   val httpClient = HttpClient.newHttpClient()
 
@@ -58,10 +57,11 @@ private[mlflow] class MlflowClientExt(val trackingUri: String) extends Logging {
   }
 
   private[mlflow] def deleteModel(name: String): Unit = {
-    val request: DeleteRegisteredModel =
-      DeleteRegisteredModel.newBuilder().setName(name).build()
-    val payload = MlflowClientExt.jsonify(request)
-    client.sendPost("registered-models/delete", payload)
+//    val request: DeleteRegisteredModel =
+//      DeleteRegisteredModel.newBuilder().setName(name).build()
+//    val payload = MlflowClientExt.jsonify(request)
+//    client.sendPost("registered-models/delete", payload)
+    //TODO delete model using external command or remove this method
   }
 }
 

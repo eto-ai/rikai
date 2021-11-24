@@ -24,8 +24,12 @@ import org.scalatest.{BeforeAndAfterEach, Suite}
 import scala.collection.JavaConverters._
 
 trait SparkSessionWithMlflow extends Logging with BeforeAndAfterEach {
-
   this: Suite =>
+
+  //TODO add server
+  val testMlflowTrackingUri: String =
+    sys.env.getOrElse("TEST_MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
+
   lazy val spark: SparkSession = SparkSession.builder
     .config(
       "spark.sql.extensions",
@@ -36,8 +40,9 @@ trait SparkSessionWithMlflow extends Logging with BeforeAndAfterEach {
       MlflowCatalog.SQL_ML_CATALOG_IMPL_MLFLOW
     )
     .config(
-      MlflowCatalog.TrackingUriKey,
-      sys.env.getOrElse("TEST_MLFLOW_TRACKING_URI", "")
+      MlflowCatalog.TrackingUriKey,{
+        testMlflowTrackingUri
+      }
     )
     .config(
       Registry.REGISTRY_IMPL_PREFIX + "test.impl",
@@ -51,14 +56,13 @@ trait SparkSessionWithMlflow extends Logging with BeforeAndAfterEach {
 
   lazy val mlflowClient = new MlflowClientExt(testMlflowTrackingUri)
 
-  val testMlflowTrackingUri: String =
-    sys.env.getOrElse("TEST_MLFLOW_TRACKING_URI", "")
 
   private[mlflow] def clearModels(): Unit = {
     mlflowClient
       .searchRegisteredModels()
       .getRegisteredModelsList
       .asScala
-      .map(m => mlflowClient.deleteModel(m.getName))
+      //The MLFlow client does not support delete a model
+      .foreach(m => mlflowClient.deleteModel(m.getName))
   }
 }

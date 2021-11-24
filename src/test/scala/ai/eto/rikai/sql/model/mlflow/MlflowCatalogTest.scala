@@ -20,6 +20,8 @@ import org.mlflow.api.proto.Service.RunInfo
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.funsuite.AnyFunSuite
 
+import scala.util.Random
+
 class MlflowCatalogTest
     extends AnyFunSuite
     with SparkSessionWithMlflow
@@ -39,7 +41,8 @@ class MlflowCatalogTest
   }
 
   test("test list registered models") {
-    mlflowClient.createModel("testModel1")
+    mlflowClient.createModel("testModel" + Random.nextInt(Int.MaxValue))
+    //TODO train a model version
     val models = spark.sql("SHOW MODELS")
     models.show()
   }

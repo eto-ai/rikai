@@ -24,8 +24,11 @@ import org.apache.spark.sql.types.StringType
 
 trait ModelCommand extends RunnableCommand {
 
-  def catalog(session: SparkSession): Catalog =
-    Catalog.getOrCreate(session.sparkContext.getConf)
+  def catalog(session: SparkSession): Catalog = {
+    val catalog = Catalog.getOrCreate(session.sparkContext.getConf)
+    println(s"catalog $catalog")
+    catalog
+  }
 
 }
 

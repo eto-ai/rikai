@@ -17,7 +17,15 @@ from typing import Any, Callable, Dict, Tuple
 import numpy as np
 import torch
 from PIL import Image
-from yolov5.utils.datasets import exif_transpose
+from torch.cuda import amp
+from yolov5.models.common import Detections
+from yolov5.utils.datasets import exif_transpose, letterbox
+from yolov5.utils.general import (
+    make_divisible,
+    non_max_suppression,
+    scale_coords,
+)
+from yolov5.utils.torch_utils import time_sync
 
 from rikai.types.vision import Image
 
@@ -40,26 +48,76 @@ def pre_processing(options: Dict[str, Any]) -> Callable:
 
 
 def post_processing(options: Dict[str, Any]) -> Callable:
-    def post_process_func(batch: "Detections"):
-        """
-        Parameters
-        ----------
-        batch: Detections
-            The ultralytics yolov5 (in torch hub) autoShape output
-        """
-        results = []
-        for predicts in batch.pred:
-            predict_result = {
-                "boxes": [],
-                "label_ids": [],
-                "scores": [],
-            }
-            for *box, conf, cls in predicts.tolist():
-                predict_result["boxes"].append(box)
-                predict_result["label_ids"].append(cls)
-                predict_result["scores"].append(conf)
-            results.append(predict_result)
-        return results
+    augment = options.get("augment", False)
+    profile = options.get("profile", False)
+    # NMS confidence threshold
+    conf_thres = options.get("conf_thres", 0.25)
+    # NMS IoU threshold
+    iou_thres = options.get("iou_thres", 0.45)
+    # maximum number of detections per image
+    max_det = options.get("max_det", 1000)
+    image_size = options.get("image_size", 640)
+
+    def post_process_func(model, batch):
+        t = [time_sync()]
+
+        p = next(model.parameters())  # for device and type
+        n = len(batch)
+        imgs = []
+        for item in batch:
+            imgs.append(item.numpy())
+        shape0 = []
+        shape1 = []
+        for i, im in enumerate(imgs):
+            s = im.shape[:2]  # HWC
+            shape0.append(s)  # image shape
+            g = image_size / max(s)  # gain
+            shape1.append([y * g for y in s])
+            imgs[i] = (
+                im if im.data.contiguous else np.ascontiguousarray(im)
+            )  # update
+        shape1 = [
+            make_divisible(x, int(model.stride.max()))
+            for x in np.stack(shape1, 0).max(0)
+        ]  # inference shape
+        x = [
+            letterbox(im, new_shape=shape1, auto=False)[0] for im in imgs
+        ]  # pad
+        x = np.stack(x, 0) if n > 1 else x[0][None]  # stack
+        x = np.ascontiguousarray(x.transpose((0, 3, 1, 2)))  # BHWC to BCHW
+        x = (
+            torch.from_numpy(x).to(p.device).type_as(p) / 255.0
+        )  # uint8 to fp16/32
+        t.append(time_sync())
+
+        with amp.autocast(enabled=p.device.type != "cpu"):
+            pred = model(x.to(p.device).type_as(p), augment, profile)
+            y = pred[0]
+            t.append(time_sync())
+
+            # Post-process
+            y = non_max_suppression(
+                y, conf_thres=conf_thres, iou_thres=iou_thres, max_det=max_det
+            )  # NMS
+            for i in range(n):
+                scale_coords(shape1, y[i][:, :4], shape0[i])
+            t.append(time_sync())
+
+            detections = Detections(imgs, y, None, times=t, shape=x.shape)
+
+            results = []
+            for predicts in detections.pred:
+                predict_result = {
+                    "boxes": [],
+                    "label_ids": [],
+                    "scores": [],
+                }
+                for *box, conf, cls in predicts.tolist():
+                    predict_result["boxes"].append(box)
+                    predict_result["label_ids"].append(cls)
+                    predict_result["scores"].append(conf)
+                results.append(predict_result)
+            return results
 
     return post_process_func
 

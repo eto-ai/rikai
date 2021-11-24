@@ -21,7 +21,6 @@ from pyspark.sql.functions import pandas_udf
 from pyspark.sql.types import StructType
 from torch.utils.data import DataLoader
 
-from rikai.contrib.torch import RikaiModule
 from rikai.io import open_uri
 from rikai.torch.pandas import PandasDataset
 

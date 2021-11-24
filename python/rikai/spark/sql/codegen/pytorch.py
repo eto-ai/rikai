@@ -73,12 +73,10 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                     num_workers=num_workers,
                 ):
                     batch = batch.to(device)
-                    if isinstance(model, RikaiModule):
-                        predictions = model(spec.options, batch)
+                    if spec.post_processing:
+                        predictions = spec.post_processing(model, batch)
                     else:
                         predictions = model(batch)
-                    if spec.post_processing:
-                        predictions = spec.post_processing(predictions)
                     results.extend(predictions)
                 if should_return_df:
                     yield pd.DataFrame(results)

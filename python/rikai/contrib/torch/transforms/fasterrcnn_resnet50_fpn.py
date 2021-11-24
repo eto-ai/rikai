@@ -35,9 +35,9 @@ def pre_processing(options: Dict[str, Any]) -> Callable:
 def post_processing(options: Dict[str, Any]) -> Callable:
     min_score = float(options.get("min_score", DEFAULT_MIN_SCORE))
 
-    def post_process_func(batch):
+    def post_process_func(model, batch):
         results = []
-        for predicts in batch:
+        for predicts in model(batch):
             predict_result = {
                 "boxes": [],
                 "label_ids": [],

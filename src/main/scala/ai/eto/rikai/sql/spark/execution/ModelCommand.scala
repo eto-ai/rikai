@@ -26,7 +26,6 @@ trait ModelCommand extends RunnableCommand {
 
   def catalog(session: SparkSession): Catalog = {
     val catalog = Catalog.getOrCreate(session.sparkContext.getConf)
-    println(s"catalog $catalog")
     catalog
   }
 

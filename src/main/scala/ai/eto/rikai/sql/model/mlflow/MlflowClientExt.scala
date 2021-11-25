@@ -33,7 +33,6 @@ import scala.collection.JavaConverters._
 
 /** Extension to MlflowClient to add necessary APIs for Rikai */
 private[mlflow] class MlflowClientExt(val trackingUri: String) extends Logging {
-  println(s"tracking uri: $trackingUri")
   val client = new RiMlflowClient(trackingUri)
 
   private[mlflow] def searchRegisteredModels()

@@ -50,7 +50,6 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
   /** Return a list of models available for all Sessions */
   override def listModels(): Seq[Model] = {
     val response = mlflowClient.searchRegisteredModels()
-    println("ResponseXXXX: ", response)
     response.getRegisteredModelsList.asScala
       .map(model => {
         model.getLatestVersionsCount match {

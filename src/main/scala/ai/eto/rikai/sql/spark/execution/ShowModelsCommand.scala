@@ -27,7 +27,6 @@ case class ShowModelsCommand() extends ModelCommand {
   override def run(spark: SparkSession): Seq[Row] = {
     val models = catalog(spark).listModels()
 
-    println(s"models $models")
     models.map { model: Model =>
       Row(
         model.name,

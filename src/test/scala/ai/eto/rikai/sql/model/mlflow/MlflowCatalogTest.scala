@@ -54,7 +54,6 @@ class MlflowCatalogTest
       .setSource("fake_uri")
       .setRunId(run.getRunId)
       .setRunLink(run.getArtifactUri)
-    println(ArtifactPathKey)
     builder.addTags(
       ModelVersionTag
         .newBuilder()

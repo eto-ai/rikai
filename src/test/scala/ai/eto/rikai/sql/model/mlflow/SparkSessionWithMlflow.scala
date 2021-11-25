@@ -19,38 +19,43 @@ package ai.eto.rikai.sql.model.mlflow
 import ai.eto.rikai.sql.model.{Catalog, Registry}
 import org.apache.logging.log4j.scala.Logging
 import org.apache.spark.sql.SparkSession
-import org.scalatest.{BeforeAndAfterEach, Suite}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
 
 import scala.collection.JavaConverters._
 
-trait SparkSessionWithMlflow extends Logging with BeforeAndAfterEach {
+trait SparkSessionWithMlflow
+    extends Logging
+    with BeforeAndAfterEach
+    with BeforeAndAfterAll {
   this: Suite =>
 
-  //TODO add server
   val testMlflowTrackingUri: String =
     sys.env.getOrElse("TEST_MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
 
-  lazy val spark: SparkSession = SparkSession.builder
-    .config(
-      "spark.sql.extensions",
-      "ai.eto.rikai.sql.spark.RikaiSparkSessionExtensions"
-    )
-    .config(
-      Catalog.SQL_ML_CATALOG_IMPL_KEY,
-      MlflowCatalog.SQL_ML_CATALOG_IMPL_MLFLOW
-    )
-    .config(
-      MlflowCatalog.TrackingUriKey, {
-        testMlflowTrackingUri
-      }
-    )
-    .config(
-      Registry.REGISTRY_IMPL_PREFIX + "test.impl",
-      "ai.eto.rikai.sql.model.testing.TestRegistry"
-    )
-    .config("spark.port.maxRetries", 128)
-    .master("local[*]")
-    .getOrCreate
+  lazy val spark: SparkSession = {
+    println("lazy called")
+    SparkSession.builder
+      .config(
+        "spark.sql.extensions",
+        "ai.eto.rikai.sql.spark.RikaiSparkSessionExtensions"
+      )
+      .config(
+        Catalog.SQL_ML_CATALOG_IMPL_KEY,
+        MlflowCatalog.SQL_ML_CATALOG_IMPL_MLFLOW
+      )
+      .config(
+        MlflowCatalog.TrackingUriKey, {
+          testMlflowTrackingUri
+        }
+      )
+      .config(
+        Registry.REGISTRY_IMPL_PREFIX + "test.impl",
+        "ai.eto.rikai.sql.model.testing.TestRegistry"
+      )
+      .config("spark.port.maxRetries", 128)
+      .master("local[*]")
+      .getOrCreate
+  }
 
   spark.sparkContext.setLogLevel("WARN")
 
@@ -63,5 +68,9 @@ trait SparkSessionWithMlflow extends Logging with BeforeAndAfterEach {
       .asScala
       //The MLFlow client does not support delete a model
       .foreach(m => mlflowClient.deleteModel(m.getName))
+  }
+
+  override protected def afterAll(): Unit = {
+    spark.close()
   }
 }

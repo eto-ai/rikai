@@ -66,7 +66,7 @@ object Catalog {
   def getOrCreate(conf: SparkConf): Catalog = {
     val className =
       conf.get(SQL_ML_CATALOG_IMPL_KEY, SQL_ML_CATALOG_IMPL_DEFAULT)
-    if (catalog.isEmpty) {
+    if (catalog.isEmpty || catalog.get.getClass.getName != className) {
       catalog = Some(
         Class
           .forName(className)

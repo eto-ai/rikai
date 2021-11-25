@@ -19,9 +19,9 @@ package ai.eto.rikai
 import ai.eto.rikai.sql.model.{Catalog, Registry}
 import ai.eto.rikai.sql.spark.{Python, TestPython}
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.scalatest.{BeforeAndAfterEach, Suite}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
 
-trait SparkTestSession extends BeforeAndAfterEach {
+trait SparkTestSession extends BeforeAndAfterEach with BeforeAndAfterAll {
 
   this: Suite =>
   lazy val spark: SparkSession = SparkSession.builder
@@ -51,5 +51,9 @@ trait SparkTestSession extends BeforeAndAfterEach {
   def assertEqual(actual: DataFrame, expected: DataFrame): Unit = {
     assert(actual.count() == expected.count())
     assert(actual.exceptAll(expected).isEmpty)
+  }
+
+  override protected def afterAll(): Unit = {
+    spark.close()
   }
 }

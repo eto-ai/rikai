@@ -117,8 +117,16 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
     * @param name the model name
     * @return true of the model is dropped successfully. False otherwise.
     */
-  override def dropModel(name: String): Boolean =
-    throw new NotImplementedError()
+  override def dropModel(name: String): Boolean = {
+    try {
+      mlflowClient.deleteModel(name)
+      true
+    } catch {
+      case e : Exception =>
+        e.printStackTrace()
+        false
+    }
+  }
 }
 
 object MlflowCatalog {

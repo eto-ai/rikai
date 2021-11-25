@@ -24,18 +24,11 @@ jobs:
       run: |
         docker-compose -f .github/docker-compose.yml up -d
         sleep 10
-    - name: Mlflow Server # for mlflow server
-      working-directory: python
-      run: |
-        sudo apt update
-        sudo apt-get -y -qq install libsnappy-dev ffmpeg
-        python -m pip install -e .[all,dev]
-        mlflow server --backend-store-uri sqlite:////tmp/mlflow.sqlite --default-artifact-root file:///tmp/models
     - name: Run Scala tests
       run: sbt test
       env:
         SPARK_LOCAL_IP: "127.0.0.1"
-        TEST_MLFLOW_TRACKING_URI: "http://localhost:5000"
+        TEST_MLFLOW_TRACKING_URI: "http://localhost:15000"
     - name: Build Scala Jar
       run: sbt package
     - name: Stop docker-compose

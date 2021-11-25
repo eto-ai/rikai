@@ -43,7 +43,6 @@ class MlflowCatalogTest
   }
 
   test("test list registered models") {
-    //TODO start server shutdown server
     val modelName = "testModel" + Random.nextInt(Int.MaxValue)
     mlflowClient.createModel(modelName)
 

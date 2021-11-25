@@ -16,6 +16,8 @@
 
 package ai.eto.rikai.sql.model.mlflow
 
+import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.ArtifactPathKey
+import org.mlflow.api.proto.ModelRegistry.{CreateModelVersion, ModelVersionTag}
 import org.mlflow.api.proto.Service.RunInfo
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.funsuite.AnyFunSuite
@@ -41,8 +43,31 @@ class MlflowCatalogTest
   }
 
   test("test list registered models") {
-    mlflowClient.createModel("testModel" + Random.nextInt(Int.MaxValue))
-    //TODO train a model version
+    //TODO start server shutdown server
+    val modelName = "testModel" + Random.nextInt(Int.MaxValue)
+    mlflowClient.createModel(modelName)
+
+    //Seems we can not really try a model in Java APi
+    val builder = CreateModelVersion
+      .newBuilder()
+      .setName(modelName)
+      .setSource("fake_uri")
+      .setRunId(run.getRunId)
+      .setRunLink(run.getArtifactUri)
+    println(ArtifactPathKey)
+    builder.addTags(
+      ModelVersionTag
+        .newBuilder()
+        .setKey(ArtifactPathKey)
+        .setValue("fake_uri")
+        .build()
+    )
+
+    mlflowClient.client.sendPost(
+      "model-versions/create",
+      MlflowClientExt.jsonify(builder)
+    )
+
     val models = spark.sql("SHOW MODELS")
     models.show()
   }

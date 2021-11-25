@@ -18,7 +18,12 @@ package ai.eto.rikai.sql.model.mlflow
 
 import com.google.protobuf.InvalidProtocolBufferException
 import org.apache.logging.log4j.scala.Logging
-import org.mlflow.api.proto.ModelRegistry.{CreateRegisteredModel, DeleteRegisteredModel, RegisteredModelTag, SearchRegisteredModels}
+import org.mlflow.api.proto.ModelRegistry.{
+  CreateRegisteredModel,
+  DeleteRegisteredModel,
+  RegisteredModelTag,
+  SearchRegisteredModels
+}
 import org.mlflow.tracking.{MlflowClientException, RiMlflowClient}
 import org.mlflow_project.google.protobuf.Message.Builder
 import org.mlflow_project.google.protobuf.MessageOrBuilder
@@ -41,10 +46,13 @@ private[mlflow] class MlflowClientExt(val trackingUri: String) extends Logging {
   }
 
   private[mlflow] def getModel(name: String) = {
-    val list = client.getLatestVersions(name,
-      //TODO how to configure?
-      Seq("None", "Staging", "Production", "Archived").asJava
-    ).asScala
+    val list = client
+      .getLatestVersions(
+        name,
+        //TODO how to configure?
+        Seq("None", "Staging", "Production", "Archived").asJava
+      )
+      .asScala
     list.headOption
   }
 
@@ -54,9 +62,8 @@ private[mlflow] class MlflowClientExt(val trackingUri: String) extends Logging {
       tags: Map[String, String] = Map.empty
   ): String = {
     val requestBuilder = CreateRegisteredModel.newBuilder().setName(name)
-    for (((name, value), idx) <- tags.zipWithIndex) {
-      requestBuilder.setTags(
-        idx,
+    for ((name, value) <- tags) {
+      requestBuilder.addTags(
         RegisteredModelTag.newBuilder().setKey(name).setValue(value)
       )
     }
@@ -78,9 +85,9 @@ private[mlflow] class MlflowClientExt(val trackingUri: String) extends Logging {
   }
 }
 
-private object MlflowClientExt {
+protected object MlflowClientExt {
 
-  private def jsonify(message: MessageOrBuilder): String = {
+  def jsonify(message: MessageOrBuilder): String = {
     try {
       JsonFormat.printer().preservingProtoFieldNames().print(message);
     } catch {
@@ -93,7 +100,7 @@ private object MlflowClientExt {
   }
 
   /** Merge json payload to the protobuf builder. */
-  private def merge(
+  def merge(
       jsonPayload: String,
       builder: Builder
   ) = {

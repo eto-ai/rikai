@@ -34,8 +34,18 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
 
   /** Create a ML Model that can be used in SQL ML in the current database.
     */
-  override def createModel(model: Model): Model =
-    throw new NotImplementedError()
+  override def createModel(model: Model): Model = {
+    val name = mlflowClient.createModel(
+      model.name,
+      Map() ++ model.flavor.map(ModelFlavorKey -> _)
+    )
+    new SparkUDFModel(
+      name,
+      s"mlflow://$name",
+      "<anonymous>",
+      model.flavor
+    )
+  }
 
   /** Return a list of models available for all Sessions */
   override def listModels(): Seq[Model] = {

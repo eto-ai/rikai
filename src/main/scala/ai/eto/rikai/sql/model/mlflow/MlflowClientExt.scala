@@ -18,7 +18,12 @@ package ai.eto.rikai.sql.model.mlflow
 
 import com.google.protobuf.InvalidProtocolBufferException
 import org.apache.logging.log4j.scala.Logging
-import org.mlflow.api.proto.ModelRegistry.{CreateRegisteredModel, DeleteRegisteredModel, SearchRegisteredModels}
+import org.mlflow.api.proto.ModelRegistry.{
+  CreateRegisteredModel,
+  DeleteRegisteredModel,
+  RegisteredModelTag,
+  SearchRegisteredModels
+}
 import org.mlflow.tracking.{MlflowClientException, RiMlflowClient}
 import org.mlflow_project.google.protobuf.Message.Builder
 import org.mlflow_project.google.protobuf.MessageOrBuilder
@@ -39,9 +44,19 @@ private[mlflow] class MlflowClientExt(val trackingUri: String) extends Logging {
   }
 
   /** Create models */
-  private[mlflow] def createModel(name: String): String = {
+  private[mlflow] def createModel(
+      name: String,
+      tags: Map[String, String] = Map.empty
+  ): String = {
+    val requestBuilder = CreateRegisteredModel.newBuilder().setName(name)
+    for (((name, value), idx) <- tags.zipWithIndex) {
+      requestBuilder.setTags(
+        idx,
+        RegisteredModelTag.newBuilder().setKey(name).setValue(value)
+      )
+    }
     val request: CreateRegisteredModel =
-      CreateRegisteredModel.newBuilder().setName(name).build()
+      requestBuilder.build()
     val json = MlflowClientExt.jsonify(request)
     val respJson = client.sendPost("registered-models/create", json)
     logger.info(s"Create model response: ${respJson}")

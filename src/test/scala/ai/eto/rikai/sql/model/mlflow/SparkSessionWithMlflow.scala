@@ -33,7 +33,6 @@ trait SparkSessionWithMlflow
     sys.env.getOrElse("TEST_MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
 
   lazy val spark: SparkSession = {
-    println("lazy called")
     SparkSession.builder
       .config(
         "spark.sql.extensions",

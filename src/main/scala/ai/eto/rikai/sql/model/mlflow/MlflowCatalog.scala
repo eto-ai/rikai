@@ -54,7 +54,6 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
       .map(model => {
         model.getLatestVersionsCount match {
           case 0 =>
-            println(s"model ${model.getName} has 0 version")
             None
           case _ =>
             val latestVersion = model.getLatestVersions(0)
@@ -73,8 +72,6 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
                 )
               )
             } else {
-              println(s"tagsMap $tagsMap")
-              println(s"artifact path key $ArtifactPathKey")
               None
             }
         }

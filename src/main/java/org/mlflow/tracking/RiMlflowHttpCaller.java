@@ -146,49 +146,8 @@ class RiMlflowHttpCaller {
         return response;
     }
 
-    String get(String path) {
-        logger.debug("Sending GET " + path);
-        HttpGet request = new HttpGet();
-        fillRequestSettings(request, path);
-        try {
-            HttpResponse response = executeRequest(request);
-            String responseJosn = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-            logger.debug("Response: " + responseJosn);
-            return responseJosn;
-        } catch (IOException e) {
-            throw new MlflowClientException(e);
-        }
-    }
-
-    // TODO(aaron) Convert to InputStream.
-    byte[] getAsBytes(String path) {
-        logger.debug("Sending GET " + path);
-        HttpGet request = new HttpGet();
-        fillRequestSettings(request, path);
-        try {
-            HttpResponse response = executeRequest(request);
-            byte[] bytes = EntityUtils.toByteArray(response.getEntity());
-            logger.debug("response: #bytes=" + bytes.length);
-            return bytes;
-        } catch (IOException e) {
-            throw new MlflowClientException(e);
-        }
-    }
-
-    String post(String path, String json) {
-        logger.debug("Sending POST " + path + ": " + json);
-        HttpPost request = new HttpPost();
-        return send(request, path, json);
-    }
-
     String delete(String path, String json) {
         HttpDeleteWithBody request = new HttpDeleteWithBody();
-        return send(request, path, json);
-    }
-
-    String patch(String path, String json) {
-        logger.debug("Sending PATCH " + path + ": " + json);
-        HttpPatch request = new HttpPatch();
         return send(request, path, json);
     }
 

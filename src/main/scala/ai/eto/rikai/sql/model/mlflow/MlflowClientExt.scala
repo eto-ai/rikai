@@ -18,22 +18,16 @@ package ai.eto.rikai.sql.model.mlflow
 
 import com.google.protobuf.InvalidProtocolBufferException
 import org.apache.logging.log4j.scala.Logging
-import org.mlflow.api.proto.ModelRegistry.{
-  CreateRegisteredModel,
-  SearchRegisteredModels
-}
-import org.mlflow.tracking.{MlflowClient, MlflowClientException}
+import org.mlflow.api.proto.ModelRegistry.{CreateRegisteredModel, DeleteRegisteredModel, SearchRegisteredModels}
+import org.mlflow.tracking.{MlflowClientException, RiMlflowClient}
 import org.mlflow_project.google.protobuf.Message.Builder
 import org.mlflow_project.google.protobuf.MessageOrBuilder
 import org.mlflow_project.google.protobuf.util.JsonFormat
 
-import java.net.http.HttpClient
-
 /** Extension to MlflowClient to add necessary APIs for Rikai */
 private[mlflow] class MlflowClientExt(val trackingUri: String) extends Logging {
   println(s"tracking uri: $trackingUri")
-  val client = new MlflowClient(trackingUri)
-  val httpClient = HttpClient.newHttpClient()
+  val client = new RiMlflowClient(trackingUri)
 
   private[mlflow] def searchRegisteredModels()
       : SearchRegisteredModels.Response = {
@@ -57,11 +51,10 @@ private[mlflow] class MlflowClientExt(val trackingUri: String) extends Logging {
   }
 
   private[mlflow] def deleteModel(name: String): Unit = {
-//    val request: DeleteRegisteredModel =
-//      DeleteRegisteredModel.newBuilder().setName(name).build()
-//    val payload = MlflowClientExt.jsonify(request)
-//    client.sendPost("registered-models/delete", payload)
-    //TODO delete model using external command or remove this method
+    val request: DeleteRegisteredModel =
+      DeleteRegisteredModel.newBuilder().setName(name).build()
+    val payload = MlflowClientExt.jsonify(request)
+    client.sendDelete(s"registered-models/delete", payload)
   }
 }
 

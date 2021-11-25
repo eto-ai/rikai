@@ -147,5 +147,5 @@ def spark_with_mlflow(mlflow_client) -> SparkSession:
         for run in mlflow_client.list_run_infos():
             print(f"Clean run: {run}")
             mlflow_client.delete_run(run.run_id)
-    except:
+    except Exception:
         pass

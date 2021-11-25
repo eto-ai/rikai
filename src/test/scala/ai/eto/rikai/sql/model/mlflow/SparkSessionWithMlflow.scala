@@ -40,7 +40,7 @@ trait SparkSessionWithMlflow extends Logging with BeforeAndAfterEach {
       MlflowCatalog.SQL_ML_CATALOG_IMPL_MLFLOW
     )
     .config(
-      MlflowCatalog.TrackingUriKey,{
+      MlflowCatalog.TrackingUriKey, {
         testMlflowTrackingUri
       }
     )
@@ -55,7 +55,6 @@ trait SparkSessionWithMlflow extends Logging with BeforeAndAfterEach {
   spark.sparkContext.setLogLevel("WARN")
 
   lazy val mlflowClient = new MlflowClientExt(testMlflowTrackingUri)
-
 
   private[mlflow] def clearModels(): Unit = {
     mlflowClient

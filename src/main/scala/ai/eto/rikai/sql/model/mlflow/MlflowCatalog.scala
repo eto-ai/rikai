@@ -98,17 +98,16 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
     * @return the model
     */
   override def getModel(name: String): Option[Model] = {
-    mlflowClient.getModel(name).map {
-      modelVersion =>
-        val tagsMap = modelVersion.getTagsList.asScala
-          .map(t => t.getKey -> t.getValue)
-          .toMap
-        new SparkUDFModel(
-          name,
-          s"mlflow://$name",
-          "<anonymous>",
-          tagsMap.get(ModelFlavorKey)
-        )
+    mlflowClient.getModel(name).map { modelVersion =>
+      val tagsMap = modelVersion.getTagsList.asScala
+        .map(t => t.getKey -> t.getValue)
+        .toMap
+      new SparkUDFModel(
+        name,
+        s"mlflow://$name",
+        "<anonymous>",
+        tagsMap.get(ModelFlavorKey)
+      )
     }
   }
 
@@ -122,7 +121,7 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
       mlflowClient.deleteModel(name)
       true
     } catch {
-      case e : Exception =>
+      case e: Exception =>
         e.printStackTrace()
         false
     }

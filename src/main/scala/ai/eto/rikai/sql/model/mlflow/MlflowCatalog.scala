@@ -88,14 +88,29 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
     *
     * @param name is the name of the model.
     */
-  override def modelExists(name: String): Boolean = ???
+  override def modelExists(name: String): Boolean = {
+    mlflowClient.getModel(name).nonEmpty
+  }
 
   /** Get the model with a specific name.
     *
     * @param name is a qualified name pointed to a Model.
     * @return the model
     */
-  override def getModel(name: String): Option[Model] = ???
+  override def getModel(name: String): Option[Model] = {
+    mlflowClient.getModel(name).map {
+      modelVersion =>
+        val tagsMap = modelVersion.getTagsList.asScala
+          .map(t => t.getKey -> t.getValue)
+          .toMap
+        new SparkUDFModel(
+          name,
+          s"mlflow://$name",
+          "<anonymous>",
+          tagsMap.get(ModelFlavorKey)
+        )
+    }
+  }
 
   /** Drops a model with a specific name
     *

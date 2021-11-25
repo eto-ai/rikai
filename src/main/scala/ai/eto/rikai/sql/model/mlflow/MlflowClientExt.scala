@@ -18,16 +18,13 @@ package ai.eto.rikai.sql.model.mlflow
 
 import com.google.protobuf.InvalidProtocolBufferException
 import org.apache.logging.log4j.scala.Logging
-import org.mlflow.api.proto.ModelRegistry.{
-  CreateRegisteredModel,
-  DeleteRegisteredModel,
-  RegisteredModelTag,
-  SearchRegisteredModels
-}
+import org.mlflow.api.proto.ModelRegistry.{CreateRegisteredModel, DeleteRegisteredModel, RegisteredModelTag, SearchRegisteredModels}
 import org.mlflow.tracking.{MlflowClientException, RiMlflowClient}
 import org.mlflow_project.google.protobuf.Message.Builder
 import org.mlflow_project.google.protobuf.MessageOrBuilder
 import org.mlflow_project.google.protobuf.util.JsonFormat
+
+import scala.collection.JavaConverters._
 
 /** Extension to MlflowClient to add necessary APIs for Rikai */
 private[mlflow] class MlflowClientExt(val trackingUri: String) extends Logging {
@@ -41,6 +38,14 @@ private[mlflow] class MlflowClientExt(val trackingUri: String) extends Logging {
     logger.debug(s"Search Register Model response: ${payload}")
     MlflowClientExt.merge(payload, builder)
     builder.build()
+  }
+
+  private[mlflow] def getModel(name: String) = {
+    val list = client.getLatestVersions(name,
+      //TODO how to configure?
+      Seq("None", "Staging", "Production", "Archived").asJava
+    ).asScala
+    list.headOption
   }
 
   /** Create models */

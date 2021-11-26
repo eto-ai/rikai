@@ -48,7 +48,7 @@ jobs:
     - name: Run python tests
       working-directory: python
       run: |
-        pytest -v --durations=10 --ignore=tests/parquet/internal
+        sudo pytest -v --durations=10 --ignore=tests/parquet/internal
       env:
         SPARK_LOCAL_IP: "127.0.0.1"
         TEST_MLFLOW_TRACKING_URI: "http://localhost:15000"

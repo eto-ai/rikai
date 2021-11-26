@@ -40,10 +40,7 @@ def mlflow_client(
         mlflow.log_param("optimizer", "Adam")
         # Fake training loop
         print("resnet model uri", resnet_model_uri)
-        model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
-            pretrained=True,
-            progress=False,
-        )
+        model = torch.load(resnet_model_uri)
         artifact_path = "model"
 
         schema = (

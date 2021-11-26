@@ -37,7 +37,7 @@ jobs:
       run: |
         sudo apt update
         sudo apt-get -y -qq install libsnappy-dev ffmpeg
-        python -m pip install -e .[all,dev]
+        sudo python -m pip install -e .[all,dev]
     - name: Python black and flake8
       if: ${{ matrix.python-version == 3.8 }}
       run: make lint

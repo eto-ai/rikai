@@ -14,9 +14,13 @@
 
 from __future__ import annotations
 
+import datetime
+import os
+
 import mlflow
 import pytest
 import torch
+import torchvision
 from mlflow.tracking import MlflowClient
 from pyspark.sql import SparkSession
 
@@ -28,16 +32,18 @@ from rikai.spark.utils import get_default_jar_version, init_spark_session
 def mlflow_client(
     tmp_path_factory, resnet_model_uri: str, spark: SparkSession
 ) -> MlflowClient:
-    tmp_path = tmp_path_factory.mktemp("mlflow")
-    tmp_path.mkdir(parents=True, exist_ok=True)
-    tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
+    tracking_uri = os.getenv('TEST_MLFLOW_TRACKING_URI', 'http://localhost:5000')
     mlflow.set_tracking_uri(tracking_uri)
-    experiment_id = mlflow.create_experiment("rikai-test", str(tmp_path))
+    experiment_id = mlflow.create_experiment("rikai-test" + str(datetime.datetime.now()), "test-artifact")
     # simpliest
     with mlflow.start_run(experiment_id=experiment_id):
         mlflow.log_param("optimizer", "Adam")
         # Fake training loop
-        model = torch.load(resnet_model_uri)
+        print("resnet model uri", resnet_model_uri)
+        model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
+            pretrained=True,
+            progress=False,
+        )
         artifact_path = "model"
 
         schema = (

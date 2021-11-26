@@ -18,7 +18,6 @@ from sklearn.linear_model import LinearRegression
 
 
 def test_list_models(spark_with_mlflow, mlflow_client):
-    print('test_list_models')
     spark = spark_with_mlflow
     x = np.array([[1, 1], [1, 2], [2, 2], [2, 3]])
     y = np.dot(x, np.array([1, 2])) + 3

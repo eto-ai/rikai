@@ -75,6 +75,7 @@ object Catalog {
           .asInstanceOf[Catalog]
       )
     }
+    println(s"catalog get ${catalog.get.getClass}")
     catalog.get
   }
 }

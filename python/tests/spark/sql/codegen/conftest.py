@@ -32,9 +32,13 @@ from rikai.spark.utils import get_default_jar_version, init_spark_session
 def mlflow_client(
     tmp_path_factory, resnet_model_uri: str, spark: SparkSession
 ) -> MlflowClient:
-    tracking_uri = os.getenv('TEST_MLFLOW_TRACKING_URI', 'http://localhost:5000')
+    tracking_uri = os.getenv(
+        "TEST_MLFLOW_TRACKING_URI", "http://localhost:5000"
+    )
     mlflow.set_tracking_uri(tracking_uri)
-    experiment_id = mlflow.create_experiment("rikai-test" + str(datetime.datetime.now()), "test-artifact")
+    experiment_id = mlflow.create_experiment(
+        "rikai-test" + str(datetime.datetime.now()), "test-artifact"
+    )
     # simpliest
     with mlflow.start_run(experiment_id=experiment_id):
         mlflow.log_param("optimizer", "Adam")

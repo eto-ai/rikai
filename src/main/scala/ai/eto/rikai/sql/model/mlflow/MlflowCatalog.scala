@@ -61,7 +61,11 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
               .map(t => t.getKey -> t.getValue)
               .toMap
             val name = model.getName
-            if (tagsMap.contains(ArtifactPathKey)) {
+            if (
+              true
+//              TODO enable this after https://github.com/eto-ai/rikai/pull/351 finished
+//              && tagsMap.contains(ArtifactPathKey)
+            ) {
               val flavor = tagsMap.getOrElse(ModelFlavorKey, "")
               Some(
                 new SparkUDFModel(

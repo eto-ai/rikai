@@ -49,7 +49,7 @@ jobs:
       working-directory: python
       run: |
 #       mlflow local temp dir need it
-        chmod 777 /var/lib
+        sudo chmod 777 /var/lib
         pytest -v --durations=10 --ignore=tests/parquet/internal
       env:
         SPARK_LOCAL_IP: "127.0.0.1"

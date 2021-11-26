@@ -37,7 +37,7 @@ jobs:
       run: |
         sudo apt update
         sudo apt-get -y -qq install libsnappy-dev ffmpeg
-        sudo python -m pip install -e .[all,dev]
+        python -m pip install -e .[all,dev]
     - name: Python black and flake8
       if: ${{ matrix.python-version == 3.8 }}
       run: make lint
@@ -48,7 +48,9 @@ jobs:
     - name: Run python tests
       working-directory: python
       run: |
-        sudo pytest -v --durations=10 --ignore=tests/parquet/internal
+#       mlflow local temp dir need it
+        chmod 777 /var/lib
+        pytest -v --durations=10 --ignore=tests/parquet/internal
       env:
         SPARK_LOCAL_IP: "127.0.0.1"
         TEST_MLFLOW_TRACKING_URI: "http://localhost:15000"

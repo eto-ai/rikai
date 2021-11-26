@@ -29,7 +29,7 @@ from rikai.spark.utils import get_default_jar_version, init_spark_session
 
 
 @pytest.fixture(scope="module")
-def mlflow_client(
+def mlflow_client_http(
     tmp_path_factory, resnet_model_uri: str, spark: SparkSession
 ) -> MlflowClient:
     tracking_uri = os.getenv(
@@ -111,7 +111,7 @@ def mlflow_client(
 
 
 @pytest.fixture()
-def spark_with_mlflow(mlflow_client) -> SparkSession:
+def spark_with_mlflow(mlflow_client_http) -> SparkSession:
     mlflow_tracking_uri = mlflow.get_tracking_uri()
     active_session = SparkSession.getActiveSession()
     if (
@@ -148,11 +148,11 @@ def spark_with_mlflow(mlflow_client) -> SparkSession:
     yield spark
 
     try:
-        for model in mlflow_client.list_registered_models():
+        for model in mlflow_client_http.list_registered_models():
             print(f"Cleanup {model.name}")
-            mlflow_client.delete_registered_model(model.name)
-        for run in mlflow_client.list_run_infos():
+            mlflow_client_http.delete_registered_model(model.name)
+        for run in mlflow_client_http.list_run_infos():
             print(f"Clean run: {run}")
-            mlflow_client.delete_run(run.run_id)
+            mlflow_client_http.delete_run(run.run_id)
     except Exception:
         pass

@@ -17,7 +17,6 @@
 package ai.eto.rikai.sql.model.mlflow
 
 import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.{
-  ArtifactPathKey,
   ModelFlavorKey,
   TrackingUriKey
 }

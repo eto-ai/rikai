@@ -13,6 +13,6 @@ setup(
         "numpy",
         "scikit-learn",
     ],
-    extras_require={"dev": ["black", "isort", "pytest"]},
+    extras_require={"dev": ["black", "isort", "pytest", "mlflow"]},
     packages=find_namespace_packages(include=["rikai.*"]),
 )

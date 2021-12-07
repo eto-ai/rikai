@@ -12,8 +12,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from rikai.parquet.resolver import Resolver
+from rikai.parquet.resolver import BaseResolver, register, Resolver
 from rikai.testing import assert_count_equal
+
+
+@register("test")
+class TestResolver(BaseResolver):
+    def resolve(self, uri):
+        return ["test_uri"]
+
+    def get_schema(self, uri):
+        return {"type": "struct", "fields": [{"name": "id", "type": "long"}]}
 
 
 def teardown_function(_):
@@ -34,3 +43,15 @@ def test_resolve_local_fs(tmp_path):
 
 def test_resolve_empty_dir(tmp_path):
     assert [] == list(Resolver.resolve(tmp_path))
+
+
+def test_default_scheme(tmp_path):
+    test_resolve_local_fs(tmp_path)
+    Resolver.set_default_scheme("test")
+    try:
+        files = Resolver.resolve(tmp_path)
+        expected_files = ["test_uri"]
+        assert_count_equal(expected_files, files)
+        assert files[0] == expected_files[0]
+    finally:
+        Resolver.set_default_scheme(None)

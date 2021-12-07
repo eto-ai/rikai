@@ -144,7 +144,7 @@ class Resolver:
         Parameters
         ----------
         default_scheme: str
-            If the uri doesn't have a scheme then the resolver for this scheme is used
+            If a uri has no scheme then the resolver for this scheme is used
         """
         Resolver.DEFAULT_SCHEME = default_scheme
 

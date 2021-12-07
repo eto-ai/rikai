@@ -168,7 +168,7 @@ class Resolver:
         """
         if scheme in cls._RESOLVERS:
             raise KeyError(f"scheme f{scheme} has already been registered")
-        cls._RESOLVERS[scheme] = resolver()
+        cls._RESOLVERS[scheme] = resolver
 
     @classmethod
     def resolve(cls, uri: Union[str, Path]) -> Iterable[str]:

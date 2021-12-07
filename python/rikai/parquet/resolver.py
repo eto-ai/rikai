@@ -28,7 +28,7 @@ from rikai.internal.uri_utils import normalize_uri
 from rikai.io import _gcsfs, open_input_stream
 from rikai.logging import logger
 
-__all__ = ["register", "Resolver", "BaseResolver"]
+__all__ = ["register", "Resolver", "BaseResolver", "DefaultResolver"]
 
 
 class BaseResolver(ABC):

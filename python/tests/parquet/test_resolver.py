@@ -18,7 +18,6 @@ from rikai.testing import assert_count_equal
 
 
 class TestResolver(BaseResolver):
-
     def resolve(self, uri: str) -> Iterable[str]:
         return ["test_uri"]
 
@@ -48,7 +47,7 @@ def test_resolve_empty_dir(tmp_path):
 
 def test_default_scheme(tmp_path):
     test_resolve_local_fs(tmp_path)
-    Resolver.register('test', TestResolver())
+    Resolver.register("test", TestResolver())
     Resolver.set_default_scheme("test")
     try:
         files = Resolver.resolve(tmp_path)

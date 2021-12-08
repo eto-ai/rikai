@@ -127,14 +127,26 @@ class DefaultResolver(BaseResolver):
 class Resolver:
     """Extensible Dataset Resolver"""
 
-    _DEFAULT_SCHEME = "_DEFAULT"
+    _UNKNOWN_SCHEME = "_DEFAULT"
     # Mapping from scheme to a daaset resolver
-    _RESOLVERS: Dict[str, BaseResolver] = {_DEFAULT_SCHEME: DefaultResolver()}
+    _RESOLVERS: Dict[str, BaseResolver] = {_UNKNOWN_SCHEME: DefaultResolver()}
+    DEFAULT_SCHEME = None
 
     @classmethod
     def reset(cls):
         """Reset Resolver for testing purpose."""
-        cls._RESOLVERS = {cls._DEFAULT_SCHEME: DefaultResolver()}
+        cls._RESOLVERS = {cls._UNKNOWN_SCHEME: DefaultResolver()}
+
+    @classmethod
+    def set_default_scheme(cls, default_scheme: str):
+        """Changes the default scheme when none is given in the uri.
+
+        Parameters
+        ----------
+        default_scheme: str
+            If a uri has no scheme then the resolver for this scheme is used
+        """
+        Resolver.DEFAULT_SCHEME = default_scheme
 
     @classmethod
     def register(cls, scheme: str, resolver: BaseResolver):
@@ -156,17 +168,17 @@ class Resolver:
         """
         if scheme in cls._RESOLVERS:
             raise KeyError(f"scheme f{scheme} has already been registered")
-        cls._RESOLVERS[scheme] = resolver()
+        cls._RESOLVERS[scheme] = resolver
 
     @classmethod
     def resolve(cls, uri: Union[str, Path]) -> Iterable[str]:
         """Resolve the dataset URI, and returns a list of parquet files."""
         uri = str(uri)
-        parsed = urlparse(uri)
-        if parsed.scheme in cls._RESOLVERS:
-            logger.debug("Use extended resolver for scheme: %s", parsed.scheme)
-            return cls._RESOLVERS[parsed.scheme].resolve(uri)
-        return cls._RESOLVERS[cls._DEFAULT_SCHEME].resolve(uri)
+        scheme = cls._parse_scheme(uri)
+        if scheme in cls._RESOLVERS:
+            logger.debug("Use extended resolver for scheme: %s", scheme)
+            return cls._RESOLVERS[scheme].resolve(uri)
+        return cls._RESOLVERS[cls._UNKNOWN_SCHEME].resolve(uri)
 
     @classmethod
     def get_schema(cls, uri: str):
@@ -177,11 +189,15 @@ class Resolver:
         uri : str
             URI of the dataset
         """
-        parsed = urlparse(uri)
-        if parsed.scheme in cls._RESOLVERS:
-            logger.debug("Use extended resolver for scheme: %s", parsed.scheme)
-            return cls._RESOLVERS[parsed.scheme].get_schema(uri)
-        return cls._RESOLVERS[cls._DEFAULT_SCHEME].get_schema(uri)
+        scheme = cls._parse_scheme(uri)
+        if scheme in cls._RESOLVERS:
+            logger.debug("Use extended resolver for scheme: %s", scheme)
+            return cls._RESOLVERS[scheme].get_schema(uri)
+        return cls._RESOLVERS[cls._UNKNOWN_SCHEME].get_schema(uri)
+
+    @classmethod
+    def _parse_scheme(cls, uri):
+        return urlparse(uri).scheme or cls.DEFAULT_SCHEME
 
 
 def register(scheme: str):

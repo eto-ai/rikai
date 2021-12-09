@@ -24,14 +24,14 @@ import java.net.URI;
  * Client to an MLflow Tracking Sever.
  * Originally from mlflow client 1.21.0
  */
-public class RiMlflowClient extends MlflowClient {
+public class RikaiMlflowClient extends MlflowClient {
     private final RiMlflowHttpCaller deleteHttpCaller;
 
-    public RiMlflowClient(String trackingUri) {
+    public RikaiMlflowClient(String trackingUri) {
         this(getHostCredsProviderFromTrackingUri(trackingUri));
     }
 
-    public RiMlflowClient(MlflowHostCredsProvider hostCredsProvider) {
+    public RikaiMlflowClient(MlflowHostCredsProvider hostCredsProvider) {
         super(hostCredsProvider);
         this.deleteHttpCaller = new RiMlflowHttpCaller(hostCredsProvider);
     }

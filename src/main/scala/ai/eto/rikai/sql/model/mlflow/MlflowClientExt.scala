@@ -24,7 +24,7 @@ import org.mlflow.api.proto.ModelRegistry.{
   RegisteredModelTag,
   SearchRegisteredModels
 }
-import org.mlflow.tracking.{MlflowClientException, RiMlflowClient}
+import org.mlflow.tracking.{MlflowClientException, RikaiMlflowClient}
 import org.mlflow_project.google.protobuf.Message.Builder
 import org.mlflow_project.google.protobuf.MessageOrBuilder
 import org.mlflow_project.google.protobuf.util.JsonFormat
@@ -33,7 +33,7 @@ import scala.collection.JavaConverters._
 
 /** Extension to MlflowClient to add necessary APIs for Rikai */
 private[mlflow] class MlflowClientExt(val trackingUri: String) extends Logging {
-  val client = new RiMlflowClient(trackingUri)
+  val client = new RikaiMlflowClient(trackingUri)
 
   private[mlflow] def searchRegisteredModels()
       : SearchRegisteredModels.Response = {

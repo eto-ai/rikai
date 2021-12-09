@@ -25,7 +25,6 @@ import scala.collection.JavaConverters._
 
 trait SparkSessionWithMlflow
     extends Logging
-    with BeforeAndAfterEach
     with BeforeAndAfterAll {
   this: Suite =>
 

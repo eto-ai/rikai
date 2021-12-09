@@ -17,6 +17,7 @@
 package ai.eto.rikai.sql.model
 
 import org.apache.spark.SparkConf
+import org.slf4j.LoggerFactory
 
 /** Catalog for SQL ML.
   */
@@ -52,6 +53,7 @@ trait Catalog {
 }
 
 object Catalog {
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   val SQL_ML_CATALOG_IMPL_KEY = "rikai.sql.ml.catalog.impl"
   val SQL_ML_CATALOG_IMPL_DEFAULT = "ai.eto.rikai.sql.model.SimpleCatalog"
@@ -75,7 +77,7 @@ object Catalog {
           .asInstanceOf[Catalog]
       )
     }
-    println(s"catalog get ${catalog.get.getClass}")
+    logger.debug("catalog get {}", catalog.get.getClass)
     catalog.get
   }
 }

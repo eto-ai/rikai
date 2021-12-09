@@ -73,7 +73,10 @@ def test_yolov5(tmp_path: Path, spark: SparkSession):
         spark.sql(
             f"""
         CREATE MODEL mlflow_yolov5_m
-        OPTIONS (device='{device}')
+        OPTIONS (
+            device='{device}',
+            iou_thres=0.5
+        )
         USING 'mlflow:///{registered_model_name}';
         """
         )

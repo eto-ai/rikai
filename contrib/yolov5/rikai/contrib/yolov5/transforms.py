@@ -48,15 +48,15 @@ def pre_processing(options: Dict[str, Any]) -> Callable:
 
 
 def post_processing(options: Dict[str, Any]) -> Callable:
-    augment = options.get("augment", False)
-    profile = options.get("profile", False)
+    augment = bool(options.get("augment", False))
+    profile = bool(options.get("profile", False))
     # NMS confidence threshold
-    conf_thres = options.get("conf_thres", 0.25)
+    conf_thres = float(options.get("conf_thres", 0.25))
     # NMS IoU threshold
-    iou_thres = options.get("iou_thres", 0.45)
+    iou_thres = float(options.get("iou_thres", 0.45))
     # maximum number of detections per image
-    max_det = options.get("max_det", 1000)
-    image_size = options.get("image_size", 640)
+    max_det = int(options.get("max_det", 1000))
+    image_size = int(options.get("image_size", 640))
 
     def post_process_func(model, batch):
         t = [time_sync()]

@@ -46,20 +46,6 @@ def test_yolov5(tmp_path: Path, spark: SparkSession):
         model = yolov5.load(pretrained)
         pre = "rikai.contrib.yolov5.transforms.pre_processing"
         post = "rikai.contrib.yolov5.transforms.post_processing"
-
-        rikai.mlflow.pytorch.log_model(
-            model,
-            "model",
-            OUTPUT_SCHEMA,
-            pre_processing=pre,
-            post_processing=post,
-            registered_model_name=registered_model_name,
-            customized_flavor="yolov5",
-        )
-
-        ####
-        # Part 2: create the model using the registered MLflow uri
-        ####
         if torch.cuda.is_available():
             print("Using GPU\n")
             device = "gpu"
@@ -70,24 +56,61 @@ def test_yolov5(tmp_path: Path, spark: SparkSession):
         spark.conf.set(
             "rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri
         )
+        work_dir = Path().absolute().parent.parent
+        image_path = f"{work_dir}/python/tests/assets/test_image.jpg"
+
+        # Use case 1: log model with customized flavor
+        rikai.mlflow.pytorch.log_model(
+            model,
+            "model",
+            OUTPUT_SCHEMA,
+            pre_processing=pre,
+            post_processing=post,
+            registered_model_name="yolov5_way_1",
+            customized_flavor="yolov5",
+        )
         spark.sql(
             f"""
-        CREATE MODEL mlflow_yolov5_m
+        CREATE MODEL yolov5_way_1
         OPTIONS (
             device='{device}',
             iou_thres=0.5
         )
-        USING 'mlflow:///{registered_model_name}';
+        USING 'mlflow:///yolov5_way_1'
+        """
+        )
+        result1 = spark.sql(
+            f"""
+        select ML_PREDICT(yolov5_way_1, '{image_path}') as pred
         """
         )
 
-        work_dir = Path().absolute().parent.parent
-        image_path = f"{work_dir}/python/tests/assets/test_image.jpg"
-        result = spark.sql(
+        ####
+        # Part 2: create the model using the registered MLflow uri
+        ####
+        rikai.mlflow.pytorch.log_model(
+            model,
+            "model",
+            OUTPUT_SCHEMA,
+            pre_processing=pre,
+            post_processing=post,
+            registered_model_name="yolov5_way_2",
+        )
+        spark.sql(
             f"""
-        select ML_PREDICT(mlflow_yolov5_m, '{image_path}') as pred
+        CREATE MODEL yolov5_way_2
+        FLAVOR yolov5
+        OPTIONS (
+            device='{device}'
+        )
+        USING 'mlflow:///yolov5_way_2'
         """
         )
-        result.show(truncate=False)
-        row = result.first()
-        assert len(row.pred.boxes) > 0
+        result2 = spark.sql(
+            f"""
+        select ML_PREDICT(yolov5_way_2, '{image_path}') as pred
+        """
+        )
+
+        assert len(result1.first().pred.boxes) > 0
+        assert len(result2.first().pred.boxes) > 0

@@ -1,6 +1,6 @@
 # Yolov5 support for Rikai
 ## Usage
-The default UDF generator for pytorch needs to be customized.
+There are two ways to use `rikai-yolov5`.
 
 Set `customized_flavor` to `yolov5` when logging the model, rikai will use
 `rikai.contrib.yolov5.codegen.generate_udf` instead of
@@ -16,6 +16,16 @@ rikai.mlflow.pytorch.log_model(
     registered_model_name=registered_model_name,
     customized_flavor="yolov5",
 )
+```
+
+Another way is setting the flavor in Rikai SQL:
+```
+CREATE MODEL mlflow_yolov5_m
+FLAVOR yolov5
+OPTIONS (
+  device='cpu'
+)
+USING 'mlflow:///{registered_model_name}';
 ```
 
 ## Available Options

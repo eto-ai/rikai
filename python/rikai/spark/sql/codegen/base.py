@@ -22,6 +22,7 @@ from pyspark.sql import SparkSession
 
 from rikai.internal.reflection import find_class
 from rikai.logging import logger
+from rikai.spark.sql.codegen.mlflow_logger import KNOWN_FLAVORS
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
 
@@ -187,17 +188,17 @@ def udf_from_spec(spec: ModelSpec):
             f"Only spec version 1.0 is supported, got {spec.version}"
         )
 
-    if spec.flavor == "pytorch":
-        from rikai.spark.sql.codegen.pytorch import generate_udf
-
-        return generate_udf(spec)
+    if spec.flavor in KNOWN_FLAVORS:
+        codegen_module = f"rikai.spark.sql.codegen.{spec.flavor}"
     else:
         codegen_module = f"rikai.contrib.{spec.flavor}.codegen"
-        try:
-            codegen = importlib.import_module(codegen_module)
-            return codegen.generate_udf(spec)
-        except ModuleNotFoundError:
-            raise SpecError(f"Unsupported model flavor: {spec.flavor}")
+
+    try:
+        codegen = importlib.import_module(codegen_module)
+        return codegen.generate_udf(spec)
+    except ModuleNotFoundError:
+        logger.error(f"Unsupported model flavor: {spec.flavor}")
+        raise
 
 
 def register_udf(spark: SparkSession, udf: Callable, name: str) -> str:

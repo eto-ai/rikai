@@ -36,7 +36,7 @@ def test_yolov5(tmp_path: Path, spark: SparkSession):
         ####
         # Part 1: Train the model and register it on MLflow
         ####
-        pretrained = "yolov5s.pt"
+        pretrained = str(tmp_path / "yolov5s.pt")
         url = (
             "https://github.com/ultralytics/yolov5/"
             + "releases/download/v5.0/yolov5s.pt"

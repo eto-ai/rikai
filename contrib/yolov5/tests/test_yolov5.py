@@ -13,8 +13,8 @@
 #  limitations under the License.
 
 import os
-import pathlib
 import urllib
+from pathlib import Path
 
 import mlflow
 import torch
@@ -25,9 +25,10 @@ import rikai
 from rikai.contrib.yolov5.transforms import OUTPUT_SCHEMA
 
 
-def test_yolov5(spark: SparkSession):
-    mlflow_tracking_uri = "sqlite:///mlruns.db"
-    mlflow.set_tracking_uri(mlflow_tracking_uri)
+def test_yolov5(tmp_path: Path, spark: SparkSession):
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
+    mlflow.set_tracking_uri(tracking_uri)
     registered_model_name = f"yolov5s-model"
     mlflow.set_experiment(registered_model_name)
 
@@ -67,7 +68,7 @@ def test_yolov5(spark: SparkSession):
             device = "cpu"
 
         spark.conf.set(
-            "rikai.sql.ml.registry.mlflow.tracking_uri", mlflow_tracking_uri
+            "rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri
         )
         spark.sql(
             f"""
@@ -77,7 +78,7 @@ def test_yolov5(spark: SparkSession):
         """
         )
 
-        work_dir = pathlib.Path().absolute().parent.parent
+        work_dir = Path().absolute().parent.parent
         image_path = f"{work_dir}/python/tests/assets/test_image.jpg"
         result = spark.sql(
             f"""

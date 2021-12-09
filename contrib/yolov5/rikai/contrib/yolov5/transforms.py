@@ -12,6 +12,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+"""
+Adapted from https://github.com/fcakyon/yolov5-pip/blob/5.0.10/yolov5/models/common.py#L291
+
+For the Yolov5 Autoshape Module, preprocessing/postprocessing are mixed: the
+tensors of the prepared images during preprocessing are also used in
+postprocessing. That's why we need to customize the UDF generator and the
+post_processing parameters.
+
+Another approach is that we can create a rikai-friendly module wrapper for the
+yolov5 model. It should work for most modules, but for torchscript model, it
+might not work.
+"""  # noqa E501
+
 from typing import Any, Callable, Dict, Tuple
 
 import numpy as np

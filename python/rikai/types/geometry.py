@@ -479,6 +479,9 @@ class Mask(ToNumpy, ToDict):
         assert len(mask.shape) > 1, "Must have more than 2-dimensions"
         return Mask(data=mask, mask_type=Mask.Type.MASK)
 
+    def __repr__(self):
+        return f"Mask(type={self.type}, data=...)"
+
     def to_mask(self, resample=1) -> np.ndarray:
         if self.type == Mask.Type.MASK:
             return self.data

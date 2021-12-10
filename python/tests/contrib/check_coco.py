@@ -40,12 +40,14 @@ def main():
 
     coco = COCO(args.annotation_json)
 
-    IOU_THRESHOLD = 0.95
+    IOU_THRESHOLD = 0.92
 
     for ann in annotations["annotations"]:
         img = coco.imgs[ann["image_id"]]
         height, width = img["height"], img["width"]  # type: int, int
         mask = Mask.from_mask(coco.annToMask(ann))
+        if np.count_nonzero(mask.to_mask()) == 0:
+            continue
 
         if ann["iscrowd"] == 0:
             print(ann)
@@ -59,12 +61,17 @@ def main():
         print("IOU: ", mask.iou(mask_1))
         if iou < IOU_THRESHOLD:
             import cv2
-            mask.to_mask()[mask == 1] = 255
-            mask_1.to_mask()[mask_1 == 1] = 255
-            # diff_mask[diff_mask == False] = 255
+            mask = mask.to_mask()
+            print("mask none zero", np.count_nonzero(mask))
+            mask_1 = mask_1.to_mask(resample=10)
+            mask[mask == 1] = 255
+            mask_1[mask_1 == 1] = 255
+            diff_mask = (mask != mask_1).astype(np.uint8)
+            diff_mask[diff_mask == 1] = 255
+            print(diff_mask)
             cv2.imwrite("img1.png", mask)
             cv2.imwrite("img2.png", mask_1)
-            # cv2.imwrite("diff.png", diff_mask)
+            cv2.imwrite("diff.png", diff_mask)
             assert False, f"Image {ann['image_id']} not equal, {mask.shape}, {mask_1.shape}"
 
 

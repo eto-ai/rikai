@@ -71,7 +71,6 @@ def main():
                 ann["segmentation"]["counts"], width=width, height=height
             )
         else:
-            continue
             rikai_mask = Mask.from_polygon(
                 ann["segmentation"],
                 width=width,

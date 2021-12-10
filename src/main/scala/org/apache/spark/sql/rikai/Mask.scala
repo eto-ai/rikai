@@ -98,6 +98,7 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
             Mask.fromRle(row.getArray(5).toArray[Int](IntegerType), height, width)
           case MaskTypeEnum.CocoRle =>
             Mask.fromCocoRLE(row.getArray(5).toArray[Int](IntegerType), height, width)
+          case MaskTypeEnum.Mask => throw new NotImplementedError()
         }
       }
     }

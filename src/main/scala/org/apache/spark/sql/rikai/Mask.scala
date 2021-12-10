@@ -24,10 +24,10 @@ object MaskTypeEnum extends Enumeration {
 
   type Type = Value
 
-  val Mask = Value(0)
-  val Polygon = Value(1)
-  val Rle = Value(2)
-  val CocoRle = Value(3)
+  val Mask: Type = Value(0)
+  val Polygon: Type = Value(1)
+  val Rle: Type = Value(2)
+  val CocoRle: Type = Value(3)
 }
 
 /** Mask of an 2-D image.
@@ -79,6 +79,12 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
     row.setInt(0, m.maskType.id)
     row.setInt(1, m.height)
     row.setInt(2, m.width)
+    m.maskType match {
+      case MaskTypeEnum.Rle | MaskTypeEnum.CocoRle => row.update(4, m.rle.get)
+      case MaskTypeEnum.Polygon => row.update(3, m.polygon.get)
+      case _ => throw new NotImplementedError()
+    }
+    row
   }
 
   override def deserialize(datum: Any): Mask = {
@@ -95,9 +101,17 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
               width
             )
           case MaskTypeEnum.Rle =>
-            Mask.fromRle(row.getArray(5).toArray[Int](IntegerType), height, width)
+            Mask.fromRle(
+              row.getArray(5).toArray[Int](IntegerType),
+              height,
+              width
+            )
           case MaskTypeEnum.CocoRle =>
-            Mask.fromCocoRLE(row.getArray(5).toArray[Int](IntegerType), height, width)
+            Mask.fromCocoRLE(
+              row.getArray(5).toArray[Int](IntegerType),
+              height,
+              width
+            )
           case MaskTypeEnum.Mask => throw new NotImplementedError()
         }
       }

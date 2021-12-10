@@ -22,10 +22,10 @@ import json
 import shutil
 from pathlib import Path
 
+import cv2
 import numpy as np
 import pandas as pd
 from pycocotools.coco import COCO
-import cv2
 
 from rikai.types import rle
 from rikai.types.geometry import Mask

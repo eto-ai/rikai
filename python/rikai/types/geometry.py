@@ -22,7 +22,7 @@ from numbers import Real
 from typing import Optional, Sequence, Tuple, Union
 
 import numpy as np
-from PIL import ImageDraw, Image
+from PIL import Image, ImageDraw
 
 from rikai.mixin import ToDict, ToNumpy
 from rikai.spark.types.geometry import Box2dType, Box3dType, PointType

@@ -27,7 +27,7 @@ def test_rle_encoding():
         rle.encode(arr), [3, 3, 2, 1, 1]
     ), f"Rle result: {rle.encode(arr)}"
     assert np.array_equal(
-        rle.decode(rle.encode(arr), arr.shape), arr
+        rle.decode(rle.encode(arr), shape=(2, 5), order="C"), arr
     ), f"Decoded: {rle.decode(rle.encode(arr), arr.shape)}"
 
     arr = np.asarray([1, 1, 0, 0])

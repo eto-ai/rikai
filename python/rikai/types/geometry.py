@@ -452,6 +452,7 @@ class Mask(ToNumpy, ToDict):
         MASK = 0
         POLYGON = 1
         RLE = 2
+        COCO_RLE = 3  # COCO style RLE, Column-based
 
     def __init__(
             self,
@@ -477,6 +478,10 @@ class Mask(ToNumpy, ToDict):
         return Mask(data, height=height, width=width, mask_type=Mask.Type.RLE)
 
     @staticmethod
+    def from_coco_rle(data: list[int], height: int, width: int) -> Mask:
+        return Mask(data, height=height, width=width, mask_type=Mask.Type.COCO_RLE)
+
+    @staticmethod
     def from_polygon(data: list[list[float]], height: int, width: int) -> Mask:
         return Mask(data, height=height, width=width, mask_type=Mask.Type.POLYGON)
 
@@ -489,7 +494,7 @@ class Mask(ToNumpy, ToDict):
         return f"Mask(type={self.type}, data=...)"
 
     def _polygon_to_mask(self) -> np.ndarray:
-        arr = np.zeros(np.array([self.height, self.width]), dtype=np.uint8)
+        arr = np.zeros((self.height, self.width), dtype=np.uint8)
         with Image.fromarray(arr) as im:
             draw = ImageDraw.Draw(im)
             for polygon in self.data:
@@ -503,7 +508,9 @@ class Mask(ToNumpy, ToDict):
         elif self.type == Mask.Type.POLYGON:
             return self._polygon_to_mask()
         elif self.type == Mask.Type.RLE:
-            return rle.decode(self.data, shape=(self.width, self.height))
+            return rle.decode(self.data, shape=(self.height, self.width))
+        elif self.type == Mask.Type.COCO_RLE:
+            return rle.decode(self.data, shape=(self.height, self.width), order="F")
         else:
             raise ValueError("Unrecognized type")
 
@@ -511,7 +518,18 @@ class Mask(ToNumpy, ToDict):
         return self.to_mask()
 
     def to_dict(self) -> dict:
-        pass
+        d = {
+            "type": self.type.value,
+            "width": self.width,
+            "height": self.height,
+        }
+        if self.type == Mask.Type.RLE:
+            d["rle"] = self.data
+        elif self.type == Mask.Type.POLYGON:
+            d["polygon"] = self.data
+        else:
+            d["mask"] = self.to_mask()
+        return d
 
     def iou(self, other: Mask) -> float:
         this_mask = self.to_mask()

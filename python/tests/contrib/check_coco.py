@@ -58,6 +58,7 @@ def main():
 
     for ann in annotations["annotations"]:
         image_id = ann["image_id"]
+        ann_id = ann["id"]
         img = coco.imgs[image_id]
         height, width = img["height"], img["width"]  # type: int, int
         is_rle = ann["iscrowd"] == 1
@@ -67,11 +68,10 @@ def main():
             continue
 
         if is_rle:
-            rikai_mask = Mask.from_rle(
+            rikai_mask = Mask.from_coco_rle(
                 ann["segmentation"]["counts"], width=width, height=height
             )
         else:
-            continue
             rikai_mask = Mask.from_polygon(
                 ann["segmentation"],
                 width=width,
@@ -88,7 +88,7 @@ def main():
                 "rle": is_rle,
             }
         )
-        print("IOU: ", original_mask.iou(rikai_mask))
+        print(f"Annotation: {ann_id} IOU: {original_mask.iou(rikai_mask)}")
         if iou < args.iou:
             coco_mask = original_mask.to_mask()
             r_mask = rikai_mask.to_mask()

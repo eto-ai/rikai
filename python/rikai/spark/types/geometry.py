@@ -192,7 +192,7 @@ class MaskType(UserDefinedType):
             return Row(
                 mask_type, mask.height, mask.width, None, mask.data, None
             )
-        elif mask.type == Mask.Type.RLE:
+        elif mask.type == Mask.Type.RLE or mask.type == Mask.Type.COCO_RLE:
             return Row(
                 mask_type, mask.height, mask.width, None, None, mask.data
             )
@@ -205,7 +205,19 @@ class MaskType(UserDefinedType):
 
     def deserialize(self, datum: Row) -> "Mask":
         from rikai.types.geometry import Mask
-        pass
+        mask_type = Mask.Type(datum[0])
+        height = datum[1]
+        width = datum[2]
+        if mask_type == Mask.Type.MASK:
+            return Mask.from_mask(datum[4])
+        elif mask_type == Mask.Type.POLYGON:
+            return Mask.from_polygon(datum[3], height=height, width=width)
+        elif mask_type == Mask.Type.RLE:
+            return Mask.from_rle(datum[5], height=height, width=width)
+        elif mask_type == Mask.Type.COCO_RLE:
+            return Mask.from_coco_rle(datum[5], height=height, width=width)
+        else:
+            raise ValueError(f"Unrecognized mask type: {datum[0]}")
 
     def simpleString(self) -> str:
         return "Mask"

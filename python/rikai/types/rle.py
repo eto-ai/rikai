@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from __future__ import annotations
+
 from typing import Tuple
 
 import numpy as np
@@ -20,7 +22,9 @@ import numpy as np
 def encode(arr: np.ndarray) -> np.array:
     """Run-length encoding a matrix.
 
-    Currently, it only supports COCO-style encoding.
+    Parameters
+    ----------
+    arr : a data array or n-D metrix/tensor.
     """
     if len(arr.shape) > 1:
         return encode(arr.reshape(-1))
@@ -35,8 +39,18 @@ def encode(arr: np.ndarray) -> np.array:
     return counts
 
 
-def decode(rle: np.array, shape: Tuple[int, int]) -> np.ndarray:
-    """Decode RLE encoding into a numpy mask."""
+def decode(rle: np.array, shape: Tuple[int] | Tuple[int, int], order: str = "C") -> np.ndarray:
+    """Decode (COCO) RLE encoding into a numpy mask.
+
+    Parameters
+    ----------
+    rle : np.array
+        A 1-D array of RLE encoded data.
+    shape: tuple of ints
+        (height, width)
+    order: str
+        Numpy array order. If uses Coco-style RLE, order should set to F.
+    """
     val = 0
     start_idx = 0
     n = np.sum(rle)
@@ -46,4 +60,4 @@ def decode(rle: np.array, shape: Tuple[int, int]) -> np.ndarray:
         start_idx += length
         val = 1 - val
 
-    return arr.reshape(shape)
+    return arr.reshape(shape, order=order)

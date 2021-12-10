@@ -12,19 +12,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-
+import itertools
 from typing import Tuple
 
 import numpy as np
 
 
-def encode(arr: np.ndarray) -> np.ndarray:
+def encode(arr: np.ndarray) -> np.array:
     """Run-length encoding a matrix.
 
     Currently, it only supports COCO-style encoding.
     """
     if len(arr.shape) > 1:
-        arr = arr.reshape(-1)
+        return encode(arr.reshape(-1))
+
     if len(arr) == 0:
         return []
     total = len(arr)
@@ -37,13 +38,13 @@ def encode(arr: np.ndarray) -> np.ndarray:
 
 def decode(rle: np.array, shape: Tuple[int]) -> np.ndarray:
     """Decode RLE encoding into a numpy mask."""
-
     val = 0
     start_idx = 0
     n = np.sum(rle)
-    arr = np.full(n, np.nan)
+    arr = np.full(n, 0, dtype=np.uint8)
     for length in rle:
-        arr[start_idx:start_idx + length] = val
-        val = 1 - val
+        arr[start_idx: start_idx + length] = val
         start_idx += length
-    return arr.reshape(shape)
+        val = 1 - val
+
+    return arr.reshape(shape, order="F")

@@ -23,7 +23,7 @@ def test_rle_encoding():
     assert np.array_equal(rle.decode(rle.encode(arr), arr.shape), arr)
 
     arr = np.asarray([[0, 0, 0, 1, 1], [1, 0, 0, 1, 0]])
-    assert np.array_equal(rle.encode(arr), [3, 3, 2, 1, 1])
+    assert np.array_equal(rle.encode(arr), [3, 2, 0, 1, 2, 1, 1])
     assert np.array_equal(rle.decode(rle.encode(arr), arr.shape), arr)
 
     arr = np.asarray([1, 1, 0, 0])

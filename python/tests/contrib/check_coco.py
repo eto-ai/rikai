@@ -40,27 +40,32 @@ def main():
 
     coco = COCO(args.annotation_json)
 
+    IOU_THRESHOLD = 0.95
+
     for ann in annotations["annotations"]:
         img = coco.imgs[ann["image_id"]]
-        height, width = img["height"], img["width"]  # type: Tuple[int, int]
-        mask = coco.annToMask(ann)
+        height, width = img["height"], img["width"]  # type: int, int
+        mask = Mask.from_mask(coco.annToMask(ann))
 
         if ann["iscrowd"] == 0:
             print(ann)
-            mask_1 = Mask.from_polygon(ann["segmentation"], (height, width)).to_mask()
+            mask_1 = Mask.from_polygon(ann["segmentation"], shape=(width, height))
         else:
             mask_1 = rle.decode(
                 ann["segmentation"]["counts"], shape=(height, width, 1)
             ).reshape((height, width))
 
-        import cv2
-        mask[mask == 1] = 255
-        mask_1[mask_1 == 1] = 255
-        cv2.imwrite("img1.png", mask)
-        cv2.imwrite("img2.png", mask_1)
-        assert np.array_equal(
-            mask, mask_1
-        ), f"Image {ann['image_id']} not equal, {mask.shape}, {mask_1.shape}"
+        iou = mask.iou(mask_1)
+        print("IOU: ", mask.iou(mask_1))
+        if iou < IOU_THRESHOLD:
+            import cv2
+            mask.to_mask()[mask == 1] = 255
+            mask_1.to_mask()[mask_1 == 1] = 255
+            # diff_mask[diff_mask == False] = 255
+            cv2.imwrite("img1.png", mask)
+            cv2.imwrite("img2.png", mask_1)
+            # cv2.imwrite("diff.png", diff_mask)
+            assert False, f"Image {ann['image_id']} not equal, {mask.shape}, {mask_1.shape}"
 
 
 if __name__ == "__main__":

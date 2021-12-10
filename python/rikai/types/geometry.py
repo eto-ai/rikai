@@ -26,6 +26,7 @@ from PIL import ImageDraw, Image
 
 from rikai.mixin import ToDict, ToNumpy
 from rikai.spark.types.geometry import Box2dType, Box3dType, PointType
+from rikai.types import rle
 
 __all__ = ["Point", "Box3d", "Box2d"]
 
@@ -478,26 +479,21 @@ class Mask(ToNumpy, ToDict):
         assert len(mask.shape) > 1, "Must have more than 2-dimensions"
         return Mask(data=mask, mask_type=Mask.Type.MASK)
 
-    def to_mask(self) -> np.ndarray:
+    def to_mask(self, resample=1) -> np.ndarray:
         if self.type == Mask.Type.MASK:
             return self.data
         elif self.type == Mask.Type.POLYGON:
-            arr = np.ndarray(shape=self.shape, dtype=np.uint8)
-            print(self.data)
-            # with Image.fromarray(arr) as im:
-            #     draw = ImageDraw.Draw(im)
-            #     for polygon in self.data:
-            #         print("DRAW POLYGON ", polygon)
-            #         draw.polygon(polygon, 1)
-            #     return np.array(im)
-            import cv2
-            for polygon in self.data:
-                print(np.ceil(polygon).reshape(-1, 2).astype(int))
-                cv2.fillPoly(arr, np.ceil(polygon).reshape(2, -1), color=(255, 255, 255))
-            return arr
+            arr = np.zeros(np.array(self.shape) * resample, dtype=np.uint8).T
+            with Image.fromarray(arr) as im:
+                draw = ImageDraw.Draw(im)
+                for polygon in self.data:
+                    draw.polygon(list(np.array(polygon) * resample), fill=1)
+                im = im.resize(self.shape)
+                return np.array(im)
         elif self.type == Mask.Type.RLE:
-            pass
-        pass
+            return rle.decode(self.data, shape=self.shape)
+        else:
+            raise ValueError("Unrecognized type")
 
     def to_numpy(self) -> np.ndarray:
         return self.to_mask()
@@ -506,4 +502,12 @@ class Mask(ToNumpy, ToDict):
         pass
 
     def iou(self, other: Mask) -> float:
-        pass
+        this_mask = self.to_mask()
+        other_mask = other.to_mask()
+        intersection = np.count_nonzero(np.logical_and(this_mask, other_mask))
+        union = np.count_nonzero(np.logical_or(this_mask, other_mask))
+        try:
+            return intersection / union
+        except ZeroDivisionError:
+            return 0
+

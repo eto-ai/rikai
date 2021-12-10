@@ -13,29 +13,37 @@
 #  limitations under the License.
 
 
-import numpy as np
 from typing import Tuple
+
+import numpy as np
 
 
 def encode(arr: np.ndarray) -> np.ndarray:
     """Run-length encoding a matrix.
 
+    Currently, it only supports COCO-style encoding.
     """
     if len(arr.shape) > 1:
         arr = arr.reshape(-1)
     if len(arr) == 0:
-        print(arr)
         return []
     total = len(arr)
     conti_idx = np.r_[0, np.flatnonzero(~np.equal(arr[1:], [arr[:-1]])) + 1]
     counts = np.diff(np.r_[conti_idx, total])
+    if arr[0]:
+        counts = np.insert(counts, 0, 0)
     return counts
 
 
-
-def decode(rle: np.array, shape=Tuple[int]) -> np.ndarray:
+def decode(rle: np.array, shape: Tuple[int]) -> np.ndarray:
     """Decode RLE encoding into a numpy mask."""
 
     val = 0
-
-    pass
+    start_idx = 0
+    n = np.sum(rle)
+    arr = np.full(n, np.nan)
+    for length in rle:
+        arr[start_idx:start_idx + length] = val
+        val = 1 - val
+        start_idx += length
+    return arr.reshape(shape)

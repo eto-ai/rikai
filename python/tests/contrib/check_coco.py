@@ -25,6 +25,7 @@ import numpy as np
 from pycocotools.coco import COCO
 
 from rikai.types import rle
+from rikai.types.geometry import Mask
 
 
 def main():
@@ -42,20 +43,21 @@ def main():
     for ann in annotations["annotations"]:
         img = coco.imgs[ann["image_id"]]
         height, width = img["height"], img["width"]  # type: Tuple[int, int]
-        if ann["iscrowd"] == 0:
-            continue
         mask = coco.annToMask(ann)
 
-        # assert np.array_equal(rle.decode(rle.encode(mask), shape=(width, height)), mask)
-        mask_1 = rle.decode(
-            ann["segmentation"]["counts"], shape=(height, width, 1)
-        ).reshape((height, width))
+        if ann["iscrowd"] == 0:
+            print(ann)
+            mask_1 = Mask.from_polygon(ann["segmentation"], (height, width)).to_mask()
+        else:
+            mask_1 = rle.decode(
+                ann["segmentation"]["counts"], shape=(height, width, 1)
+            ).reshape((height, width))
 
-        # import cv2
-        # mask[mask == 1] = 255
-        # mask_1[mask_1 == 1] = 255
-        # cv2.imwrite("img1.png", mask)
-        # cv2.imwrite("img2.png", mask_1)
+        import cv2
+        mask[mask == 1] = 255
+        mask_1[mask_1 == 1] = 255
+        cv2.imwrite("img1.png", mask)
+        cv2.imwrite("img2.png", mask_1)
         assert np.array_equal(
             mask, mask_1
         ), f"Image {ann['image_id']} not equal, {mask.shape}, {mask_1.shape}"

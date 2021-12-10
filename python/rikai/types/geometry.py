@@ -22,6 +22,7 @@ from numbers import Real
 from typing import Optional, Sequence, Tuple, Union
 
 import numpy as np
+from PIL import ImageDraw, Image
 
 from rikai.mixin import ToDict, ToNumpy
 from rikai.spark.types.geometry import Box2dType, Box3dType, PointType
@@ -454,7 +455,7 @@ class Mask(ToNumpy, ToDict):
     def __init__(
             self,
             data: Union[list, np.ndarray],
-            shape: Optional[Tuple[int]] = None,
+            shape: Optional[Tuple[int, int]] = None,
             mask_type: Mask.Type = Type.POLYGON,
     ):
         self.type = mask_type
@@ -465,11 +466,11 @@ class Mask(ToNumpy, ToDict):
             self.shape = shape
 
     @staticmethod
-    def from_rle(data: list, shape: Tuple[int]) -> Mask:
+    def from_rle(data: list, shape: Tuple[int, int]) -> Mask:
         return Mask(data, shape=shape, mask_type=Mask.Type.RLE)
 
     @staticmethod
-    def from_polygon(data: list, shape: Tuple[int]) -> Mask:
+    def from_polygon(data: list[list[float]], shape: Tuple[int, int]) -> Mask:
         return Mask(data, shape=shape, mask_type=Mask.Type.POLYGON)
 
     @staticmethod
@@ -480,6 +481,22 @@ class Mask(ToNumpy, ToDict):
     def to_mask(self) -> np.ndarray:
         if self.type == Mask.Type.MASK:
             return self.data
+        elif self.type == Mask.Type.POLYGON:
+            arr = np.ndarray(shape=self.shape, dtype=np.uint8)
+            print(self.data)
+            # with Image.fromarray(arr) as im:
+            #     draw = ImageDraw.Draw(im)
+            #     for polygon in self.data:
+            #         print("DRAW POLYGON ", polygon)
+            #         draw.polygon(polygon, 1)
+            #     return np.array(im)
+            import cv2
+            for polygon in self.data:
+                print(np.ceil(polygon).reshape(-1, 2).astype(int))
+                cv2.fillPoly(arr, np.ceil(polygon).reshape(2, -1), color=(255, 255, 255))
+            return arr
+        elif self.type == Mask.Type.RLE:
+            pass
         pass
 
     def to_numpy(self) -> np.ndarray:

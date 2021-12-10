@@ -39,7 +39,9 @@ def encode(arr: np.ndarray) -> np.array:
     return counts
 
 
-def decode(rle: np.array, shape: Tuple[int] | Tuple[int, int], order: str = "C") -> np.ndarray:
+def decode(
+    rle: np.array, shape: Tuple[int] | Tuple[int, int], order: str = "C"
+) -> np.ndarray:
     """Decode (COCO) RLE encoding into a numpy mask.
 
     Parameters
@@ -56,7 +58,7 @@ def decode(rle: np.array, shape: Tuple[int] | Tuple[int, int], order: str = "C")
     n = np.sum(rle)
     arr = np.full(n, 0, dtype=np.uint8)
     for length in rle:
-        arr[start_idx: start_idx + length] = val
+        arr[start_idx : start_idx + length] = val
         start_idx += length
         val = 1 - val
 

@@ -205,6 +205,7 @@ class MaskType(UserDefinedType):
 
     def deserialize(self, datum: Row) -> "Mask":
         from rikai.types.geometry import Mask
+
         mask_type = Mask.Type(datum[0])
         height = datum[1]
         width = datum[2]

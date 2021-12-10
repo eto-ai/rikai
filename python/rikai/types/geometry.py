@@ -488,22 +488,22 @@ class Mask(ToNumpy, ToDict):
     def __repr__(self):
         return f"Mask(type={self.type}, data=...)"
 
-    def _polygon_to_mask(self, resample: int) -> np.ndarray:
-        arr = np.zeros(np.array([self.height, self.width]) * resample, dtype=np.uint8)
+    def _polygon_to_mask(self) -> np.ndarray:
+        arr = np.zeros(np.array([self.height, self.width]), dtype=np.uint8)
         with Image.fromarray(arr) as im:
             draw = ImageDraw.Draw(im)
             for polygon in self.data:
-                draw.polygon(list(np.array(polygon) * resample), fill=1)
+                draw.polygon(list(np.array(polygon)), fill=1)
             im = im.resize((self.width, self.height))
             return np.array(im)
 
-    def to_mask(self, resample: int = 1) -> np.ndarray:
+    def to_mask(self) -> np.ndarray:
         if self.type == Mask.Type.MASK:
             return self.data
         elif self.type == Mask.Type.POLYGON:
-            return self._polygon_to_mask(resample)
+            return self._polygon_to_mask()
         elif self.type == Mask.Type.RLE:
-            return rle.decode(self.data, shape=(self.height, self.width))
+            return rle.decode(self.data, shape=(self.width, self.height))
         else:
             raise ValueError("Unrecognized type")
 

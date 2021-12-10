@@ -46,4 +46,4 @@ def decode(rle: np.array, shape: Tuple[int, int]) -> np.ndarray:
         start_idx += length
         val = 1 - val
 
-    return arr.reshape(shape, order="F")
+    return arr.reshape(shape)

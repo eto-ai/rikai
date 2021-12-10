@@ -57,10 +57,10 @@ class Point(ToNumpy, ToDict):
 
     def __eq__(self, o: object) -> bool:
         return (
-                isinstance(o, Point)
-                and self.x == o.x
-                and self.y == o.y
-                and self.z == o.z
+            isinstance(o, Point)
+            and self.x == o.x
+            and self.y == o.y
+            and self.z == o.z
         )
 
     def to_numpy(self) -> np.ndarray:
@@ -101,10 +101,10 @@ class Box2d(ToNumpy, Sequence, ToDict):
 
     def __init__(self, xmin: float, ymin: float, xmax: float, ymax: float):
         assert (
-                0 <= xmin <= xmax
+            0 <= xmin <= xmax
         ), f"xmin({xmin}) and xmax({xmax}) must satisfy 0 <= xmin <= xmax"
         assert (
-                0 <= ymin <= ymax
+            0 <= ymin <= ymax
         ), f"ymin({ymin}) and ymax({ymax}) must satisfy 0 <= ymin <= ymax"
         self.xmin = float(xmin)
         self.ymin = float(ymin)
@@ -113,7 +113,7 @@ class Box2d(ToNumpy, Sequence, ToDict):
 
     @classmethod
     def from_center(
-            cls, center_x: float, center_y: float, width: float, height: float
+        cls, center_x: float, center_y: float, width: float, height: float
     ) -> Box2d:
         """Factory method to construct a :py:class:`Box2d` from
         the center point coordinates: ``{center_x, center_y, width, height}``.
@@ -135,7 +135,7 @@ class Box2d(ToNumpy, Sequence, ToDict):
         Box2d
         """
         assert (
-                width >= 0 and height >= 0
+            width >= 0 and height >= 0
         ), f"Box2d width({width}) and height({height}) must be non-negative."
         return Box2d(
             center_x - width / 2,
@@ -146,7 +146,7 @@ class Box2d(ToNumpy, Sequence, ToDict):
 
     @classmethod
     def from_top_left(
-            cls, xmin: float, ymin: float, width: float, height: float
+        cls, xmin: float, ymin: float, width: float, height: float
     ) -> Box2d:
         """Construct a :py:class:`Box2d` from
         the top-left based coordinates: ``{x0, y0, width, height}``.
@@ -175,14 +175,14 @@ class Box2d(ToNumpy, Sequence, ToDict):
         .. _Coco Dataset: https://cocodataset.org/
         """
         assert (
-                width >= 0 and height >= 0
+            width >= 0 and height >= 0
         ), f"Box2d width({width}) and height({height}) must be non-negative."
         return Box2d(xmin, ymin, xmin + width, ymin + height)
 
     def __repr__(self) -> str:
         return (
-                f"Box2d(xmin={self.xmin}, ymin={self.ymin}, xmax={self.xmax}"
-                + f", ymax={self.ymax})"
+            f"Box2d(xmin={self.xmin}, ymin={self.ymin}, xmax={self.xmax}"
+            + f", ymax={self.ymax})"
         )
 
     def __eq__(self, o: Box2d) -> bool:
@@ -198,16 +198,16 @@ class Box2d(ToNumpy, Sequence, ToDict):
 
     @staticmethod
     def _verified_scale(
-            scale: Union[Real, Tuple[float, float]]
+        scale: Union[Real, Tuple[float, float]]
     ) -> Tuple[float, float]:
         if isinstance(scale, Real):
             assert scale > 0, f"scale must be positive, got {scale}"
             return scale, scale
         assert (
-                type(scale) == tuple and len(scale) == 2
+            type(scale) == tuple and len(scale) == 2
         ), f"scale must be either a number or a 2-element tuple, got {scale}"
         assert (
-                scale[0] > 0 and scale[1] > 0
+            scale[0] > 0 and scale[1] > 0
         ), f"scale must be positive, got {scale}"
         return scale
 
@@ -286,8 +286,8 @@ class Box2d(ToNumpy, Sequence, ToDict):
 
     @staticmethod
     def ious(
-            boxes1: Union[Sequence[Box2d], np.ndarray],
-            boxes2: Union[Sequence[Box2d], np.ndarray],
+        boxes1: Union[Sequence[Box2d], np.ndarray],
+        boxes2: Union[Sequence[Box2d], np.ndarray],
     ) -> np.ndarray:
         """Compute intersection over union(IOU).
 
@@ -345,7 +345,7 @@ class Box2d(ToNumpy, Sequence, ToDict):
         return iou_mat
 
     def iou(
-            self, other: Union[Box2d, Sequence[Box2d], np.ndarray]
+        self, other: Union[Box2d, Sequence[Box2d], np.ndarray]
     ) -> Union[float, np.ndarray]:
         """Compute intersection over union(IOU)."""
         assert isinstance(
@@ -368,9 +368,9 @@ class Box2d(ToNumpy, Sequence, ToDict):
         inter_area = self._area(inter_arr)
 
         iou_arr = inter_area / (
-                self._area(np.array([self_arr]))
-                + self._area(other_arr)
-                - inter_area
+            self._area(np.array([self_arr]))
+            + self._area(other_arr)
+            - inter_area
         )
         if isinstance(other, Box2d):
             return iou_arr[0]
@@ -403,12 +403,12 @@ class Box3d(ToNumpy, ToDict):
     __UDT__ = Box3dType()
 
     def __init__(
-            self,
-            center: Point,
-            length: float,
-            width: float,
-            height: float,
-            heading: float,
+        self,
+        center: Point,
+        length: float,
+        width: float,
+        height: float,
+        heading: float,
     ):
         self.center = center
         self.length = float(length)
@@ -418,18 +418,18 @@ class Box3d(ToNumpy, ToDict):
 
     def __repr__(self) -> str:
         return (
-                f"Box3d(center={self.center}, l={self.length}, "
-                + f"h={self.height}, w={self.width}, heading={self.heading})"
+            f"Box3d(center={self.center}, l={self.length}, "
+            + f"h={self.height}, w={self.width}, heading={self.heading})"
         )
 
     def __eq__(self, o: object) -> bool:
         return (
-                isinstance(o, Box3d)
-                and self.center == o.center
-                and self.length == o.length
-                and self.width == o.width
-                and self.height == o.height
-                and self.heading == o.heading
+            isinstance(o, Box3d)
+            and self.center == o.center
+            and self.length == o.length
+            and self.width == o.width
+            and self.height == o.height
+            and self.heading == o.heading
         )
 
     def to_numpy(self) -> np.ndarray:
@@ -455,11 +455,11 @@ class Mask(ToNumpy, ToDict):
         COCO_RLE = 3  # COCO style RLE, Column-based
 
     def __init__(
-            self,
-            data: Union[list, np.ndarray],
-            height: Optional[int] = None,
-            width: Optional[int] = None,
-            mask_type: Mask.Type = Type.POLYGON,
+        self,
+        data: Union[list, np.ndarray],
+        height: Optional[int] = None,
+        width: Optional[int] = None,
+        mask_type: Mask.Type = Type.POLYGON,
     ):
         self.type = mask_type
         self.data = data
@@ -468,7 +468,7 @@ class Mask(ToNumpy, ToDict):
             self.width = data.shape[1]
         else:
             assert (
-                    height is not None and width is not None
+                height is not None and width is not None
             ), "Must provide height and width for RLE or Polygon type"
             self.height = height
             self.width = width
@@ -479,11 +479,15 @@ class Mask(ToNumpy, ToDict):
 
     @staticmethod
     def from_coco_rle(data: list[int], height: int, width: int) -> Mask:
-        return Mask(data, height=height, width=width, mask_type=Mask.Type.COCO_RLE)
+        return Mask(
+            data, height=height, width=width, mask_type=Mask.Type.COCO_RLE
+        )
 
     @staticmethod
     def from_polygon(data: list[list[float]], height: int, width: int) -> Mask:
-        return Mask(data, height=height, width=width, mask_type=Mask.Type.POLYGON)
+        return Mask(
+            data, height=height, width=width, mask_type=Mask.Type.POLYGON
+        )
 
     @staticmethod
     def from_mask(mask: np.ndarray) -> Mask:
@@ -510,7 +514,9 @@ class Mask(ToNumpy, ToDict):
         elif self.type == Mask.Type.RLE:
             return rle.decode(self.data, shape=(self.height, self.width))
         elif self.type == Mask.Type.COCO_RLE:
-            return rle.decode(self.data, shape=(self.height, self.width), order="F")
+            return rle.decode(
+                self.data, shape=(self.height, self.width), order="F"
+            )
         else:
             raise ValueError("Unrecognized type")
 

@@ -20,7 +20,11 @@ from __future__ import annotations
 # Third-Party
 from pyspark.sql import Row
 from pyspark.sql.types import (
+    ArrayType,
     DoubleType,
+    FloatType,
+    IntegerType,
+    ShortType,
     StructField,
     StructType,
     UserDefinedType,
@@ -148,3 +152,60 @@ class Box3dType(UserDefinedType):
 
     def simpleString(self) -> str:
         return "Box3dType"
+
+
+class MaskType(UserDefinedType):
+    """Spark UDT for 2-D mask"""
+
+    @classmethod
+    def sqlType(cls) -> StructType:
+        from rikai.numpy import NDArrayType
+
+        return StructType(
+            fields=[
+                StructField("type", ShortType(), False),
+                StructField("height", IntegerType(), False),
+                StructField("width", IntegerType(), False),
+                StructField(
+                    "polygon",
+                    ArrayType(ArrayType(FloatType(), False), False),
+                    True,
+                ),
+                StructField("mask", NDArrayType(), True),
+                StructField("rle", ArrayType(IntegerType(), False), True),
+            ]
+        )
+
+    @classmethod
+    def module(cls) -> str:
+        return "rikai.spark.types.geometry"
+
+    @classmethod
+    def scalaUDT(cls) -> str:
+        return "org.apache.spark.sql.rikai.MaskType"
+
+    def serialize(self, mask: "Mask") -> Row:
+        from rikai.types.geometry import Mask
+
+        mask_type = mask.type.value
+        if mask.type == Mask.Type.MASK:
+            return Row(
+                mask_type, mask.height, mask.width, None, mask.data, None
+            )
+        elif mask.type == Mask.Type.RLE:
+            return Row(
+                mask_type, mask.height, mask.width, None, None, mask.data
+            )
+        elif mask.type == Mask.Type.POLYGON:
+            return Row(
+                mask_type, mask.height, mask.width, mask.data, None, None
+            )
+        else:
+            raise ValueError(f"Unrecognized mask type: {mask.type}")
+
+    def deserialize(self, datum: Row) -> "Mask":
+        from rikai.types.geometry import Mask
+        pass
+
+    def simpleString(self) -> str:
+        return "Mask"

@@ -28,7 +28,7 @@ from rikai.mixin import ToDict, ToNumpy
 from rikai.spark.types.geometry import Box2dType, Box3dType, PointType
 from rikai.types import rle
 
-__all__ = ["Point", "Box3d", "Box2d"]
+__all__ = ["Point", "Box3d", "Box2d", "Mask"]
 
 
 class Point(ToNumpy, ToDict):
@@ -456,23 +456,29 @@ class Mask(ToNumpy, ToDict):
     def __init__(
             self,
             data: Union[list, np.ndarray],
-            shape: Optional[Tuple[int, int]] = None,
+            height: Optional[int] = None,
+            width: Optional[int] = None,
             mask_type: Mask.Type = Type.POLYGON,
     ):
         self.type = mask_type
         self.data = data
         if self.type == Mask.Type.MASK:
-            self.shape = data.shape
+            self.height = data.shape[0]
+            self.width = data.shape[1]
         else:
-            self.shape = shape
+            assert (
+                    height is not None and width is not None
+            ), "Must provide height and width for RLE or Polygon type"
+            self.height = height
+            self.width = width
 
     @staticmethod
-    def from_rle(data: list, shape: Tuple[int, int]) -> Mask:
-        return Mask(data, shape=shape, mask_type=Mask.Type.RLE)
+    def from_rle(data: list[int], height: int, width: int) -> Mask:
+        return Mask(data, height=height, width=width, mask_type=Mask.Type.RLE)
 
     @staticmethod
-    def from_polygon(data: list[list[float]], shape: Tuple[int, int]) -> Mask:
-        return Mask(data, shape=shape, mask_type=Mask.Type.POLYGON)
+    def from_polygon(data: list[list[float]], height: int, width: int) -> Mask:
+        return Mask(data, height=height, width=width, mask_type=Mask.Type.POLYGON)
 
     @staticmethod
     def from_mask(mask: np.ndarray) -> Mask:
@@ -482,19 +488,22 @@ class Mask(ToNumpy, ToDict):
     def __repr__(self):
         return f"Mask(type={self.type}, data=...)"
 
-    def to_mask(self, resample=1) -> np.ndarray:
+    def _polygon_to_mask(self, resample: int) -> np.ndarray:
+        arr = np.zeros(np.array([self.height, self.width]) * resample, dtype=np.uint8)
+        with Image.fromarray(arr) as im:
+            draw = ImageDraw.Draw(im)
+            for polygon in self.data:
+                draw.polygon(list(np.array(polygon) * resample), fill=1)
+            im = im.resize((self.width, self.height))
+            return np.array(im)
+
+    def to_mask(self, resample: int = 1) -> np.ndarray:
         if self.type == Mask.Type.MASK:
             return self.data
         elif self.type == Mask.Type.POLYGON:
-            arr = np.zeros(np.array(self.shape) * resample, dtype=np.uint8).T
-            with Image.fromarray(arr) as im:
-                draw = ImageDraw.Draw(im)
-                for polygon in self.data:
-                    draw.polygon(list(np.array(polygon) * resample), fill=1)
-                im = im.resize(self.shape)
-                return np.array(im)
+            return self._polygon_to_mask(resample)
         elif self.type == Mask.Type.RLE:
-            return rle.decode(self.data, shape=self.shape)
+            return rle.decode(self.data, shape=(self.height, self.width))
         else:
             raise ValueError("Unrecognized type")
 
@@ -513,4 +522,3 @@ class Mask(ToNumpy, ToDict):
             return intersection / union
         except ZeroDivisionError:
             return 0
-

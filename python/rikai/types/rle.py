@@ -35,7 +35,7 @@ def encode(arr: np.ndarray) -> np.array:
     return counts
 
 
-def decode(rle: np.array, shape: Tuple[int]) -> np.ndarray:
+def decode(rle: np.array, shape: Tuple[int, int]) -> np.ndarray:
     """Decode RLE encoding into a numpy mask."""
     val = 0
     start_idx = 0

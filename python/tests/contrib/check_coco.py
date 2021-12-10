@@ -19,10 +19,13 @@
 
 import argparse
 import json
-from typing import Tuple
+import shutil
+from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from pycocotools.coco import COCO
+import cv2
 
 from rikai.types import rle
 from rikai.types.geometry import Mask
@@ -33,6 +36,13 @@ def main():
         description="Verify data consistency between coco and rikai"
     )
     parser.add_argument("annotation_json", help="Coco annotation json file")
+    parser.add_argument(
+        "-i",
+        "--iou",
+        help="IOU threshold to consider a mask is mismatched",
+        default=0.9,
+        type=float,
+    )
     args = parser.parse_args()
 
     with open(args.annotation_json) as f:
@@ -40,39 +50,57 @@ def main():
 
     coco = COCO(args.annotation_json)
 
-    IOU_THRESHOLD = 0.92
+    accuracy_record = []
+
+    err_dir = Path("errors")
+    shutil.rmtree(err_dir, ignore_errors=True)
+    err_dir.mkdir()
 
     for ann in annotations["annotations"]:
-        img = coco.imgs[ann["image_id"]]
+        image_id = ann["image_id"]
+        img = coco.imgs[image_id]
         height, width = img["height"], img["width"]  # type: int, int
-        mask = Mask.from_mask(coco.annToMask(ann))
-        if np.count_nonzero(mask.to_mask()) == 0:
+        is_rle = ann["iscrowd"] == 1
+        # Mask from pycocotools directly
+        original_mask = Mask.from_mask(coco.annToMask(ann))
+        if np.count_nonzero(original_mask.to_mask()) == 0:
             continue
 
-        if ann["iscrowd"] == 0:
-            print(ann)
-            mask_1 = Mask.from_polygon(ann["segmentation"], shape=(width, height))
+        if is_rle:
+            rikai_mask = Mask.from_rle(
+                ann["segmentation"]["counts"], width=width, height=height
+            )
         else:
-            mask_1 = rle.decode(
-                ann["segmentation"]["counts"], shape=(height, width, 1)
-            ).reshape((height, width))
+            continue
+            rikai_mask = Mask.from_polygon(
+                ann["segmentation"],
+                width=width,
+                height=height,
+            )
 
-        iou = mask.iou(mask_1)
-        print("IOU: ", mask.iou(mask_1))
-        if iou < IOU_THRESHOLD:
-            import cv2
-            mask = mask.to_mask()
-            print("mask none zero", np.count_nonzero(mask))
-            mask_1 = mask_1.to_mask(resample=10)
-            mask[mask == 1] = 255
-            mask_1[mask_1 == 1] = 255
-            diff_mask = (mask != mask_1).astype(np.uint8)
+        # print(image_id, ann, original_mask.to_mask().shape, rikai_mask.to_mask().shape)
+        iou = original_mask.iou(rikai_mask)
+        accuracy_record.append(
+            {
+                "image_id": image_id,
+                "iou": iou,
+                "area": ann["area"],
+                "rle": is_rle,
+            }
+        )
+        print("IOU: ", original_mask.iou(rikai_mask))
+        if iou < args.iou:
+            coco_mask = original_mask.to_mask()
+            r_mask = rikai_mask.to_mask()
+            coco_mask[coco_mask == 1] = 255
+            r_mask[r_mask == 1] = 255
+            diff_mask = (coco_mask != r_mask).astype(np.uint8)
             diff_mask[diff_mask == 1] = 255
-            print(diff_mask)
-            cv2.imwrite("img1.png", mask)
-            cv2.imwrite("img2.png", mask_1)
-            cv2.imwrite("diff.png", diff_mask)
-            assert False, f"Image {ann['image_id']} not equal, {mask.shape}, {mask_1.shape}"
+            cv2.imwrite(str(err_dir / f"{image_id}_coco.png"), coco_mask)
+            cv2.imwrite(str(err_dir / f"{image_id}_rikai.png"), r_mask)
+            cv2.imwrite(str(err_dir / f"{image_id}_diff.png"), diff_mask)
+    df = pd.DataFrame(accuracy_record)
+    df.to_csv("accuracy.csv")
 
 
 if __name__ == "__main__":

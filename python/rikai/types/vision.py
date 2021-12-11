@@ -104,23 +104,17 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
             return cls.from_pil(img, uri, format=format, **kwargs)
 
     @staticmethod
-    def from_uri(
+    def read(
         uri: Union[str, Path],
-        embedded: bool = True,
     ) -> Image:
-        """Create an image from external URI
+        """Create an embedded image from external URI
 
         Parameters
         ----------
         uri : str or Path
             The URI pointed to an image.
-        embedded : bool, optional
-            Whether to store the image embedded
         """
-        img = Image(uri)
-        if embedded:
-            img = img.to_embedded()
-        return img
+        return Image(uri).to_embedded()
 
     @staticmethod
     def from_pil(

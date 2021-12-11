@@ -17,7 +17,7 @@
 package org.apache.spark.sql.rikai
 
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
+import org.apache.spark.sql.catalyst.expressions.{GenericInternalRow, UnsafeArrayData}
 import org.apache.spark.sql.types._
 
 object MaskTypeEnum extends Enumeration {
@@ -38,7 +38,7 @@ class Mask(
     val height: Int,
     val width: Int,
     val polygon: Option[Seq[Seq[Float]]] = None,
-    val rle: Option[Seq[Int]] = None
+    val rle: Option[Array[Int]] = None
 ) {}
 
 object Mask {
@@ -48,11 +48,11 @@ object Mask {
     new Mask(MaskTypeEnum.Polygon, height, width, polygon = Some(data))
   }
 
-  def fromRle(data: Seq[Int], height: Int, width: Int): Mask = {
+  def fromRLE(data: Array[Int], height: Int, width: Int): Mask = {
     new Mask(MaskTypeEnum.Rle, height, width, rle = Some(data))
   }
 
-  def fromCocoRLE(data: Seq[Int], height: Int, width: Int): Mask = {
+  def fromCocoRLE(data: Array[Int], height: Int, width: Int): Mask = {
     new Mask(MaskTypeEnum.CocoRle, height, width, rle = Some(data))
   }
 }
@@ -74,14 +74,21 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
 
   override def pyUDT: String = "rikai.spark.types.geometry.Mask"
 
-  override def serialize(m: Mask): Any = {
+  override def serialize(m: Mask): InternalRow = {
     val row = new GenericInternalRow(6)
     row.setInt(0, m.maskType.id)
     row.setInt(1, m.height)
     row.setInt(2, m.width)
+    println("XXXX: ", UnsafeArrayData.fromPrimitiveArray(m.rle.get))
     m.maskType match {
-      case MaskTypeEnum.Rle | MaskTypeEnum.CocoRle => row.update(4, m.rle.get)
-      case MaskTypeEnum.Polygon => row.update(3, m.polygon.get)
+      case MaskTypeEnum.Rle | MaskTypeEnum.CocoRle =>
+        row.setNullAt(3)
+        row.update(4, UnsafeArrayData.fromPrimitiveArray(m.rle.get))
+        row.setNullAt(5)
+      case MaskTypeEnum.Polygon =>
+        row.update(3, m.polygon.get)
+        row.setNullAt(4)
+        row.setNullAt(5)
       case _ => throw new NotImplementedError()
     }
     row
@@ -89,7 +96,7 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
 
   override def deserialize(datum: Any): Mask = {
     datum match {
-      case row: InternalRow => {
+      case row: InternalRow =>
         val maskType: MaskTypeEnum.Type = MaskTypeEnum(row.getInt(0))
         val height = row.getInt(1)
         val width = row.getInt(2)
@@ -101,7 +108,7 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
               width
             )
           case MaskTypeEnum.Rle =>
-            Mask.fromRle(
+            Mask.fromRLE(
               row.getArray(5).toArray[Int](IntegerType),
               height,
               width
@@ -114,7 +121,6 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
             )
           case MaskTypeEnum.Mask => throw new NotImplementedError()
         }
-      }
     }
   }
 

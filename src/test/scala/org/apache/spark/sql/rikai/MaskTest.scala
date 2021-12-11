@@ -24,7 +24,7 @@ class MaskTest extends AnyFunSuite with SparkTestSession {
   import spark.implicits._
 
   test("test create mask data") {
-    val df = Seq((1, Mask.fromRle(Seq(1, 2, 3), 10, 5))).toDF("id", "segment")
+    val df = Seq((1, Mask.fromRLE(Array(1, 2, 3), 10, 5))).toDF("id", "segment")
 
     df.show()
   }

@@ -104,6 +104,19 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
             return cls.from_pil(img, uri, format=format, **kwargs)
 
     @staticmethod
+    def read(
+        uri: Union[str, Path],
+    ) -> Image:
+        """Create an embedded image from external URI
+
+        Parameters
+        ----------
+        uri : str or Path
+            The URI pointed to an image.
+        """
+        return Image(uri).to_embedded()
+
+    @staticmethod
     def from_pil(
         img: PILImage,
         uri: Optional[Union[str, Path]] = None,
@@ -215,6 +228,13 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
         if self.is_embedded:
             return {"data": base64.b64encode(self.data).decode("ascii")}
         return {"uri": self.uri}
+
+    def to_embedded(self) -> Image:
+        """Convert this image into an embedded image."""
+        if self.is_embedded:
+            return self
+        with self.open() as img:
+            return Image(img.read())
 
     def save(self, uri: Union[str, Path]) -> Image:
         """Save the image into a file, specified by the file path or URI.

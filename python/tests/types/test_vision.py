@@ -26,12 +26,16 @@ from rikai.types.geometry import Box2d
 from rikai.types.vision import Image
 
 
-def test_show_embedded_png(tmp_path):
+@pytest.fixture
+def test_image() -> PILImage:
     data = np.random.random((100, 100))
     rescaled = (255.0 / data.max() * (data - data.min())).astype(np.uint8)
-    im = PILImage.fromarray(rescaled)
+    return PILImage.fromarray(rescaled)
+
+
+def test_show_embedded_png(tmp_path, test_image):
     uri = tmp_path / "test.png"
-    im.save(uri)
+    test_image.save(uri)
     result = Image(uri)._repr_png_()
     with open(uri, "rb") as fh:
         expected = b2a_base64(fh.read()).decode("ascii")
@@ -42,12 +46,9 @@ def test_show_embedded_png(tmp_path):
         assert result == embedded_image._repr_png_()
 
 
-def test_show_embedded_jpeg(tmp_path):
-    data = np.random.random((100, 100))
-    rescaled = (255.0 / data.max() * (data - data.min())).astype(np.uint8)
-    im = PILImage.fromarray(rescaled)
+def test_show_embedded_jpeg(tmp_path, test_image):
     uri = tmp_path / "test.jpg"
-    im.save(uri)
+    test_image.save(uri)
     result = Image(uri)._repr_jpeg_()
     with open(uri, "rb") as fh:
         expected = b2a_base64(fh.read()).decode("ascii")
@@ -56,6 +57,23 @@ def test_show_embedded_jpeg(tmp_path):
         fh.seek(0)
         embedded_image = Image(fh)
         assert result == embedded_image._repr_jpeg_()
+
+
+def test_convert_to_embedded_image(tmp_path, test_image: PILImage):
+    uri = tmp_path / "test.jpg"
+    test_image.save(uri)
+
+    img = Image.read(uri)
+    assert img.is_embedded
+    with open(uri, mode="rb") as fobj:
+        assert img.data == fobj.read()
+
+    img2 = Image(uri)
+    img3 = img2.to_embedded()
+    assert not img2.is_embedded
+    assert img3.is_embedded
+    with open(uri, mode="rb") as fobj:
+        assert img3.data == fobj.read()
 
 
 def test_format_kwargs(tmp_path):

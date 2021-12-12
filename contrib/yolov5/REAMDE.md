@@ -1,4 +1,7 @@
 # Yolov5 support for Rikai
+`rikai-yolov5` integrates Yolov5 implemented in PyTorch with Rikai. It is based
+on the [packaged ultralytics/yolov5](https://github.com/fcakyon/yolov5-pip).
+
 ## Usage
 There are two ways to use `rikai-yolov5`.
 

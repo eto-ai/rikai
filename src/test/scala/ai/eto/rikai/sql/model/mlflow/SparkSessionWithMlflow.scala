@@ -23,9 +23,7 @@ import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
 
 import scala.collection.JavaConverters._
 
-trait SparkSessionWithMlflow
-    extends Logging
-    with BeforeAndAfterAll {
+trait SparkSessionWithMlflow extends Logging with BeforeAndAfterAll {
   this: Suite =>
 
   val testMlflowTrackingUri: String =

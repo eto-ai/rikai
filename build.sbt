@@ -64,7 +64,7 @@ libraryDependencies ++= {
     "software.amazon.awssdk" % "s3" % awsVersion % "provided",
     "org.xerial.snappy" % "snappy-java" % snappyVersion,
     "org.apache.logging.log4j" %% "log4j-api-scala" % log4jScalaVersion,
-    "org.apache.logging.log4j" % "log4j-core" % log4jVersion % Runtime,
+    "org.apache.logging.log4j" % "log4j-core" % log4jVersion,
     "org.scalatest" %% "scalatest-funsuite" % scalatestVersion % "test",
     "io.circe" %% "circe-core" % circeVersion,
     "io.circe" %% "circe-generic" % circeVersion,

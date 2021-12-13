@@ -19,7 +19,7 @@ package ai.eto.rikai.sql.model.mlflow
 import ai.eto.rikai.sql.model.{Catalog, Registry}
 import org.apache.logging.log4j.scala.Logging
 import org.apache.spark.sql.SparkSession
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
+import org.scalatest.{BeforeAndAfterAll, Suite}
 
 import scala.collection.JavaConverters._
 

@@ -16,6 +16,9 @@
 
 package ai.eto.rikai.sql.model.testing
 
+import java.io.File
+import java.net.URI
+
 import ai.eto.rikai.sql.model.{
   Model,
   ModelNotFoundException,
@@ -23,16 +26,15 @@ import ai.eto.rikai.sql.model.{
   Registry,
   SparkUDFModel
 }
-import org.apache.logging.log4j.scala.Logging
-
-import java.io.File
-import java.net.URI
+import com.typesafe.scalalogging.LazyLogging
 
 /** [[TestRegistry]] is a Registry for the testing purpose.
   *
   * A valid model URI is: "test://hostname/model_name"
   */
-class TestRegistry(conf: Map[String, String]) extends Registry with Logging {
+class TestRegistry(conf: Map[String, String])
+    extends Registry
+    with LazyLogging {
 
   val schema: String = "test"
 

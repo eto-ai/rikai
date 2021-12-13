@@ -22,7 +22,7 @@ import ai.eto.rikai.sql.model.{
   ModelSpec,
   Registry
 }
-import org.apache.logging.log4j.scala.Logging
+import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.{Row, SparkSession}
 
@@ -38,7 +38,7 @@ case class CreateModelCommand(
     replace: Boolean,
     options: Map[String, String]
 ) extends ModelCommand
-    with Logging {
+    with LazyLogging {
 
   @throws[ModelResolveException]
   private[spark] def asSpec: ModelSpec =

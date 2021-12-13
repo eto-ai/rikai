@@ -17,7 +17,7 @@
 package ai.eto.rikai.sql.model.mlflow
 
 import com.google.protobuf.InvalidProtocolBufferException
-import org.apache.logging.log4j.scala.Logging
+import com.typesafe.scalalogging.LazyLogging
 import org.mlflow.api.proto.ModelRegistry.{
   CreateRegisteredModel,
   DeleteRegisteredModel,
@@ -32,7 +32,8 @@ import org.mlflow_project.google.protobuf.util.JsonFormat
 import scala.collection.JavaConverters._
 
 /** Extension to MlflowClient to add necessary APIs for Rikai */
-private[mlflow] class MlflowClientExt(val trackingUri: String) extends Logging {
+private[mlflow] class MlflowClientExt(val trackingUri: String)
+    extends LazyLogging {
   val client = new RikaiMlflowClient(trackingUri)
 
   private[mlflow] def searchRegisteredModels()

@@ -142,7 +142,8 @@ def spark_with_mlflow(mlflow_client_http) -> SparkSession:
                     mlflow_tracking_uri,
                 ),
             ]
-        )
+        ),
+        app_name="rikai_with_mlflow",
     )
     yield spark
 

@@ -11,104 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import mlflow
 import py4j
 import pytest
-import torch
 from mlflow.tracking import MlflowClient
-from pyspark.sql import Row, SparkSession
+from pyspark.sql import SparkSession
 from utils import check_ml_predict
 
-import rikai
 from rikai.spark.sql.codegen.mlflow_registry import MlflowModelSpec
 from rikai.spark.sql.schema import parse_schema
-
-
-@pytest.fixture(scope="session")
-def mlflow_client_with_tracking_uri(
-    tmp_path_factory, resnet_model_uri: str
-) -> (MlflowClient, str):
-    tmp_path = tmp_path_factory.mktemp("mlflow")
-    tmp_path.mkdir(parents=True, exist_ok=True)
-    tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
-    mlflow.set_tracking_uri(tracking_uri)
-    experiment_id = mlflow.create_experiment("rikai-test", str(tmp_path))
-    # simpliest
-    with mlflow.start_run(experiment_id=experiment_id):
-        mlflow.log_param("optimizer", "Adam")
-        # Fake training loop
-        model = torch.load(resnet_model_uri)
-        artifact_path = "model"
-
-        schema = (
-            "STRUCT<boxes:ARRAY<ARRAY<float>>,"
-            "scores:ARRAY<float>,label_ids:ARRAY<int>>"
-        )
-        pre_processing = (
-            "rikai.contrib.torch.transforms."
-            "fasterrcnn_resnet50_fpn.pre_processing"
-        )
-        post_processing = (
-            "rikai.contrib.torch.transforms."
-            "fasterrcnn_resnet50_fpn.post_processing"
-        )
-        rikai.mlflow.pytorch.log_model(
-            model,  # same as vanilla mlflow
-            artifact_path,  # same as vanilla mlflow
-            schema,
-            pre_processing,
-            post_processing,
-            registered_model_name="rikai-test",  # same as vanilla mlflow
-        )
-
-    # vanilla mlflow
-    with mlflow.start_run():
-        mlflow.pytorch.log_model(
-            model, artifact_path, registered_model_name="vanilla-mlflow"
-        )
-        mlflow.set_tags(
-            {
-                "rikai.model.flavor": "pytorch",
-                "rikai.output.schema": schema,
-                "rikai.transforms.pre": pre_processing,
-                "rikai.transforms.post": post_processing,
-            }
-        )
-
-    # vanilla mlflow no tags
-    with mlflow.start_run():
-        mlflow.pytorch.log_model(
-            model,
-            artifact_path,
-            registered_model_name="vanilla-mlflow-no-tags",
-        )
-
-    # vanilla mlflow wrong tags
-    with mlflow.start_run():
-        mlflow.pytorch.log_model(
-            model,
-            artifact_path,
-            registered_model_name="vanilla-mlflow-wrong-tags",
-        )
-        mlflow.set_tags(
-            {
-                "rikai.model.flavor": "pytorch",
-                "rikai.output.schema": schema,
-                "rikai.transforms.pre": "wrong_pre",
-                "rikai.transforms.post": "wrong_post",
-            }
-        )
-    return mlflow.tracking.MlflowClient(tracking_uri), tracking_uri
-
-
-@pytest.fixture(scope="session")
-def mlflow_client(mlflow_client_with_tracking_uri):
-    return mlflow_client_with_tracking_uri[0]
-
-
-@pytest.fixture(scope="session")
-def mlflow_tracking_uri(mlflow_client_with_tracking_uri):
-    return mlflow_client_with_tracking_uri[1]
 
 
 def test_modelspec(mlflow_client: MlflowClient):

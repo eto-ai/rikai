@@ -112,7 +112,7 @@ def mlflow_client_http(
     return mlflow.tracking.MlflowClient(tracking_uri)
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def spark_with_mlflow(mlflow_client_http) -> SparkSession:
     mlflow_tracking_uri = mlflow.get_tracking_uri()
     active_session = SparkSession.getActiveSession()

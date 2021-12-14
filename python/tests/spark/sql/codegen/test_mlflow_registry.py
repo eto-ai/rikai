@@ -24,7 +24,7 @@ from rikai.spark.sql.codegen.mlflow_registry import MlflowModelSpec
 from rikai.spark.sql.schema import parse_schema
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def mlflow_client_with_tracking_uri(
     tmp_path_factory, resnet_model_uri: str
 ) -> (MlflowClient, str):
@@ -101,12 +101,12 @@ def mlflow_client_with_tracking_uri(
     return mlflow.tracking.MlflowClient(tracking_uri), tracking_uri
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def mlflow_client(mlflow_client_with_tracking_uri):
     return mlflow_client_with_tracking_uri[0]
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def mlflow_tracking_uri(mlflow_client_with_tracking_uri):
     return mlflow_client_with_tracking_uri[1]
 

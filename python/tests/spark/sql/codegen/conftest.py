@@ -30,7 +30,7 @@ from rikai.spark.utils import get_default_jar_version, init_spark_session
 
 @pytest.fixture(scope="module")
 def mlflow_client_http(
-    tmp_path_factory, resnet_model_uri: str, spark: SparkSession
+    tmp_path_factory, resnet_model_uri: str, spark_with_mlflow: SparkSession
 ) -> MlflowClient:
     tracking_uri = os.getenv(
         "TEST_MLFLOW_TRACKING_URI", "http://localhost:5000"
@@ -106,7 +106,7 @@ def mlflow_client_http(
             }
         )
 
-    spark.conf.set("rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri)
+    spark_with_mlflow.conf.set("rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri)
     return mlflow.tracking.MlflowClient(tracking_uri)
 
 

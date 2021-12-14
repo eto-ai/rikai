@@ -106,7 +106,9 @@ def mlflow_client_http(
             }
         )
 
-    spark_with_mlflow.conf.set("rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri)
+    spark_with_mlflow.conf.set(
+        "rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri
+    )
     return mlflow.tracking.MlflowClient(tracking_uri)
 
 

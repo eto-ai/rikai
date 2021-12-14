@@ -22,17 +22,17 @@ from urllib.parse import urlparse
 
 # Third Party
 import pytest
-import torch
 import torchvision
 from pyspark.sql import SparkSession
 
+import torch
+
 # Rikai
-from rikai.spark.sql import init
 from rikai.spark.utils import get_default_jar_version, init_spark_session
 
 
 @pytest.fixture(scope="session")
-def spark() -> SparkSession:
+def spark(mlflow_tracking_uri: str) -> SparkSession:
     rikai_version = get_default_jar_version(use_snapshot=True)
     hadoop_version = "3.2.0"  # TODO(lei): get hadoop version
 
@@ -73,6 +73,10 @@ def spark() -> SparkSession:
                 ),
                 ("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem"),
                 ("spark.hadoop.fs.s3a.access.key", os.environ.get("AWS")),
+                (
+                    "rikai.sql.ml.registry.mlflow.tracking_uri",
+                    mlflow_tracking_uri,
+                ),
             ]
         )
     )

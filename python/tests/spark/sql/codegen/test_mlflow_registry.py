@@ -25,9 +25,9 @@ from rikai.spark.sql.schema import parse_schema
 
 
 @pytest.fixture(scope="module")
-def mlflow_client(
-    tmp_path_factory, resnet_model_uri: str, spark: SparkSession
-) -> MlflowClient:
+def mlflow_client_with_tracking_uri(
+    tmp_path_factory, resnet_model_uri: str
+) -> (MlflowClient, str):
     tmp_path = tmp_path_factory.mktemp("mlflow")
     tmp_path.mkdir(parents=True, exist_ok=True)
     tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
@@ -98,9 +98,17 @@ def mlflow_client(
                 "rikai.transforms.post": "wrong_post",
             }
         )
+    return mlflow.tracking.MlflowClient(tracking_uri), tracking_uri
 
-    spark.conf.set("rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri)
-    return mlflow.tracking.MlflowClient(tracking_uri)
+
+@pytest.fixture(scope="module")
+def mlflow_client(mlflow_client_with_tracking_uri):
+    return mlflow_client_with_tracking_uri[0]
+
+
+@pytest.fixture(scope="module")
+def mlflow_tracking_uri(mlflow_client_with_tracking_uri):
+    return mlflow_client_with_tracking_uri[1]
 
 
 def test_modelspec(mlflow_client: MlflowClient):

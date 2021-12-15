@@ -34,7 +34,7 @@ import rikai
 from rikai.spark.utils import get_default_jar_version, init_spark_session
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def mlflow_client_with_tracking_uri(
     tmp_path_factory, resnet_model_uri: str
 ) -> (MlflowClient, str):
@@ -111,21 +111,25 @@ def mlflow_client_with_tracking_uri(
     return mlflow.tracking.MlflowClient(tracking_uri), tracking_uri
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def mlflow_client(mlflow_client_with_tracking_uri):
     return mlflow_client_with_tracking_uri[0]
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def mlflow_tracking_uri(mlflow_client_with_tracking_uri):
     return mlflow_client_with_tracking_uri[1]
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="class")
 def spark(mlflow_tracking_uri: str) -> SparkSession:
     print(f"ml flow tracking uri for spark: ${mlflow_tracking_uri}")
     rikai_version = get_default_jar_version(use_snapshot=True)
     hadoop_version = "3.2.0"  # TODO(lei): get hadoop version
+    # # Avoid reused session polluting configs
+    # active_session = SparkSession.getActiveSession()
+    # if active_session:
+    #     active_session.stop()
 
     return init_spark_session(
         dict(

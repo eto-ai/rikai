@@ -45,7 +45,7 @@ def test_modelspec(mlflow_client: MlflowClient):
     assert spec.model_uri == "models:/rikai-test/{}".format(mv.version)
 
 
-@pytest.mark.timeout(600)
+@pytest.mark.timeout(200)
 def test_mlflow_model_from_model_version(
     spark: SparkSession, mlflow_client: MlflowClient
 ):
@@ -58,7 +58,7 @@ def test_mlflow_model_from_model_version(
     check_ml_predict(spark, "resnet_m_buzz")
 
 
-@pytest.mark.timeout(600)
+@pytest.mark.timeout(200)
 def test_mlflow_model_without_custom_logger(
     spark: SparkSession, mlflow_client: MlflowClient
 ):

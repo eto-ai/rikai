@@ -28,7 +28,7 @@ import rikai
 from rikai.spark.utils import get_default_jar_version, init_spark_session
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="class")
 def mlflow_client_http(
     tmp_path_factory, resnet_model_uri: str
 ) -> MlflowClient:
@@ -108,16 +108,14 @@ def mlflow_client_http(
     return mlflow.tracking.MlflowClient(tracking_uri)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="class")
 def spark_with_mlflow(mlflow_client_http) -> SparkSession:
     mlflow_tracking_uri = mlflow.get_tracking_uri()
     print(f"Spark with mlflow tracking uri: ${mlflow_tracking_uri}")
+
+    # Avoid reused session polluting configs
     active_session = SparkSession.getActiveSession()
-    if (
-        active_session
-        and active_session.conf.get("rikai.sql.ml.catalog.impl", None)
-        != "ai.eto.rikai.sql.model.mlflow.MlflowCatalog"
-    ):
+    if active_session:
         active_session.stop()
 
     rikai_version = get_default_jar_version(use_snapshot=True)

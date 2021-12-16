@@ -202,7 +202,7 @@ def test_crops(spark: SparkSession, tmp_path: Path):
     assert np.array_equal(patches[2].to_numpy(), data[20:40, 20:40, :])
 
 
-@pytest.mark.timeout(10)
+@pytest.mark.timeout(30)
 @pytest.mark.webtest
 def test_video_to_images(
     spark: SparkSession, tmp_path: Path, asset_path: Path

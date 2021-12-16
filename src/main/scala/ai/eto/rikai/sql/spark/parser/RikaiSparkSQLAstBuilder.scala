@@ -24,7 +24,8 @@ import org.apache.spark.sql.catalyst.analysis.UnresolvedAttribute
 import org.apache.spark.sql.catalyst.expressions.{Expression, Literal}
 import org.apache.spark.sql.catalyst.parser.ParserUtils.withOrigin
 import org.apache.spark.sql.catalyst.parser.SqlBaseParser.FunctionCallContext
-import org.apache.spark.sql.catalyst.parser.{AstBuilder, ParseException}
+import org.apache.spark.sql.catalyst.parser.ParseException
+import org.apache.spark.sql.execution.SparkSqlAstBuilder
 
 import java.util.Locale
 import scala.collection.JavaConverters.asScalaBufferConverter
@@ -33,7 +34,7 @@ import scala.collection.JavaConverters.asScalaBufferConverter
   * Spark SQL Select/Where/OrderBy clauses.
   */
 private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
-    extends AstBuilder {
+    extends SparkSqlAstBuilder {
 
   val catalog: Catalog =
     Catalog.getOrCreate(session.sparkContext.getConf)

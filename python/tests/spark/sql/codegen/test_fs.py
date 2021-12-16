@@ -189,13 +189,13 @@ def test_construct_spec_with_options(tmp_path):
     assert "s3://bucket/to/model.pt" == spec.model_uri
 
 
-@pytest.mark.timeout(60)
+@pytest.mark.timeout(120)
 def test_yaml_model(spark: SparkSession, resnet_spec: str):
     spark.sql("CREATE MODEL resnet_m USING 'file://{}'".format(resnet_spec))
     check_ml_predict(spark, "resnet_m")
 
 
-@pytest.mark.timeout(60)
+@pytest.mark.timeout(120)
 def test_count_objects_model(spark: SparkSession, count_objects_spec: str):
     spark.sql(
         "CREATE MODEL count_objects USING 'file://{}'".format(

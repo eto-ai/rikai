@@ -129,6 +129,7 @@ def spark(mlflow_tracking_uri: str) -> SparkSession:
     # Avoid reused session polluting configs
     active_session = SparkSession.getActiveSession()
     if active_session:
+        print("active session stopped, will restart")
         active_session.stop()
 
     return init_spark_session(
@@ -171,6 +172,10 @@ def spark(mlflow_tracking_uri: str) -> SparkSession:
                 (
                     "rikai.sql.ml.registry.mlflow.tracking_uri",
                     mlflow_tracking_uri,
+                ),
+                (
+                    "rikai.sql.ml.catalog.impl",
+                    "ai.eto.rikai.sql.model.SimpleCatalog",
                 ),
             ]
         )

@@ -50,4 +50,9 @@ class RikaiSparkSQLParserTest extends AnyFunSuite with SparkTestSession {
     val expected = df.withColumn("score", plus_two(col("id")))
     assertEqual(scores, expected)
   }
+
+  test("Test parse explain select 1") {
+    val df = spark.sql("explain select 1")
+    assert(df.count() === 1)
+  }
 }

@@ -34,7 +34,7 @@ import rikai
 from rikai.spark.utils import get_default_jar_version, init_spark_session
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="module")
 def mlflow_client_with_tracking_uri(
     tmp_path_factory, resnet_model_uri: str
 ) -> (MlflowClient, str):
@@ -111,12 +111,12 @@ def mlflow_client_with_tracking_uri(
     return mlflow.tracking.MlflowClient(tracking_uri), tracking_uri
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="module")
 def mlflow_client(mlflow_client_with_tracking_uri):
     return mlflow_client_with_tracking_uri[0]
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="module")
 def mlflow_tracking_uri(mlflow_client_with_tracking_uri):
     return mlflow_client_with_tracking_uri[1]
 

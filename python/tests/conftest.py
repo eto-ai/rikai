@@ -121,15 +121,15 @@ def mlflow_tracking_uri(mlflow_client_with_tracking_uri):
     return mlflow_client_with_tracking_uri[1]
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="module")
 def spark(mlflow_tracking_uri: str) -> SparkSession:
     print(f"ml flow tracking uri for spark: ${mlflow_tracking_uri}")
     rikai_version = get_default_jar_version(use_snapshot=True)
     hadoop_version = "3.2.0"  # TODO(lei): get hadoop version
-    # # Avoid reused session polluting configs
-    # active_session = SparkSession.getActiveSession()
-    # if active_session:
-    #     active_session.stop()
+    # Avoid reused session polluting configs
+    active_session = SparkSession.getActiveSession()
+    if active_session:
+        active_session.stop()
 
     return init_spark_session(
         dict(

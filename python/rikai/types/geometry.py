@@ -466,10 +466,35 @@ class Mask(ToNumpy, ToDict):
     mask_type: :py:class:`Mask.Type`
         The type of the mask.
 
+    Examples
+    --------
+
+    .. code-block:: python
+
+        from pycocotools.coco import COCO
+        from rikai.types import Mask
+
+        coco = COCO("instance_train2017.json")
+        ann = coco.loadAnns(ann_id)
+        image = coco.loadImgs(ann["image_id"])
+        if ann["iscrowed"] == 0:
+            mask = Mask.from_polygon(
+                ann["segmentation"],
+                height=image["height"],
+                width=image["width],
+            )
+        else:
+            mask = Mask.from_coco_rle(
+                ann["segmentation"],
+                height=image["height"],
+                width=image["width],
+            )
+
     """
 
     class Type(Enum):
         """Mask type."""
+
         MASK = 0
         POLYGON = 1
         RLE = 2
@@ -496,16 +521,50 @@ class Mask(ToNumpy, ToDict):
 
     @staticmethod
     def from_rle(data: list[int], height: int, width: int) -> Mask:
+        """Convert a (row-based) RLE mask (segmentation) into Mask
+
+        Parameters
+        ----------
+        data: list[int]
+            the RLE data
+        height: int
+            The height of the image which the mask applies to.
+        width: int
+            The width of the image which the mask applies to.
+        """
+
         return Mask(data, height=height, width=width, mask_type=Mask.Type.RLE)
 
     @staticmethod
     def from_coco_rle(data: list[int], height: int, width: int) -> Mask:
+        """Convert a COCO RLE mask (segmentation) into Mask
+
+        Parameters
+        ----------
+        data: list[int]
+            the RLE data
+        height: int
+            The height of the image which the mask applies to.
+        width: int
+            The width of the image which the mask applies to.
+        """
         return Mask(
             data, height=height, width=width, mask_type=Mask.Type.COCO_RLE
         )
 
     @staticmethod
     def from_polygon(data: list[list[float]], height: int, width: int) -> Mask:
+        """Build mask from a Polygon
+
+        Parameters
+        ----------
+        data: list[list[float]]
+            Multiple Polygon segmentation data. i.e., ``[[x0, y0, x1, y1, ...], [x0, y0, x1, y1, ...]])``
+        height: int
+            The height of the image which the mask applies to.
+        width: int
+            The width of the image which the mask applies to.
+        """
         return Mask(
             data, height=height, width=width, mask_type=Mask.Type.POLYGON
         )
@@ -528,8 +587,7 @@ class Mask(ToNumpy, ToDict):
             return np.array(im)
 
     def to_mask(self) -> np.ndarray:
-        """Convert this mask to a numpy array.
-        """
+        """Convert this mask to a numpy array."""
         if self.type == Mask.Type.MASK:
             return self.data
         elif self.type == Mask.Type.POLYGON:

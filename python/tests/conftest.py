@@ -45,15 +45,11 @@ def mlflow_client_with_tracking_uri(
     experiment_id = mlflow.create_experiment("rikai-test", str(tmp_path))
     # simpliest
     with mlflow.start_run(experiment_id=experiment_id):
+        from rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn import OUTPUT_SCHEMA
         mlflow.log_param("optimizer", "Adam")
         # Fake training loop
         model = torch.load(resnet_model_uri)
         artifact_path = "model"
-
-        schema = (
-            "STRUCT<boxes:ARRAY<ARRAY<float>>,"
-            "scores:ARRAY<float>,label_ids:ARRAY<int>>"
-        )
         pre_processing = (
             "rikai.contrib.torch.transforms."
             "fasterrcnn_resnet50_fpn.pre_processing"
@@ -65,7 +61,7 @@ def mlflow_client_with_tracking_uri(
         rikai.mlflow.pytorch.log_model(
             model,  # same as vanilla mlflow
             artifact_path,  # same as vanilla mlflow
-            schema,
+            OUTPUT_SCHEMA,
             pre_processing,
             post_processing,
             registered_model_name="rikai-test",  # same as vanilla mlflow
@@ -79,7 +75,7 @@ def mlflow_client_with_tracking_uri(
         mlflow.set_tags(
             {
                 "rikai.model.flavor": "pytorch",
-                "rikai.output.schema": schema,
+                "rikai.output.schema": OUTPUT_SCHEMA,
                 "rikai.transforms.pre": pre_processing,
                 "rikai.transforms.post": post_processing,
             }
@@ -103,7 +99,7 @@ def mlflow_client_with_tracking_uri(
         mlflow.set_tags(
             {
                 "rikai.model.flavor": "pytorch",
-                "rikai.output.schema": schema,
+                "rikai.output.schema": OUTPUT_SCHEMA,
                 "rikai.transforms.pre": "wrong_pre",
                 "rikai.transforms.post": "wrong_post",
             }

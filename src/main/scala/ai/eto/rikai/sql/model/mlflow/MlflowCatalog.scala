@@ -16,10 +16,7 @@
 
 package ai.eto.rikai.sql.model.mlflow
 
-import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.{
-  MODEL_FLAVOR_KEY,
-  TRACKING_URI_KEY
-}
+import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.{MODEL_FLAVOR_KEY, TRACKING_URI_KEY}
 import ai.eto.rikai.sql.model.{Catalog, Model, SparkUDFModel}
 import org.apache.spark.SparkConf
 
@@ -50,35 +47,31 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
   override def listModels(): Seq[Model] = {
     val response = mlflowClient.searchRegisteredModels()
     response.getRegisteredModelsList.asScala
-      .map(model => {
-        model.getLatestVersionsCount match {
-          case 0 =>
-            None
-          case _ =>
-            val latestVersion = model.getLatestVersions(0)
-            val tagsMap = latestVersion.getTagsList.asScala
-              .map(t => t.getKey -> t.getValue)
-              .toMap
-            val name = model.getName
-            if (
-              true
-//              TODO enable this after https://github.com/eto-ai/rikai/pull/351 finished
-//              && tagsMap.contains(ArtifactPathKey)
-            ) {
-              val flavor = tagsMap.getOrElse(MODEL_FLAVOR_KEY, "")
-              Some(
-                new SparkUDFModel(
-                  name,
-                  s"mlflow://$name",
-                  "<anonymous>",
-                  flavor
-                )
+      .collect {
+        case model if model.getLatestVersionsCount != 0 =>
+          val latestVersion = model.getLatestVersions(0)
+          val tagsMap = latestVersion.getTagsList.asScala
+            .map(t => t.getKey -> t.getValue)
+            .toMap
+          val name = model.getName
+          if (
+            true
+          //              TODO enable this after https://github.com/eto-ai/rikai/pull/351 finished
+          //              && tagsMap.contains(ArtifactPathKey)
+          ) {
+            val flavor = tagsMap.getOrElse(MODEL_FLAVOR_KEY, "")
+            Some(
+              new SparkUDFModel(
+                name,
+                s"mlflow://$name",
+                "<anonymous>",
+                flavor
               )
-            } else {
-              None
-            }
-        }
-      })
+            )
+          } else {
+            None
+          }
+      }
       .filter(m => m.isDefined)
       .map(m => m.get)
   }

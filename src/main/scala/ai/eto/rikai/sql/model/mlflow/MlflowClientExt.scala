@@ -18,12 +18,8 @@ package ai.eto.rikai.sql.model.mlflow
 
 import com.google.protobuf.InvalidProtocolBufferException
 import com.typesafe.scalalogging.LazyLogging
-import org.mlflow.api.proto.ModelRegistry.{
-  CreateRegisteredModel,
-  DeleteRegisteredModel,
-  RegisteredModelTag,
-  SearchRegisteredModels
-}
+import org.mlflow.api.proto.ModelRegistry
+import org.mlflow.api.proto.ModelRegistry.{CreateRegisteredModel, DeleteRegisteredModel, RegisteredModelTag, SearchRegisteredModels}
 import org.mlflow.tracking.{MlflowClientException, RikaiMlflowClient}
 import org.mlflow_project.google.protobuf.Message.Builder
 import org.mlflow_project.google.protobuf.MessageOrBuilder
@@ -45,7 +41,7 @@ private[mlflow] class MlflowClientExt(val trackingUri: String)
     builder.build()
   }
 
-  private[mlflow] def getModel(name: String) = {
+  private[mlflow] def getModel(name: String): Option[ModelRegistry.ModelVersion] = {
     val list = client
       .getLatestVersions(
         name,

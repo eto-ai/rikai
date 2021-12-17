@@ -221,7 +221,7 @@ class MlflowRegistry(Registry):
         name = raw_spec.getName()
         uri = raw_spec.getUri()
         logger.info(f"Resolving model {name} from {uri}")
-        logger.info(f"tracking uri: {self.mlflow_tracking_uri}")
+        logger.info(f"Using tracking uri: {self.mlflow_tracking_uri}")
         parsed = urlparse(uri)
         if parsed.netloc:
             raise ValueError(

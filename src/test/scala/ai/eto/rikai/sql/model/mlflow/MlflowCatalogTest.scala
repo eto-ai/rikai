@@ -16,7 +16,7 @@
 
 package ai.eto.rikai.sql.model.mlflow
 
-import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.ArtifactPathKey
+import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.ARTIFACT_PATH_KEY
 import org.mlflow.api.proto.ModelRegistry.{CreateModelVersion, ModelVersionTag}
 import org.mlflow.api.proto.Service.RunInfo
 import org.scalatest.BeforeAndAfterEach
@@ -56,7 +56,7 @@ class MlflowCatalogTest
     builder.addTags(
       ModelVersionTag
         .newBuilder()
-        .setKey(ArtifactPathKey)
+        .setKey(ARTIFACT_PATH_KEY)
         .setValue("fake_uri")
         .build()
     )

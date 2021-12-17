@@ -17,8 +17,8 @@
 package ai.eto.rikai.sql.model.mlflow
 
 import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.{
-  ModelFlavorKey,
-  TrackingUriKey
+  MODEL_FLAVOR_KEY,
+  TRACKING_URI_KEY
 }
 import ai.eto.rikai.sql.model.{Catalog, Model, SparkUDFModel}
 import org.apache.spark.SparkConf
@@ -29,14 +29,14 @@ import scala.collection.JavaConverters._
   */
 class MlflowCatalog(val conf: SparkConf) extends Catalog {
 
-  private val mlflowClient = new MlflowClientExt(conf.get(TrackingUriKey))
+  private val mlflowClient = new MlflowClientExt(conf.get(TRACKING_URI_KEY))
 
   /** Create a ML Model that can be used in SQL ML in the current database.
     */
   override def createModel(model: Model): Model = {
     val name = mlflowClient.createModel(
       model.name,
-      Map() ++ model.flavor.map(ModelFlavorKey -> _)
+      Map() ++ model.flavor.map(MODEL_FLAVOR_KEY -> _)
     )
     new SparkUDFModel(
       name,
@@ -65,7 +65,7 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
 //              TODO enable this after https://github.com/eto-ai/rikai/pull/351 finished
 //              && tagsMap.contains(ArtifactPathKey)
             ) {
-              val flavor = tagsMap.getOrElse(ModelFlavorKey, "")
+              val flavor = tagsMap.getOrElse(MODEL_FLAVOR_KEY, "")
               Some(
                 new SparkUDFModel(
                   name,
@@ -105,7 +105,7 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
         name,
         s"mlflow://$name",
         "<anonymous>",
-        tagsMap.get(ModelFlavorKey)
+        tagsMap.get(MODEL_FLAVOR_KEY)
       )
     }
   }
@@ -129,14 +129,14 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
 
 object MlflowCatalog {
 
-  val TrackingUriKey = "rikai.sql.ml.registry.mlflow.tracking_uri"
+  val TRACKING_URI_KEY = "rikai.sql.ml.registry.mlflow.tracking_uri"
 
-  val ArtifactPathKey = "rikai.model.artifact_path"
-  val ModelFlavorKey = "rikai.model.flavor"
-  val OutputSchemaKey = "rikai.output.schema"
-  val SpecVersionKey = "rikai.spec.version"
-  val PreProcessingKey = "rikai.transforms.pre"
-  val PostProcessingKey = "rikai.transforms.post"
+  val ARTIFACT_PATH_KEY = "rikai.model.artifact_path"
+  val MODEL_FLAVOR_KEY = "rikai.model.flavor"
+  val OUTPUT_SCHEMA_KEY = "rikai.output.schema"
+  val SPEC_VERSION_KEY = "rikai.spec.version"
+  val PRE_PROCESSING_KEY = "rikai.transforms.pre"
+  val POST_PROCESSING_KEY = "rikai.transforms.post"
 
   val SQL_ML_CATALOG_IMPL_MLFLOW = "ai.eto.rikai.sql.model.mlflow.MlflowCatalog"
 }

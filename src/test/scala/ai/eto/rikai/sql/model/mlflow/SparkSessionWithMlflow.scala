@@ -40,7 +40,7 @@ trait SparkSessionWithMlflow extends LazyLogging with BeforeAndAfterAll {
         MlflowCatalog.SQL_ML_CATALOG_IMPL_MLFLOW
       )
       .config(
-        MlflowCatalog.TrackingUriKey, {
+        MlflowCatalog.TRACKING_URI_KEY, {
           testMlflowTrackingUri
         }
       )

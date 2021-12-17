@@ -16,8 +16,8 @@
 
 package ai.eto.rikai.sql.model
 
+import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.SparkConf
-import org.slf4j.LoggerFactory
 
 /** Catalog for SQL ML.
   */
@@ -52,8 +52,7 @@ trait Catalog {
   def dropModel(name: String): Boolean
 }
 
-object Catalog {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+object Catalog extends LazyLogging {
 
   val SQL_ML_CATALOG_IMPL_KEY = "rikai.sql.ml.catalog.impl"
   val SQL_ML_CATALOG_IMPL_DEFAULT = "ai.eto.rikai.sql.model.SimpleCatalog"

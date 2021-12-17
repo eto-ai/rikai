@@ -16,37 +16,12 @@
 
 package ai.eto.rikai.sql.model.mlflow
 
-import ai.eto.rikai.sql.model.{
-  Model,
-  ModelNotFoundException,
-  ModelSpec,
-  Registry
-}
-import ai.eto.rikai.sql.spark.Python
-import com.typesafe.scalalogging.LazyLogging
+import ai.eto.rikai.sql.model.PyImplRegistry
 
 /** MLflow-based Model [[Registry]].
   */
-class MlflowRegistry(val conf: Map[String, String])
-    extends Registry
-    with LazyLogging {
+class MlflowRegistry(val conf: Map[String, String]) extends PyImplRegistry {
 
-  private val pyClass: String =
+  override def pyClass: String =
     "rikai.spark.sql.codegen.mlflow_registry.MlflowRegistry"
-
-  /** Resolve a [[Model]] from the specific URI.
-    *
-    * @param spec Model Spec to send to python.
-    *
-    * @throws ModelNotFoundException if the model does not exist on the registry.
-    *
-    * @return [[Model]] if found.
-    */
-  @throws[ModelNotFoundException]
-  override def resolve(
-      spec: ModelSpec
-  ): Model = {
-    logger.info(s"Resolving ML model from ${spec.uri}")
-    Python.resolve(pyClass, spec)
-  }
 }

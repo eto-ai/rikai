@@ -28,12 +28,7 @@ from mlflow.tracking import MlflowClient
 from pyspark.sql import SparkSession
 
 from rikai.logging import logger
-from rikai.spark.sql.codegen.base import (
-    ModelSpec,
-    register_udf,
-    Registry,
-    udf_from_spec,
-)
+from rikai.spark.sql.codegen.base import codegen_from_spec, ModelSpec, Registry
 from rikai.spark.sql.codegen.mlflow_logger import (
     CONF_MLFLOW_ARTIFACT_PATH,
     CONF_MLFLOW_MODEL_FLAVOR,
@@ -167,29 +162,6 @@ def _get_model_prop(
             ).format(conf_name, run_tags, extra_options)
         )
     return value
-
-
-def codegen_from_spec(
-    spark: SparkSession, spec: dict, name: Optional[str] = None
-) -> str:
-    """Generate code from an MLFlow runid
-
-    Parameters
-    ----------
-    spark : SparkSession
-        A live spark session
-    spec : dict
-        the model spec info dict
-    name : str
-        The name of the model in the catalog
-
-    Returns
-    -------
-    str
-        Spark UDF function name for the generated data.
-    """
-    udf = udf_from_spec(spec)
-    return register_udf(spark, udf, name)
 
 
 class MlflowRegistry(Registry):

@@ -45,7 +45,10 @@ def mlflow_client_with_tracking_uri(
     experiment_id = mlflow.create_experiment("rikai-test", str(tmp_path))
     # simpliest
     with mlflow.start_run(experiment_id=experiment_id):
-        from rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn import OUTPUT_SCHEMA
+        from rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn import (
+            OUTPUT_SCHEMA,
+        )
+
         mlflow.log_param("optimizer", "Adam")
         # Fake training loop
         model = torch.load(resnet_model_uri)

@@ -446,9 +446,30 @@ class Box3d(ToNumpy, ToDict):
 
 
 class Mask(ToNumpy, ToDict):
-    """2-d Mask"""
+    """2-d Mask over an image
+
+    This 2D mask can be built from:
+
+    - A binary-valued (0 or 1) 2D-numpy matrix (:py:class:`Mask.Type.MASK`).
+    - A Run Length Encoded (RLE) data. It supports both row-based RLE (:py:class:`Mask.Type.RLE`)
+      or column-based RLE (:py:class:`Mask.Type.COCO_RLE`) which is used in the Coco datset.
+    - A Polygon ``[x0, y0, x1, y1, ..., xn, yn]``
+
+    Parameters
+    ----------
+    data: list or :py:class:`np.ndarray`
+        The mask data. Can be a numpy array or a list.
+    height: int, optional
+        The height of the image this mask applies to.
+    width: int, optional
+        The width of the image this mask applies to.
+    mask_type: :py:class:`Mask.Type`
+        The type of the mask.
+
+    """
 
     class Type(Enum):
+        """Mask type."""
         MASK = 0
         POLYGON = 1
         RLE = 2
@@ -507,6 +528,8 @@ class Mask(ToNumpy, ToDict):
             return np.array(im)
 
     def to_mask(self) -> np.ndarray:
+        """Convert this mask to a numpy array.
+        """
         if self.type == Mask.Type.MASK:
             return self.data
         elif self.type == Mask.Type.POLYGON:

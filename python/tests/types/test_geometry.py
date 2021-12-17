@@ -93,3 +93,7 @@ def test_to_dict():
         "heading": b3.heading,
     }
     assert b3.to_dict() == exp
+
+
+def test_mask_from_rle():
+    pass

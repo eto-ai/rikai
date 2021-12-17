@@ -58,7 +58,7 @@ def decode(
     n = np.sum(rle)
     arr = np.full(n, 0, dtype=np.uint8)
     for length in rle:
-        arr[start_idx : start_idx + length] = val
+        arr[start_idx: start_idx + length] = val  # fmt:skip
         start_idx += length
         val = 1 - val
 

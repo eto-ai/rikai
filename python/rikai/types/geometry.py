@@ -451,8 +451,9 @@ class Mask(ToNumpy, ToDict):
     This 2D mask can be built from:
 
     - A binary-valued (0 or 1) 2D-numpy matrix (:py:class:`Mask.Type.MASK`).
-    - A Run Length Encoded (RLE) data. It supports both row-based RLE (:py:class:`Mask.Type.RLE`)
-      or column-based RLE (:py:class:`Mask.Type.COCO_RLE`) which is used in the Coco datset.
+    - A Run Length Encoded (RLE) data. It supports both row-based RLE
+      (:py:class:`Mask.Type.RLE`) or column-based RLE
+      (:py:class:`Mask.Type.COCO_RLE`) which is used in the Coco dataset.
     - A Polygon ``[x0, y0, x1, y1, ..., xn, yn]``
 
     Parameters
@@ -559,7 +560,8 @@ class Mask(ToNumpy, ToDict):
         Parameters
         ----------
         data: list[list[float]]
-            Multiple Polygon segmentation data. i.e., ``[[x0, y0, x1, y1, ...], [x0, y0, x1, y1, ...]])``
+            Multiple Polygon segmentation data. i.e.,
+            ``[[x0, y0, x1, y1, ...], [x0, y0, x1, y1, ...]])``
         height: int
             The height of the image which the mask applies to.
         width: int
@@ -571,6 +573,13 @@ class Mask(ToNumpy, ToDict):
 
     @staticmethod
     def from_mask(mask: np.ndarray) -> Mask:
+        """Build mask from a numpy array.
+
+        Parameters
+        ----------
+        mask : np.ndarray
+            A binary-valued (0/1) numpy array
+        """
         assert len(mask.shape) > 1, "Must have more than 2-dimensions"
         return Mask(data=mask, mask_type=Mask.Type.MASK)
 

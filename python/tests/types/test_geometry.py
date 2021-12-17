@@ -17,7 +17,7 @@ from typing import Sequence
 import numpy as np
 from PIL import Image, ImageDraw
 
-from rikai.types import Box2d, Box3d, Point
+from rikai.types import Box2d, Box3d, Mask, Point
 
 
 def test_scale_box2d():
@@ -96,4 +96,13 @@ def test_to_dict():
 
 
 def test_mask_from_rle():
-    pass
+    mask = np.zeros((100, 100))
+    assert np.array_equal(
+        mask, Mask.from_rle([100 * 100], height=100, width=100).to_mask()
+    )
+
+    full_mask = np.ones((100, 100))
+    assert np.array_equal(
+        full_mask,
+        Mask.from_rle([0, 100 * 100], height=100, width=100).to_mask(),
+    )

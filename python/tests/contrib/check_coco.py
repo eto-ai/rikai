@@ -78,7 +78,6 @@ def main():
                 height=height,
             )
 
-        # print(image_id, ann, original_mask.to_mask().shape, rikai_mask.to_mask().shape)
         iou = original_mask.iou(rikai_mask)
         accuracy_record.append(
             {

@@ -25,7 +25,12 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 from rikai.mixin import ToDict, ToNumpy
-from rikai.spark.types.geometry import Box2dType, Box3dType, PointType, MaskType
+from rikai.spark.types.geometry import (
+    Box2dType,
+    Box3dType,
+    PointType,
+    MaskType,
+)
 from rikai.types import rle
 
 __all__ = ["Point", "Box3d", "Box2d", "Mask"]
@@ -587,6 +592,15 @@ class Mask(ToNumpy, ToDict):
 
     def __repr__(self):
         return f"Mask(type={self.type}, data=...)"
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, Mask)
+            and self.type == other.type
+            and self.height == other.height
+            and self.width == other.width
+            and np.array_equal(self.data, other.data)
+        )
 
     def _polygon_to_mask(self) -> np.ndarray:
         arr = np.zeros((self.height, self.width), dtype=np.uint8)

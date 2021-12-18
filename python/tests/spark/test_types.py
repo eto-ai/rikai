@@ -56,8 +56,11 @@ def test_box3d(spark, tmpdir):
 
 
 def test_mask(spark, tmpdir):
-    df = spark.createDataFrame([Row(mask=Mask.from_rle([1, 10, 10], height=3, width=7))])
+    df = spark.createDataFrame(
+        [Row(mask=Mask.from_rle([1, 10, 10], height=3, width=7))]
+    )
     _check_roundtrip(spark, df, tmpdir)
+
 
 def test_embedded_images(spark, tmpdir):
     df = spark.createDataFrame([Row(Image(secrets.token_bytes(128)))])

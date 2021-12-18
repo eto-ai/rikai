@@ -171,7 +171,7 @@ class MaskType(UserDefinedType):
                     ArrayType(ArrayType(FloatType(), False), False),
                     True,
                 ),
-                StructField("mask", NDArrayType(), True),
+                StructField("mask", NDArrayType().sqlType(), True),
                 StructField("rle", ArrayType(IntegerType(), False), True),
             ]
         )

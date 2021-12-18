@@ -486,7 +486,7 @@ class Mask(ToNumpy, ToDict):
             )
         else:
             mask = Mask.from_coco_rle(
-                ann["segmentation"],
+                ann["segmentation"]["counts"],
                 height=image["height"],
                 width=image["width],
             )

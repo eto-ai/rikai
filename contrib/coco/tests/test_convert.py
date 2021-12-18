@@ -19,7 +19,8 @@ def test_covert_segmentation():
                 mask = Mask.from_polygon(
                     ann["segmentation"], height=height, width=width
                 )
-                #
+                # TODO: currently, it has disparity of the conversion between
+                # polygon to mask between coco and rikai (PIL based)
             else:
                 mask = Mask.from_coco_rle(
                     ann["segmentation"]["counts"], height=height, width=width

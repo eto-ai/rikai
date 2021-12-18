@@ -16,8 +16,8 @@
 
 from pathlib import Path
 
-from pycocotools.coco import COCO
 import numpy as np
+from pycocotools.coco import COCO
 
 from rikai.types import Mask
 

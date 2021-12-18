@@ -28,8 +28,8 @@ from rikai.mixin import ToDict, ToNumpy
 from rikai.spark.types.geometry import (
     Box2dType,
     Box3dType,
-    PointType,
     MaskType,
+    PointType,
 )
 from rikai.types import rle
 

@@ -17,7 +17,10 @@
 package org.apache.spark.sql.rikai
 
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{GenericInternalRow, UnsafeArrayData}
+import org.apache.spark.sql.catalyst.expressions.{
+  GenericInternalRow,
+  UnsafeArrayData
+}
 import org.apache.spark.sql.types._
 
 object MaskTypeEnum extends Enumeration {

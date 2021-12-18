@@ -25,7 +25,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 from rikai.mixin import ToDict, ToNumpy
-from rikai.spark.types.geometry import Box2dType, Box3dType, PointType
+from rikai.spark.types.geometry import Box2dType, Box3dType, PointType, MaskType
 from rikai.types import rle
 
 __all__ = ["Point", "Box3d", "Box2d", "Mask"]
@@ -492,6 +492,8 @@ class Mask(ToNumpy, ToDict):
             )
 
     """
+
+    __UDT__ = MaskType()
 
     class Type(Enum):
         """Mask type."""

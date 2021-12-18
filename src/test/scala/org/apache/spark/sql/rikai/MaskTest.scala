@@ -19,13 +19,24 @@ package org.apache.spark.sql.rikai
 import ai.eto.rikai.SparkTestSession
 import org.scalatest.funsuite.AnyFunSuite
 
+import java.io.File
+import java.nio.file.Files
+
 class MaskTest extends AnyFunSuite with SparkTestSession {
 
   import spark.implicits._
 
   test("test create mask data") {
+    val testDir =
+      new File(Files.createTempDirectory("rikai").toFile, "dataset")
+
     val df = Seq((1, Mask.fromRLE(Array(1, 2, 3), 10, 5))).toDF("id", "segment")
 
+    df.write.format("rikai").save(testDir.toString)
+
+    val actualDf = spark.read.load(testDir.toString)
+    assert(df.count() == actualDf.count())
+    assert(df.exceptAll(actualDf).isEmpty)
     df.show()
   }
 }

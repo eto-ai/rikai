@@ -58,6 +58,7 @@ libraryDependencies ++= {
   val snappyVersion = "1.1.8.4" // Support Apple Silicon
   val scalatestVersion = "3.2.0"
   val circeVersion = "0.12.3"
+  val mlflowVersion = "1.21.0"
 
   Seq(
     "org.apache.spark" %% "spark-sql" % sparkVersion % "provided",
@@ -68,7 +69,8 @@ libraryDependencies ++= {
     "org.scalatest" %% "scalatest-funsuite" % scalatestVersion % "test",
     "io.circe" %% "circe-core" % circeVersion,
     "io.circe" %% "circe-generic" % circeVersion,
-    "io.circe" %% "circe-parser" % circeVersion
+    "io.circe" %% "circe-parser" % circeVersion,
+    "org.mlflow" % "mlflow-client" % mlflowVersion
   )
 }
 

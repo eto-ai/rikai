@@ -16,6 +16,7 @@
 
 package ai.eto.rikai.sql.model
 
+import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.SparkConf
 
 /** Catalog for SQL ML.
@@ -51,7 +52,7 @@ trait Catalog {
   def dropModel(name: String): Boolean
 }
 
-object Catalog {
+object Catalog extends LazyLogging {
 
   val SQL_ML_CATALOG_IMPL_KEY = "rikai.sql.ml.catalog.impl"
   val SQL_ML_CATALOG_IMPL_DEFAULT = "ai.eto.rikai.sql.model.SimpleCatalog"
@@ -66,7 +67,7 @@ object Catalog {
   def getOrCreate(conf: SparkConf): Catalog = {
     val className =
       conf.get(SQL_ML_CATALOG_IMPL_KEY, SQL_ML_CATALOG_IMPL_DEFAULT)
-    if (catalog.isEmpty) {
+    if (catalog.isEmpty || catalog.get.getClass.getName != className) {
       catalog = Some(
         Class
           .forName(className)
@@ -75,6 +76,7 @@ object Catalog {
           .asInstanceOf[Catalog]
       )
     }
+    logger.debug("catalog get {}", catalog.get.getClass)
     catalog.get
   }
 }

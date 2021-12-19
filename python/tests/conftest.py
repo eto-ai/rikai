@@ -21,20 +21,115 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 # Third Party
+import mlflow
 import pytest
 import torch
 import torchvision
+from mlflow.tracking import MlflowClient
 from pyspark.sql import SparkSession
 
+import rikai
+
 # Rikai
-from rikai.spark.sql import init
 from rikai.spark.utils import get_default_jar_version, init_spark_session
 
 
-@pytest.fixture(scope="session")
-def spark() -> SparkSession:
+@pytest.fixture(scope="module")
+def mlflow_client_with_tracking_uri(
+    tmp_path_factory, resnet_model_uri: str
+) -> (MlflowClient, str):
+    tmp_path = tmp_path_factory.mktemp("mlflow")
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
+    mlflow.set_tracking_uri(tracking_uri)
+    experiment_id = mlflow.create_experiment("rikai-test", str(tmp_path))
+    # simpliest
+    with mlflow.start_run(experiment_id=experiment_id):
+        from rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn import (
+            OUTPUT_SCHEMA,
+        )
+
+        mlflow.log_param("optimizer", "Adam")
+        # Fake training loop
+        model = torch.load(resnet_model_uri)
+        artifact_path = "model"
+        pre_processing = (
+            "rikai.contrib.torch.transforms."
+            "fasterrcnn_resnet50_fpn.pre_processing"
+        )
+        post_processing = (
+            "rikai.contrib.torch.transforms."
+            "fasterrcnn_resnet50_fpn.post_processing"
+        )
+        rikai.mlflow.pytorch.log_model(
+            model,  # same as vanilla mlflow
+            artifact_path,  # same as vanilla mlflow
+            OUTPUT_SCHEMA,
+            pre_processing,
+            post_processing,
+            registered_model_name="rikai-test",  # same as vanilla mlflow
+        )
+
+    # vanilla mlflow
+    with mlflow.start_run():
+        mlflow.pytorch.log_model(
+            model, artifact_path, registered_model_name="vanilla-mlflow"
+        )
+        mlflow.set_tags(
+            {
+                "rikai.model.flavor": "pytorch",
+                "rikai.output.schema": OUTPUT_SCHEMA,
+                "rikai.transforms.pre": pre_processing,
+                "rikai.transforms.post": post_processing,
+            }
+        )
+
+    # vanilla mlflow no tags
+    with mlflow.start_run():
+        mlflow.pytorch.log_model(
+            model,
+            artifact_path,
+            registered_model_name="vanilla-mlflow-no-tags",
+        )
+
+    # vanilla mlflow wrong tags
+    with mlflow.start_run():
+        mlflow.pytorch.log_model(
+            model,
+            artifact_path,
+            registered_model_name="vanilla-mlflow-wrong-tags",
+        )
+        mlflow.set_tags(
+            {
+                "rikai.model.flavor": "pytorch",
+                "rikai.output.schema": OUTPUT_SCHEMA,
+                "rikai.transforms.pre": "wrong_pre",
+                "rikai.transforms.post": "wrong_post",
+            }
+        )
+    return mlflow.tracking.MlflowClient(tracking_uri), tracking_uri
+
+
+@pytest.fixture(scope="module")
+def mlflow_client(mlflow_client_with_tracking_uri):
+    return mlflow_client_with_tracking_uri[0]
+
+
+@pytest.fixture(scope="module")
+def mlflow_tracking_uri(mlflow_client_with_tracking_uri):
+    return mlflow_client_with_tracking_uri[1]
+
+
+@pytest.fixture(scope="module")
+def spark(mlflow_tracking_uri: str) -> SparkSession:
+    print(f"ml flow tracking uri for spark: ${mlflow_tracking_uri}")
     rikai_version = get_default_jar_version(use_snapshot=True)
     hadoop_version = "3.2.0"  # TODO(lei): get hadoop version
+    # Avoid reused session polluting configs
+    active_session = SparkSession.getActiveSession()
+    if active_session:
+        print("active session stopped, will restart")
+        active_session.stop()
 
     return init_spark_session(
         dict(
@@ -73,6 +168,14 @@ def spark() -> SparkSession:
                 ),
                 ("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem"),
                 ("spark.hadoop.fs.s3a.access.key", os.environ.get("AWS")),
+                (
+                    "rikai.sql.ml.registry.mlflow.tracking_uri",
+                    mlflow_tracking_uri,
+                ),
+                (
+                    "rikai.sql.ml.catalog.impl",
+                    "ai.eto.rikai.sql.model.SimpleCatalog",
+                ),
             ]
         )
     )

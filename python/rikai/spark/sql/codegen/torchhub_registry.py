@@ -67,7 +67,7 @@ class TorchHubRegistry(Registry):
                 "try URI with 1 slash instead"
             )
         if not parsed.scheme:
-            raise ValueError("Scheme must be mlflow. How did you get here?")
+            raise ValueError("Scheme must be torchhub. How did you get here?")
         parts = parsed.path.strip("/").split("/")
         repo_or_dir = "/".join(parts[0:-1])
         model = parts[-1]

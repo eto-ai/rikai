@@ -19,39 +19,41 @@
 
 import argparse
 import json
-from itertools import islice
 
 from pycocotools.coco import COCO
 
 
 def build(args):
+    """Build test datasets."""
     coco = COCO(args.annotation_json)
-    with open(args.annotation_json) as fobj:
-        d = json.load(fobj)
 
     images = []
     annotations = []
     polygon_images = 0
     rle_images = 0
-    for image_id in islice(coco.imgs, 0, 200):
+    for image_id in coco.imgs:
         img = coco.loadImgs(image_id)
         anns = coco.loadAnns(coco.getAnnIds(imgIds=image_id))
         if any([ann["iscrowd"] for ann in anns]):
+            if rle_images < 10:
+                images.extend(img)
+                annotations.extend(anns)
             rle_images += 1
-            if rle_images > 10:
-                break
         else:
+            if polygon_images < 10:
+                images.extend(img)
+                annotations.extend(anns)
             polygon_images += 1
-            if polygon_images > 10:
-                continue
-        images.extend(img)
-        annotations.extend(anns)
+
+        if rle_images > 10 and polygon_images > 10:
+            break
 
     with open(args.output, "w") as fobj:
         json.dump({"annotations": annotations, "images": images}, fobj)
 
 
 def main():
+    """Generate a small coco dataset that suitable for testing"""
     parser = argparse.ArgumentParser()
     parser.add_argument("annotation_json", metavar="annotations.json")
     parser.add_argument("output", metavar="output.json")

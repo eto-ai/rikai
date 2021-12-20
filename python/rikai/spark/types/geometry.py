@@ -33,7 +33,7 @@ from pyspark.sql.types import (
 # Rikai
 from rikai.logging import logger
 
-__all__ = ["PointType", "Box3dType", "Box2dType"]
+__all__ = ["PointType", "Box3dType", "Box2dType", "MaskType"]
 
 
 class Box2dType(UserDefinedType):
@@ -188,7 +188,7 @@ class MaskType(UserDefinedType):
         from rikai.types.geometry import Mask
 
         mask_type = mask.type.value
-        if mask.type == Mask.Type.MASK:
+        if mask.type == Mask.Type.RAW:
             return Row(
                 mask_type, mask.height, mask.width, None, mask.data, None
             )
@@ -209,7 +209,7 @@ class MaskType(UserDefinedType):
         mask_type = Mask.Type(datum[0])
         height = datum[1]
         width = datum[2]
-        if mask_type == Mask.Type.MASK:
+        if mask_type == Mask.Type.RAW:
             return Mask.from_mask(datum[4])
         elif mask_type == Mask.Type.POLYGON:
             return Mask.from_polygon(datum[3], height=height, width=width)

@@ -503,10 +503,10 @@ class Mask(ToNumpy, ToDict):
     class Type(Enum):
         """Mask type."""
 
-        MASK = 0
+        RAW = 0
         POLYGON = 1
         RLE = 2
-        COCO_RLE = 3  # COCO style RLE, Column-based
+        COCO_RLE = 3  # COCO style RLE, column-based
 
     def __init__(
         self,
@@ -517,13 +517,14 @@ class Mask(ToNumpy, ToDict):
     ):
         self.type = mask_type
         self.data = data
-        if self.type == Mask.Type.MASK:
+        if self.type == Mask.Type.RAW:
             self.height = data.shape[0]
             self.width = data.shape[1]
         else:
-            assert (
-                height is not None and width is not None
-            ), "Must provide height and width for RLE or Polygon type"
+            if height is not None and width is not None:
+                raise ValueError(
+                    "Must provide height and width for RLE or Polygon type"
+                )
             self.height = height
             self.width = width
 
@@ -588,7 +589,7 @@ class Mask(ToNumpy, ToDict):
             A binary-valued (0/1) numpy array
         """
         assert len(mask.shape) > 1, "Must have more than 2-dimensions"
-        return Mask(data=mask, mask_type=Mask.Type.MASK)
+        return Mask(data=mask, mask_type=Mask.Type.RAW)
 
     def __repr__(self):
         return f"Mask(type={self.type}, data=...)"
@@ -613,7 +614,7 @@ class Mask(ToNumpy, ToDict):
 
     def to_mask(self) -> np.ndarray:
         """Convert this mask to a numpy array."""
-        if self.type == Mask.Type.MASK:
+        if self.type == Mask.Type.RAW:
             return self.data
         elif self.type == Mask.Type.POLYGON:
             return self._polygon_to_mask()
@@ -630,18 +631,13 @@ class Mask(ToNumpy, ToDict):
         return self.to_mask()
 
     def to_dict(self) -> dict:
-        d = {
+        ret = {
             "type": self.type.value,
             "width": self.width,
             "height": self.height,
+            "data": self.data,
         }
-        if self.type == Mask.Type.RLE:
-            d["rle"] = self.data
-        elif self.type == Mask.Type.POLYGON:
-            d["polygon"] = self.data
-        else:
-            d["mask"] = self.to_mask()
-        return d
+        return ret
 
     def iou(self, other: Mask) -> float:
         this_mask = self.to_mask()

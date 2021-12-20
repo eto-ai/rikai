@@ -65,7 +65,7 @@ jobs:
         working-directory: python
         run: |
           python -m pip install -q --use-feature=in-tree-build . wheel pycocotools
-      - name: Install rikai-ros
+      - name: Install rikai-coco
         working-directory: contrib/coco
         run: |
           python -m pip install --use-feature=in-tree-build .[dev]

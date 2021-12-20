@@ -521,7 +521,7 @@ class Mask(ToNumpy, ToDict):
             self.height = data.shape[0]
             self.width = data.shape[1]
         else:
-            if height is not None and width is not None:
+            if height is None or width is None:
                 raise ValueError(
                     "Must provide height and width for RLE or Polygon type"
                 )

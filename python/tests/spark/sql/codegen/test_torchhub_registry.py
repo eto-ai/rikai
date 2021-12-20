@@ -20,15 +20,18 @@ from rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn import (
 
 
 def test_create_model(rikai_spark: SparkSession):
+    # TODO: run ml_predict on resnet50
+    # rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn
+    # does not actually work for torchhub loaded model
     rikai_spark.sql(
         f"""
 CREATE MODEL resnet50
 FLAVOR pytorch
 PREPROCESSOR 'rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing'
 POSTPROCESSOR 'rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing'
-OPTIONS (min_confidence=0.3, device="gpu", batch_size=32)
+OPTIONS (min_confidence=0.3, device="cpu", batch_size=32)
 RETURNS {OUTPUT_SCHEMA}
 USING "torchhub:///pytorch/vision:v0.9.1/resnet50";
     """
     )
-    rikai_spark.sql("show models").show()
+    assert rikai_spark.sql("show models").count() > 0

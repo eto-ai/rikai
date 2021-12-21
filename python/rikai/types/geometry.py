@@ -455,7 +455,7 @@ class Mask(ToNumpy, ToDict):
 
     This 2D mask can be built from:
 
-    - A binary-valued (0 or 1) 2D-numpy matrix (:py:class:`Mask.Type.MASK`).
+    - A binary-valued (0 or 1) 2D-numpy matrix.
     - A Run Length Encoded (RLE) data. It supports both row-based RLE
       (:py:class:`Mask.Type.RLE`) or column-based RLE
       (:py:class:`Mask.Type.COCO_RLE`) which is used in the Coco dataset.
@@ -503,7 +503,6 @@ class Mask(ToNumpy, ToDict):
     class Type(Enum):
         """Mask type."""
 
-        RAW = 0
         POLYGON = 1
         RLE = 2
         COCO_RLE = 3  # COCO style RLE, column-based
@@ -515,18 +514,16 @@ class Mask(ToNumpy, ToDict):
         width: Optional[int] = None,
         mask_type: Mask.Type = Type.POLYGON,
     ):
+        if height is None or width is None:
+            raise ValueError(
+                "Must provide height and width for RLE or Polygon type"
+            )
+
         self.type = mask_type
         self.data = data
-        if self.type == Mask.Type.RAW:
-            self.height = data.shape[0]
-            self.width = data.shape[1]
-        else:
-            if height is None or width is None:
-                raise ValueError(
-                    "Must provide height and width for RLE or Polygon type"
-                )
-            self.height = height
-            self.width = width
+
+        self.height = height
+        self.width = width
 
     @staticmethod
     def from_rle(data: list[int], height: int, width: int) -> Mask:
@@ -589,7 +586,7 @@ class Mask(ToNumpy, ToDict):
             A binary-valued (0/1) numpy array
         """
         assert len(mask.shape) > 1, "Must have more than 2-dimensions"
-        return Mask(data=mask, mask_type=Mask.Type.RAW)
+        return Mask(data=rle.encode(mask), mask_type=Mask.Type.RLE)
 
     def __repr__(self):
         return f"Mask(type={self.type}, data=...)"
@@ -614,9 +611,7 @@ class Mask(ToNumpy, ToDict):
 
     def to_mask(self) -> np.ndarray:
         """Convert this mask to a numpy array."""
-        if self.type == Mask.Type.RAW:
-            return self.data
-        elif self.type == Mask.Type.POLYGON:
+        if self.type == Mask.Type.POLYGON:
             return self._polygon_to_mask()
         elif self.type == Mask.Type.RLE:
             return rle.decode(self.data, shape=(self.height, self.width))

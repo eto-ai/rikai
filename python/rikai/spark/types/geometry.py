@@ -188,11 +188,7 @@ class MaskType(UserDefinedType):
         from rikai.types.geometry import Mask
 
         mask_type = mask.type.value
-        if mask.type == Mask.Type.RAW:
-            return Row(
-                mask_type, mask.height, mask.width, None, mask.data, None
-            )
-        elif mask.type == Mask.Type.RLE or mask.type == Mask.Type.COCO_RLE:
+        if mask.type == Mask.Type.RLE or mask.type == Mask.Type.COCO_RLE:
             return Row(
                 mask_type, mask.height, mask.width, None, None, mask.data
             )
@@ -209,9 +205,7 @@ class MaskType(UserDefinedType):
         mask_type = Mask.Type(datum[0])
         height = datum[1]
         width = datum[2]
-        if mask_type == Mask.Type.RAW:
-            return Mask.from_mask(datum[4])
-        elif mask_type == Mask.Type.POLYGON:
+        if mask_type == Mask.Type.POLYGON:
             return Mask.from_polygon(datum[3], height=height, width=width)
         elif mask_type == Mask.Type.RLE:
             return Mask.from_rle(datum[5], height=height, width=width)

@@ -27,7 +27,6 @@ object MaskTypeEnum extends Enumeration {
 
   type Type = Value
 
-  val Mask: Type = Value(0)
   val Polygon: Type = Value(1)
   val Rle: Type = Value(2)
   val CocoRle: Type = Value(3)
@@ -71,7 +70,6 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
         "polygon",
         ArrayType(ArrayType(FloatType))
       ),
-      StructField("mask", NDArrayType.sqlType),
       StructField("rle", ArrayType(IntegerType))
     )
   )
@@ -86,12 +84,10 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
     m.maskType match {
       case MaskTypeEnum.Rle | MaskTypeEnum.CocoRle =>
         row.setNullAt(3)
-        row.setNullAt(4)
-        row.update(5, UnsafeArrayData.fromPrimitiveArray(m.rle.get))
+        row.update(4, UnsafeArrayData.fromPrimitiveArray(m.rle.get))
       case MaskTypeEnum.Polygon =>
         row.update(3, m.polygon.get)
         row.setNullAt(4)
-        row.setNullAt(5)
       case _ => throw new NotImplementedError()
     }
     row
@@ -112,17 +108,16 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
             )
           case MaskTypeEnum.Rle =>
             Mask.fromRLE(
-              row.getArray(5).toArray[Int](IntegerType),
+              row.getArray(4).toArray[Int](IntegerType),
               height,
               width
             )
           case MaskTypeEnum.CocoRle =>
             Mask.fromCocoRLE(
-              row.getArray(5).toArray[Int](IntegerType),
+              row.getArray(4).toArray[Int](IntegerType),
               height,
               width
             )
-          case MaskTypeEnum.Mask => throw new NotImplementedError()
         }
     }
   }

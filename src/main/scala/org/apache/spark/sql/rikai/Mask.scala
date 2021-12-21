@@ -77,7 +77,7 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
   override def pyUDT: String = "rikai.spark.types.geometry.MaskType"
 
   override def serialize(m: Mask): InternalRow = {
-    val row = new GenericInternalRow(6)
+    val row = new GenericInternalRow(5)
     row.setInt(0, m.maskType.id)
     row.setInt(1, m.height)
     row.setInt(2, m.width)

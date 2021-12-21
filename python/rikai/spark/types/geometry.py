@@ -171,7 +171,6 @@ class MaskType(UserDefinedType):
                     ArrayType(ArrayType(FloatType(), False), False),
                     True,
                 ),
-                StructField("mask", NDArrayType().sqlType(), True),
                 StructField("rle", ArrayType(IntegerType(), False), True),
             ]
         )
@@ -190,11 +189,11 @@ class MaskType(UserDefinedType):
         mask_type = mask.type.value
         if mask.type == Mask.Type.RLE or mask.type == Mask.Type.COCO_RLE:
             return Row(
-                mask_type, mask.height, mask.width, None, None, mask.data
+                mask_type, mask.height, mask.width, None, mask.data
             )
         elif mask.type == Mask.Type.POLYGON:
             return Row(
-                mask_type, mask.height, mask.width, mask.data, None, None
+                mask_type, mask.height, mask.width, mask.data, None
             )
         else:
             raise ValueError(f"Unrecognized mask type: {mask.type}")
@@ -208,9 +207,9 @@ class MaskType(UserDefinedType):
         if mask_type == Mask.Type.POLYGON:
             return Mask.from_polygon(datum[3], height=height, width=width)
         elif mask_type == Mask.Type.RLE:
-            return Mask.from_rle(datum[5], height=height, width=width)
+            return Mask.from_rle(datum[4], height=height, width=width)
         elif mask_type == Mask.Type.COCO_RLE:
-            return Mask.from_coco_rle(datum[5], height=height, width=width)
+            return Mask.from_coco_rle(datum[4], height=height, width=width)
         else:
             raise ValueError(f"Unrecognized mask type: {datum[0]}")
 

@@ -143,6 +143,14 @@ def spark(mlflow_tracking_uri: str) -> SparkSession:
                         ]
                     ),
                 ),
+                (
+                    # Sadly we have to use a shaded gcs connector due to guava
+                    # conflicts with Spark 3.1
+                    "spark.jars",
+                    "https://repo1.maven.org/maven2/com/google/cloud/"
+                    "bigdataoss/gcs-connector/hadoop3-2.2.2/"
+                    "gcs-connector-hadoop3-2.2.2-shaded.jar",
+                ),
                 ("spark.port.maxRetries", 128),
                 (
                     "rikai.sql.ml.registry.test.impl",

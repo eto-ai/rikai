@@ -66,10 +66,12 @@ class TorchHubRegistry(Registry):
                 "URI with 2 forward slashes is not supported, "
                 "try URI with 1 slash instead"
             )
-        if not parsed.scheme:
-            raise ValueError("Scheme must be torchhub. How did you get here?")
+        if parsed.scheme != "torchhub":
+            raise ValueError(f"Expect schema: torchhub, but got {parsed.scheme}")
         parts = parsed.path.strip("/").split("/")
-        repo_or_dir = "/".join(parts[0:-1])
+        if len(parts) != 3:
+            raise ValueError("Bad URI, expected torchhub:///<org>/<prj>/<mdl>")
+        repo_or_dir = "/".join(parts[:-1])
         model = parts[-1]
         spec = TorchHubModelSpec(repo_or_dir, model, raw_spec)
         func_name = codegen_from_spec(self._spark, spec, name)

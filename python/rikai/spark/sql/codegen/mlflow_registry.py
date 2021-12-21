@@ -200,8 +200,8 @@ class MlflowRegistry(Registry):
                 "URI with 2 forward slashes is not supported, "
                 "try URI with 1 slash instead"
             )
-        if not parsed.scheme:
-            raise ValueError("Scheme must be mlflow. How did you get here?")
+        if parsed.scheme != "mlflow":
+            raise ValueError("Expect schema: mlflow, but got {parsed.scheme}")
         parts = parsed.path.strip("/").split("/", 1)
         model_uri, run = self.get_model_version(*parts)
         spec = MlflowModelSpec(

@@ -23,6 +23,7 @@ import org.apache.spark.sql.catalyst.expressions.{
 }
 import org.apache.spark.sql.types._
 
+
 object MaskTypeEnum extends Enumeration {
 
   type Type = Value
@@ -31,6 +32,7 @@ object MaskTypeEnum extends Enumeration {
   val Rle: Type = Value(2)
   val CocoRle: Type = Value(3)
 }
+
 
 /** Mask of an 2-D image.
   */
@@ -102,7 +104,7 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
         maskType match {
           case MaskTypeEnum.Polygon =>
             Mask.fromPolygon(
-              row.getArray(3).toArray[Seq[Float]](ArrayType(FloatType)),
+              row.getArray(3).toArray[Seq[Float]](ArrayType(FloatType)).toSeq,
               height,
               width
             )

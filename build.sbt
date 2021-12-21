@@ -91,7 +91,7 @@ libraryDependencies += "com.thoughtworks.enableIf" %% "enableif" % "1.1.7"
 scalacOptions ++= Seq(
   "-encoding",
   "utf8",
-  "-Xfatal-warnings",
+  // "-Xfatal-warnings",
   "-Ywarn-dead-code",
   "-deprecation",
   "-unchecked",
@@ -101,6 +101,16 @@ scalacOptions ++= Seq(
   "-language:postfixOps",
   "-Xlint:unused"
 )
+
+// Enable macro annotation by scalac flags for Scala 2.13
+scalacOptions ++= {
+  import Ordering.Implicits._
+  if (VersionNumber(scalaVersion.value).numbers >= Seq(2L, 13L)) {
+    Seq("-Ymacro-annotations")
+  } else {
+    Nil
+  }
+}
 
 parallelExecution in Test := false
 fork in Test := true

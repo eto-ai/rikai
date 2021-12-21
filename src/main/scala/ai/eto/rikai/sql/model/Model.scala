@@ -43,7 +43,6 @@ trait Model {
 
   /** Return options as java Map, so that it is easily accessible in Python via py4j. */
   final def javaOptions: java.util.Map[String, String] = mapAsJavaMap(options)
-
 }
 
 object Model {

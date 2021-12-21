@@ -230,31 +230,6 @@ def s3_tmpdir() -> str:
 
 
 @pytest.fixture(scope="session")
-def rikai_spark() -> SparkSession:
-    rikai_version = get_default_jar_version(use_snapshot=True)
-
-    return init_spark_session(
-        dict(
-            [
-                (
-                    "spark.jars.packages",
-                    ",".join(
-                        [
-                            "ai.eto:rikai_2.12:{}".format(rikai_version),
-                        ]
-                    ),
-                ),
-                ("spark.port.maxRetries", 128),
-                (
-                    "rikai.sql.ml.registry.test.impl",
-                    "ai.eto.rikai.sql.model.testing.TestRegistry",
-                ),
-            ]
-        )
-    )
-
-
-@pytest.fixture(scope="session")
 def resnet_model_uri(tmp_path_factory):
     # Prepare model
     tmp_path = tmp_path_factory.mktemp(str(uuid.uuid4()))

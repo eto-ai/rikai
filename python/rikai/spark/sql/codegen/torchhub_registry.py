@@ -67,7 +67,9 @@ class TorchHubRegistry(Registry):
                 "try URI with 1 slash instead"
             )
         if parsed.scheme != "torchhub":
-            raise ValueError(f"Expect schema: torchhub, but got {parsed.scheme}")
+            raise ValueError(
+                f"Expect schema: torchhub, but got {parsed.scheme}"
+            )
         parts = parsed.path.strip("/").split("/")
         if len(parts) != 3:
             raise ValueError("Bad URI, expected torchhub:///<org>/<prj>/<mdl>")

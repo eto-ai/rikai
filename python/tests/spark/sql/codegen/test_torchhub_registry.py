@@ -12,20 +12,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from pyspark.sql import SparkSession
-import pytest
 import py4j
+import pytest
+from pyspark.sql import SparkSession
 
 from rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn import (
     OUTPUT_SCHEMA,
 )
 
 
-def test_create_model(rikai_spark: SparkSession):
+def test_create_model(spark: SparkSession):
     # TODO: run ml_predict on resnet50
     # rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn
     # does not work for torchhub loaded model
-    rikai_spark.sql(
+    spark.sql(
         f"""
 CREATE MODEL resnet50
 FLAVOR pytorch
@@ -36,12 +36,12 @@ RETURNS {OUTPUT_SCHEMA}
 USING "torchhub:///pytorch/vision:v0.9.1/resnet50";
     """
     )
-    assert rikai_spark.sql("show models").count() > 0
+    assert spark.sql("show models").count() > 0
 
 
-def test_bad_uri(rikai_spark: SparkSession):
+def test_bad_uri(spark: SparkSession):
     with pytest.raises(py4j.protocol.Py4JJavaError, match=r".*Bad URI.*"):
-        rikai_spark.sql(
+        spark.sql(
             f"""
 CREATE MODEL resnet50_bad_case_1
 FLAVOR pytorch
@@ -50,10 +50,11 @@ POSTPROCESSOR 'rikai.contrib.torchhub.transforms.resnet50'
 OPTIONS (min_confidence=0.3, device="cpu", batch_size=32)
 RETURNS {OUTPUT_SCHEMA}
 USING "torchhub:///pytorch/vision:v0.9.1/resnet50/bad";
-        """)
+        """
+        )
 
     with pytest.raises(py4j.protocol.Py4JJavaError, match=r".*Bad URI.*"):
-        rikai_spark.sql(
+        spark.sql(
             f"""
 CREATE MODEL resnet50_bad_case_2
 FLAVOR pytorch
@@ -62,13 +63,14 @@ POSTPROCESSOR 'rikai.contrib.torchhub.transforms.resnet50'
 OPTIONS (min_confidence=0.3, device="cpu", batch_size=32)
 RETURNS {OUTPUT_SCHEMA}
 USING "torchhub:///pytorch/vision:v0.9.1";
-        """)
+        """
+        )
 
     with pytest.raises(
         py4j.protocol.Py4JJavaError,
         match=r".*URI with 2 forward slashes is not supported.*",
     ):
-        rikai_spark.sql(
+        spark.sql(
             f"""
 CREATE MODEL resnet50_bad_case_3
 FLAVOR pytorch
@@ -77,4 +79,5 @@ POSTPROCESSOR 'rikai.contrib.torchhub.transforms.resnet50'
 OPTIONS (min_confidence=0.3, device="cpu", batch_size=32)
 RETURNS {OUTPUT_SCHEMA}
 USING "torchhub://pytorch/vision:v0.9.1/model_name";
-        """)
+        """
+        )

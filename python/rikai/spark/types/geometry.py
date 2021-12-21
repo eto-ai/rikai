@@ -188,13 +188,9 @@ class MaskType(UserDefinedType):
 
         mask_type = mask.type.value
         if mask.type == Mask.Type.RLE or mask.type == Mask.Type.COCO_RLE:
-            return Row(
-                mask_type, mask.height, mask.width, None, mask.data
-            )
+            return Row(mask_type, mask.height, mask.width, None, mask.data)
         elif mask.type == Mask.Type.POLYGON:
-            return Row(
-                mask_type, mask.height, mask.width, mask.data, None
-            )
+            return Row(mask_type, mask.height, mask.width, mask.data, None)
         else:
             raise ValueError(f"Unrecognized mask type: {mask.type}")
 

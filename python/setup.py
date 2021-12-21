@@ -56,7 +56,7 @@ setup(
         "pandas",
         "Pillow",
         "pyarrow>=2.0",
-        "pyspark>=3.2",
+        "pyspark==3.1.2",
         "pyyaml",
         "requests",
         "semver",

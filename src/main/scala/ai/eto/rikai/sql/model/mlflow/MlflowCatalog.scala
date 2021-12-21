@@ -75,8 +75,8 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
             None
           }
       }
-      .filter(m => m.isDefined)
-      .map(m => m.get)
+      .collect { case Some(model) => model }
+      .toSeq
   }
 
   /** Check a model with the specified name exists.

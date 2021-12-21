@@ -52,7 +52,7 @@ setup(
         "ipython",
         "jsonschema",
         "numpy",
-        "opencv-python",
+        "opencv-python-headless",
         "pandas",
         "Pillow",
         "pyarrow>=2.0",

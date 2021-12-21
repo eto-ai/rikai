@@ -16,7 +16,6 @@ import secrets
 from pathlib import Path
 
 from pyspark.sql import DataFrame, Row, SparkSession
-from pyspark.sql.functions import col
 
 # Rikai
 from rikai.testing.asserters import assert_count_equal
@@ -24,6 +23,7 @@ from rikai.types import (
     Box2d,
     Box3d,
     Image,
+    Mask,
     Point,
     Segment,
     VideoStream,
@@ -52,6 +52,13 @@ def test_point(spark, tmpdir):
 
 def test_box3d(spark, tmpdir):
     df = spark.createDataFrame([Row(Box3d(Point(1, 2, 3), 1, 2, 3, 2.5))])
+    _check_roundtrip(spark, df, tmpdir)
+
+
+def test_mask(spark, tmpdir):
+    df = spark.createDataFrame(
+        [Row(mask=Mask.from_rle([1, 10, 10], height=3, width=7))]
+    )
     _check_roundtrip(spark, df, tmpdir)
 
 

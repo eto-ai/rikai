@@ -17,15 +17,23 @@
 
 from __future__ import annotations
 
+from enum import Enum
 from numbers import Real
-from typing import Sequence, Tuple, Union
+from typing import Optional, Sequence, Tuple, Union
 
 import numpy as np
+from PIL import Image, ImageDraw
 
 from rikai.mixin import ToDict, ToNumpy
-from rikai.spark.types.geometry import Box2dType, Box3dType, PointType
+from rikai.spark.types.geometry import (
+    Box2dType,
+    Box3dType,
+    MaskType,
+    PointType,
+)
+from rikai.types import rle
 
-__all__ = ["Point", "Box3d", "Box2d"]
+__all__ = ["Point", "Box3d", "Box2d", "Mask"]
 
 
 class Point(ToNumpy, ToDict):
@@ -440,3 +448,198 @@ class Box3d(ToNumpy, ToDict):
             "height": self.height,
             "heading": self.heading,
         }
+
+
+class Mask(ToNumpy, ToDict):
+    """2-d Mask over an image
+
+    This 2D mask can be built from:
+
+    - A binary-valued (0 or 1) 2D-numpy matrix.
+    - A Run Length Encoded (RLE) data. It supports both row-based RLE
+      (:py:class:`Mask.Type.RLE`) or column-based RLE
+      (:py:class:`Mask.Type.COCO_RLE`) which is used in the Coco dataset.
+    - A Polygon ``[x0, y0, x1, y1, ..., xn, yn]``
+
+    Parameters
+    ----------
+    data: list or :py:class:`np.ndarray`
+        The mask data. Can be a numpy array or a list.
+    height: int, optional
+        The height of the image this mask applies to.
+    width: int, optional
+        The width of the image this mask applies to.
+    mask_type: :py:class:`Mask.Type`
+        The type of the mask.
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+        from pycocotools.coco import COCO
+        from rikai.types import Mask
+
+        coco = COCO("instance_train2017.json")
+        ann = coco.loadAnns(ann_id)
+        image = coco.loadImgs(ann["image_id"])
+        if ann["iscrowed"] == 0:
+            mask = Mask.from_polygon(
+                ann["segmentation"],
+                height=image["height"],
+                width=image["width],
+            )
+        else:
+            mask = Mask.from_coco_rle(
+                ann["segmentation"]["counts"],
+                height=image["height"],
+                width=image["width],
+            )
+
+    """
+
+    __UDT__ = MaskType()
+
+    class Type(Enum):
+        """Mask type."""
+
+        POLYGON = 1
+        RLE = 2
+        COCO_RLE = 3  # COCO style RLE, column-based
+
+    def __init__(
+        self,
+        data: Union[list, np.ndarray],
+        height: Optional[int] = None,
+        width: Optional[int] = None,
+        mask_type: Mask.Type = Type.POLYGON,
+    ):
+        if height is None or width is None:
+            raise ValueError(
+                "Must provide height and width for RLE or Polygon type"
+            )
+
+        self.type = mask_type
+        self.data = data
+
+        self.height = height
+        self.width = width
+
+    @staticmethod
+    def from_rle(data: list[int], height: int, width: int) -> Mask:
+        """Convert a (row-based) RLE mask (segmentation) into Mask
+
+        Parameters
+        ----------
+        data: list[int]
+            the RLE data
+        height: int
+            The height of the image which the mask applies to.
+        width: int
+            The width of the image which the mask applies to.
+        """
+
+        return Mask(data, height=height, width=width, mask_type=Mask.Type.RLE)
+
+    @staticmethod
+    def from_coco_rle(data: list[int], height: int, width: int) -> Mask:
+        """Convert a COCO RLE mask (segmentation) into Mask
+
+        Parameters
+        ----------
+        data: list[int]
+            the RLE data
+        height: int
+            The height of the image which the mask applies to.
+        width: int
+            The width of the image which the mask applies to.
+        """
+        return Mask(
+            data, height=height, width=width, mask_type=Mask.Type.COCO_RLE
+        )
+
+    @staticmethod
+    def from_polygon(data: list[list[float]], height: int, width: int) -> Mask:
+        """Build mask from a Polygon
+
+        Parameters
+        ----------
+        data: list[list[float]]
+            Multiple Polygon segmentation data. i.e.,
+            ``[[x0, y0, x1, y1, ...], [x0, y0, x1, y1, ...]])``
+        height: int
+            The height of the image which the mask applies to.
+        width: int
+            The width of the image which the mask applies to.
+        """
+        return Mask(
+            data, height=height, width=width, mask_type=Mask.Type.POLYGON
+        )
+
+    @staticmethod
+    def from_mask(mask: np.ndarray) -> Mask:
+        """Build mask from a numpy array.
+
+        Parameters
+        ----------
+        mask : np.ndarray
+            A binary-valued (0/1) numpy array
+        """
+        assert len(mask.shape) > 1, "Must have more than 2-dimensions"
+        return Mask(data=rle.encode(mask), mask_type=Mask.Type.RLE)
+
+    def __repr__(self):
+        return f"Mask(type={self.type}, data=...)"
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, Mask)
+            and self.type == other.type
+            and self.height == other.height
+            and self.width == other.width
+            and np.array_equal(self.data, other.data)
+        )
+
+    def _polygon_to_mask(self) -> np.ndarray:
+        arr = np.zeros((self.height, self.width), dtype=np.uint8)
+        with Image.fromarray(arr) as im:
+            draw = ImageDraw.Draw(im)
+            for polygon in self.data:
+                draw.polygon(list(np.array(polygon)), fill=1)
+            im = im.resize((self.width, self.height))
+            return np.array(im)
+
+    def to_mask(self) -> np.ndarray:
+        """Convert this mask to a numpy array."""
+        if self.type == Mask.Type.POLYGON:
+            return self._polygon_to_mask()
+        elif self.type == Mask.Type.RLE:
+            return rle.decode(self.data, shape=(self.height, self.width))
+        elif self.type == Mask.Type.COCO_RLE:
+            return rle.decode(
+                self.data, shape=(self.height, self.width), order="F"
+            )
+        else:
+            raise ValueError("Unrecognized type")
+
+    def to_numpy(self) -> np.ndarray:
+        return self.to_mask()
+
+    def to_dict(self) -> dict:
+        ret = {
+            "type": self.type.value,
+            "width": self.width,
+            "height": self.height,
+            "data": self.data,
+        }
+        return ret
+
+    def iou(self, other: Mask) -> float:
+        this_mask = self.to_mask()
+        other_mask = other.to_mask()
+        intersection = np.count_nonzero(np.logical_and(this_mask, other_mask))
+        union = np.count_nonzero(np.logical_or(this_mask, other_mask))
+        try:
+            return intersection / union
+        except ZeroDivisionError:
+            return 0

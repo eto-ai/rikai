@@ -23,7 +23,6 @@ import org.apache.spark.sql.catalyst.expressions.{
 }
 import org.apache.spark.sql.types._
 
-
 object MaskTypeEnum extends Enumeration {
 
   type Type = Value
@@ -32,7 +31,6 @@ object MaskTypeEnum extends Enumeration {
   val Rle: Type = Value(2)
   val CocoRle: Type = Value(3)
 }
-
 
 /** Mask of an 2-D image.
   */

@@ -51,7 +51,7 @@ private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
     */
   def visitMlPredictFunction(ctx: FunctionCallContext): Expression =
     withOrigin(ctx) {
-      val arguments = ctx.argument.asScala.map(expression)
+      val arguments = ctx.argument.asScala.map(expression).toSeq
       if (arguments.size < 2) {
         throw new ParseException(
           s"${Predict.name.toUpperCase} requires at least 2 parameters, got ${arguments.size}",

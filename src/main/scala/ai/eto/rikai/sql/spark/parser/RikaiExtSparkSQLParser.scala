@@ -51,7 +51,7 @@ private[spark] class RikaiExtSqlParser(
     with Logging {
 
   /** Used for test only */
-  def this() {
+  def this() = {
     this(null, null, true)
   }
 

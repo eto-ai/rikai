@@ -1,6 +1,7 @@
 import java.io.File
 import scala.reflect.io.Directory
 
+crossScalaVersions := List("2.12.11", "2.12.15", "2.13.7")
 scalaVersion := "2.12.11"
 name := "rikai"
 
@@ -51,7 +52,7 @@ scmInfo := Some(
 )
 
 libraryDependencies ++= {
-  val sparkVersion = "3.1.1"
+  val sparkVersion = if (scalaVersion.value.compareTo("2.12.15") >= 0)  "3.2.0" else "3.1.2"
   val awsVersion = "2.15.69"
   val log4jVersion = "2.15.0"
   val scalaLoggingVersion = "3.9.4"
@@ -61,12 +62,12 @@ libraryDependencies ++= {
   val mlflowVersion = "1.21.0"
 
   Seq(
-    "org.apache.spark" %% "spark-sql" % sparkVersion % "provided",
-    "software.amazon.awssdk" % "s3" % awsVersion % "provided",
+    "org.apache.spark" %% "spark-sql" % sparkVersion % Provided,
+    "software.amazon.awssdk" % "s3" % awsVersion % Provided,
     "org.xerial.snappy" % "snappy-java" % snappyVersion,
     "org.apache.logging.log4j" % "log4j-core" % log4jVersion % Runtime,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
-    "org.scalatest" %% "scalatest-funsuite" % scalatestVersion % "test",
+    "org.scalatest" %% "scalatest-funsuite" % scalatestVersion % Test,
     "io.circe" %% "circe-core" % circeVersion,
     "io.circe" %% "circe-generic" % circeVersion,
     "io.circe" %% "circe-parser" % circeVersion,
@@ -74,10 +75,23 @@ libraryDependencies ++= {
   )
 }
 
+libraryDependencies ++= {
+  import Ordering.Implicits._
+  if (VersionNumber(scalaVersion.value).numbers >= Seq(2L, 13L)) {
+    Nil
+  } else {
+    Seq(
+      compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full)
+    )
+  }
+}
+
+libraryDependencies += "com.thoughtworks.enableIf" %% "enableif" % "1.1.7"
+
 scalacOptions ++= Seq(
   "-encoding",
   "utf8",
-  "-Xfatal-warnings",
+  // "-Xfatal-warnings",
   "-Ywarn-dead-code",
   "-deprecation",
   "-unchecked",
@@ -87,6 +101,16 @@ scalacOptions ++= Seq(
   "-language:postfixOps",
   "-Xlint:unused"
 )
+
+// Enable macro annotation by scalac flags for Scala 2.13
+scalacOptions ++= {
+  import Ordering.Implicits._
+  if (VersionNumber(scalaVersion.value).numbers >= Seq(2L, 13L)) {
+    Seq("-Ymacro-annotations")
+  } else {
+    Nil
+  }
+}
 
 parallelExecution in Test := false
 fork in Test := true

@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        scala-version: [ 2.12.11, 2.13.7 ]
     timeout-minutes: 15
     steps:
     - uses: actions/checkout@v2
@@ -25,7 +28,7 @@ jobs:
         docker-compose -f .github/docker-compose.yml up -d
         sleep 10
     - name: Run Scala tests
-      run: sbt test
+      run: sbt ++${{matrix.scala-version}} test
       env:
         SPARK_LOCAL_IP: "127.0.0.1"
         TEST_MLFLOW_TRACKING_URI: "http://localhost:15000"

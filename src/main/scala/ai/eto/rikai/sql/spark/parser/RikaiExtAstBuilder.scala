@@ -178,11 +178,11 @@ private[parser] class RikaiExtAstBuilder
       ctx: QualifiedNameContext
   ): TableIdentifier =
     withOrigin(ctx) {
-      ctx.identifier.asScala match {
-        case Seq(tbl)     => TableIdentifier(tbl.getText)
-        case Seq(db, tbl) => TableIdentifier(tbl.getText, Some(db.getText))
+      ctx.identifier.asScala.toSeq match {
+        case Seq(tbl)     => TableIdentifier(tbl.getText())
+        case Seq(db, tbl) => TableIdentifier(tbl.getText(), Some(db.getText()))
         case _ =>
-          throw new ParseException(s"Illegal table name ${ctx.getText}", ctx)
+          throw new ParseException(s"Illegal table name ${ctx.getText()}", ctx)
       }
     }
 

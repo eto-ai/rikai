@@ -16,10 +16,12 @@
 
 package ai.eto.rikai.sql.model
 
+import ai.eto.rikai.sql.spark.Python
+import com.typesafe.scalalogging.LazyLogging
 import org.apache.http.client.utils.URIUtils
 import org.apache.log4j.Logger
-import java.net.URI
 
+import java.net.URI
 import scala.util.{Success, Try}
 
 /** Model Registry Integrations.
@@ -40,6 +42,26 @@ trait Registry {
   ): Model
 }
 
+abstract class PyImplRegistry extends Registry with LazyLogging {
+  def pyClass: String
+
+  /** Resolve a [[Model]] from the specific URI.
+    *
+    * @param spec Model Spec to send to python.
+    *
+    * @throws ModelNotFoundException if the model does not exist on the registry.
+    *
+    * @return [[Model]] if found.
+    */
+  @throws[ModelNotFoundException]
+  override def resolve(
+      spec: ModelSpec
+  ): Model = {
+    logger.info(s"Resolving ML model from ${spec.uri}")
+    Python.resolve(pyClass, spec)
+  }
+}
+
 private[rikai] object Registry {
 
   val REGISTRY_IMPL_PREFIX = "rikai.sql.ml.registry."
@@ -57,7 +79,8 @@ private[rikai] object Registry {
     */
   val DEFAULT_REGISTRIES = Map(
     "rikai.sql.ml.registry.file.impl" -> "ai.eto.rikai.sql.model.fs.FileSystemRegistry",
-    "rikai.sql.ml.registry.mlflow.impl" -> "ai.eto.rikai.sql.model.mlflow.MlflowRegistry"
+    "rikai.sql.ml.registry.mlflow.impl" -> "ai.eto.rikai.sql.model.mlflow.MlflowRegistry",
+    "rikai.sql.ml.registry.torchhub.impl" -> "ai.eto.rikai.sql.model.torchhub.TorchHubRegistry"
   )
   private val logger = Logger.getLogger(Registry.getClass)
 

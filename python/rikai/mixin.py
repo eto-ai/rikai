@@ -28,7 +28,7 @@ import numpy as np
 from rikai.internal.uri_utils import uri_equal
 from rikai.io import open_uri
 
-__all__ = ["ToNumpy", "Asset", "Displayable", "ToDict"]
+__all__ = ["ToNumpy", "Asset", "Displayable", "Drawable", "ToDict"]
 
 
 class ToNumpy(ABC):
@@ -61,6 +61,14 @@ class Displayable(ABC):
     @abstractmethod
     def display(self, **kwargs) -> "IPython.display.DisplayObject":
         """Return an IPython.display.DisplayObject"""
+
+
+class Drawable(ABC):
+    """Mixin for a class that is drawable"""
+
+    @abstractmethod
+    def render(self, render: "rikai.viz.Render") -> None:
+        """Render the object using render."""
 
 
 class Asset(ABC):

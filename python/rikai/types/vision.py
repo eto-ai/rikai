@@ -30,17 +30,18 @@ import numpy as np
 from PIL import Image as PILImage
 
 # Rikai
-from rikai.conf import CONF_RIKAI_IMAGE_DEFAULT_FORMAT, options
+from rikai.conf import options
 from rikai.internal.uri_utils import normalize_uri
 from rikai.io import copy, open_output_stream
-from rikai.mixin import Asset, Displayable, ToDict, ToNumpy, ToPIL
+from rikai.mixin import Asset, Displayable, Drawable, ToDict, ToNumpy, ToPIL
 from rikai.spark.types import ImageType
 from rikai.types.geometry import Box2d
+from rikai.viz import Draw, PILRender
 
 __all__ = ["Image"]
 
 
-class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
+class Image(ToNumpy, ToPIL, Asset, Displayable, Drawable, ToDict):
     """An external Image Asset.
 
     It contains a reference URI to an image stored on the remote system.
@@ -183,6 +184,9 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
                     url=url, embed=True, format=inferred_format, **kwargs
                 )
 
+    def draw(self, drawable: Drawable) -> Draw:
+        return ImageDraw().draw(self).draw(drawable)
+
     def __repr__(self) -> str:
         if self.is_embedded:
             return "Image(<embedded>)"
@@ -208,6 +212,14 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
 
     def __eq__(self, other) -> bool:
         return isinstance(other, Image) and super().__eq__(other)
+
+    def __and__(self, other: Drawable) -> Draw:
+        """Override ``&`` operator to chain images with visualization components.
+        """
+        return self.draw(other)
+
+    def render(self, render: "rikai.viz.Render") -> None:
+        raise RuntimeError("Image should be the first in the visual pipeline")
 
     def to_pil(self) -> PILImage:
         """Return an PIL image.
@@ -288,3 +300,29 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
                 with pil_image.crop(bbox) as patch:
                     crops.append(Image.from_pil(patch))
         return crops
+
+
+class ImageDraw(Draw):
+
+    def display(self, **kwargs) -> "IPython.display.DisplayObject":
+        if not self.layers:
+            raise ValueError("Can not render empty displayable draw")
+        if not isinstance(self.layers[0], Image):
+            raise ValueError("ImageDraw must start with an image")
+
+        from PIL import ImageDraw as PILDraw
+
+        # make a copy of image
+        img = self.layers[0].to_pil()
+        render = PILRender(PILDraw.Draw(img))
+        for layer in self.layers[1:]:
+            layer.render(render)
+        return Image.from_pil(img)
+
+    def _repr_jpeg_(self):
+        """default visualizer for embedded jpeg"""
+        return self.display()._repr_jpeg_()
+
+    def _repr_png_(self):
+        """default visualizer for embedded png"""
+        return self.display()._repr_png_()

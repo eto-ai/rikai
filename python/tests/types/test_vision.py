@@ -172,3 +172,13 @@ def test_to_dict():
     )
     img = Image("foo")
     assert img.to_dict() == {"uri": "foo"}
+
+
+def test_draw_image():
+    data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
+    img = Image.from_array(data)
+
+    box1 = Box2d(1, 2, 10, 12)
+    box2 = Box2d(20, 20, 40, 40)
+    draw_boxes = img & box1 & box2
+    print(draw_boxes.display())

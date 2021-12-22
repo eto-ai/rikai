@@ -67,7 +67,7 @@ class Drawable(ABC):
     """Mixin for a class that is drawable"""
 
     @abstractmethod
-    def render(self, render: "rikai.viz.Render") -> None:
+    def render(self, render: "rikai.viz.Render", **kwargs) -> None:
         """Render the object using render."""
 
 

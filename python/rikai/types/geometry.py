@@ -255,8 +255,8 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
         x_scale, y_scale = self._verified_scale(scale)
         return self / (1.0 / x_scale, 1.0 / y_scale)
 
-    def render(self, render: "rikai.viz.Render") -> None:
-        render.rectangle(self)
+    def render(self, render: "rikai.viz.Render", **kwargs) -> None:
+        render.rectangle(self, **kwargs)
 
     def to_numpy(self) -> np.ndarray:
         """Convert a :py:class:`Box2d` to numpy ndarray:

@@ -218,7 +218,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, Drawable, ToDict):
         """
         return self.draw(other)
 
-    def render(self, render: "rikai.viz.Render") -> None:
+    def render(self, render: "rikai.viz.Render", **kwargs) -> None:
         raise RuntimeError("Image should be the first in the visual pipeline")
 
     def to_pil(self) -> PILImage:

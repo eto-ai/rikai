@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import Optional
 
 import numpy as np
 
@@ -24,8 +25,23 @@ __all__ = ["Style"]
 
 
 class Style(Drawable):
+    """Styling a drawable-component."""
     def __init__(self, **kwarg):
         self.kwargs = kwarg
+        self.inner = None  # type: Optional[Drawable]
+
+    def __repr__(self):
+        return f"style({self.kwargs})"
+
+    def __call__(self, inner: Drawable) -> Drawable:
+        s = Style(**self.kwargs)
+        s.inner = inner
+        return s
+
+    def render(self, render: Render, **kwargs):
+        assert self.inner is not None
+        # TODO: catch excessive parameters
+        return self.inner.render(render, **(self.kwargs | kwargs))
 
 
 class Draw(Displayable, ABC):
@@ -72,7 +88,7 @@ class PILRender(Render):
 
     def __init__(self, draw: "PIL.ImageDraw"):
         from PIL import ImageDraw
-        self.draw = draw   # type: ImageDraw
+        self.draw = draw  # type: ImageDraw
 
     def rectangle(self, xy, color: str = "red", width: int = 1):
         self.draw.rectangle(xy, outline=color, width=width)

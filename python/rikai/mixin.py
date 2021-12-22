@@ -19,7 +19,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from io import BytesIO
 from pathlib import Path
-from typing import BinaryIO, Optional, Union
+from typing import BinaryIO, Optional, Union, Mapping
 
 # Third Party
 import numpy as np
@@ -69,6 +69,14 @@ class Drawable(ABC):
     @abstractmethod
     def render(self, render: "rikai.viz.Render", **kwargs) -> None:
         """Render the object using render."""
+
+    def __matmul__(self, style: Union[dict, "rikai.viz.Style"]) -> Drawable:
+        from rikai.viz import Style
+        if not isinstance(style, (Mapping, Style)):
+            raise ValueError(f"Must decorate drawable with a dict or style object, but got {style}")
+        if isinstance(style, dict):
+            style = Style(**style)
+        return style(self)
 
 
 class Asset(ABC):

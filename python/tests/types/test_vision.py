@@ -25,6 +25,7 @@ from PIL import ImageDraw
 
 from rikai.types.geometry import Box2d
 from rikai.types.vision import Image
+from rikai.viz import Style
 
 
 @pytest.fixture
@@ -192,7 +193,28 @@ def test_draw_image():
 
 
 def test_draw_styled_images():
-    pass
+    data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
+    img = Image.from_array(data)
+    box1 = Box2d(1, 2, 10, 12)
+    box2 = Box2d(20, 20, 40, 40)
+
+    style = Style(color="yellow", width=3)
+    styled_boxes = img | style(box1) | style(box2)
+
+    expected = Image.from_array(data).to_pil()
+    draw = ImageDraw.Draw(expected)
+    draw.rectangle((1, 2, 10, 12), outline="yellow", width=3)
+    draw.rectangle((20, 20, 40, 40), outline="yellow", width=3)
+    assert np.array_equal(styled_boxes.display().to_numpy(), expected)
+
+    # Sugar!
+    sugar_boxes = img | box1@{"color": "green", "width": 10} | box2@{"color": "green", "width": 10}
+
+    sugar_expected = Image.from_array(data).to_pil()
+    draw = ImageDraw.Draw(sugar_expected)
+    draw.rectangle((1, 2, 10, 12), outline="green", width=10)
+    draw.rectangle((20, 20, 40, 40), outline="green", width=10)
+    assert np.array_equal(sugar_boxes.display().to_numpy(), sugar_expected)
 
 
 def test_wrong_draw_order():
@@ -204,3 +226,6 @@ def test_wrong_draw_order():
 
     with pytest.raises(TypeError):
         rendered = box1 | img
+
+    with pytest.raises(TypeError):
+        rendered = img | {"color": "white"}@box1

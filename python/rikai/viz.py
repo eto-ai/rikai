@@ -25,7 +25,19 @@ __all__ = ["Style"]
 
 
 class Style(Drawable):
-    """Styling a drawable-component."""
+    """Styling a drawable-component.
+
+    Examples
+    --------
+
+    >>> from rikai.viz import Style
+    >>> from rikai.types import Box2d, Image
+    ...
+    >>> img = Image(uri="s3://....")
+    >>> bbox1, bbox2 = Box2d(1, 2, 3, 4), Box2d(3, 4, 5, 6)
+    >>> bbox_style = Style(color="yellow", width=4)
+    >>> image | bbox_style(bbox1) | bbox_style(bbox2)
+    """
 
     def __init__(self, **kwarg):
         self.kwargs = kwarg
@@ -35,6 +47,8 @@ class Style(Drawable):
         return f"style({self.kwargs})"
 
     def __call__(self, inner: Drawable) -> Drawable:
+        # Make a copy of Style so the same style can be applied
+        # to multiple drawables
         s = Style(**self.kwargs)
         s.inner = inner
         return s

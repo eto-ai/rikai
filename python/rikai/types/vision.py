@@ -213,7 +213,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, Drawable, ToDict):
     def __eq__(self, other) -> bool:
         return isinstance(other, Image) and super().__eq__(other)
 
-    def __and__(self, other: Drawable) -> Draw:
+    def __or__(self, other: Drawable) -> Draw:
         """Override ``&`` operator to chain images with
         visualization components.
         """

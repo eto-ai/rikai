@@ -20,7 +20,8 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from PIL import Image as PILImage, ImageDraw
+from PIL import Image as PILImage
+from PIL import ImageDraw
 
 from rikai.types.geometry import Box2d
 from rikai.types.vision import Image
@@ -180,7 +181,7 @@ def test_draw_image():
 
     box1 = Box2d(1, 2, 10, 12)
     box2 = Box2d(20, 20, 40, 40)
-    draw_boxes = img & box1 & box2
+    draw_boxes = img | box1 | box2
     pil_image = draw_boxes.display()
 
     expected = Image.from_array(data).to_pil()
@@ -189,3 +190,17 @@ def test_draw_image():
     draw.rectangle((20, 20, 40, 40), outline="red")
     assert np.array_equal(pil_image.to_numpy(), expected)
 
+
+def test_draw_styled_images():
+    pass
+
+
+def test_wrong_draw_order():
+    """A draw pipeline must start with an image"""
+    data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
+    img = Image.from_array(data)
+
+    box1 = Box2d(1, 2, 10, 12)
+
+    with pytest.raises(TypeError):
+        rendered = box1 | img

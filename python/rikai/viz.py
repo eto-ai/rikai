@@ -61,13 +61,12 @@ class Draw(Displayable, ABC):
         self.layers.append(layer)
         return self
 
-    def __and__(self, other: Drawable) -> Draw:
+    def __or__(self, other: Drawable) -> Draw:
         return self.draw(other)
 
 
 class Render(ABC):
-    """The base class for rendering a :py:class:`Draw`.
-    """
+    """The base class for rendering a :py:class:`Draw`."""
 
     @abstractmethod
     def rectangle(self, xy, color: str = "red", width: int = 1):

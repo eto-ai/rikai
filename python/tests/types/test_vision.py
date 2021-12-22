@@ -185,7 +185,7 @@ def test_draw_image():
     draw_boxes = img | box1 | box2
     pil_image = draw_boxes.display()
 
-    expected = Image.from_array(data).to_pil()
+    expected = Image.from_array(data).to_pil().convert("RGBA")
     draw = ImageDraw.Draw(expected)
     draw.rectangle((1.0, 2.0, 10.0, 12.0), outline="red")
     draw.rectangle((20, 20, 40, 40), outline="red")
@@ -201,7 +201,7 @@ def test_draw_styled_images():
     style = Style(color="yellow", width=3)
     styled_boxes = img | style(box1) | style(box2)
 
-    expected = Image.from_array(data).to_pil()
+    expected = Image.from_array(data).to_pil().convert("RGBA")
     draw = ImageDraw.Draw(expected)
     draw.rectangle((1, 2, 10, 12), outline="yellow", width=3)
     draw.rectangle((20, 20, 40, 40), outline="yellow", width=3)
@@ -214,7 +214,7 @@ def test_draw_styled_images():
         | box2 @ {"color": "green", "width": 10}
     )
 
-    sugar_expected = Image.from_array(data).to_pil()
+    sugar_expected = Image.from_array(data).to_pil().convert("RGBA")
     draw = ImageDraw.Draw(sugar_expected)
     draw.rectangle((1, 2, 10, 12), outline="green", width=10)
     draw.rectangle((20, 20, 40, 40), outline="green", width=10)

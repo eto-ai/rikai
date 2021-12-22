@@ -119,7 +119,8 @@ class PILRender(Render):
 
     def polygon(self, xy, color: str = DEFAULT_COLOR, fill: bool = True):
         if fill:
-            from PIL import Image as PILImage, ImageDraw
+            from PIL import Image as PILImage
+            from PIL import ImageDraw
 
             overlay = PILImage.new("RGBA", self.img.size, (255, 255, 255, 0))
             overlay_draw = ImageDraw.Draw(overlay)
@@ -137,7 +138,9 @@ class PILRender(Render):
         self.draw.text(xy, text, fill=color)
 
     def mask(self, arr: np.ndarray, color: str = DEFAULT_COLOR):
-        from PIL import Image as PILImage, ImageDraw
+        from PIL import Image as PILImage
+        from PIL import ImageDraw
+
         overlay = PILImage.new("RGBA", self.img.size, (255, 255, 255, 0))
         overlay_draw = ImageDraw.Draw(overlay)
         overlay_draw.bitmap((0, 0), PILImage.fromarray(arr), fill=color)

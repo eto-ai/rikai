@@ -56,7 +56,8 @@ class Style(Drawable):
     def render(self, render: Render, **kwargs):
         assert self.inner is not None
         # TODO: catch excessive parameters
-        return self.inner.render(render, **(self.kwargs | kwargs))
+        kwargs.update(self.kwargs)
+        return self.inner.render(render, **kwargs)
 
 
 class Draw(Displayable, ABC):

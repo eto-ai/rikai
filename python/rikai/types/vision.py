@@ -317,13 +317,6 @@ class ImageDraw(Draw):
             layer.render(render)
         return Image.from_pil(render.image)
 
-    #
-    # def _repr_jpeg_(self):
-    #     """default visualizer for embedded jpeg"""
-    #
-    #     print("REPR JPEG")
-    #     return self.display()._repr_jpeg_()
-
     def _repr_png_(self):
         """default visualizer for embedded png"""
         return self.display()._repr_png_()

@@ -26,6 +26,7 @@ __all__ = ["Style"]
 
 class Style(Drawable):
     """Styling a drawable-component."""
+
     def __init__(self, **kwarg):
         self.kwargs = kwarg
         self.inner = None  # type: Optional[Drawable]
@@ -45,8 +46,7 @@ class Style(Drawable):
 
 
 class Draw(Displayable, ABC):
-    """Draw is a container that contain the elements for visualized lazily.
-    """
+    """Draw is a container that contain the elements for visualized lazily."""
 
     def __init__(self):
         self.layers = []
@@ -88,6 +88,7 @@ class PILRender(Render):
 
     def __init__(self, draw: "PIL.ImageDraw"):
         from PIL import ImageDraw
+
         self.draw = draw  # type: ImageDraw
 
     def rectangle(self, xy, color: str = "red", width: int = 1):

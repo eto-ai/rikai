@@ -214,8 +214,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, Drawable, ToDict):
         return isinstance(other, Image) and super().__eq__(other)
 
     def __and__(self, other: Drawable) -> Draw:
-        """Override ``&`` operator to chain images with visualization components.
-        """
+        """Override ``&`` operator to chain images with visualization components."""
         return self.draw(other)
 
     def render(self, render: "rikai.viz.Render", **kwargs) -> None:
@@ -303,7 +302,6 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, Drawable, ToDict):
 
 
 class ImageDraw(Draw):
-
     def display(self, **kwargs) -> "IPython.display.DisplayObject":
         if not self.layers:
             raise ValueError("Can not render empty displayable draw")

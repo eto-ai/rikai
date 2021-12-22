@@ -24,7 +24,7 @@ from typing import Optional, Sequence, Tuple, Union
 import numpy as np
 from PIL import Image, ImageDraw
 
-from rikai.mixin import ToDict, ToNumpy
+from rikai.mixin import Drawable, ToDict, ToNumpy
 from rikai.spark.types.geometry import (
     Box2dType,
     Box3dType,
@@ -32,7 +32,6 @@ from rikai.spark.types.geometry import (
     PointType,
 )
 from rikai.types import rle
-from rikai.mixin import Drawable
 
 __all__ = ["Point", "Box3d", "Box2d", "Mask"]
 

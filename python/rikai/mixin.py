@@ -19,7 +19,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from io import BytesIO
 from pathlib import Path
-from typing import BinaryIO, Optional, Union, Mapping
+from typing import BinaryIO, Mapping, Optional, Union
 
 # Third Party
 import numpy as np

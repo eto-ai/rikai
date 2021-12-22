@@ -75,7 +75,8 @@ class Drawable(ABC):
 
         if not isinstance(style, (Mapping, Style)):
             raise ValueError(
-                f"Must decorate drawable with a dict or style object, but got {style}"
+                f"Must decorate drawable with a dict or style object"
+                " but got {style}"
             )
         if isinstance(style, dict):
             style = Style(**style)

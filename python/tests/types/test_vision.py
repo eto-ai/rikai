@@ -20,7 +20,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from PIL import Image as PILImage
+from PIL import Image as PILImage, ImageDraw
 
 from rikai.types.geometry import Box2d
 from rikai.types.vision import Image
@@ -152,7 +152,7 @@ def test_show_remote_ref():
 
 
 def test_save_image_as_external(tmp_path):
-    # Store an embeded image to an external loczltion
+    # Store an embedded image to an external location
     data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
     img = Image.from_array(data)
     ext_path = str(tmp_path / "ext.png")
@@ -181,4 +181,11 @@ def test_draw_image():
     box1 = Box2d(1, 2, 10, 12)
     box2 = Box2d(20, 20, 40, 40)
     draw_boxes = img & box1 & box2
-    print(draw_boxes.display())
+    pil_image = draw_boxes.display()
+
+    expected = Image.from_array(data).to_pil()
+    draw = ImageDraw.Draw(expected)
+    draw.rectangle((1.0, 2.0, 10.0, 12.0), outline="red")
+    draw.rectangle((20, 20, 40, 40), outline="red")
+    assert np.array_equal(pil_image.to_numpy(), expected)
+

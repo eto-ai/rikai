@@ -66,6 +66,9 @@ class Draw(Displayable, ABC):
 
 
 class Render(ABC):
+    """The base class for rendering a :py:class:`Draw`.
+    """
+
     @abstractmethod
     def rectangle(self, xy, color: str = "red", width: int = 1):
         pass
@@ -84,7 +87,7 @@ class Render(ABC):
 
 
 class PILRender(Render):
-    """Use PIL to render components"""
+    """Use PIL to render drawables"""
 
     def __init__(self, draw: "PIL.ImageDraw"):
         from PIL import ImageDraw
@@ -95,7 +98,7 @@ class PILRender(Render):
         self.draw.rectangle(xy, outline=color, width=width)
 
     def polygon(self, xy):
-        pass
+        self.draw.polygon(xy=xy)
 
     def text(self, xy, text: str, color: str = ""):
         self.draw.text(xy, text, fill=color)

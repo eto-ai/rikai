@@ -38,6 +38,10 @@ jobs:
         java-version: 11
     - name: Run style check
       run: make lint
+    - name: Start docker-compose
+      run: |
+        docker-compose -f .github/docker-compose.yml up -d
+        sleep 10
     - name: Run Scala tests
       run: sbt test
       env:
@@ -61,3 +65,5 @@ jobs:
         github_token: ${{ secrets.RELEASE_TOKEN }}
         branch: master
         tags: true
+    - name: Stop docker-compose
+      run: docker-compose -f .github/docker-compose.yml down

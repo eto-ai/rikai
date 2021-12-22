@@ -68,7 +68,7 @@ jobs:
         SPARK_LOCAL_IP: "127.0.0.1"
         TEST_MLFLOW_TRACKING_URI: "http://localhost:15000"
   mac-build:
-    runs-on: macos-latest
+    runs-on: macos-11
     timeout-minutes: 10
     steps:
     - uses: actions/checkout@v2

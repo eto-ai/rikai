@@ -214,7 +214,7 @@ def register_udf(spark: SparkSession, udf: Callable, name: str) -> str:
 def codegen_from_spec(
     spark: SparkSession, spec: dict, name: Optional[str] = None
 ) -> str:
-    """Generate code from an MLFlow runid
+    """Generate code from a model spec info dict
 
     Parameters
     ----------

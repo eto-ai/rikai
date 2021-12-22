@@ -612,9 +612,11 @@ class Mask(ToNumpy, ToDict, Drawable):
             im = im.resize((self.width, self.height))
             return np.array(im)
 
-    def render(self, render):
+    def render(self, render, **kwargs):
+        """Render"""
         if self.type == Mask.Type.POLYGON:
-            render.polygon(self.data)
+            for segmentation in self.data:
+                render.polygon(segmentation, **kwargs)
         else:
             render.mask(self.to_mask())
 

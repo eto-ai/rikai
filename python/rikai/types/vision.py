@@ -310,18 +310,19 @@ class ImageDraw(Draw):
         if not isinstance(self.layers[0], Image):
             raise ValueError("ImageDraw must start with an image")
 
-        from PIL import ImageDraw as PILDraw
-
         # make a copy of image
         img = self.layers[0].to_pil()
-        render = PILRender(PILDraw.Draw(img))
+        render = PILRender(img)
         for layer in self.layers[1:]:
             layer.render(render)
-        return Image.from_pil(img)
+        return Image.from_pil(render.image)
 
-    def _repr_jpeg_(self):
-        """default visualizer for embedded jpeg"""
-        return self.display()._repr_jpeg_()
+    #
+    # def _repr_jpeg_(self):
+    #     """default visualizer for embedded jpeg"""
+    #
+    #     print("REPR JPEG")
+    #     return self.display()._repr_jpeg_()
 
     def _repr_png_(self):
         """default visualizer for embedded png"""

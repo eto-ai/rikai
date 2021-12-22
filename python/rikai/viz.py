@@ -102,16 +102,33 @@ class Render(ABC):
 class PILRender(Render):
     """Use PIL to render drawables"""
 
-    def __init__(self, draw: "PIL.ImageDraw"):
+    def __init__(self, img: "PIL.Image"):
         from PIL import ImageDraw
 
-        self.draw = draw  # type: ImageDraw
+        self.img = img.convert("RGBA")
+        self.draw = ImageDraw.Draw(self.img)  # type: ImageDraw
+
+    @property
+    def image(self) -> "PIL.Image":
+        return self.img
 
     def rectangle(self, xy, color: str = "red", width: int = 1):
         self.draw.rectangle(xy, outline=color, width=width)
 
-    def polygon(self, xy):
-        self.draw.polygon(xy=xy)
+    def polygon(self, xy, color: str = "red", fill_transparency: float = 0.2):
+        self.draw.polygon(xy=xy, outline=color)
+        if fill_transparency:
+            from PIL import Image as PILImage, ImageDraw
+
+            overlay = PILImage.new("RGBA", self.img.size, (255, 255, 255, 0))
+            overlay_draw = ImageDraw.Draw(overlay)
+            mask_img = PILImage.new("L", self.draw.im.size, 0)
+            mask_draw = ImageDraw.Draw(mask_img)
+            mask_draw.polygon(xy=xy, fill=color)
+            overlay_draw.bitmap((0, 0), mask_img, fill=color)
+
+            self.img = PILImage.alpha_composite(self.img, overlay)
+            self.draw = ImageDraw.Draw(self.img)
 
     def text(self, xy, text: str, color: str = ""):
         self.draw.text(xy, text, fill=color)

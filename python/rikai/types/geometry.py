@@ -25,7 +25,12 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 from rikai.mixin import Drawable, ToDict, ToNumpy
-from rikai.spark.types.geometry import Box2dType, Box3dType, MaskType, PointType
+from rikai.spark.types.geometry import (
+    Box2dType,
+    Box3dType,
+    MaskType,
+    PointType,
+)
 from rikai.types import rle
 
 __all__ = ["Point", "Box3d", "Box2d", "Mask"]

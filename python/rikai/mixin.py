@@ -72,8 +72,11 @@ class Drawable(ABC):
 
     def __matmul__(self, style: Union[dict, "rikai.viz.Style"]) -> Drawable:
         from rikai.viz import Style
+
         if not isinstance(style, (Mapping, Style)):
-            raise ValueError(f"Must decorate drawable with a dict or style object, but got {style}")
+            raise ValueError(
+                f"Must decorate drawable with a dict or style object, but got {style}"
+            )
         if isinstance(style, dict):
             style = Style(**style)
         return style(self)

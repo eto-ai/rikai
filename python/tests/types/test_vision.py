@@ -208,7 +208,11 @@ def test_draw_styled_images():
     assert np.array_equal(styled_boxes.display().to_numpy(), expected)
 
     # Sugar!
-    sugar_boxes = img | box1@{"color": "green", "width": 10} | box2@{"color": "green", "width": 10}
+    sugar_boxes = (
+        img
+        | box1 @ {"color": "green", "width": 10}
+        | box2 @ {"color": "green", "width": 10}
+    )
 
     sugar_expected = Image.from_array(data).to_pil()
     draw = ImageDraw.Draw(sugar_expected)
@@ -228,4 +232,4 @@ def test_wrong_draw_order():
         rendered = box1 | img
 
     with pytest.raises(TypeError):
-        rendered = img | {"color": "white"}@box1
+        rendered = img | {"color": "white"} @ box1

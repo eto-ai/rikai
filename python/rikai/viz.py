@@ -102,6 +102,8 @@ class Render(ABC):
 class PILRender(Render):
     """Use PIL to render drawables"""
 
+    DEFAULT_COLOR = "red"
+
     def __init__(self, img: "PIL.Image"):
         from PIL import ImageDraw
 
@@ -112,12 +114,11 @@ class PILRender(Render):
     def image(self) -> "PIL.Image":
         return self.img
 
-    def rectangle(self, xy, color: str = "red", width: int = 1):
+    def rectangle(self, xy, color: str = DEFAULT_COLOR, width: int = 1):
         self.draw.rectangle(xy, outline=color, width=width)
 
-    def polygon(self, xy, color: str = "red", fill_transparency: float = 0.2):
-        self.draw.polygon(xy=xy, outline=color)
-        if fill_transparency:
+    def polygon(self, xy, color: str = DEFAULT_COLOR, fill: bool = True):
+        if fill:
             from PIL import Image as PILImage, ImageDraw
 
             overlay = PILImage.new("RGBA", self.img.size, (255, 255, 255, 0))
@@ -129,9 +130,17 @@ class PILRender(Render):
 
             self.img = PILImage.alpha_composite(self.img, overlay)
             self.draw = ImageDraw.Draw(self.img)
+        else:
+            self.draw.polygon(xy=xy, outline=color)
 
-    def text(self, xy, text: str, color: str = ""):
+    def text(self, xy, text: str, color: str = DEFAULT_COLOR):
         self.draw.text(xy, text, fill=color)
 
-    def mask(self, arr: np.ndarray):
-        pass
+    def mask(self, arr: np.ndarray, color: str = DEFAULT_COLOR):
+        from PIL import Image as PILImage, ImageDraw
+        overlay = PILImage.new("RGBA", self.img.size, (255, 255, 255, 0))
+        overlay_draw = ImageDraw.Draw(overlay)
+        overlay_draw.bitmap((0, 0), PILImage.fromarray(arr), fill=color)
+
+        self.img = PILImage.alpha_composite(self.img, overlay)
+        self.draw = ImageDraw.Draw(self.img)

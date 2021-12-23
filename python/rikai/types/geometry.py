@@ -518,7 +518,7 @@ class Mask(ToNumpy, ToDict):
             height is None or width is None
         ):
             raise ValueError(
-                "Must provide height and width for RLE or Polygon type"
+                "Must provide height and width for RLE type"
             )
 
         self.type = mask_type
@@ -569,10 +569,6 @@ class Mask(ToNumpy, ToDict):
         data: list[list[float]]
             Multiple Polygon segmentation data. i.e.,
             ``[[x0, y0, x1, y1, ...], [x0, y0, x1, y1, ...]])``
-        height: int
-            The height of the image which the mask applies to.
-        width: int
-            The width of the image which the mask applies to.
         """
         return Mask(data, mask_type=Mask.Type.POLYGON)
 

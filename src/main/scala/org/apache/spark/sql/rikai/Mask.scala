@@ -111,7 +111,7 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
         maskType match {
           case MaskTypeEnum.Polygon =>
             Mask.fromPolygon(
-              row.getArray(3).toArray[Seq[Float]](ArrayType(FloatType)).toSeq,
+              row.getArray(3).toArray[Seq[Float]](ArrayType(FloatType)).toSeq
             )
           case MaskTypeEnum.Rle =>
             val height = row.getInt(1)

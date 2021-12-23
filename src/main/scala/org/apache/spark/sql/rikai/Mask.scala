@@ -37,25 +37,35 @@ object MaskTypeEnum extends Enumeration {
 @SQLUserDefinedType(udt = classOf[MaskType])
 class Mask(
     val maskType: MaskTypeEnum.Type,
-    val height: Int,
-    val width: Int,
     val polygon: Option[Seq[Seq[Float]]] = None,
+    val height: Option[Int] = None,
+    val width: Option[Int] = None,
     val rle: Option[Array[Int]] = None
 ) {}
 
 object Mask {
 
   /** Construct a Mask from polygon array */
-  def fromPolygon(data: Seq[Seq[Float]], height: Int, width: Int): Mask = {
-    new Mask(MaskTypeEnum.Polygon, height, width, polygon = Some(data))
+  def fromPolygon(data: Seq[Seq[Float]]): Mask = {
+    new Mask(MaskTypeEnum.Polygon, polygon = Some(data))
   }
 
   def fromRLE(data: Array[Int], height: Int, width: Int): Mask = {
-    new Mask(MaskTypeEnum.Rle, height, width, rle = Some(data))
+    new Mask(
+      MaskTypeEnum.Rle,
+      height = Some(height),
+      width = Some(width),
+      rle = Some(data)
+    )
   }
 
   def fromCocoRLE(data: Array[Int], height: Int, width: Int): Mask = {
-    new Mask(MaskTypeEnum.CocoRle, height, width, rle = Some(data))
+    new Mask(
+      MaskTypeEnum.CocoRle,
+      height = Some(height),
+      width = Some(width),
+      rle = Some(data)
+    )
   }
 }
 
@@ -64,8 +74,8 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
   override def sqlType: DataType = StructType(
     Seq(
       StructField("type", IntegerType, nullable = false),
-      StructField("height", IntegerType, nullable = false),
-      StructField("width", IntegerType, nullable = false),
+      StructField("height", IntegerType, nullable = true),
+      StructField("width", IntegerType, nullable = true),
       StructField(
         "polygon",
         ArrayType(ArrayType(FloatType))
@@ -79,10 +89,10 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
   override def serialize(m: Mask): InternalRow = {
     val row = new GenericInternalRow(5)
     row.setInt(0, m.maskType.id)
-    row.setInt(1, m.height)
-    row.setInt(2, m.width)
     m.maskType match {
       case MaskTypeEnum.Rle | MaskTypeEnum.CocoRle =>
+        row.setInt(1, m.height.get)
+        row.setInt(2, m.width.get)
         row.setNullAt(3)
         row.update(4, UnsafeArrayData.fromPrimitiveArray(m.rle.get))
       case MaskTypeEnum.Polygon =>
@@ -97,22 +107,23 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
     datum match {
       case row: InternalRow =>
         val maskType: MaskTypeEnum.Type = MaskTypeEnum(row.getInt(0))
-        val height = row.getInt(1)
-        val width = row.getInt(2)
+
         maskType match {
           case MaskTypeEnum.Polygon =>
             Mask.fromPolygon(
               row.getArray(3).toArray[Seq[Float]](ArrayType(FloatType)).toSeq,
-              height,
-              width
             )
           case MaskTypeEnum.Rle =>
+            val height = row.getInt(1)
+            val width = row.getInt(2)
             Mask.fromRLE(
               row.getArray(4).toArray[Int](IntegerType),
               height,
               width
             )
           case MaskTypeEnum.CocoRle =>
+            val height = row.getInt(1)
+            val width = row.getInt(2)
             Mask.fromCocoRLE(
               row.getArray(4).toArray[Int](IntegerType),
               height,

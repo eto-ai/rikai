@@ -159,13 +159,11 @@ class MaskType(UserDefinedType):
 
     @classmethod
     def sqlType(cls) -> StructType:
-        from rikai.numpy import NDArrayType
-
         return StructType(
             fields=[
                 StructField("type", ShortType(), False),
-                StructField("height", IntegerType(), False),
-                StructField("width", IntegerType(), False),
+                StructField("height", IntegerType(), True),
+                StructField("width", IntegerType(), True),
                 StructField(
                     "polygon",
                     ArrayType(ArrayType(FloatType(), False), False),
@@ -201,7 +199,7 @@ class MaskType(UserDefinedType):
         height = datum[1]
         width = datum[2]
         if mask_type == Mask.Type.POLYGON:
-            return Mask.from_polygon(datum[3], height=height, width=width)
+            return Mask.from_polygon(datum[3])
         elif mask_type == Mask.Type.RLE:
             return Mask.from_rle(datum[4], height=height, width=width)
         elif mask_type == Mask.Type.COCO_RLE:

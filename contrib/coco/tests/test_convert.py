@@ -32,9 +32,7 @@ def test_covert_segmentation():
         ann_ids = coco.getAnnIds(imgIds=image_id)
         for ann in coco.loadAnns(ann_ids):
             if ann["iscrowd"] == 0:
-                mask = Mask.from_polygon(
-                    ann["segmentation"], height=height, width=width
-                )
+                mask = Mask.from_polygon(ann["segmentation"])
                 # TODO: currently, it has disparity of the conversion between
                 # polygon to mask between coco and rikai (PIL based)
             else:

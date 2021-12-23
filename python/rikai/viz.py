@@ -18,6 +18,8 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 import numpy as np
+from PIL import Image as PILImage
+from PIL import ImageDraw
 
 from rikai.mixin import Displayable, Drawable
 
@@ -105,14 +107,12 @@ class PILRenderer(Renderer):
 
     DEFAULT_COLOR = "red"
 
-    def __init__(self, img: "PIL.Image"):
-        from PIL import ImageDraw
-
+    def __init__(self, img: PILImage):
         self.img = img.convert("RGBA")
         self.draw = ImageDraw.Draw(self.img)  # type: ImageDraw
 
     @property
-    def image(self) -> "PIL.Image":
+    def image(self) -> PILImage:
         return self.img
 
     def rectangle(self, xy, color: str = DEFAULT_COLOR, width: int = 1):
@@ -120,9 +120,6 @@ class PILRenderer(Renderer):
 
     def polygon(self, xy, color: str = DEFAULT_COLOR, fill: bool = True):
         if fill:
-            from PIL import Image as PILImage
-            from PIL import ImageDraw
-
             overlay = PILImage.new("RGBA", self.img.size, (255, 255, 255, 0))
             overlay_draw = ImageDraw.Draw(overlay)
             mask_img = PILImage.new("L", self.draw.im.size, 0)
@@ -139,9 +136,6 @@ class PILRenderer(Renderer):
         self.draw.text(xy, text, fill=color)
 
     def mask(self, arr: np.ndarray, color: str = DEFAULT_COLOR):
-        from PIL import Image as PILImage
-        from PIL import ImageDraw
-
         overlay = PILImage.new("RGBA", self.img.size, (255, 255, 255, 0))
         overlay_draw = ImageDraw.Draw(overlay)
         overlay_draw.bitmap((0, 0), PILImage.fromarray(arr), fill=color)

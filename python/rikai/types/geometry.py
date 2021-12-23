@@ -514,7 +514,9 @@ class Mask(ToNumpy, ToDict):
         width: Optional[int] = None,
         mask_type: Mask.Type = Type.POLYGON,
     ):
-        if mask_type != Mask.Type.POLYGON and (height is None or width is None):
+        if mask_type != Mask.Type.POLYGON and (
+            height is None or width is None
+        ):
             raise ValueError(
                 "Must provide height and width for RLE or Polygon type"
             )

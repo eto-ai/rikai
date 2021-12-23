@@ -30,12 +30,13 @@ import numpy as np
 from PIL import Image as PILImage
 
 # Rikai
-from rikai.conf import CONF_RIKAI_IMAGE_DEFAULT_FORMAT, options
+from rikai.conf import options
 from rikai.internal.uri_utils import normalize_uri
 from rikai.io import copy, open_output_stream
-from rikai.mixin import Asset, Displayable, ToDict, ToNumpy, ToPIL
+from rikai.mixin import Asset, Displayable, Drawable, ToDict, ToNumpy, ToPIL
 from rikai.spark.types import ImageType
 from rikai.types.geometry import Box2d
+from rikai.viz import Draw, PILRenderer
 
 __all__ = ["Image"]
 
@@ -183,6 +184,9 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
                     url=url, embed=True, format=inferred_format, **kwargs
                 )
 
+    def draw(self, drawable: Drawable) -> Draw:
+        return ImageDraw(self).draw(drawable)
+
     def __repr__(self) -> str:
         if self.is_embedded:
             return "Image(<embedded>)"
@@ -208,6 +212,12 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
 
     def __eq__(self, other) -> bool:
         return isinstance(other, Image) and super().__eq__(other)
+
+    def __or__(self, other: Drawable) -> Draw:
+        """Override ``|`` operator to chain images with
+        visualization components.
+        """
+        return self.draw(other)
 
     def to_pil(self) -> PILImage:
         """Return an PIL image.
@@ -288,3 +298,22 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
                 with pil_image.crop(bbox) as patch:
                     crops.append(Image.from_pil(patch))
         return crops
+
+
+class ImageDraw(Draw):
+    def __init__(self, img: Image):
+        super().__init__()
+        self.img = img.to_pil()
+
+    def display(self, **kwargs) -> "IPython.display.DisplayObject":
+        if not self.layers:
+            raise ValueError("Can not render empty displayable draw")
+
+        render = PILRenderer(self.img)
+        for layer in self.layers:
+            layer._render(render)
+        return Image.from_pil(render.image)
+
+    def _repr_png_(self):
+        """default visualizer for embedded png"""
+        return self.display()._repr_png_()

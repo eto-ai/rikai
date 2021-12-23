@@ -24,7 +24,7 @@ from typing import Optional, Sequence, Tuple, Union
 import numpy as np
 from PIL import Image, ImageDraw
 
-from rikai.mixin import ToDict, ToNumpy
+from rikai.mixin import Drawable, ToDict, ToNumpy
 from rikai.spark.types.geometry import (
     Box2dType,
     Box3dType,
@@ -75,7 +75,7 @@ class Point(ToNumpy, ToDict):
         return {"x": self.x, "y": self.y, "z": self.z}
 
 
-class Box2d(ToNumpy, Sequence, ToDict):
+class Box2d(ToNumpy, Sequence, ToDict, Drawable):
     """2-D Bounding Box, defined by ``(xmin, ymin, xmax, ymax)``
 
     Attributes
@@ -253,6 +253,9 @@ class Box2d(ToNumpy, Sequence, ToDict):
         """
         x_scale, y_scale = self._verified_scale(scale)
         return self / (1.0 / x_scale, 1.0 / y_scale)
+
+    def _render(self, render: "rikai.viz.Renderer", **kwargs) -> None:
+        render.rectangle(self, **kwargs)
 
     def to_numpy(self) -> np.ndarray:
         """Convert a :py:class:`Box2d` to numpy ndarray:
@@ -450,7 +453,7 @@ class Box3d(ToNumpy, ToDict):
         }
 
 
-class Mask(ToNumpy, ToDict):
+class Mask(ToNumpy, ToDict, Drawable):
     """2-d Mask over an image
 
     This 2D mask can be built from:
@@ -602,6 +605,14 @@ class Mask(ToNumpy, ToDict):
                 draw.polygon(list(np.array(polygon)), fill=1)
             im = im.resize((self.width, self.height))
             return np.array(im)
+
+    def _render(self, render, **kwargs):
+        """Render a Mask"""
+        if self.type == Mask.Type.POLYGON:
+            for segmentation in self.data:
+                render.polygon(segmentation, **kwargs)
+        else:
+            render.mask(self.to_mask())
 
     def to_mask(self) -> np.ndarray:
         """Convert this mask to a numpy array."""

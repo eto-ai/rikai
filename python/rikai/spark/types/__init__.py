@@ -30,7 +30,12 @@ from pyspark.sql.types import (
 
 # Rikai
 import rikai
-from rikai.spark.types.geometry import Box2dType, Box3dType, PointType
+from rikai.spark.types.geometry import (
+    Box2dType,
+    Box3dType,
+    MaskType,
+    PointType,
+)
 from rikai.spark.types.video import (
     SegmentType,
     VideoStreamType,
@@ -46,6 +51,7 @@ __all__ = [
     "Box2dType",
     "VideoStreamType",
     "YouTubeVideoType",
+    "MaskType",
     "SegmentType",
 ]
 

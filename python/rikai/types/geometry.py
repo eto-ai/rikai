@@ -517,9 +517,7 @@ class Mask(ToNumpy, ToDict):
         if mask_type != Mask.Type.POLYGON and (
             height is None or width is None
         ):
-            raise ValueError(
-                "Must provide height and width for RLE type"
-            )
+            raise ValueError("Must provide height and width for RLE type")
 
         self.type = mask_type
         self.data = data

@@ -21,6 +21,7 @@ import org.apache.spark.sql.catalyst.expressions.{
   GenericInternalRow,
   UnsafeArrayData
 }
+import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.types._
 
 object MaskTypeEnum extends Enumeration {
@@ -37,16 +38,21 @@ object MaskTypeEnum extends Enumeration {
 @SQLUserDefinedType(udt = classOf[MaskType])
 class Mask(
     val maskType: MaskTypeEnum.Type,
-    val polygon: Option[Seq[Seq[Float]]] = None,
+    val polygon: Option[Array[Array[Float]]] = None,
     val height: Option[Int] = None,
     val width: Option[Int] = None,
     val rle: Option[Array[Int]] = None
-) {}
+) {
+
+  override def toString: String = {
+    s"Mask($maskType)"
+  }
+}
 
 object Mask {
 
   /** Construct a Mask from polygon array */
-  def fromPolygon(data: Seq[Seq[Float]]): Mask = {
+  def fromPolygon(data: Array[Array[Float]]): Mask = {
     new Mask(MaskTypeEnum.Polygon, polygon = Some(data))
   }
 
@@ -96,7 +102,13 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
         row.setNullAt(3)
         row.update(4, UnsafeArrayData.fromPrimitiveArray(m.rle.get))
       case MaskTypeEnum.Polygon =>
-        row.update(3, m.polygon.get)
+        val arrayData = new GenericArrayData(
+          m.polygon.get.map(arr => UnsafeArrayData.fromPrimitiveArray(arr))
+        )
+        row.update(
+          3,
+          arrayData
+        )
         row.setNullAt(4)
       case _ => throw new NotImplementedError()
     }
@@ -110,9 +122,11 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
 
         maskType match {
           case MaskTypeEnum.Polygon =>
-            Mask.fromPolygon(
-              row.getArray(3).toArray[Seq[Float]](ArrayType(FloatType)).toSeq
-            )
+            val data = row.getArray(3)
+            val polygon = (0 until data.numElements())
+              .map(idx => data.getArray(idx).toFloatArray())
+              .toArray
+            Mask.fromPolygon(polygon)
           case MaskTypeEnum.Rle =>
             val height = row.getInt(1)
             val width = row.getInt(2)

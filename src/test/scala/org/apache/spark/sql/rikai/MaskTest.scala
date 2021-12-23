@@ -30,7 +30,11 @@ class MaskTest extends AnyFunSuite with SparkTestSession {
     val testDir =
       new File(Files.createTempDirectory("rikai").toFile, "dataset")
 
-    val df = Seq((1, Mask.fromRLE(Array(1, 2, 3), 10, 5))).toDF("id", "segment")
+    val df =
+      Seq(
+        (1, Mask.fromRLE(Array(1, 2, 3), 10, 5)),
+        (2, Mask.fromPolygon(Array(Array(1, 1, 5, 5, 10, 10))))
+      ).toDF("id", "segmentation")
 
     df.write.format("rikai").save(testDir.toString)
 

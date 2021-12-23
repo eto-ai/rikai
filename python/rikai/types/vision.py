@@ -214,7 +214,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
         return isinstance(other, Image) and super().__eq__(other)
 
     def __or__(self, other: Drawable) -> Draw:
-        """Override ``&`` operator to chain images with
+        """Override ``|`` operator to chain images with
         visualization components.
         """
         return self.draw(other)

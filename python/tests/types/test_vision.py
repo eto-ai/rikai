@@ -221,6 +221,33 @@ def test_draw_styled_images():
     assert np.array_equal(sugar_boxes.display().to_numpy(), sugar_expected)
 
 
+def test_draw_list_of_boxes():
+    data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
+    img = Image.from_array(data)
+    boxes = [Box2d(1, 2, 10, 12), Box2d(20, 20, 30, 30)]
+    pil_image = (img | boxes).display()
+
+    expected = Image.from_array(data).to_pil().convert("RGBA")
+    draw = ImageDraw.Draw(expected)
+    for box in boxes:
+        draw.rectangle(box, outline="red")
+    assert np.array_equal(pil_image.to_numpy(), expected)
+
+
+def test_draw_styled_list_of_boxes():
+    data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
+    img = Image.from_array(data)
+    boxes = [Box2d(1, 2, 10, 12), Box2d(20, 20, 30, 30)]
+    style = Style(color="yellow", width=3)
+    pil_image = (img | style(boxes)).display()
+
+    expected = Image.from_array(data).to_pil().convert("RGBA")
+    draw = ImageDraw.Draw(expected)
+    for box in boxes:
+        draw.rectangle(box, outline="yellow", width=3)
+    assert np.array_equal(pil_image.to_numpy(), expected)
+
+
 def test_wrong_draw_order():
     """A draw pipeline must start with an image"""
     data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)

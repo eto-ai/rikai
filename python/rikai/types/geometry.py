@@ -254,7 +254,7 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
         x_scale, y_scale = self._verified_scale(scale)
         return self / (1.0 / x_scale, 1.0 / y_scale)
 
-    def render(self, render: "rikai.viz.Render", **kwargs) -> None:
+    def _render(self, render: "rikai.viz.Renderer", **kwargs) -> None:
         render.rectangle(self, **kwargs)
 
     def to_numpy(self) -> np.ndarray:
@@ -612,8 +612,8 @@ class Mask(ToNumpy, ToDict, Drawable):
             im = im.resize((self.width, self.height))
             return np.array(im)
 
-    def render(self, render, **kwargs):
-        """Render"""
+    def _render(self, render, **kwargs):
+        """Render a Mask"""
         if self.type == Mask.Type.POLYGON:
             for segmentation in self.data:
                 render.polygon(segmentation, **kwargs)

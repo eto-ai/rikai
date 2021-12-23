@@ -53,11 +53,11 @@ class Style(Drawable):
         s.inner = inner
         return s
 
-    def render(self, render: Render, **kwargs):
+    def _render(self, render: Renderer, **kwargs):
         assert self.inner is not None
         # TODO: catch excessive parameters
         kwargs.update(self.kwargs)
-        return self.inner.render(render, **kwargs)
+        return self.inner._render(render, **kwargs)
 
 
 class Draw(Displayable, ABC):
@@ -80,7 +80,7 @@ class Draw(Displayable, ABC):
         return self.draw(other)
 
 
-class Render(ABC):
+class Renderer(ABC):
     """The base class for rendering a :py:class:`Draw`."""
 
     @abstractmethod
@@ -100,7 +100,7 @@ class Render(ABC):
         pass
 
 
-class PILRender(Render):
+class PILRenderer(Renderer):
     """Use PIL to render drawables"""
 
     DEFAULT_COLOR = "red"

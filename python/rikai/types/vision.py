@@ -36,12 +36,12 @@ from rikai.io import copy, open_output_stream
 from rikai.mixin import Asset, Displayable, Drawable, ToDict, ToNumpy, ToPIL
 from rikai.spark.types import ImageType
 from rikai.types.geometry import Box2d
-from rikai.viz import Draw, PILRender
+from rikai.viz import Draw, PILRenderer
 
 __all__ = ["Image"]
 
 
-class Image(ToNumpy, ToPIL, Asset, Displayable, Drawable, ToDict):
+class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
     """An external Image Asset.
 
     It contains a reference URI to an image stored on the remote system.
@@ -185,7 +185,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, Drawable, ToDict):
                 )
 
     def draw(self, drawable: Drawable) -> Draw:
-        return ImageDraw().draw(self).draw(drawable)
+        return ImageDraw(self).draw(drawable)
 
     def __repr__(self) -> str:
         if self.is_embedded:
@@ -218,9 +218,6 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, Drawable, ToDict):
         visualization components.
         """
         return self.draw(other)
-
-    def render(self, render: "rikai.viz.Render", **kwargs) -> None:
-        raise RuntimeError("Image should be the first in the visual pipeline")
 
     def to_pil(self) -> PILImage:
         """Return an PIL image.
@@ -304,17 +301,17 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, Drawable, ToDict):
 
 
 class ImageDraw(Draw):
+    def __init__(self, img: Image):
+        super().__init__()
+        self.img = img.to_pil()
+
     def display(self, **kwargs) -> "IPython.display.DisplayObject":
         if not self.layers:
             raise ValueError("Can not render empty displayable draw")
-        if not isinstance(self.layers[0], Image):
-            raise ValueError("ImageDraw must start with an image")
 
-        # make a copy of image
-        img = self.layers[0].to_pil()
-        render = PILRender(img)
-        for layer in self.layers[1:]:
-            layer.render(render)
+        render = PILRenderer(self.img)
+        for layer in self.layers:
+            layer._render(render)
         return Image.from_pil(render.image)
 
     def _repr_png_(self):

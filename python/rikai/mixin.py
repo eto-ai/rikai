@@ -67,7 +67,7 @@ class Drawable(ABC):
     """Mixin for a class that is drawable"""
 
     @abstractmethod
-    def render(self, render: "rikai.viz.Render", **kwargs) -> None:
+    def _render(self, render: "rikai.viz.Renderer", **kwargs) -> None:
         """Render the object using render."""
 
     def __matmul__(self, style: Union[dict, "rikai.viz.Style"]) -> Drawable:

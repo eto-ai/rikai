@@ -19,7 +19,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from io import BytesIO
 from pathlib import Path
-from typing import BinaryIO, Optional, Union
+from typing import BinaryIO, Mapping, Optional, Union
 
 # Third Party
 import numpy as np
@@ -28,7 +28,7 @@ import numpy as np
 from rikai.internal.uri_utils import uri_equal
 from rikai.io import open_uri
 
-__all__ = ["ToNumpy", "Asset", "Displayable", "ToDict"]
+__all__ = ["ToNumpy", "Asset", "Displayable", "Drawable", "ToDict"]
 
 
 class ToNumpy(ABC):
@@ -61,6 +61,26 @@ class Displayable(ABC):
     @abstractmethod
     def display(self, **kwargs) -> "IPython.display.DisplayObject":
         """Return an IPython.display.DisplayObject"""
+
+
+class Drawable(ABC):
+    """Mixin for a class that is drawable"""
+
+    @abstractmethod
+    def _render(self, render: "rikai.viz.Renderer", **kwargs) -> None:
+        """Render the object using render."""
+
+    def __matmul__(self, style: Union[dict, "rikai.viz.Style"]) -> Drawable:
+        from rikai.viz import Style
+
+        if not isinstance(style, (Mapping, Style)):
+            raise ValueError(
+                f"Must decorate drawable with a dict or style object"
+                " but got {style}"
+            )
+        if isinstance(style, dict):
+            style = Style(**style)
+        return style(self)
 
 
 class Asset(ABC):

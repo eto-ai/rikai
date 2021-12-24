@@ -21,17 +21,23 @@ from pathlib import Path
 import numpy as np
 import pytest
 from PIL import Image as PILImage
+from PIL import ImageDraw
 
 from rikai.types.geometry import Box2d
 from rikai.types.vision import Image
+from rikai.viz import Style
 
 
-def test_show_embedded_png(tmp_path):
+@pytest.fixture
+def test_image() -> PILImage:
     data = np.random.random((100, 100))
     rescaled = (255.0 / data.max() * (data - data.min())).astype(np.uint8)
-    im = PILImage.fromarray(rescaled)
+    return PILImage.fromarray(rescaled)
+
+
+def test_show_embedded_png(tmp_path, test_image):
     uri = tmp_path / "test.png"
-    im.save(uri)
+    test_image.save(uri)
     result = Image(uri)._repr_png_()
     with open(uri, "rb") as fh:
         expected = b2a_base64(fh.read()).decode("ascii")
@@ -42,12 +48,9 @@ def test_show_embedded_png(tmp_path):
         assert result == embedded_image._repr_png_()
 
 
-def test_show_embedded_jpeg(tmp_path):
-    data = np.random.random((100, 100))
-    rescaled = (255.0 / data.max() * (data - data.min())).astype(np.uint8)
-    im = PILImage.fromarray(rescaled)
+def test_show_embedded_jpeg(tmp_path, test_image):
     uri = tmp_path / "test.jpg"
-    im.save(uri)
+    test_image.save(uri)
     result = Image(uri)._repr_jpeg_()
     with open(uri, "rb") as fh:
         expected = b2a_base64(fh.read()).decode("ascii")
@@ -56,6 +59,23 @@ def test_show_embedded_jpeg(tmp_path):
         fh.seek(0)
         embedded_image = Image(fh)
         assert result == embedded_image._repr_jpeg_()
+
+
+def test_convert_to_embedded_image(tmp_path, test_image: PILImage):
+    uri = tmp_path / "test.jpg"
+    test_image.save(uri)
+
+    img = Image.read(uri)
+    assert img.is_embedded
+    with open(uri, mode="rb") as fobj:
+        assert img.data == fobj.read()
+
+    img2 = Image(uri)
+    img3 = img2.to_embedded()
+    assert not img2.is_embedded
+    assert img3.is_embedded
+    with open(uri, mode="rb") as fobj:
+        assert img3.data == fobj.read()
 
 
 def test_format_kwargs(tmp_path):
@@ -130,11 +150,11 @@ def test_show_remote_ref():
     img = Image(uri)
     # TODO check the actual content
     assert img._repr_html_() == img.display()._repr_html_()
-    assert img.display()._repr_html_() == IPyImage(uri)._repr_html_()
+    assert img.display()._repr_html_() == IPyImage(url=uri)._repr_html_()
 
 
 def test_save_image_as_external(tmp_path):
-    # Store an embeded image to an external loczltion
+    # Store an embedded image to an external location
     data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
     img = Image.from_array(data)
     ext_path = str(tmp_path / "ext.png")
@@ -154,3 +174,89 @@ def test_to_dict():
     )
     img = Image("foo")
     assert img.to_dict() == {"uri": "foo"}
+
+
+def test_draw_image():
+    data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
+    img = Image.from_array(data)
+
+    box1 = Box2d(1, 2, 10, 12)
+    box2 = Box2d(20, 20, 40, 40)
+    draw_boxes = img | box1 | box2
+    pil_image = draw_boxes.display()
+
+    expected = Image.from_array(data).to_pil().convert("RGBA")
+    draw = ImageDraw.Draw(expected)
+    draw.rectangle((1.0, 2.0, 10.0, 12.0), outline="red")
+    draw.rectangle((20, 20, 40, 40), outline="red")
+    assert np.array_equal(pil_image.to_numpy(), expected)
+
+
+def test_draw_styled_images():
+    data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
+    img = Image.from_array(data)
+    box1 = Box2d(1, 2, 10, 12)
+    box2 = Box2d(20, 20, 40, 40)
+
+    style = Style(color="yellow", width=3)
+    styled_boxes = img | style(box1) | style(box2)
+
+    expected = Image.from_array(data).to_pil().convert("RGBA")
+    draw = ImageDraw.Draw(expected)
+    draw.rectangle((1, 2, 10, 12), outline="yellow", width=3)
+    draw.rectangle((20, 20, 40, 40), outline="yellow", width=3)
+    assert np.array_equal(styled_boxes.display().to_numpy(), expected)
+
+    # Sugar!
+    sugar_boxes = (
+        img
+        | box1 @ {"color": "green", "width": 10}
+        | box2 @ {"color": "green", "width": 10}
+    )
+
+    sugar_expected = Image.from_array(data).to_pil().convert("RGBA")
+    draw = ImageDraw.Draw(sugar_expected)
+    draw.rectangle((1, 2, 10, 12), outline="green", width=10)
+    draw.rectangle((20, 20, 40, 40), outline="green", width=10)
+    assert np.array_equal(sugar_boxes.display().to_numpy(), sugar_expected)
+
+
+def test_draw_list_of_boxes():
+    data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
+    img = Image.from_array(data)
+    boxes = [Box2d(1, 2, 10, 12), Box2d(20, 20, 30, 30)]
+    pil_image = (img | boxes).display()
+
+    expected = Image.from_array(data).to_pil().convert("RGBA")
+    draw = ImageDraw.Draw(expected)
+    for box in boxes:
+        draw.rectangle(box, outline="red")
+    assert np.array_equal(pil_image.to_numpy(), expected)
+
+
+def test_draw_styled_list_of_boxes():
+    data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
+    img = Image.from_array(data)
+    boxes = [Box2d(1, 2, 10, 12), Box2d(20, 20, 30, 30)]
+    style = Style(color="yellow", width=3)
+    pil_image = (img | style(boxes)).display()
+
+    expected = Image.from_array(data).to_pil().convert("RGBA")
+    draw = ImageDraw.Draw(expected)
+    for box in boxes:
+        draw.rectangle(box, outline="yellow", width=3)
+    assert np.array_equal(pil_image.to_numpy(), expected)
+
+
+def test_wrong_draw_order():
+    """A draw pipeline must start with an image"""
+    data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
+    img = Image.from_array(data)
+
+    box1 = Box2d(1, 2, 10, 12)
+
+    with pytest.raises(TypeError):
+        rendered = box1 | img
+
+    with pytest.raises(TypeError):
+        rendered = img | {"color": "white"} @ box1

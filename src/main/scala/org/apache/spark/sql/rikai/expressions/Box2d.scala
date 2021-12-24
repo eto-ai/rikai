@@ -14,6 +14,8 @@
 
 package org.apache.spark.sql.rikai.expressions
 
+import com.thoughtworks.enableIf
+
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{
   BinaryExpression,
@@ -42,6 +44,10 @@ case class Area(child: Expression)
   override def dataType: DataType = DoubleType
 
   override def prettyName: String = "area"
+
+  @enableIf(scala.util.Properties.versionNumberString.compareTo("2.12.15") >= 0)
+  override def withNewChildInternal(newChild: Expression): Expression =
+    copy(child = newChild)
 }
 
 case class IOU(leftBox: Expression, rightBox: Expression)
@@ -63,4 +69,11 @@ case class IOU(leftBox: Expression, rightBox: Expression)
   }
 
   override def prettyName: String = "iou"
+
+  @enableIf(scala.util.Properties.versionNumberString.compareTo("2.12.15") >= 0)
+  override def withNewChildrenInternal(
+      newLeft: Expression,
+      newRight: Expression
+  ): Expression =
+    copy(leftBox = newLeft, rightBox = newRight)
 }

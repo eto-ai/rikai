@@ -52,6 +52,7 @@ class MlflowLogger:
         pre_processing: Optional[str] = None,
         post_processing: Optional[str] = None,
         registered_model_name: Optional[str] = None,
+        customized_flavor: Optional[str] = None,
         **kwargs,
     ):
         """Convenience function to log the model with tags needed by rikai.
@@ -115,7 +116,9 @@ class MlflowLogger:
         )
         tags = {
             CONF_MLFLOW_SPEC_VERSION: MlflowLogger._CURRENT_MODEL_SPEC_VERSION,
-            CONF_MLFLOW_MODEL_FLAVOR: self.flavor,
+            CONF_MLFLOW_MODEL_FLAVOR: customized_flavor
+            if customized_flavor
+            else self.flavor,
             CONF_MLFLOW_OUTPUT_SCHEMA: schema,
             CONF_MLFLOW_PRE_PROCESSING: pre_processing,
             CONF_MLFLOW_POST_PROCESSING: post_processing,

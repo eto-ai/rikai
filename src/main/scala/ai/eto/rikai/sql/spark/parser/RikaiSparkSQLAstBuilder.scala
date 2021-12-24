@@ -24,7 +24,8 @@ import org.apache.spark.sql.catalyst.analysis.UnresolvedAttribute
 import org.apache.spark.sql.catalyst.expressions.{Expression, Literal}
 import org.apache.spark.sql.catalyst.parser.ParserUtils.withOrigin
 import org.apache.spark.sql.catalyst.parser.SqlBaseParser.FunctionCallContext
-import org.apache.spark.sql.catalyst.parser.{AstBuilder, ParseException}
+import org.apache.spark.sql.catalyst.parser.ParseException
+import org.apache.spark.sql.execution.SparkSqlAstBuilder
 
 import java.util.Locale
 import scala.collection.JavaConverters.asScalaBufferConverter
@@ -33,15 +34,10 @@ import scala.collection.JavaConverters.asScalaBufferConverter
   * Spark SQL Select/Where/OrderBy clauses.
   */
 private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
-    extends AstBuilder {
+    extends SparkSqlAstBuilder {
 
   val catalog: Catalog =
-    Catalog.getOrCreate(
-      session.conf.get(
-        Catalog.SQL_ML_CATALOG_IMPL_KEY,
-        Catalog.SQL_ML_CATALOG_IMPL_DEFAULT
-      )
-    )
+    Catalog.getOrCreate(session.sparkContext.getConf)
 
   override def visitFunctionCall(ctx: FunctionCallContext): Expression =
     withOrigin(ctx) {
@@ -55,7 +51,7 @@ private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
     */
   def visitMlPredictFunction(ctx: FunctionCallContext): Expression =
     withOrigin(ctx) {
-      val arguments = ctx.argument.asScala.map(expression)
+      val arguments = ctx.argument.asScala.map(expression).toSeq
       if (arguments.size < 2) {
         throw new ParseException(
           s"${Predict.name.toUpperCase} requires at least 2 parameters, got ${arguments.size}",

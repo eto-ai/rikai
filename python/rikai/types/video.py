@@ -15,8 +15,6 @@
 """Video related types and utils"""
 from abc import ABC, abstractmethod
 
-import cv2
-
 from rikai.mixin import Displayable, ToDict
 from rikai.spark.types import SegmentType, VideoStreamType, YouTubeVideoType
 
@@ -277,6 +275,8 @@ class SingleFrameSampler(VideoSampler):
 
     def __iter__(self):
         # TODO use seek for sparse sampling and maybe multithreaded
+        import cv2
+
         cap = cv2.VideoCapture(self.stream.uri)
         if self.start_frame > 0:
             cap.set(cv2.CAP_PROP_POS_FRAMES, self.start_frame)

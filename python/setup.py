@@ -24,7 +24,7 @@ dev = [
     "wheel",
 ]
 sklearn = ["scikit-learn"]
-torch = ["torch>=1.9.0", "torchvision>=0.11.0"]
+torch = ["torch>=1.8.1", "torchvision>=0.9.1"]
 jupyter = ["matplotlib", "jupyterlab"]
 aws = ["boto3", "botocore"]
 gcp = ["gcsfs"]
@@ -52,11 +52,11 @@ setup(
         "ipython",
         "jsonschema",
         "numpy",
-        "opencv-python",
+        "opencv-python-headless",
         "pandas",
         "Pillow",
         "pyarrow>=2.0",
-        "pyspark>=3.1,<3.2",
+        "pyspark==3.1.2",
         "pyyaml",
         "requests",
         "semver",

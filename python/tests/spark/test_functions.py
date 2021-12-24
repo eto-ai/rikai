@@ -202,7 +202,7 @@ def test_crops(spark: SparkSession, tmp_path: Path):
     assert np.array_equal(patches[2].to_numpy(), data[20:40, 20:40, :])
 
 
-@pytest.mark.timeout(10)
+@pytest.mark.timeout(30)
 @pytest.mark.webtest
 def test_video_to_images(
     spark: SparkSession, tmp_path: Path, asset_path: Path
@@ -229,35 +229,12 @@ def test_video_to_images(
         ),
     )
 
-    df2 = spark.createDataFrame(
-        [(YouTubeVideo(vid="rUWxSEwctFU"), Segment(0, 20))],
-        ["video", "segment"],
-    )
-    output_dir = tmp_path / "youtube_test"
-    output_dir.mkdir(parents=True)
-    df2 = df2.withColumn(
-        "images",
-        video_to_images(
-            col("video"),
-            lit(str(output_dir)),
-            col("segment"),
-            lit(sample_rate),
-            lit(max_samples),
-        ),
-    )
-
     videostream_sample = df1.first()["images"]
-    youtube_sample = df2.first()["images"]
 
     assert (
         type(videostream_sample) == list
         and type(videostream_sample[0]) == Image
         and len(videostream_sample) == max_samples
-    )
-    assert (
-        type(youtube_sample) == list
-        and type(youtube_sample[0]) == Image
-        and len(youtube_sample) == max_samples
     )
 
 

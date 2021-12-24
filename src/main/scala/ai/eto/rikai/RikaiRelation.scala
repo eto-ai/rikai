@@ -64,7 +64,7 @@ class RikaiRelation(val options: RikaiOptions)(
   ): RDD[Row] = {
     var df = sqlContext.read
       .parquet(options.path)
-      .select(requiredColumns.map(col): _*)
+      .select(requiredColumns.map(col).toSeq: _*)
     for (filter <- filters) {
       df = FilterUtils.apply(df, filter)
     }

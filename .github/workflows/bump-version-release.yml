@@ -38,21 +38,33 @@ jobs:
         java-version: 11
     - name: Run style check
       run: make lint
+    - name: Start docker-compose
+      run: |
+        docker-compose -f .github/docker-compose.yml up -d
+        sleep 10
     - name: Run Scala tests
       run: sbt test
       env:
         SPARK_LOCAL_IP: "127.0.0.1"
+        TEST_MLFLOW_TRACKING_URI: "http://localhost:15000"
+    - name: Stop docker-compose
+      run: docker-compose -f .github/docker-compose.yml down
     - name: Install jar for Python tests
       run: sbt publishLocal
     - name: Python lint
       working-directory: python
       run: pylint rikai || true
+    - name: Start docker-compose
+      run: |
+        docker-compose -f .github/docker-compose.yml up -d
+        sleep 10
     - name: Run python tests
       working-directory: python
       run: |
         pytest -v --durations=10 --ignore=tests/parquet/internal
       env:
         SPARK_LOCAL_IP: "127.0.0.1"
+        TEST_MLFLOW_TRACKING_URI: "http://localhost:15000"
     - name: Bump version and make tag
       run: make release
     - name: Push new version and tag
@@ -61,3 +73,5 @@ jobs:
         github_token: ${{ secrets.RELEASE_TOKEN }}
         branch: master
         tags: true
+    - name: Stop docker-compose
+      run: docker-compose -f .github/docker-compose.yml down

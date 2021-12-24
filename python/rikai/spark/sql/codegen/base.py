@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import importlib
 import secrets
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Optional
@@ -21,6 +22,7 @@ from pyspark.sql import SparkSession
 
 from rikai.internal.reflection import find_class
 from rikai.logging import logger
+from rikai.spark.sql.codegen.mlflow_logger import KNOWN_FLAVORS
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
 
@@ -186,16 +188,17 @@ def udf_from_spec(spec: ModelSpec):
             f"Only spec version 1.0 is supported, got {spec.version}"
         )
 
-    if spec.flavor == "pytorch":
-        from rikai.spark.sql.codegen.pytorch import generate_udf
-
-        return generate_udf(spec)
-    elif spec.flavor == "sklearn":
-        from rikai.spark.sql.codegen.sklearn import generate_udf
-
-        return generate_udf(spec)
+    if spec.flavor in KNOWN_FLAVORS:
+        codegen_module = f"rikai.spark.sql.codegen.{spec.flavor}"
     else:
-        raise SpecError(f"Unsupported model flavor: {spec.flavor}")
+        codegen_module = f"rikai.contrib.{spec.flavor}.codegen"
+
+    try:
+        codegen = importlib.import_module(codegen_module)
+        return codegen.generate_udf(spec)
+    except ModuleNotFoundError:
+        logger.error(f"Unsupported model flavor: {spec.flavor}")
+        raise
 
 
 def register_udf(spark: SparkSession, udf: Callable, name: str) -> str:
@@ -206,3 +209,26 @@ def register_udf(spark: SparkSession, udf: Callable, name: str) -> str:
     spark.udf.register(func_name, udf)
     logger.info(f"Created model inference pandas_udf with name {func_name}")
     return func_name
+
+
+def codegen_from_spec(
+    spark: SparkSession, spec: dict, name: Optional[str] = None
+) -> str:
+    """Generate code from a model spec info dict
+
+    Parameters
+    ----------
+    spark : SparkSession
+        A live spark session
+    spec : dict
+        the model spec info dict
+    name : str
+        The name of the model in the catalog
+
+    Returns
+    -------
+    str
+        Spark UDF function name for the generated data.
+    """
+    udf = udf_from_spec(spec)
+    return register_udf(spark, udf, name)

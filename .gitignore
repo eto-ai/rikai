@@ -31,3 +31,5 @@ python/rikai/jars/
 
 **/mlruns
 .antlr
+
+python/test-artifact

@@ -58,7 +58,8 @@ class Style(Drawable):
         return s
 
     def _render(self, render: Renderer, **kwargs):
-        assert self.inner is not None
+        if self.inner is None:
+            raise ValueError("This style object has not attack to a Drawable yet")
         # TODO: catch excessive parameters
         kwargs.update(self.kwargs)
         for inner_draw in self.inner:

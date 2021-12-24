@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 from PIL import Image as PILImage
@@ -43,23 +43,29 @@ class Style(Drawable):
 
     def __init__(self, **kwarg):
         self.kwargs = kwarg
-        self.inner = None  # type: Optional[Drawable]
+        self.inner = None  # type: Optional[list[Drawable]]
 
     def __repr__(self):
         return f"style({self.kwargs})"
 
-    def __call__(self, inner: Drawable) -> Drawable:
+    def __call__(self, inner: Union[Drawable, list[Drawable]]) -> Drawable:
         # Make a copy of Style so the same style can be applied
         # to multiple drawables
         s = Style(**self.kwargs)
+        if isinstance(inner, Drawable):
+            inner = [inner]
         s.inner = inner
         return s
 
     def _render(self, render: Renderer, **kwargs):
-        assert self.inner is not None
+        if self.inner is None:
+            raise ValueError(
+                "This style object has not attack to a Drawable yet"
+            )
         # TODO: catch excessive parameters
         kwargs.update(self.kwargs)
-        return self.inner._render(render, **kwargs)
+        for inner_draw in self.inner:
+            inner_draw._render(render, **kwargs)
 
 
 class Draw(Displayable, ABC):
@@ -72,13 +78,19 @@ class Draw(Displayable, ABC):
         first_layer = self.layers[0] if self.layers else "N/A"
         return f"Draw({first_layer})"
 
-    def draw(self, layer: Drawable) -> Draw:
-        if not isinstance(layer, Drawable):
-            raise ValueError(f"{layer} must be a Drawable")
-        self.layers.append(layer)
+    def draw(self, layer: Union[Drawable, list[Drawable]]) -> Draw:
+        # layer can not be checked against typing.Sequence or typing.Iterable,
+        # because many of the Drawables are iterables (i.e., Box2d).
+        if isinstance(layer, Drawable):
+            layer = [layer]
+        elif not isinstance(layer, (Drawable, list)):
+            raise ValueError(
+                f"{layer} must be one Drawable or a list of Drawable"
+            )
+        self.layers.extend(layer)
         return self
 
-    def __or__(self, other: Drawable) -> Draw:
+    def __or__(self, other: Union[Drawable, list[Drawable]]) -> Draw:
         return self.draw(other)
 
 

@@ -184,7 +184,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
                     url=url, embed=True, format=inferred_format, **kwargs
                 )
 
-    def draw(self, drawable: Drawable) -> Draw:
+    def draw(self, drawable: Union[Drawable, list[Drawable]]) -> Draw:
         return ImageDraw(self).draw(drawable)
 
     def __repr__(self) -> str:

@@ -133,7 +133,8 @@ class MlflowLogger:
                 )
         mlflow.set_tags(tags)
         if registered_model_name is not None:
-            # if we're creating a model registry entry, we also want to set the tags on the model version
+            # if we're creating a model registry entry,
+            # we also want to set the tags on the model version
             # and model to enable search
             c = MlflowClient()
             # mlflow log_model does not return the version (wtf)

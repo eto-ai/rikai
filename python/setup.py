@@ -31,7 +31,7 @@ gcp = ["gcsfs"]
 docs = ["sphinx"]
 video = ["ffmpeg-python", "scenedetect"]
 youtube = ["pafy", "youtube_dl"]
-mlflow = ["mlflow>=1.15"]
+mlflow = ["mlflow==1.20.2"]
 all = sklearn + torch + jupyter + gcp + docs + video + youtube + mlflow + aws
 
 

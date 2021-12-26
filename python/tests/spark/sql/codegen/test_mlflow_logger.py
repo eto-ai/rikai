@@ -65,11 +65,17 @@ def test_model_and_version_tags(tmp_path: Path, resnet_model_uri):
         run = mlflow.get_run(run_id)
         tags = run.data.tags
 
-    all_versions = c.get_latest_versions(
+    logged_model = c.get_registered_model(model_name)
+    print(f"current logged model {logged_model}")
+    assert logged_model.tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH] == tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH]
+    assert logged_model.tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA] == tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA]
+    assert logged_model.tags[rikai.mlflow.CONF_MLFLOW_MODEL_FLAVOR] == 'pytorch'
+
+    newer_all_versions = c.get_latest_versions(
         model_name, stages=["production", "staging", "None"]
     )
     current_version: ModelVersion = None
-    for v in all_versions:
+    for v in newer_all_versions:
         if v.run_id == run_id:
             current_version = v
             break
@@ -82,3 +88,44 @@ def test_model_and_version_tags(tmp_path: Path, resnet_model_uri):
     assert current_version.tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA] == tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA]
     assert current_version.tags[rikai.mlflow.CONF_MLFLOW_MODEL_FLAVOR] == 'pytorch'
 
+    # verify the tags would be overwritten
+    with mlflow.start_run():
+        model = torch.load(resnet_model_uri)
+        rikai.mlflow.pytorch.log_model(
+            model,
+            "artifact_path2",
+            "output_schema2",
+            registered_model_name=model_name,
+            pre_processing=None,
+            post_processing=None,
+        )
+        second_run_id = mlflow.active_run().info.run_id
+        run = mlflow.get_run(second_run_id)
+        second_run_tags = run.data.tags
+    assert run_id != second_run_id
+    logged_model = c.get_registered_model(model_name)
+    print(f"current logged model2 {logged_model}")
+
+    assert logged_model.tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH] == second_run_tags[
+        rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH]
+    assert logged_model.tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA] == second_run_tags[
+        rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA]
+    assert logged_model.tags[rikai.mlflow.CONF_MLFLOW_MODEL_FLAVOR] == 'pytorch'
+
+    newer_all_versions = c.get_latest_versions(
+        model_name, stages=["production", "staging", "None"]
+    )
+    for v in newer_all_versions:
+        if v.run_id == second_run_id:
+            current_version = v
+            break
+    if current_version is None:
+        raise ValueError(
+            "No model version found matching runid: {}".format(second_run_id)
+        )
+    print(f"current version2 {current_version}")
+    assert current_version.tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH] == second_run_tags[
+        rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH]
+    assert current_version.tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA] == second_run_tags[
+        rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA]
+    assert current_version.tags[rikai.mlflow.CONF_MLFLOW_MODEL_FLAVOR] == 'pytorch'

@@ -67,9 +67,17 @@ def test_model_and_version_tags(tmp_path: Path, resnet_model_uri):
 
     logged_model = c.get_registered_model(model_name)
     print(f"current logged model {logged_model}")
-    assert logged_model.tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH] == tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH]
-    assert logged_model.tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA] == tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA]
-    assert logged_model.tags[rikai.mlflow.CONF_MLFLOW_MODEL_FLAVOR] == 'pytorch'
+    assert (
+        logged_model.tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH]
+        == tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH]
+    )
+    assert (
+        logged_model.tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA]
+        == tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA]
+    )
+    assert (
+        logged_model.tags[rikai.mlflow.CONF_MLFLOW_MODEL_FLAVOR] == "pytorch"
+    )
 
     newer_all_versions = c.get_latest_versions(
         model_name, stages=["production", "staging", "None"]
@@ -84,9 +92,18 @@ def test_model_and_version_tags(tmp_path: Path, resnet_model_uri):
             "No model version found matching runid: {}".format(run_id)
         )
     print(f"current version {current_version}")
-    assert current_version.tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH] == tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH]
-    assert current_version.tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA] == tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA]
-    assert current_version.tags[rikai.mlflow.CONF_MLFLOW_MODEL_FLAVOR] == 'pytorch'
+    assert (
+        current_version.tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH]
+        == tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH]
+    )
+    assert (
+        current_version.tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA]
+        == tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA]
+    )
+    assert (
+        current_version.tags[rikai.mlflow.CONF_MLFLOW_MODEL_FLAVOR]
+        == "pytorch"
+    )
 
     # verify the tags would be overwritten
     with mlflow.start_run():
@@ -106,11 +123,17 @@ def test_model_and_version_tags(tmp_path: Path, resnet_model_uri):
     logged_model = c.get_registered_model(model_name)
     print(f"current logged model2 {logged_model}")
 
-    assert logged_model.tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH] == second_run_tags[
-        rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH]
-    assert logged_model.tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA] == second_run_tags[
-        rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA]
-    assert logged_model.tags[rikai.mlflow.CONF_MLFLOW_MODEL_FLAVOR] == 'pytorch'
+    assert (
+        logged_model.tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH]
+        == second_run_tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH]
+    )
+    assert (
+        logged_model.tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA]
+        == second_run_tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA]
+    )
+    assert (
+        logged_model.tags[rikai.mlflow.CONF_MLFLOW_MODEL_FLAVOR] == "pytorch"
+    )
 
     newer_all_versions = c.get_latest_versions(
         model_name, stages=["production", "staging", "None"]
@@ -124,8 +147,15 @@ def test_model_and_version_tags(tmp_path: Path, resnet_model_uri):
             "No model version found matching runid: {}".format(second_run_id)
         )
     print(f"current version2 {current_version}")
-    assert current_version.tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH] == second_run_tags[
-        rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH]
-    assert current_version.tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA] == second_run_tags[
-        rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA]
-    assert current_version.tags[rikai.mlflow.CONF_MLFLOW_MODEL_FLAVOR] == 'pytorch'
+    assert (
+        current_version.tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH]
+        == second_run_tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH]
+    )
+    assert (
+        current_version.tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA]
+        == second_run_tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA]
+    )
+    assert (
+        current_version.tags[rikai.mlflow.CONF_MLFLOW_MODEL_FLAVOR]
+        == "pytorch"
+    )

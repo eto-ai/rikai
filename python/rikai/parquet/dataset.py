@@ -16,12 +16,15 @@
 """
 
 # Standard Library
+from functools import partial
 import importlib
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 # Third Party
-import pyarrow.parquet as pg
+import pandas as pd
+from pyarrow import fs
+import pyarrow.parquet as pq
 from pyarrow.fs import FileSystem
 from pyspark.ml.linalg import Matrix, Vector
 from pyspark.sql import Row
@@ -82,14 +85,14 @@ class Dataset:
     _UDT_CACHE: Dict[str, UserDefinedType] = {}
 
     def __init__(  # pylint: disable=too-many-arguments
-        self,
-        query: Union[str, Path],
-        columns: Optional[List[str]] = None,
-        shuffle: bool = False,
-        shuffler_capacity: int = 128,
-        seed: Optional[int] = None,
-        world_size: int = 1,
-        rank: int = 0,
+            self,
+            query: Union[str, Path],
+            columns: Optional[List[str]] = None,
+            shuffle: bool = False,
+            shuffler_capacity: int = 128,
+            seed: Optional[int] = None,
+            world_size: int = 1,
+            rank: int = 0,
     ):
         self.uri = str(query)
         self.columns = columns
@@ -138,9 +141,9 @@ class Dataset:
         return cls._UDT_CACHE[pyclass]
 
     def _convert(
-        self, raw_row: Dict[str, Any], schema: Dict[str, Any]
+            self, raw_row: Dict[str, Any], schema: Dict[str, Any]
     ) -> Dict[str, Any]:
-        """Convert Spark UDT to native rikia or numpy types.
+        """Convert Spark UDT to native rikai or numpy types.
 
         Parameters
         ----------
@@ -156,30 +159,22 @@ class Dataset:
                 # This column is not selected, skip
                 continue
             field_type = field["type"]
-            if isinstance(field_type, dict) and field_type["type"] == "udt":
+            if not isinstance(field_type, dict):
+                converted[name] = raw_row[name]
+            elif field_type["type"] == "udt":
                 udt = self._find_udt(field_type["pyClass"])
-
-                value = raw_row[name]
-                if isinstance(value, dict):
-                    row = Row(**value)
-                else:
-                    row = Row(value)
-                converted_value = udt.deserialize(row)
-                if isinstance(converted_value, (Vector, Matrix)):
-                    # For pyspark.ml.linalg.{Vector,Matrix}, we eagly convert
-                    # them into numpy ndarrays.
-                    converted_value = converted_value.toArray()
-                converted[name] = converted_value
-            elif (
-                isinstance(field_type, dict)
-                and field_type["type"] == "array"
-                and isinstance(field_type["elementType"], dict)
-                and field_type["elementType"]["type"] in {"struct", "udt"}
-            ):
+                converted[name] = _convert_udt_value(raw_row[name], udt)
+            elif (field_type["type"] == "array"
+                    and isinstance(field_type['elementType'], dict)):
                 converted[name] = [
                     self._convert(elem, field_type["elementType"])
                     for elem in raw_row[name]
                 ]
+            elif field_type["type"] == "struct":
+                converted[name] = {
+                    f["name"]: self._convert(raw_row[f["name"]], f["type"])
+                    for f in field_type["type"]["fields"]
+                }
             else:
                 converted[name] = raw_row[name]
 
@@ -192,7 +187,7 @@ class Dataset:
         group_count = -1
         for file_uri in self.files:
             with open_input_stream(file_uri) as fobj:
-                parquet = pg.ParquetFile(fobj)
+                parquet = pq.ParquetFile(fobj)
                 for group_idx in range(parquet.num_row_groups):
                     # A simple form of row-group level bucketing without
                     # memory overhead.
@@ -212,7 +207,7 @@ class Dataset:
                         group_idx, columns=self.columns
                     )
                     for (
-                        batch
+                            batch
                     ) in row_group.to_batches():  # type: pyarrow.RecordBatch
                         # TODO: read batches not using pandas
                         for _, row in batch.to_pandas().iterrows():
@@ -228,3 +223,42 @@ class Dataset:
             yield self._convert(
                 shuffler.pop().to_dict(), self.spark_row_metadata
             )
+
+    def to_pandas(self):
+        filesystem, path = fs.FileSystem.from_uri(self.uri)
+        raw_df = (pq.ParquetDataset(path, filesystem)
+                  .read(self.columns)
+                  .to_pandas())
+        types = {f['name']: f['type']
+                 for f in self.spark_row_metadata["fields"]}
+        return pd.DataFrame({name: self._convert_col(col, types.get(name))
+                             for name, col in raw_df.iteritems()})
+
+    def _convert_col(self, col: pd.Series, field_type) -> pd.Series:
+        if field_type is None:
+            return col
+        if not isinstance(field_type, dict):
+            return col
+        elif field_type["type"] == "udt":
+            udt = self._find_udt(field_type["pyClass"])
+            return col.apply(partial(_convert_udt_value, udt=udt))
+        elif field_type["type"] == "struct":
+            return col.apply(lambda d: self._convert(d, field_type))
+        elif field_type["type"] == "array":
+            def convert_array(arr):
+                return [self._convert(x, field_type["elementType"])
+                        for x in arr]
+            return col.apply(convert_array)
+        else:
+            return col
+
+
+def _convert_udt_value(value, udt):
+    if isinstance(value, dict):
+        row = Row(**value)
+    else:
+        row = Row(value)
+    converted_value = udt.deserialize(row)
+    if isinstance(converted_value, (Vector, Matrix)):
+        converted_value = converted_value.toArray()
+    return converted_value

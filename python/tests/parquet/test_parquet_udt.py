@@ -31,7 +31,7 @@ from pyspark.sql.types import (
 
 # Rikai
 from rikai.parquet import Dataset
-from rikai.spark.types import NDArrayType
+from rikai.spark.types import NDArrayType, Box2dType
 from rikai.testing.asserters import assert_count_equal
 from rikai.types import Box2d, Image
 
@@ -240,3 +240,75 @@ def test_bbox_list(spark: SparkSession, tmp_path: Path):
         [{"bboxes": [{"b": Box2d(1, 2, 3, 4)}, {"b": Box2d(3, 4, 5, 6)}]}],
         records,
     )
+
+
+def test_to_pandas(spark: SparkSession, tmp_path: Path):
+    test_dir = str(tmp_path)
+    spark_df = spark.createDataFrame(
+        [Row(bboxes=[Row(b=Box2d(1, 2, 3, 4)), Row(b=Box2d(3, 4, 5, 6))])]
+    )
+    spark_df.write.mode("overwrite").format("rikai").save(test_dir)
+    pandas_df = Dataset(test_dir).to_pandas()
+    assert all([isinstance(row['b'], Box2d)
+                for row in pandas_df.bboxes[0]])
+
+
+def test_struct(spark: SparkSession, tmp_path: Path):
+    test_dir = str(tmp_path)
+    schema = StructType(
+        [
+            StructField("id", IntegerType(), False),
+            StructField(
+                "anno",
+                StructType([
+                    StructField("label_id", IntegerType(), False),
+                    StructField("label", StringType(), False),
+                    StructField("bbox", Box2dType(), False)
+                ]),
+                False
+            ),
+        ])
+    df = spark.createDataFrame(
+        [
+            {
+                "id": 1,
+                "anno": {"label": "cat",
+                         "label_id": 1,
+                         "bbox": Box2d(1, 2, 3, 4)},
+            },
+            {
+                "id": 2,
+                "anno": {"label": "bug",
+                         "label_id": 3,
+                         "bbox": Box2d(5, 6, 7, 8)},
+            },
+        ],
+        schema=schema,
+    )
+    df.repartition(1).write.mode("overwrite").format("rikai").save(test_dir)
+
+    pdf = Dataset(test_dir).to_pandas()
+    for expect, actual in zip(
+            [
+                {
+                    "id": 1,
+                    "anno": {
+                        "label": "cat",
+                        "label_id": 1,
+                        "bbox": Box2d(1, 2, 3, 4)
+                    },
+                },
+                {
+                    "id": 2,
+                    "anno": {
+                        "label": "bug",
+                        "label_id": 3,
+                        "bbox": Box2d(5, 6, 7, 8)
+                    }
+                }
+            ],
+            [row.to_dict() for _, row in pdf.iterrows()],
+    ):
+        assert expect["id"] == actual["id"]
+        assert len(expect["anno"]) == len(actual["anno"])
+        assert expect["anno"]["bbox"] == actual["anno"]["bbox"]

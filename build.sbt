@@ -60,9 +60,13 @@ libraryDependencies ++= {
   val scalatestVersion = "3.2.0"
   val circeVersion = "0.12.3"
   val mlflowVersion = "1.21.0"
+  val enableifVersion = "1.1.7"
 
   Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided,
+    "com.thoughtworks.enableIf" %% "enableif" % enableifVersion exclude(
+      "org.scala-lang", "scala-reflect"
+    ),
     "org.apache.spark" %% "spark-sql" % sparkVersion % Provided,
     "software.amazon.awssdk" % "s3" % awsVersion % Provided,
     "org.xerial.snappy" % "snappy-java" % snappyVersion,
@@ -88,8 +92,6 @@ libraryDependencies ++= {
     )
   }
 }
-
-libraryDependencies += "com.thoughtworks.enableIf" %% "enableif" % "1.1.7"
 
 scalacOptions ++= Seq(
   "-encoding",

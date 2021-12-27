@@ -28,9 +28,26 @@ def init(spark: SparkSession):
     """Register all rikai UDFs"""
     from rikai.spark.functions import geometry, io, vision
 
-    for name in geometry.__all__:
+    all_geo_udfs = [
+        "area",
+        "box2d",
+        "box2d_from_center",
+        "box2d_from_top_left",
+    ]
+    all_io_udfs = ["copy"]
+    all_vis_udfs = [
+        "crop",
+        "to_image",
+        "image_copy",
+        "numpy_to_image",
+        "video_to_images",
+        "spectrogram_image",
+        "video_metadata",
+        "video_metadata_schema",
+    ]
+    for name in all_geo_udfs:
         spark.udf.register(name, getattr(geometry, name))
-    for name in io.__all__:
+    for name in all_io_udfs:
         spark.udf.register(name, getattr(io, name))
-    for name in vision.__all__:
+    for name in all_vis_udfs:
         spark.udf.register(name, getattr(vision, name))

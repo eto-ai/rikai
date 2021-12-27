@@ -31,7 +31,7 @@ from pyspark.sql.types import (
 
 # Rikai
 from rikai.parquet import Dataset
-from rikai.spark.types import NDArrayType, Box2dType
+from rikai.spark.types import Box2dType, NDArrayType
 from rikai.testing.asserters import assert_count_equal
 from rikai.types import Box2d, Image
 
@@ -249,8 +249,7 @@ def test_to_pandas(spark: SparkSession, tmp_path: Path):
     )
     spark_df.write.mode("overwrite").format("rikai").save(test_dir)
     pandas_df = Dataset(test_dir).to_pandas()
-    assert all([isinstance(row['b'], Box2d)
-                for row in pandas_df.bboxes[0]])
+    assert all([isinstance(row["b"], Box2d) for row in pandas_df.bboxes[0]])
 
 
 def test_struct(spark: SparkSession, tmp_path: Path):
@@ -260,27 +259,34 @@ def test_struct(spark: SparkSession, tmp_path: Path):
             StructField("id", IntegerType(), False),
             StructField(
                 "anno",
-                StructType([
-                    StructField("label_id", IntegerType(), False),
-                    StructField("label", StringType(), False),
-                    StructField("bbox", Box2dType(), False)
-                ]),
-                False
+                StructType(
+                    [
+                        StructField("label_id", IntegerType(), False),
+                        StructField("label", StringType(), False),
+                        StructField("bbox", Box2dType(), False),
+                    ]
+                ),
+                False,
             ),
-        ])
+        ]
+    )
     df = spark.createDataFrame(
         [
             {
                 "id": 1,
-                "anno": {"label": "cat",
-                         "label_id": 1,
-                         "bbox": Box2d(1, 2, 3, 4)},
+                "anno": {
+                    "label": "cat",
+                    "label_id": 1,
+                    "bbox": Box2d(1, 2, 3, 4),
+                },
             },
             {
                 "id": 2,
-                "anno": {"label": "bug",
-                         "label_id": 3,
-                         "bbox": Box2d(5, 6, 7, 8)},
+                "anno": {
+                    "label": "bug",
+                    "label_id": 3,
+                    "bbox": Box2d(5, 6, 7, 8),
+                },
             },
         ],
         schema=schema,
@@ -289,25 +295,25 @@ def test_struct(spark: SparkSession, tmp_path: Path):
 
     pdf = Dataset(test_dir).to_pandas()
     for expect, actual in zip(
-            [
-                {
-                    "id": 1,
-                    "anno": {
-                        "label": "cat",
-                        "label_id": 1,
-                        "bbox": Box2d(1, 2, 3, 4)
-                    },
+        [
+            {
+                "id": 1,
+                "anno": {
+                    "label": "cat",
+                    "label_id": 1,
+                    "bbox": Box2d(1, 2, 3, 4),
                 },
-                {
-                    "id": 2,
-                    "anno": {
-                        "label": "bug",
-                        "label_id": 3,
-                        "bbox": Box2d(5, 6, 7, 8)
-                    }
-                }
-            ],
-            [row.to_dict() for _, row in pdf.iterrows()],
+            },
+            {
+                "id": 2,
+                "anno": {
+                    "label": "bug",
+                    "label_id": 3,
+                    "bbox": Box2d(5, 6, 7, 8),
+                },
+            },
+        ],
+        [row.to_dict() for _, row in pdf.iterrows()],
     ):
         assert expect["id"] == actual["id"]
         assert len(expect["anno"]) == len(actual["anno"])

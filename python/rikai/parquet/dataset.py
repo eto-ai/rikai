@@ -15,16 +15,17 @@
 """Parquet-based Rikai Dataset that supports automatically UDT conversions.
 """
 
+import importlib
+
 # Standard Library
 from functools import partial
-import importlib
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 # Third Party
 import pandas as pd
-from pyarrow import fs
 import pyarrow.parquet as pq
+from pyarrow import fs
 from pyarrow.fs import FileSystem
 from pyspark.ml.linalg import Matrix, Vector
 from pyspark.sql import Row
@@ -85,14 +86,14 @@ class Dataset:
     _UDT_CACHE: Dict[str, UserDefinedType] = {}
 
     def __init__(  # pylint: disable=too-many-arguments
-            self,
-            query: Union[str, Path],
-            columns: Optional[List[str]] = None,
-            shuffle: bool = False,
-            shuffler_capacity: int = 128,
-            seed: Optional[int] = None,
-            world_size: int = 1,
-            rank: int = 0,
+        self,
+        query: Union[str, Path],
+        columns: Optional[List[str]] = None,
+        shuffle: bool = False,
+        shuffler_capacity: int = 128,
+        seed: Optional[int] = None,
+        world_size: int = 1,
+        rank: int = 0,
     ):
         self.uri = str(query)
         self.columns = columns
@@ -141,7 +142,7 @@ class Dataset:
         return cls._UDT_CACHE[pyclass]
 
     def _convert(
-            self, raw_row: Dict[str, Any], schema: Dict[str, Any]
+        self, raw_row: Dict[str, Any], schema: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Convert Spark UDT to native rikai or numpy types.
 
@@ -164,8 +165,9 @@ class Dataset:
             elif field_type["type"] == "udt":
                 udt = self._find_udt(field_type["pyClass"])
                 converted[name] = _convert_udt_value(raw_row[name], udt)
-            elif (field_type["type"] == "array"
-                    and isinstance(field_type['elementType'], dict)):
+            elif field_type["type"] == "array" and isinstance(
+                field_type["elementType"], dict
+            ):
                 converted[name] = [
                     self._convert(elem, field_type["elementType"])
                     for elem in raw_row[name]
@@ -207,7 +209,7 @@ class Dataset:
                         group_idx, columns=self.columns
                     )
                     for (
-                            batch
+                        batch
                     ) in row_group.to_batches():  # type: pyarrow.RecordBatch
                         # TODO: read batches not using pandas
                         for _, row in batch.to_pandas().iterrows():
@@ -226,13 +228,18 @@ class Dataset:
 
     def to_pandas(self):
         filesystem, path = fs.FileSystem.from_uri(self.uri)
-        raw_df = (pq.ParquetDataset(path, filesystem)
-                  .read(self.columns)
-                  .to_pandas())
-        types = {f['name']: f['type']
-                 for f in self.spark_row_metadata["fields"]}
-        return pd.DataFrame({name: self._convert_col(col, types.get(name))
-                             for name, col in raw_df.iteritems()})
+        raw_df = (
+            pq.ParquetDataset(path, filesystem).read(self.columns).to_pandas()
+        )
+        types = {
+            f["name"]: f["type"] for f in self.spark_row_metadata["fields"]
+        }
+        return pd.DataFrame(
+            {
+                name: self._convert_col(col, types.get(name))
+                for name, col in raw_df.iteritems()
+            }
+        )
 
     def _convert_col(self, col: pd.Series, field_type) -> pd.Series:
         if field_type is None:
@@ -245,9 +252,12 @@ class Dataset:
         elif field_type["type"] == "struct":
             return col.apply(lambda d: self._convert(d, field_type))
         elif field_type["type"] == "array":
+
             def convert_array(arr):
-                return [self._convert(x, field_type["elementType"])
-                        for x in arr]
+                return [
+                    self._convert(x, field_type["elementType"]) for x in arr
+                ]
+
             return col.apply(convert_array)
         else:
             return col

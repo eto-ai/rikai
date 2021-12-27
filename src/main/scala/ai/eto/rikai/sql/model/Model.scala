@@ -17,11 +17,11 @@
 package ai.eto.rikai.sql.model
 
 import ai.eto.rikai.sql.spark.SparkRunnable
-import io.circe.syntax._
-import io.circe.generic.encoding.DerivedAsObjectEncoder._
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.UnresolvedFunction
 import org.apache.spark.sql.catalyst.expressions.Expression
+import org.json4s.DefaultFormats
+import org.json4s.jackson.Serialization.write
 
 import scala.collection.JavaConverters.mapAsJavaMap
 
@@ -59,7 +59,7 @@ object Model {
 
   def serializeOptions(options: Map[String, String]): String = {
     if (options.isEmpty) ""
-    else options.asJson.noSpaces
+    else write(options)(DefaultFormats)
   }
 }
 

@@ -58,7 +58,6 @@ libraryDependencies ++= {
   val scalaLoggingVersion = "3.9.4"
   val snappyVersion = "1.1.8.4" // Support Apple Silicon
   val scalatestVersion = "3.2.0"
-  val circeVersion = "0.12.3"
   val mlflowVersion = "1.21.0"
 
   Seq(
@@ -68,9 +67,6 @@ libraryDependencies ++= {
     "org.apache.logging.log4j" % "log4j-core" % log4jVersion % Runtime,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "org.scalatest" %% "scalatest-funsuite" % scalatestVersion % Test,
-    "io.circe" %% "circe-core" % circeVersion,
-    "io.circe" %% "circe-generic" % circeVersion,
-    "io.circe" %% "circe-parser" % circeVersion,
     "org.mlflow" % "mlflow-client" % mlflowVersion
   )
 }

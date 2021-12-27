@@ -54,6 +54,7 @@ __all__ = [
     "video_to_images",
     "spectrogram_image",
     "video_metadata",
+    "video_metadata_schema",
 ]
 
 

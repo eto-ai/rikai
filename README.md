@@ -179,3 +179,14 @@ sbt publishLocal
 cd python
 pip install -e . # pip install -e .[all] to install all optional extras (see "Install from pypi")
 ```
+
+### Contribution
+#### Utilities
+`pre-commit` can be helpful in keep consistent code format with the repository. 
+It can trigger reformat and extra things before the CI force you to do it.
+
+To install and enable `pre-commit`
+```bash
+pip install pre-commit
+pre-commit install #in your local development directory
+```

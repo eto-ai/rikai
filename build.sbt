@@ -33,14 +33,14 @@ inThisBuild(
         url("https://github.com/eto-ai/rikai")
       )
     ),
-    version := dynverGitDescribeOutput.value
-      .mkVersion(versionFmt, fallbackVersion(dynverCurrentDate.value)),
+    version := "0.0.16-SNAPSHOT",
     dynver := {
       val d = new java.util.Date
       sbtdynver.DynVer
         .getGitDescribeOutput(d)
         .mkVersion(versionFmt, fallbackVersion(d))
-    }
+    },
+    skip.in(publish) := "2.12.15".equals(scalaVersion.value)
   )
 )
 

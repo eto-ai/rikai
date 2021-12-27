@@ -43,7 +43,6 @@ def init(spark: SparkSession):
         "video_to_images",
         "spectrogram_image",
         "video_metadata",
-        "video_metadata_schema",
     ]
     for name in all_geo_udfs:
         spark.udf.register(name, getattr(geometry, name))

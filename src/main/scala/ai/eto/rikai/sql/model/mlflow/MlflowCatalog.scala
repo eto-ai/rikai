@@ -17,6 +17,7 @@
 package ai.eto.rikai.sql.model.mlflow
 
 import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.{
+  ARTIFACT_PATH_KEY,
   MODEL_FLAVOR_KEY,
   TRACKING_URI_KEY
 }
@@ -57,11 +58,7 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
             .map(t => t.getKey -> t.getValue)
             .toMap
           val name = model.getName
-          if (
-            true
-            //              TODO enable this after https://github.com/eto-ai/rikai/pull/351 finished
-            //              && tagsMap.contains(ArtifactPathKey)
-          ) {
+          if (tagsMap.contains(ARTIFACT_PATH_KEY)) {
             val flavor = tagsMap.getOrElse(MODEL_FLAVOR_KEY, "")
             Some(
               new SparkUDFModel(

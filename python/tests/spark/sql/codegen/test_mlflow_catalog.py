@@ -28,4 +28,5 @@ def test_list_models(spark_with_mlflow, mlflow_client_http):
     tracking_uri = mlflow.get_tracking_uri()
     print("Tracking URI", tracking_uri)
     spark.sql("SHOW MODELS").show()
-    assert spark.sql("SHOW MODELS").count() == 4
+    # 4 Models in total, 1 registered by Rikai, so the answer should be 1
+    assert spark.sql("SHOW MODELS").count() == 1

@@ -21,8 +21,6 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 11
-    - name: Run style check
-      run: sbt scalafmtCheckAll
     - name: Start docker-compose
       run: |
         docker-compose -f .github/docker-compose.yml up -d

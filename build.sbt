@@ -40,7 +40,8 @@ inThisBuild(
       sbtdynver.DynVer
         .getGitDescribeOutput(d)
         .mkVersion(versionFmt, fallbackVersion(d))
-    }
+    },
+    skip.in(publish) := "2.12.15".equals(scalaVersion.value)
   )
 )
 

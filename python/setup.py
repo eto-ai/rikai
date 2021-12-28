@@ -55,7 +55,7 @@ setup(
         "opencv-python-headless",
         "pandas",
         "Pillow",
-        "pyarrow>=2.0",
+        "pyarrow>=6.0",
         "pyspark==3.1.2",
         "pyyaml",
         "requests",

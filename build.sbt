@@ -1,8 +1,8 @@
 import java.io.File
 import scala.reflect.io.Directory
 
-crossScalaVersions := List("2.12.11", "2.12.15", "2.13.7")
-scalaVersion := "2.12.11"
+crossScalaVersions := List("2.12.10", "2.12.15", "2.13.7")
+scalaVersion := "2.12.10"
 name := "rikai"
 
 def versionFmt(out: sbtdynver.GitDescribeOutput): String = {
@@ -61,13 +61,20 @@ libraryDependencies ++= {
   val scalatestVersion = "3.2.0"
   val circeVersion = "0.12.3"
   val mlflowVersion = "1.21.0"
+  val enableifVersion = "1.1.7"
 
   Seq(
+    "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided,
+    "com.thoughtworks.enableIf" %% "enableif" % enableifVersion exclude(
+      "org.scala-lang", "scala-reflect"
+    ),
     "org.apache.spark" %% "spark-sql" % sparkVersion % Provided,
     "software.amazon.awssdk" % "s3" % awsVersion % Provided,
     "org.xerial.snappy" % "snappy-java" % snappyVersion,
     "org.apache.logging.log4j" % "log4j-core" % log4jVersion % Runtime,
-    "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
+    "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion exclude(
+      "org.scala-lang", "scala-reflect"
+    ),
     "org.scalatest" %% "scalatest-funsuite" % scalatestVersion % Test,
     "io.circe" %% "circe-core" % circeVersion,
     "io.circe" %% "circe-generic" % circeVersion,
@@ -86,8 +93,6 @@ libraryDependencies ++= {
     )
   }
 }
-
-libraryDependencies += "com.thoughtworks.enableIf" %% "enableif" % "1.1.7"
 
 scalacOptions ++= Seq(
   "-encoding",

@@ -24,9 +24,9 @@ from typing import Any, Dict, List, Optional, Union
 
 # Third Party
 import pandas as pd
+import pyarrow.dataset as ds
 import pyarrow.parquet as pq
 from pyarrow import fs
-from pyarrow.fs import FileSystem
 from pyspark.ml.linalg import Matrix, Vector
 from pyspark.sql import Row
 from pyspark.sql.types import UserDefinedType
@@ -168,10 +168,8 @@ class Dataset:
             elif field_type["type"] == "array" and isinstance(
                 field_type["elementType"], dict
             ):
-                converted[name] = [
-                    self._convert(elem, field_type["elementType"])
-                    for elem in raw_row[name]
-                ]
+                converted[name] = self._convert_array(
+                    raw_row[name], field_type['elementType'])
             elif field_type["type"] == "struct":
                 converted[name] = {
                     f["name"]: self._convert(raw_row[f["name"]], f["type"])
@@ -226,11 +224,21 @@ class Dataset:
                 shuffler.pop().to_dict(), self.spark_row_metadata
             )
 
-    def to_pandas(self):
+    def to_pandas(self, limit=None):
+        """Create a pandas dataframe from the parquet data in this Dataset
+
+        Parameters
+        ----------
+        limit: int, default None
+            The max number of rows to retrieve. If none, 0, or negative
+            then retrieve all rows
+        """
         filesystem, path = fs.FileSystem.from_uri(self.uri)
-        raw_df = (
-            pq.ParquetDataset(path, filesystem).read(self.columns).to_pandas()
-        )
+        dataset = ds.dataset(path, filesystem=filesystem, format='parquet')
+        if limit is None or limit <= 0:
+            raw_df = dataset.to_table(columns=self.columns).to_pandas()
+        else:
+            raw_df = dataset.head(limit, columns=self.columns).to_pandas()
         types = {
             f["name"]: f["type"] for f in self.spark_row_metadata["fields"]
         }
@@ -252,15 +260,13 @@ class Dataset:
         elif field_type["type"] == "struct":
             return col.apply(lambda d: self._convert(d, field_type))
         elif field_type["type"] == "array":
-
-            def convert_array(arr):
-                return [
-                    self._convert(x, field_type["elementType"]) for x in arr
-                ]
-
-            return col.apply(convert_array)
+            return col.apply(
+                lambda d: self._convert_array(d, field_type['elementType']))
         else:
             return col
+
+    def _convert_array(self, arr, element_type):
+        return [self._convert(x, element_type) for x in arr]
 
 
 def _convert_udt_value(value, udt):

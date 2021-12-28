@@ -251,6 +251,9 @@ def test_to_pandas(spark: SparkSession, tmp_path: Path):
     pandas_df = Dataset(test_dir).to_pandas()
     assert all([isinstance(row["b"], Box2d) for row in pandas_df.bboxes[0]])
 
+    pandas_df = Dataset(test_dir).to_pandas(1)
+    assert all([isinstance(row["b"], Box2d) for row in pandas_df.bboxes[0]])
+
 
 def test_struct(spark: SparkSession, tmp_path: Path):
     test_dir = str(tmp_path)

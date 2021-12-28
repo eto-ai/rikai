@@ -29,7 +29,7 @@ jobs:
       - name: Make Lint
         if: ${{ matrix.python-version == 3.8 }}
         run: |
-          pip install isort black pylint
+          pip install isort black pylint pycodestyle flake8
           make lint
 
       - name: Python lint

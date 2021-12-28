@@ -169,7 +169,8 @@ class Dataset:
                 field_type["elementType"], dict
             ):
                 converted[name] = self._convert_array(
-                    raw_row[name], field_type['elementType'])
+                    raw_row[name], field_type["elementType"]
+                )
             elif field_type["type"] == "struct":
                 converted[name] = {
                     f["name"]: self._convert(raw_row[f["name"]], f["type"])
@@ -234,7 +235,7 @@ class Dataset:
             then retrieve all rows
         """
         filesystem, path = fs.FileSystem.from_uri(self.uri)
-        dataset = ds.dataset(path, filesystem=filesystem, format='parquet')
+        dataset = ds.dataset(path, filesystem=filesystem, format="parquet")
         if limit is None or limit <= 0:
             raw_df = dataset.to_table(columns=self.columns).to_pandas()
         else:
@@ -261,7 +262,8 @@ class Dataset:
             return col.apply(lambda d: self._convert(d, field_type))
         elif field_type["type"] == "array":
             return col.apply(
-                lambda d: self._convert_array(d, field_type['elementType']))
+                lambda d: self._convert_array(d, field_type["elementType"])
+            )
         else:
             return col
 

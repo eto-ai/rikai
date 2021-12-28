@@ -180,13 +180,19 @@ cd python
 pip install -e . # pip install -e .[all] to install all optional extras (see "Install from pypi")
 ```
 
-### Contribution
-#### Utilities
-`pre-commit` can be helpful in keep consistent code format with the repository. 
-It can trigger reformat and extra things before the CI force you to do it.
 
-To install and enable `pre-commit`
+### Utilities
+
+[pre-commit](https://pre-commit.com/) can be helpful in keep consistent code format with the repository. 
+It can trigger reformat and extra things in your local machine before the CI force you to do it.
+
+If you want it, install and enable `pre-commit`
 ```bash
 pip install pre-commit
 pre-commit install #in your local development directory
+#pre-commit installed at .git/hooks/pre-commit
+```
+If you want to uninstall it, it would be easy, too.
+```
+pre-commit uninstall
 ```

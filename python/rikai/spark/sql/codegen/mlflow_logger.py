@@ -98,6 +98,7 @@ class MlflowLogger:
 
         try:
             import mlflow
+            from mlflow.tracking import MlflowClient
         except ImportError as e:
             raise ImportError(
                 "Couldn't import mlflow. Please make sure to "
@@ -131,6 +132,30 @@ class MlflowLogger:
                     "will not be populated to MLflow"
                 )
         mlflow.set_tags(tags)
+        if registered_model_name is not None:
+            # if we're creating a model registry entry,
+            # we also want to set the tags on the model version
+            # and model to enable search
+            c = MlflowClient()
+            # mlflow log_model does not return the version (wtf)
+            all_versions = c.get_latest_versions(
+                registered_model_name, stages=["production", "staging", "None"]
+            )
+            current_version = None
+            run_id = mlflow.active_run().info.run_id
+            for v in all_versions:
+                if v.run_id == run_id:
+                    current_version = v
+                    break
+            if current_version is None:
+                raise ValueError(
+                    "No model version found matching runid: {}".format(run_id)
+                )
+            for key, value in tags.items():
+                c.set_registered_model_tag(registered_model_name, key, value)
+                c.set_model_version_tag(
+                    registered_model_name, current_version.version, key, value
+                )
 
 
 KNOWN_FLAVORS = ["pytorch", "sklearn"]

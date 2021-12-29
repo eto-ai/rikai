@@ -1,0 +1,6 @@
+-   repo: local
+    hooks:
+      -   id: fixlint
+          name: fixlint
+          entry: make fix lint
+          language: system

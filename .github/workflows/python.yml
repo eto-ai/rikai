@@ -53,13 +53,6 @@ jobs:
         sudo apt update
         sudo apt-get -y -qq install libsnappy-dev ffmpeg
         python -m pip install -e .[all,dev]
-    - name: Python black and flake8
-      if: ${{ matrix.python-version == 3.8 }}
-      run: make lint
-    - name: Python lint
-      if: ${{ matrix.python-version == 3.8 }}
-      working-directory: python
-      run: pylint rikai || true
     - name: Run python tests
       working-directory: python
       run: |

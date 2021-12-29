@@ -21,6 +21,7 @@ import numpy as np
 from PIL import Image as PILImage
 from PIL import ImageDraw
 
+from rikai.conf import get_option, CONF_RIKAI_VIZ_COLOR
 from rikai.mixin import Displayable, Drawable
 
 __all__ = ["Style", "Text"]
@@ -98,7 +99,9 @@ class Renderer(ABC):
     """The base class for rendering a :py:class:`Draw`."""
 
     @abstractmethod
-    def rectangle(self, xy, color: str = "red", width: int = 1):
+    def rectangle(
+        self, xy, color: str = get_option(CONF_RIKAI_VIZ_COLOR), width: int = 1
+    ):
         pass
 
     @abstractmethod
@@ -117,8 +120,6 @@ class Renderer(ABC):
 class PILRenderer(Renderer):
     """Use PIL to render drawables"""
 
-    DEFAULT_COLOR = "red"
-
     def __init__(self, img: PILImage):
         self.img = img.convert("RGBA")
         self.draw = ImageDraw.Draw(self.img)  # type: ImageDraw
@@ -127,10 +128,17 @@ class PILRenderer(Renderer):
     def image(self) -> PILImage:
         return self.img
 
-    def rectangle(self, xy, color: str = DEFAULT_COLOR, width: int = 1):
+    def rectangle(
+        self, xy, color: str = get_option(CONF_RIKAI_VIZ_COLOR), width: int = 1
+    ):
         self.draw.rectangle(xy, outline=color, width=width)
 
-    def polygon(self, xy, color: str = DEFAULT_COLOR, fill: bool = True):
+    def polygon(
+        self,
+        xy,
+        color: str = get_option(CONF_RIKAI_VIZ_COLOR),
+        fill: bool = True,
+    ):
         if fill:
             overlay = PILImage.new("RGBA", self.img.size, (255, 255, 255, 0))
             overlay_draw = ImageDraw.Draw(overlay)
@@ -144,10 +152,14 @@ class PILRenderer(Renderer):
         else:
             self.draw.polygon(xy=xy, outline=color)
 
-    def text(self, xy, text: str, color: str = DEFAULT_COLOR):
+    def text(
+        self, xy, text: str, color: str = get_option(CONF_RIKAI_VIZ_COLOR)
+    ):
         self.draw.text(xy, text, fill=color)
 
-    def mask(self, arr: np.ndarray, color: str = DEFAULT_COLOR):
+    def mask(
+        self, arr: np.ndarray, color: str = get_option(CONF_RIKAI_VIZ_COLOR)
+    ):
         overlay = PILImage.new("RGBA", self.img.size, (255, 255, 255, 0))
         overlay_draw = ImageDraw.Draw(overlay)
         overlay_draw.bitmap((0, 0), PILImage.fromarray(arr), fill=color)
@@ -169,7 +181,12 @@ class Text(Drawable):
         The RGB color string to render the text
     """
 
-    def __init__(self, text: str, xy: Tuple[int, int], color: str = "red"):
+    def __init__(
+        self,
+        text: str,
+        xy: Tuple[int, int],
+        color: str = get_option(CONF_RIKAI_VIZ_COLOR),
+    ):
         self.text = text
         self.xy = xy
         self.color = color

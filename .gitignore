@@ -20,7 +20,7 @@ notebooks/coco_sample*
 notebooks/dataset
 notebooks/out
 **/.ipynb_checkpoints
-project/
+project/project
 
 python/rikai/jars/
 

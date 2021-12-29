@@ -31,6 +31,7 @@ def init(spark: SparkSession):
     all_geo_udfs = [
         "area",
         "box2d",
+        "array_box2d",
         "box2d_from_center",
         "box2d_from_top_left",
     ]

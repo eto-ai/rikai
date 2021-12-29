@@ -24,13 +24,14 @@ import pandas.testing as pdt
 import pytest
 from PIL import Image as PILImage
 from pyspark.sql import Row, SparkSession
-from pyspark.sql.functions import col, concat, lit
+from pyspark.sql.functions import col, concat, explode, lit
 from pyspark.sql.types import ArrayType, StructField, StructType
 
 # Rikai
 from rikai.numpy import wrap
 from rikai.spark.functions import (
     area,
+    array_box2d,
     box2d,
     box2d_from_center,
     crop,
@@ -90,6 +91,22 @@ def test_box2d_udfs(spark):
         ["values"],
     ).withColumn("bbox", box2d("values"))
     df = df.withColumn("area", area(col("bbox")))
+    assert_area_equals([1.0, 5.0], df)
+
+
+def test_array_box2d(spark):
+    df = (
+        spark.createDataFrame(
+            [
+                Row(boxes=[[1.0, 2.0, 2.0, 3.0]]),
+                Row(boxes=[[10.0, 12.0, 11.0, 17.0]]),
+            ],
+            ["boxes"],
+        )
+        .withColumn("box2d_arr", array_box2d("boxes"))
+        .withColumn("box2d", explode("box2d_arr"))
+        .withColumn("area", area(col("box2d")))
+    )
     assert_area_equals([1.0, 5.0], df)
 
 

@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 
 import numpy as np
 from PIL import Image as PILImage
@@ -23,7 +23,7 @@ from PIL import ImageDraw
 
 from rikai.mixin import Displayable, Drawable
 
-__all__ = ["Style"]
+__all__ = ["Style", "Text"]
 
 
 class Style(Drawable):
@@ -154,3 +154,25 @@ class PILRenderer(Renderer):
 
         self.img = PILImage.alpha_composite(self.img, overlay)
         self.draw = ImageDraw.Draw(self.img)
+
+
+class Text(Drawable):
+    """Render a Text
+
+    Parameters
+    ----------
+    text : str
+        The text content to be rendered
+    xy : Tuple[int, int]
+        The location to render the text
+    color : str, optional
+        The RGB color string to render the text
+    """
+
+    def __init__(self, text: str, xy: Tuple[int, int], color: str = "red"):
+        self.text = text
+        self.xy = xy
+        self.color = color
+
+    def _render(self, render: Renderer, **kwargs):
+        return render.text(self.xy, self.text, color=self.color, **kwargs)

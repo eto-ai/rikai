@@ -25,7 +25,7 @@ from PIL import ImageDraw
 
 from rikai.types.geometry import Box2d
 from rikai.types.vision import Image
-from rikai.viz import Style
+from rikai.viz import Style, Text
 
 
 @pytest.fixture
@@ -245,6 +245,17 @@ def test_draw_styled_list_of_boxes():
     draw = ImageDraw.Draw(expected)
     for box in boxes:
         draw.rectangle(box, outline="yellow", width=3)
+    assert np.array_equal(pil_image.to_numpy(), expected)
+
+
+def test_draw_texts():
+    data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
+    img = Image.from_array(data)
+    pil_image = (img | Text("label", (10, 10))).display()
+
+    expected = Image.from_array(data).to_pil().convert("RGBA")
+    draw = ImageDraw.Draw(expected)
+    draw.text((10, 10), "label", fill="red")
     assert np.array_equal(pil_image.to_numpy(), expected)
 
 

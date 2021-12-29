@@ -1,7 +1,7 @@
 import java.io.File
 import scala.reflect.io.Directory
 
-crossScalaVersions := List("2.12.10", "2.12.15", "2.13.7")
+crossScalaVersions := List("2.12.10", "2.13.7")
 scalaVersion := "2.12.10"
 name := "rikai"
 
@@ -40,8 +40,7 @@ inThisBuild(
       sbtdynver.DynVer
         .getGitDescribeOutput(d)
         .mkVersion(versionFmt, fallbackVersion(d))
-    },
-    skip.in(publish) := "2.12.15".equals(scalaVersion.value)
+    }
   )
 )
 

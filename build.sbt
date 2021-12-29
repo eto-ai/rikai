@@ -54,7 +54,7 @@ scmInfo := Some(
 libraryDependencies ++= {
   val sparkVersion = if (scalaVersion.value.compareTo("2.12.15") >= 0)  "3.2.0" else "3.1.2"
   val awsVersion = "2.15.69"
-  val log4jVersion = "2.17.0"
+  val log4jVersion = "2.17.1"
   val scalaLoggingVersion = "3.9.4"
   val snappyVersion = "1.1.8.4" // Support Apple Silicon
   val scalatestVersion = "3.2.0"

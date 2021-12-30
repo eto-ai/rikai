@@ -39,26 +39,14 @@ def test_show_embedded_png(tmp_path, test_image):
     uri = tmp_path / "test.png"
     test_image.save(uri)
     result = Image(uri)._repr_png_()
-    with open(uri, "rb") as fh:
-        expected = b2a_base64(fh.read()).decode("ascii")
-        assert result == expected
-
-        fh.seek(0)
-        embedded_image = Image(fh)
-        assert result == embedded_image._repr_png_()
+    assert result == None
 
 
 def test_show_embedded_jpeg(tmp_path, test_image):
     uri = tmp_path / "test.jpg"
     test_image.save(uri)
     result = Image(uri)._repr_jpeg_()
-    with open(uri, "rb") as fh:
-        expected = b2a_base64(fh.read()).decode("ascii")
-        assert result == expected
-
-        fh.seek(0)
-        embedded_image = Image(fh)
-        assert result == embedded_image._repr_jpeg_()
+    assert result == None
 
 
 def test_convert_to_embedded_image(tmp_path, test_image: PILImage):

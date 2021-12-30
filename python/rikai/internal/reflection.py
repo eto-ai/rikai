@@ -22,3 +22,30 @@ def find_class(class_name: str):
     module, cls = class_name.rsplit(".", 1)
     mod = importlib.import_module(module)
     return getattr(mod, cls)
+
+
+def check_class(class_name: str):
+    module, cls = class_name.rsplit(".", 1)
+    try:
+        mod = importlib.import_module(module)
+        return hasattr(mod, cls)
+    except ModuleNotFoundError:
+        return False
+
+
+def find_func(func_name: str):
+    module, cls, func = func_name.rsplit(".", 2)
+    try:
+        mod = importlib.import_module(module)
+        return getattr(getattr(mod, cls), func)
+    except AttributeError:
+        return find_class(func_name)
+
+
+def check_func(func_name: str) -> bool:
+    module, cls, func = func_name.rsplit(".", 2)
+    try:
+        mod = importlib.import_module(module)
+        return hasattr(getattr(mod, cls), func)
+    except AttributeError:
+        return check_class(func_name)

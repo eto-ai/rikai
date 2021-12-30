@@ -17,6 +17,7 @@ from urllib.parse import urlparse
 
 import torch
 
+from rikai.internal.reflection import check_func, find_func
 from rikai.logging import logger
 from rikai.spark.sql.codegen.base import ModelSpec, Registry, udf_from_spec
 
@@ -32,6 +33,27 @@ class TorchHubModelSpec(ModelSpec):
                 "post": raw_spec.get("postprocessor", None),
             },
         }
+
+        # remove none value of pre/post processing
+        repo_proj = repo_or_dir.split(":")[0].replace("/", ".")
+        pre_f = f"rikai.contrib.torchhub.{repo_proj}.{model}.pre_processing"
+        post_f = f"rikai.contrib.torchhub.{repo_proj}.{model}.post_processing"
+        schema_f = f"rikai.contrib.torchhub.{repo_proj}.{model}.OUTPUT_SCHEMA"
+
+        if not spec["transforms"]["pre"]:
+            if check_func(pre_f):
+                spec["transforms"]["pre"] = pre_f
+            else:
+                del spec["transforms"]["pre"]
+        if not spec["transforms"]["post"]:
+            if check_func(post_f):
+                spec["transforms"]["post"] = post_f
+            else:
+                del spec["transforms"]["post"]
+        if not spec["schema"] and check_func(schema_f):
+            spec["schema"] = find_func(schema_f)
+        if not spec["model"]["flavor"]:
+            spec["model"]["flavor"] = "pytorch"
 
         self.repo_or_dir = repo_or_dir
         self.model = model

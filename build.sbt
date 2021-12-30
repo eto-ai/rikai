@@ -117,12 +117,12 @@ scalacOptions ++= {
   }
 }
 
-parallelExecution in Test := false
-fork in Test := true
+Test / parallelExecution := false
+Test / fork := true
 
-antlr4PackageName in Antlr4 := Some("ai.eto.rikai.sql.spark.parser")
-antlr4GenVisitor in Antlr4 := true
-antlr4Version in Antlr4 := "4.8-1"
+Antlr4 / antlr4PackageName := Some("ai.eto.rikai.sql.spark.parser")
+Antlr4 / antlr4GenVisitor := true
+Antlr4 / antlr4Version := "4.8-1"
 
 enablePlugins(Antlr4Plugin)
 

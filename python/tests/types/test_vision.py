@@ -35,20 +35,6 @@ def test_image() -> PILImage:
     return PILImage.fromarray(rescaled)
 
 
-def test_show_embedded_png(tmp_path, test_image):
-    uri = tmp_path / "test.png"
-    test_image.save(uri)
-    result = Image(uri)._repr_png_()
-    assert result is None
-
-
-def test_show_embedded_jpeg(tmp_path, test_image):
-    uri = tmp_path / "test.jpg"
-    test_image.save(uri)
-    result = Image(uri)._repr_jpeg_()
-    assert result is None
-
-
 def test_convert_to_embedded_image(tmp_path, test_image: PILImage):
     uri = tmp_path / "test.jpg"
     test_image.save(uri)

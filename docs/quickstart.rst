@@ -1,5 +1,5 @@
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
 Quickstart
 ==========
@@ -15,11 +15,10 @@ Installation
     pip install rikai[torch]
 
 
-Use `Rikai` in the machine learning life cycle
-----------------------------------------------
+Step 1. Feature Engineering
+---------------------------
 
-Lets get started from the feature engineering in `Spark`_.
-
+Lets start feature engineering using `Spark`_.
 
 .. code-block:: python
 
@@ -39,46 +38,87 @@ Lets get started from the feature engineering in `Spark`_.
         [
             {
                 "id": 1,
-                "mat": DenseMatrix(2, 2, range(4)),
                 "image": Image("s3://foo/bar/1.png"),
                 "annotations": [
                     Row(
                         text="cat",
+                        label=2,
                         mask=np.random(size=(256, 256)),
-                        bbox=Box2d(x=1.0, y=2.0, width=3.0, height=4.0)
+                        bbox=Box2d(xmin=1.0, ymin=2.0, xmax=3.0, ymax=4.0)
                     )
                 ]
             },
         ]
     )
 
-    df.write.format("rikai").save("dataset/out")
+    df.write.format("rikai").save("my_dataset")
+
+The magic here is that Rikai maintains commonly used :doc:`Semantic Types <types>`
+and takes care of ``SerDe`` (short for **Ser**-ialization and **De**-serialization)
+and visualization in notebooks.
+
+Additionally, Rikai community maintains a set of pre-baked connectors,
+such as `COCO <https://cocodataset.org/#home>`_ and `ROS Bag <http://wiki.ros.org/Bags>`_
+
+When it is ready, we can submit the script via ``spark-submit``
+
+.. code-block:: bash
+
+    spark-submit \
+      --master yarn \
+      --packages ai.eto:rikai_0.12:0.0.16 \
+      script.py
+
+
+Step 2. Inspect Dataset
+------------------------
 
 We can then inspect the dataset in a `Jupyter Notebook`_.
 
-
-
 .. code-block:: python
 
-    df = spark.read.format("rikai").load("dataset/out")
+    df = spark.read.format("rikai").load("my_dataset")
     df.printSchema()
     df.show(5)
 
 
+Step 3. Train the model
+-----------------------
 
 Use the dataset in `pytorch`
 
 .. code-block:: python
 
-    from rikai.torch import DataLoader
+    import torch
+    import torchvision
+    from rikai.torch.vision import Dataset
+    from torch.utils.data import DataLoader
+
+    device = torch.device("cuda") if \
+        torch.cuda.is_available() else torch.device("cpu")
+
+    dataset = Dataset(
+        "my_dataset",
+        image_column="image",
+        target_column='annotations',
+        transform=torchvision.transforms.ToTensor(),
+    )
 
     data_loader = DataLoader(
-        "dataset/out",
-        shuffle=True,
-        batch=8,
+        dataset,
+        batch_size=8,
+        num_workers=4,
     )
-    for examples in data_loader:
-        print(example)
+
+    model.train()
+    for epoch in range(10):
+        for imgs, annotations in data_loader:
+            lost_dict = model(imgs, annotations)
+            losses = sum(loss_dict.values())
+            optimizer.zero_grad()
+            losses.backward()
+            optimizer.step()
+
 
 .. _Spark : https://spark.apache.org/
 .. _Jupyter Notebook : https://jupyter.org/

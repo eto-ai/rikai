@@ -4,12 +4,16 @@
 Quickstart
 ==========
 
+In this quickstart, we illustrate a user journey from data cleaning to
+model training to model evaluation using `Pytorch`_ and Rikai.
+
 Installation
 ------------
 
 .. code-block:: bash
 
-    pip install rikai[torch,aws]
+    pip install rikai[torch]
+
 
 Use `Rikai` in the machine learning life cycle
 ----------------------------------------------
@@ -28,10 +32,6 @@ Lets get started from the feature engineering in `Spark`_.
         SparkSession
         .builder
         .appName("rikai-quickstart")
-        .config('spark.jars.packages', 'ai.eto:rikai:0.0.5')
-        .config("spark.driver.extraJavaOptions", "-Dcom.amazonaws.services.s3.enableV4=true")
-        .config('spark.jars.packages', 'org.apache.hadoop:hadoop-aws:2.7.4')
-        .master("local[*]")
         .getOrCreate()
     )
 
@@ -82,5 +82,6 @@ Use the dataset in `pytorch`
 
 .. _Spark : https://spark.apache.org/
 .. _Jupyter Notebook : https://jupyter.org/
+.. _Pytorch : https://pytorch.org/
 
 

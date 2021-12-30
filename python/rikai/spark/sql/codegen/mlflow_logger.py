@@ -75,23 +75,28 @@ class MlflowLogger:
         kwargs: dict
             Passed to `mlflow.<flavor>.log_model`
 
+
         Examples
         --------
-        # import mlflow.pytorch  <= vanilla mlflow usage
-        import rikai.mlflow
 
-        # Log PyTorch model
-        with mlflow.start_run() as run:
+        .. code-block:: python
 
-            # Training loop
-            # ...
+            # import mlflow.pytorch  <= vanilla mlflow usage
+            import rikai.mlflow
 
-            # Assume `model` is the trained model from the training loop
-            rikai.mlflow.pytorch.log_model(model, "model",
-                      schema=rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.OUTPUT_SCHEMA,
-                      pre_processing="rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing",
-                      post_processing="rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing",
-                      registered_model_name="MyPytorchModel")
+            # Log PyTorch model
+            with mlflow.start_run() as run:
+
+                # Training loop
+                # ...
+
+                # Assume `model` is the trained model from the training loop
+                rikai.mlflow.pytorch.log_model(model, "model",
+                        schema=rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.OUTPUT_SCHEMA,
+                        pre_processing="rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing",
+                        post_processing="rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing",
+                        registered_model_name="MyPytorchModel")
+
 
         For more details see `mlflow docs <https://www.mlflow.org/docs/latest/python_api/mlflow.pytorch.html#mlflow.pytorch.log_model>`_.
         """  # noqa E501

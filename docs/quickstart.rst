@@ -85,7 +85,7 @@ We can then inspect the dataset in a `Jupyter Notebook`_.
 Step 3. Train the model
 -----------------------
 
-Use the dataset in `pytorch`
+Use this dataset in `Pytorch`_
 
 .. code-block:: python
 
@@ -113,7 +113,7 @@ Use the dataset in `pytorch`
     model.train()
     for epoch in range(10):
         for imgs, annotations in data_loader:
-            lost_dict = model(imgs, annotations)
+            loss_dict = model(imgs, annotations)
             losses = sum(loss_dict.values())
             optimizer.zero_grad()
             losses.backward()

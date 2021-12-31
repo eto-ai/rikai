@@ -81,7 +81,6 @@ class MlflowLogger:
 
         .. code-block:: python
 
-            # import mlflow.pytorch  <= vanilla mlflow usage
             import rikai.mlflow
 
             # Log PyTorch model

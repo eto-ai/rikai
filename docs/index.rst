@@ -2,24 +2,23 @@
 Welcome to Rikai!
 =================
 
-Rikai is a large-scale data system specicially designed for Machine Learning workflows,
+Rikai is a large-scale data system specifically designed for Machine Learning workflows,
 specialized in Deep Learning development over various forms of unstructured data,
 for example, image, video or sensor data.
 
-Rikai strives to offer agnostic developer experice to assist ML engineers at each
+Rikai strives to offer great developer experience to assist ML engineers at each
 stage of application development.
 
-1. At its core, Riaki persists unstructured machine learning data in an `Apache Parquet`_
+1. At its core, Rikai persists unstructured machine learning data in an `Apache Parquet`_
    based format. It handles SerDe of these unstructured data transparently via a rich collection of
    semantic types.
-2. Extensive set of I/O connectors, from ETL to training (i.e., `Pytorch`_ ``DataLoader``), to
+2. Extensive set of I/O connectors, from ETL to training (i.e., `Pytorch`_ ``Dataset``), to
    bring the familiar developer experience at each stage of ML development.
 3. An SQL Engine, which extends `Spark`_ SQL with ML capability,
    that analyzes Rikai data lake with your own model ("Bring Your Own Model").
-4. Carefully crafted data-visualization embedded with Semantic Types, especially in Jupyter notebooks.
+4. Carefully crafted data-visualization embedded with semantic types, especially in Jupyter notebooks.
 
 For more details, please read :doc:`quickstart`.
-
 
 .. toctree::
    :maxdepth: 1

@@ -18,7 +18,7 @@ Installation
 Step 1. Feature Engineering
 ---------------------------
 
-Lets start feature engineering using `Spark`_.
+Let's start feature engineering using `Spark`_.
 
 .. code-block:: python
 
@@ -54,8 +54,7 @@ Lets start feature engineering using `Spark`_.
     df.write.format("rikai").save("my_dataset")
 
 The magic here is that Rikai maintains commonly used :doc:`Semantic Types <types>`
-and takes care of ``SerDe`` (short for **Ser**-ialization and **De**-serialization)
-and visualization in notebooks.
+, takes care of ``SerDe`` and visualization in notebooks.
 
 Additionally, Rikai community maintains a set of pre-baked connectors,
 such as `COCO <https://cocodataset.org/#home>`_ and `ROS Bag <http://wiki.ros.org/Bags>`_

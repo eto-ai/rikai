@@ -2,18 +2,19 @@
 Welcome to Rikai!
 *****************
 
-What is Rikai
-=============
+Rikai is a framework specifically designed for AI workflows focused around large scale unstructured datasets
+(e.g., images, videos, sensor data (future), text (future), and more).
+Through every stage of the AI modeling workflow,
+Rikai strives to offer a great developer experience when working with real-world AI datasets.
 
 The quality of an AI dataset can make or break an AI project, but tooling for AI data is sorely lacking in ergonomics.
 As a result, practitioners must spend most of their time and effort wrestling with their data instead of innovating on the models and use cases.
 Rikai alleviates the pain that AI practitioners experience on a daily basis dealing with the myriad of tedious data tasks,
 so they can focus again on model-building and problem solving.
 
-Rikai is a framework specifically designed for AI workflows focused around large scale unstructured datasets (e.g., images, videos, sensor data (future), text (future), and more).
 
-Rikai strives to offer great developer experience to assist ML engineers at each
-stage of application development.
+Main Features
+=============
 
 Data format
 ^^^^^^^^^^^

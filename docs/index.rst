@@ -14,7 +14,7 @@ stage of application development.
    semantic types.
 2. Extensive set of I/O connectors, from ETL to training (i.e., `Pytorch`_ ``DataLoader``), to
    bring the familiar developer experience at each stage of ML development.
-3. An SQL Engine, which extends Spark SQL with ML capability,
+3. An SQL Engine, which extends `Spark`_ SQL with ML capability,
    that analyzes Rikai data lake with your own model ("Bring Your Own Model").
 4. Carefully crafted data-visualization embedded with Semantic Types, especially in Jupyter notebooks.
 
@@ -37,8 +37,7 @@ For more details, please read :doc:`quickstart`.
 .. _Tensorflow : https://www.tensorflow.org/
 .. _Presto : https://prestodb.io/
 .. _Jupyter : https://jupyter.org/
-.. _Apache Spark : https://parquet.apache.org/
-.. _Apache Parquet:
+.. _Apache Parquet: https://parquet.apache.org/
 
 Indices and tables
 ==================

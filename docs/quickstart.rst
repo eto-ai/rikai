@@ -146,7 +146,7 @@ Once the training finishes, Model ``my_ssd_model`` is available for :doc:`SQL ML
         id,
         ML_PREDICT(my_ssd_model, image) as detections,
         annotations
-    FROM images
+    FROM my_dataset
     WHERE split = 'eval'
     LIMIT 10
 

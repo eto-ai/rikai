@@ -1,61 +1,49 @@
 
-Welcome to Rikai's documentation!
-=================================
+Welcome to Rikai!
+*****************
 
-Rikai is an `Apache Spark`_ based ML data format built for working with
-unstructured data at scale. Processing large amounts of data for ML is never trivial, but that
-is especially true for images and videos often at the core of deep learning applications. We are
-building Rikai with two main goals:
+Rikai is a framework specifically designed for AI workflows focused around large scale unstructured datasets
+(e.g., images, videos, sensor data (future), text (future), and more).
+Through every stage of the AI modeling workflow,
+Rikai strives to offer a great developer experience when working with real-world AI datasets.
 
-1. Enable ML engineers/researchers to have a seamless workflow from feature engineering (`Spark`_)
-   to training (`PyTorch`_/`Tensorflow`_), from notebook to production (:doc:`See details <types>`).
-2. Enable advanced analytics capabilities to support much faster active learning, model debugging,
-   and monitoring in production.
+The quality of an AI dataset can make or break an AI project, but tooling for AI data is sorely lacking in ergonomics.
+As a result, practitioners must spend most of their time and effort wrestling with their data instead of innovating on the models and use cases.
+Rikai alleviates the pain that AI practitioners experience on a daily basis dealing with the myriad of tedious data tasks,
+so they can focus again on model-building and problem solving.
 
-.. code-block:: python
 
-  from pyspark.ml.linalg import DenseMetrix
-  from rikai.types import Image, Box2d
-  from rikai import numpy as np
+Main Features
+=============
 
-  df = spark.createDataFrame(
-      [{
-          "id": 1,
-          "mat": DenseMatrix(2, 2, range(4)),
-          "image": Image("s3://foo/bar/1.png"),
-          "annotations": [
-              {
-                  "label": "cat",
-                  "mask": np.random(size=(256,256)),
-                  "bbox": Box2d(xmin=1.0, ymin=2.0, xmax=3.0, ymax=4.0)
-              }
-          ]
-      }]
-  )
+Data format
+^^^^^^^^^^^
 
-  df.write.format("rikai").save("dataset/out")
+The core of Rikai is a data format ("rikai format")
+based on `Apache Parquet`_.
+Rikai augments parquet with a rich collection of semantic types design specifically for unstructured data and annotations.
 
-``Rikai`` dataset can be seamlessly integrated into your favorite training frameworks,
-taking `Pytorch`_ as an example:
+Integrations
+^^^^^^^^^^^^
 
-.. code-block:: python
+Rikai comes with an extensive set of I/O connectors. For ETL, Rikai is able to consume popular formats like ROS bags and Coco.
+For analysis, it's easy to read Rikai data into pandas/spark DataFrames (Rikai handles serde for the semantic types).
+And for training, Rikai allows direct creation of Pytorch/Tensorflow datasets without manual conversion.
 
-  from rikai.torch import DataLoader
+SQL-ML Engine
+^^^^^^^^^^^^^
 
-  data_loader = DataLoader(
-      "dataset/out",
-      shuffle=True,
-      batch=8,
-  )
-  for examples in data_loader:
-      print(example)
+Rikai extends Spark SQL with ML capability which allows users to analyze Rikai datasets using own models with SQL
+(*"Bring your own model"*)
 
-Additionally, the parquet-native nature of the ``rikai`` format allows such unstructured ML dataset
-being analyzed in `Jupyter`_, `Spark`_, `Presto`_ or
-`BigQuery <https://cloud.google.com/bigquery/external-data-cloud-storage>`_.
+Visualization
+^^^^^^^^^^^^^
+
+Carefully crafted data-visualization embedded with semantic types, especially in Jupyter notebooks,
+to help you visualize and inspect your AI data without having to remember complicated raw image manipulations.
+
 
 For more details, please read :doc:`quickstart`.
-
 
 .. toctree::
    :maxdepth: 1
@@ -73,7 +61,7 @@ For more details, please read :doc:`quickstart`.
 .. _Tensorflow : https://www.tensorflow.org/
 .. _Presto : https://prestodb.io/
 .. _Jupyter : https://jupyter.org/
-.. _Apache Spark : https://parquet.apache.org/
+.. _Apache Parquet: https://parquet.apache.org/
 
 Indices and tables
 ==================

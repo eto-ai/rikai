@@ -131,6 +131,7 @@ class DataLoader:
     rank : int
         The rank of this worker among distributed workers. Default is ``0``.
 
+
     **Distributed Training**
 
     :py:class:`DataLoader` can work with distributed training framework,
@@ -157,6 +158,7 @@ class DataLoader:
         for epoch in range(100):
             for batch_idx, (data, target) in enumerate(train_loader):
                 ...
+
 
     .. warning::
 

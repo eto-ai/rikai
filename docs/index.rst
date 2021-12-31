@@ -1,31 +1,46 @@
 
 Welcome to Rikai!
-=================
+*****************
 
 What is Rikai
--------------
+=============
 
-The success of a AI product is determined by high quality of ML data.
-This is the number one reason ML practioners spending the most of the efforts working on data instead
-of innovating on models.
-Rikai alleviates ML practioners from many of these tedious data tasks so that they can
-focus on model innovation and problem solving.
+The quality of an AI dataset can make or break an AI project, but tooling for AI data is sorely lacking in ergonomics.
+As a result, practitioners must spend most of their time and effort wrestling with their data instead of innovating on the models and use cases.
+Rikai alleviates the pain that AI practitioners experience on a daily basis dealing with the myriad of tedious data tasks,
+so they can focus again on model-building and problem solving.
 
-Rikai is a large-scale data system specifically designed for Machine Learning workflows,
-specialized in Deep Learning development over various forms of unstructured data,
-for example, image, video or sensor data.
+Rikai is a framework specifically designed for AI workflows focused around large scale unstructured datasets (e.g., images, videos, sensor data (future), text (future), and more).
 
 Rikai strives to offer great developer experience to assist ML engineers at each
 stage of application development.
 
-1. At its core, Rikai persists unstructured machine learning data in an `Apache Parquet`_
-   based format. It handles SerDe of these unstructured data transparently via a rich collection of
-   semantic types.
-2. Extensive set of I/O connectors, from ETL to training (e.g., `Pytorch`_ ``Dataset``), to
-   bring the familiar developer experience at each stage of ML development.
-3. An SQL Engine, which extends `Spark`_ SQL with ML capability,
-   that analyzes Rikai data lake with your own model ("Bring Your Own Model").
-4. Carefully crafted data-visualization embedded with semantic types, especially in Jupyter notebooks.
+Data format
+^^^^^^^^^^^
+
+The core of Rikai is a data format ("rikai format")
+based on `Apache Parquet`_.
+Rikai augments parquet with a rich collection of semantic types design specifically for unstructured data and annotations.
+
+Integrations
+^^^^^^^^^^^^
+
+Rikai comes with an extensive set of I/O connectors. For ETL, Rikai is able to consume popular formats like ROS bags and Coco.
+For analysis, it's easy to read Rikai data into pandas/spark DataFrames (Rikai handles serde for the semantic types).
+And for training, Rikai allows direct creation of Pytorch/Tensorflow datasets without manual conversion.
+
+SQL-ML Engine
+^^^^^^^^^^^^^
+
+Rikai extends Spark SQL with ML capability which allows users to analyze Rikai datasets using own models with SQL
+(*"Bring your own model"*)
+
+Visualization
+^^^^^^^^^^^^^
+
+Carefully crafted data-visualization embedded with semantic types, especially in Jupyter notebooks,
+to help you visualize and inspect your AI data without having to remember complicated raw image manipulations.
+
 
 For more details, please read :doc:`quickstart`.
 

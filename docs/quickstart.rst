@@ -119,9 +119,40 @@ Use this dataset in `Pytorch`_
             losses.backward()
             optimizer.step()
 
+Rikai offers `MLflow`_ integration. When a model registered with `MLflow`, it will be available
+to SQL ML directly.
+
+.. code-block:: python
+
+    import rikai.mlflow
+
+    with mlflow.start_run() as run:
+        # training loop
+        for epoch in range(10):
+            for imgs, annotations in data_loader:
+                ...
+
+        rikai.mlflow.pytorch.log_model(model, "model",
+            schema=OUTPUT_SCHEMA,
+            pre_processing="rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing",
+            post_processing="rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing",
+            registered_model_name="my_ssd_model")
+
+Once the training finishes, Model ``my_ssd_model`` is available for :doc:`SQL ML <sqlml>` to use.
+
+.. code-block:: SQL
+
+    SELECT
+        id,
+        ML_PREDICT(my_ssd_model, image) as detections,
+        annotations
+    FROM images
+    WHERE split = 'eval'
+    LIMIT 10
 
 .. _Spark : https://spark.apache.org/
 .. _Jupyter Notebook : https://jupyter.org/
 .. _Pytorch : https://pytorch.org/
+.. _Mlflow : https://mlflow.org/
 
 

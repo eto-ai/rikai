@@ -55,6 +55,11 @@ class MLPredictTest
     downloadResnet()
   }
 
+  override def afterAll(): Unit = {
+    super.afterAll()
+    Files.delete(resnetPath)
+  }
+
   test("Use simple fs model") {
     val specYamlPath = Files.createTempFile("spec", ".yml")
     try {

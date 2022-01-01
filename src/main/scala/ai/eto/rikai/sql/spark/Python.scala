@@ -25,8 +25,8 @@ import ai.eto.rikai.sql.model.{
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.rikai.model.Resolver
 
-import java.util
-import scala.sys.process.Process
+import scala.sys.process
+import scala.sys.process.{Process, ProcessLogger}
 
 /** [[Python]] is the callback service to call arbitrary Python code
   * in the SparkSessions' main python interpreter.
@@ -49,7 +49,6 @@ trait Python {
 }
 
 object Python {
-  private var python: Option[Python] = None
 
   /** Python executor */
   lazy val pythonExec: String =
@@ -74,19 +73,17 @@ object Python {
     ) !!
 
   def execute(code: String, session: SparkSession): Unit = {
+    val stderr = new StringBuilder
+    val stdout = new StringBuilder
     val workerEnv = session.conf.getAll.toSeq
-    Process(Seq(Python.pythonExec, "-c", code), None, workerEnv: _*) !!
-  }
-
-  def register(mr: Python): Unit =
-    python = Some(mr)
-
-  @throws[RuntimeException]
-  def checkRegistered: Unit = {
-    if (python.isEmpty) {
-      throw new RuntimeException("""ModelResolved has not been initialized.
-          |Please make sure "rikai.spark.sql.init" has been called.
-          |""".stripMargin)
+    val status = Process(
+      Seq(Python.pythonExec, "-c", code),
+      None,
+      workerEnv: _*
+    ) ! ProcessLogger(stdout append _, stderr append _)
+    print(process.stdout.toString)
+    if (status != 0) {
+      throw new RuntimeException(stderr.toString)
     }
   }
 

@@ -14,5 +14,4 @@
 
 from rikai.spark.sql.codegen.base import command_from_spec
 
-
 __all__ = ["command_from_spec"]

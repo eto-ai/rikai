@@ -16,10 +16,9 @@ from typing import Any, Dict, Optional
 from urllib.parse import urlparse
 
 import torch
-from pyspark.sql import SparkSession
 
 from rikai.logging import logger
-from rikai.spark.sql.codegen.base import codegen_from_spec, ModelSpec, Registry
+from rikai.spark.sql.codegen.base import ModelSpec, Registry, udf_from_spec
 
 
 class TorchHubModelSpec(ModelSpec):
@@ -49,10 +48,6 @@ class TorchHubModelSpec(ModelSpec):
 class TorchHubRegistry(Registry):
     """TorchHub-based Model Registry"""
 
-    def __init__(self, spark: SparkSession):
-        self._spark = spark
-        self._jvm = spark.sparkContext._jvm
-
     def __repr__(self):
         return "TorchHubRegistry"
 
@@ -76,8 +71,5 @@ class TorchHubRegistry(Registry):
         repo_or_dir = "/".join(parts[:-1])
         model = parts[-1]
         spec = TorchHubModelSpec(repo_or_dir, model, raw_spec)
-        func_name = codegen_from_spec(self._spark, spec, name)
-        model = self._jvm.ai.eto.rikai.sql.model.SparkUDFModel(
-            name, uri, func_name, raw_spec.getFlavor()
-        )
-        return model
+        udf = udf_from_spec(spec)
+        return udf.func, udf.returnType

@@ -14,6 +14,8 @@
 
 import os
 from urllib.parse import urlparse
+from typing import Union, Optional
+from pathlib import Path
 
 import yaml
 
@@ -41,15 +43,14 @@ class FileModelSpec(ModelSpec):
 
     def __init__(
         self,
-        raw_spec: dict,
+        spec_uri: Union[str, Path],
+        options: Optional[dict] = None,
         validate: bool = True,
     ):
-        uri = raw_spec["uri"]
-        with open_uri(uri) as fobj:
+        with open_uri(spec_uri) as fobj:
             spec = yaml.load(fobj, Loader=yaml.FullLoader)
-        self.base_dir = os.path.dirname(uri)
+        self.base_dir = os.path.dirname(spec_uri)
         spec.setdefault("options", {})
-        options = raw_spec["options"]
         if options:
             spec["options"].update(options)
         super().__init__(spec, validate=validate)
@@ -79,7 +80,9 @@ class FileSystemRegistry(Registry):
         return "FileSystemRegistry"
 
     def resolve(self, raw_spec: dict):
-        spec = FileModelSpec(raw_spec)
+        uri = raw_spec.get("uri")
+        options = raw_spec.get("options", {})
+        spec = FileModelSpec(uri, options=options)
         name = spec.name
         uri = spec.model_uri
         logger.info(f"Resolving model {name} from {uri}")

@@ -32,9 +32,9 @@ object Resolver {
 
   def resolve(
       session: SparkSession,
+      registryClassName: String,
       spec: ModelSpec
   ): Unit = {
-    val specClass = "rikai.spark.sql.codegen.fs.FileModelSpec"
     val specPath = Files.createTempFile("model-spec", ".json")
     val path = Files.createTempFile("model-code", ".cpt")
     val dataTypePath = Files.createTempFile("model-type", ".json")
@@ -44,7 +44,7 @@ object Resolver {
                  |import json
                  |spec = json.load(open("${specPath}", "r"))
                  |from rikai.spark.sql.codegen import command_from_spec
-                 |func, dataType = command_from_spec("${specClass}", spec)
+                 |func, dataType = command_from_spec("${registryClassName}", spec)
                  |pickle = CloudPickleSerializer()
                  |with open("${path}", "wb") as fobj:
                  |    fobj.write(pickle.dumps((func, dataType)))

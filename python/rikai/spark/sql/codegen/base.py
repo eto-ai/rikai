@@ -234,8 +234,8 @@ def codegen_from_spec(
     return register_udf(spark, udf, name)
 
 
-def command_from_spec(spec_class: str, row_spec: dict):
-    cls = find_class(spec_class)
-    print(cls)
-    generated = udf_from_spec(cls(row_spec))
-    return generated.func, generated.returnType
+def command_from_spec(registry_class: str, row_spec: dict):
+    cls = find_class(registry_class)
+    resolver = cls()
+    func, returnType = resolver.resolve(row_spec)
+    return func, returnType

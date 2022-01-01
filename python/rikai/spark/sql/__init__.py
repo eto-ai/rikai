@@ -34,4 +34,5 @@ def init(spark: SparkSession, enable_dynamic_port: bool = True):
         init(spark)
 
     """
-    init_cb_service(spark, enable_dynamic_port)
+    # init_cb_service(spark, enable_dynamic_port)
+    pass

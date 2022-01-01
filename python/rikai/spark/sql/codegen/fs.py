@@ -49,14 +49,15 @@ class FileModelSpec(ModelSpec):
 
     def __init__(
         self,
-        spec_uri: Union[str, Path],
-        options: Optional[Dict[str, Any]] = None,
+        raw_spec: dict,
         validate: bool = True,
     ):
-        with open_uri(spec_uri) as fobj:
+        uri = raw_spec["uri"]
+        with open_uri(uri) as fobj:
             spec = yaml.load(fobj, Loader=yaml.FullLoader)
-        self.base_dir = os.path.dirname(spec_uri)
+        self.base_dir = os.path.dirname(uri)
         spec.setdefault("options", {})
+        options = raw_spec["options"]
         if options:
             spec["options"].update(options)
         super().__init__(spec, validate=validate)

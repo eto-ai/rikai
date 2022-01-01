@@ -18,13 +18,15 @@ package org.apache.spark.sql.rikai.model
 
 import ai.eto.rikai.sql.model.ModelSpec
 import ai.eto.rikai.sql.spark.Python
+import io.circe.generic.auto._
+import io.circe.syntax._
 import org.apache.spark.api.python.{PythonEvalType, PythonFunction}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.execution.python.UserDefinedPythonFunction
 import org.apache.spark.sql.types.IntegerType
 
-import collection.JavaConverters._
 import java.nio.file.Files
+import scala.collection.JavaConverters._
 
 object Resolver {
 
@@ -32,16 +34,22 @@ object Resolver {
       session: SparkSession,
       spec: ModelSpec
   ): Unit = {
+    val specClass = "rikai.spark.sql.codegen.fs.FileModelSpec"
+    val specJson = spec.asJson
+    print(specJson)
+    val specPath = Files.createTempFile("model-spec", ".json")
+    print(specPath)
     val path = Files.createTempFile("model-code", ".cpt")
     try {
+      Files.writeString(specPath, spec.asJson.toString)
       Python.execute(s"""from pyspark.serializers import CloudPickleSerializer;
-                 |from pyspark.sql.types import IntegerType
+                 |import json
+                 |spec = json.load(open("${specPath}", "r"))
+                 |from rikai.spark.sql.codegen import command_from_spec
+                 |func, dataType = command_from_spec("${specClass}", spec)
                  |pickle = CloudPickleSerializer()
-                 |def pd_iter(x):
-                 |    print(type(x))
-                 |    return x + 1
                  |with open("${path}", "wb") as fobj:
-                 |    fobj.write(pickle.dumps((pd_iter, IntegerType())))
+                 |    fobj.write(pickle.dumps((func, dataType)))
                  |""".stripMargin)
       val cmd = Files.readAllBytes(path)
       val udf =
@@ -57,12 +65,13 @@ object Resolver {
             null
           ),
           IntegerType,
-          PythonEvalType.SQL_SCALAR_PANDAS_UDF,
+          PythonEvalType.SQL_SCALAR_PANDAS_ITER_UDF,
           udfDeterministic = true
         )
       session.udf.registerPython("sumsum", udf)
     } finally {
       Files.delete(path)
+      Files.delete(specPath)
     }
   }
 

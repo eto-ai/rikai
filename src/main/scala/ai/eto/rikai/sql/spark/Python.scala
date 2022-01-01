@@ -51,7 +51,7 @@ object Python {
   private var python: Option[Python] = None
 
   /** Python executor */
-  val pythonExec =
+  val pythonExec: String =
     sys.env.getOrElse(
       "PYSPARK_PYTHON",
       sys.env.getOrElse("PYSPARK_DRIVER_PYTHON", "python3")

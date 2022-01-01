@@ -20,7 +20,7 @@ import ai.eto.rikai.sql.model.Catalog
 import org.apache.spark.sql.SparkSession
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.{BeforeAndAfterAll, Suite}
-
+import java.nio.file.Files
 class MLPredictTest extends AnyFunSuite with BeforeAndAfterAll {
 
   this: Suite =>
@@ -39,24 +39,47 @@ class MLPredictTest extends AnyFunSuite with BeforeAndAfterAll {
 
   spark.sparkContext.setLogLevel("WARN")
 
+  lazy val resnetPath = Files.createTempFile("resnet", ".pt")
+
   private def downloadResnet(): Unit = {
-    Python.execute("""import torch;
+    Python.execute(f"""import torch;
         |import torchvision;
         |resnet = torchvision.models.detection.fasterrcnn_resnet50_fpn(
         |    pretrained=True, progress=False);
-        |torch.save(resnet, "/tmp/resnet.pt")""".stripMargin)
+        |torch.save(resnet, "${resnetPath}")""".stripMargin)
   }
+
+  private val resnetSpecYaml: String = s"""
+      |version: "1.0"
+      |name: resnet
+      |model:
+      |  uri: ${resnetPath}
+      |  flavor: pytorch
+      |schema: STRUCT<boxes:ARRAY<ARRAY<float>>, scores:ARRAY<float>, label_ids:ARRAY<int>>
+      |transforms:
+      |  pre: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing
+      |  post: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing""".stripMargin
 
   override def beforeAll(): Unit = {
     downloadResnet()
   }
 
   test("Use simple fs model") {
-    spark.sql(
-      "CREATE MODEL resnet USING '/tmp/resnet.pt'"
-    )
-    val df = spark.sql("SELECT ML_PREDICT(resnet, 1) as s")
-    df.show()
-    assert(df.exceptAll(spark.sql("SELECT 2 as s")).isEmpty)
+    val specYamlPath = Files.createTempFile("spec", ".yml")
+    try {
+      Files.writeString(specYamlPath, resnetSpecYaml)
+      spark.sql(
+        s"CREATE MODEL resnet USING '${specYamlPath}'"
+      )
+      val df = spark.sql(
+        """SELECT
+          |ML_PREDICT(resnet,
+          |'s3://eto-public/little_coco_raw/val2017/000000346707.jpg') AS s""".stripMargin
+      )
+      df.show()
+    } finally {
+      Files.delete(specYamlPath)
+    }
+
   }
 }

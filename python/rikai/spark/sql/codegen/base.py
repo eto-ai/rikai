@@ -234,9 +234,8 @@ def codegen_from_spec(
     return register_udf(spark, udf, name)
 
 
-def command_from_spec(row_spec: dict, output_path: str):
-    generated = udf_from_spec(row_spec)
-    from pyspark.serializers import CloudPickleSerializer
-    pickle = CloudPickleSerializer()
-    s = pickle.dumps(generated.func)
-    return s
+def command_from_spec(spec_class: str, row_spec: dict):
+    cls = find_class(spec_class)
+    print(cls)
+    generated = udf_from_spec(cls(row_spec))
+    return generated.func, generated.returnType

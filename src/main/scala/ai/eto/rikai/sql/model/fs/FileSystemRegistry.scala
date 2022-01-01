@@ -16,10 +16,10 @@
 
 package ai.eto.rikai.sql.model.fs
 
-import ai.eto.rikai.sql.model.{PyImplRegistry, Registry}
+import ai.eto.rikai.sql.model.PyImplRegistry
 import com.typesafe.scalalogging.LazyLogging
 
-/** FileSystem-based Model [[Registry]].
+/** FileSystem-based Model Registry.
   */
 class FileSystemRegistry(val conf: Map[String, String])
     extends PyImplRegistry

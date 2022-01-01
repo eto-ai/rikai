@@ -201,39 +201,6 @@ def udf_from_spec(spec: ModelSpec):
         raise
 
 
-def register_udf(spark: SparkSession, udf: Callable, name: str) -> str:
-    """
-    Register a given UDF with the give Spark session under the given name.
-    """
-    func_name = f"{name}_{secrets.token_hex(4)}"
-    spark.udf.register(func_name, udf)
-    logger.info(f"Created model inference pandas_udf with name {func_name}")
-    return func_name
-
-
-def codegen_from_spec(
-    spark: SparkSession, spec: dict, name: Optional[str] = None
-) -> str:
-    """Generate code from a model spec info dict
-
-    Parameters
-    ----------
-    spark : SparkSession
-        A live spark session
-    spec : dict
-        the model spec info dict
-    name : str
-        The name of the model in the catalog
-
-    Returns
-    -------
-    str
-        Spark UDF function name for the generated data.
-    """
-    udf = udf_from_spec(spec)
-    return register_udf(spark, udf, name)
-
-
 def command_from_spec(registry_class: str, row_spec: dict):
     cls = find_class(registry_class)
     resolver = cls()

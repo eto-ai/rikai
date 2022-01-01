@@ -13,9 +13,9 @@
 #  limitations under the License.
 
 import os
-from urllib.parse import urlparse
-from typing import Union, Optional
 from pathlib import Path
+from typing import Optional, Union
+from urllib.parse import urlparse
 
 import yaml
 

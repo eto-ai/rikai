@@ -40,7 +40,8 @@ object Resolver {
     val dataTypePath = Files.createTempFile("model-type", ".json")
     try {
       Files.writeString(specPath, spec.asJson.toString)
-      Python.execute(s"""from pyspark.serializers import CloudPickleSerializer;
+      Python.execute(
+        s"""from pyspark.serializers import CloudPickleSerializer;
                  |import json
                  |spec = json.load(open("${specPath}", "r"))
                  |from rikai.spark.sql.codegen import command_from_spec
@@ -50,7 +51,9 @@ object Resolver {
                  |    fobj.write(pickle.dumps((func, dataType)))
                  |with open("${dataTypePath}", "w") as fobj:
                  |    fobj.write(dataType.json())
-                 |""".stripMargin, session)
+                 |""".stripMargin,
+        session
+      )
       val cmd = Files.readAllBytes(path)
       val dataTypeJson = Files.readString(dataTypePath)
       val returnType = DataType.fromJson(dataTypeJson)

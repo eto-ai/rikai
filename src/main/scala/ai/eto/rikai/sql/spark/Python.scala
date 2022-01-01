@@ -16,7 +16,12 @@
 
 package ai.eto.rikai.sql.spark
 
-import ai.eto.rikai.sql.model.{Model, ModelNotFoundException, ModelSpec, SparkUDFModel}
+import ai.eto.rikai.sql.model.{
+  Model,
+  ModelNotFoundException,
+  ModelSpec,
+  SparkUDFModel
+}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.rikai.model.Resolver
 
@@ -70,7 +75,7 @@ object Python {
 
   def execute(code: String, session: SparkSession): Unit = {
     val workerEnv = session.conf.getAll.toSeq
-    Process(Seq(Python.pythonExec, "-c", code), None, workerEnv:_*)!!
+    Process(Seq(Python.pythonExec, "-c", code), None, workerEnv: _*) !!
   }
 
   def register(mr: Python): Unit =

@@ -16,30 +16,18 @@
 
 package ai.eto.rikai.sql.spark
 
-import ai.eto.rikai.sql.model.Catalog
-import org.apache.spark.sql.SparkSession
+import ai.eto.rikai.SparkTestSession
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
-import org.scalatest.{BeforeAndAfterAll, Suite}
-import java.nio.file.Files
-class MLPredictTest extends AnyFunSuite with BeforeAndAfterAll {
 
-  this: Suite =>
-  lazy val spark: SparkSession = SparkSession.builder
-    .config(
-      "spark.sql.extensions",
-      "ai.eto.rikai.sql.spark.RikaiSparkSessionExtensions"
-    )
-    .config(
-      Catalog.SQL_ML_CATALOG_IMPL_KEY,
-      Catalog.SQL_ML_CATALOG_IMPL_DEFAULT
-    )
-    .config("spark.port.maxRetries", 128)
-    .master("local[2]")
-    .getOrCreate
+import java.nio.file.{Files, Path}
 
-  spark.sparkContext.setLogLevel("WARN")
+class MLPredictTest
+    extends AnyFunSuite
+    with SparkTestSession
+    with BeforeAndAfterAll {
 
-  lazy val resnetPath = Files.createTempFile("resnet", ".pt")
+  lazy val resnetPath: Path = Files.createTempFile("resnet", ".pt")
 
   private def downloadResnet(): Unit = {
     Python.execute(f"""import torch;
@@ -61,6 +49,7 @@ class MLPredictTest extends AnyFunSuite with BeforeAndAfterAll {
       |  post: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing""".stripMargin
 
   override def beforeAll(): Unit = {
+    super.beforeAll()
     downloadResnet()
   }
 
@@ -69,7 +58,7 @@ class MLPredictTest extends AnyFunSuite with BeforeAndAfterAll {
     try {
       Files.writeString(specYamlPath, resnetSpecYaml)
       spark.sql(
-        s"CREATE MODEL resnet USING '${specYamlPath}'"
+        s"CREATE MODEL resnet USING 'file://${specYamlPath}'"
       )
       val df = spark.sql(
         """SELECT
@@ -81,6 +70,5 @@ class MLPredictTest extends AnyFunSuite with BeforeAndAfterAll {
     } finally {
       Files.delete(specYamlPath)
     }
-
   }
 }

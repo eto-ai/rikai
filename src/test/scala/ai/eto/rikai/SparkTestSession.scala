@@ -17,7 +17,7 @@
 package ai.eto.rikai
 
 import ai.eto.rikai.sql.model.{Catalog, Registry}
-import ai.eto.rikai.sql.spark.{Python, TestPython}
+import ai.eto.rikai.sql.spark.Python
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
 
@@ -45,7 +45,6 @@ trait SparkTestSession extends BeforeAndAfterEach with BeforeAndAfterAll {
 
   override def beforeEach(): Unit = {
     Catalog.testing.clear()
-    Python.register(new TestPython)
   }
 
   def assertEqual(actual: DataFrame, expected: DataFrame): Unit = {

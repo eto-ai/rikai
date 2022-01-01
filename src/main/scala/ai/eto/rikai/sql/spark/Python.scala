@@ -16,15 +16,11 @@
 
 package ai.eto.rikai.sql.spark
 
-import ai.eto.rikai.sql.model.{
-  Model,
-  ModelNotFoundException,
-  ModelSpec,
-  SparkUDFModel
-}
+import ai.eto.rikai.sql.model.{Model, ModelNotFoundException, ModelSpec, SparkUDFModel}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.rikai.model.Resolver
 
+import java.util
 import scala.sys.process.Process
 
 /** [[Python]] is the callback service to call arbitrary Python code
@@ -71,6 +67,11 @@ object Python {
     Process(
       Seq(Python.pythonExec, "-c", code)
     ) !!
+
+  def execute(code: String, session: SparkSession): Unit = {
+    val workerEnv = session.conf.getAll.toSeq
+    Process(Seq(Python.pythonExec, "-c", code), None, workerEnv:_*)!!
+  }
 
   def register(mr: Python): Unit =
     python = Some(mr)

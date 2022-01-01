@@ -25,14 +25,11 @@ class TorchHubModelSpec(ModelSpec):
     def __init__(self, repo_or_dir: str, model: str, raw_spec: "ModelSpec"):
         spec = {
             "version": "1.0",
-            "schema": raw_spec.getSchema(),
-            "model": {
-                "flavor": raw_spec.getFlavor(),
-                "uri": raw_spec.getUri(),
-            },
+            "schema": raw_spec["schema"],
+            "model": {"flavor": raw_spec["flavor"], "uri": raw_spec["uri"]},
             "transforms": {
-                "pre": raw_spec.getPreprocessor(),
-                "post": raw_spec.getPostprocessor(),
+                "pre": raw_spec.get("preprocessor", None),
+                "post": raw_spec.get("postprocessor", None),
             },
         }
 
@@ -51,9 +48,9 @@ class TorchHubRegistry(Registry):
     def __repr__(self):
         return "TorchHubRegistry"
 
-    def resolve(self, raw_spec):
-        name = raw_spec.getName()
-        uri = raw_spec.getUri()
+    def resolve(self, raw_spec: dict):
+        name = raw_spec["name"]
+        uri = raw_spec["uri"]
         logger.info(f"Resolving model {name} from {uri}")
         parsed = urlparse(uri)
         if parsed.netloc:

@@ -50,7 +50,7 @@ object Resolver {
                  |    fobj.write(pickle.dumps((func, dataType)))
                  |with open("${dataTypePath}", "w") as fobj:
                  |    fobj.write(dataType.json())
-                 |""".stripMargin)
+                 |""".stripMargin, session)
       val cmd = Files.readAllBytes(path)
       val dataTypeJson = Files.readString(dataTypePath)
       val returnType = DataType.fromJson(dataTypeJson)

@@ -62,9 +62,10 @@ class MLPredictTest
       spark.sql(
         s"CREATE MODEL resnet USING 'file://${specYamlPath}'"
       )
+
       Seq(
-        getClass.getResource("000000304150.jpg").getPath,
-        getClass.getResource("000000419650.jpg").getPath
+        getClass.getResource("/000000304150.jpg").getPath,
+        getClass.getResource("/000000419650.jpg").getPath
       ).toDF("image_uri").createOrReplaceTempView("images")
 
       val df = spark.sql(

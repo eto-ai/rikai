@@ -16,7 +16,7 @@
 
 package org.apache.spark.sql.rikai.model
 
-import ai.eto.rikai.sql.model.ModelSpec
+import ai.eto.rikai.sql.model.{ModelSpec, SparkUDFModel}
 import ai.eto.rikai.sql.spark.Python
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -25,6 +25,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.execution.python.UserDefinedPythonFunction
 import org.apache.spark.sql.types.DataType
 
+import scala.util.Random
 import java.nio.file.Files
 import scala.collection.JavaConverters._
 
@@ -34,7 +35,7 @@ object Resolver {
       session: SparkSession,
       registryClassName: String,
       spec: ModelSpec
-  ): Unit = {
+  ): SparkUDFModel = {
     val specPath = Files.createTempFile("model-spec", ".json")
     val path = Files.createTempFile("model-code", ".cpt")
     val dataTypePath = Files.createTempFile("model-type", ".json")
@@ -57,9 +58,11 @@ object Resolver {
       val cmd = Files.readAllBytes(path)
       val dataTypeJson = Files.readString(dataTypePath)
       val returnType = DataType.fromJson(dataTypeJson)
+      val suffix = Random.alphanumeric.take(6)
+      val udfName = s"${spec.name}_${suffix}"
       val udf =
         UserDefinedPythonFunction(
-          "test_sum",
+          udfName,
           PythonFunction(
             cmd,
             new java.util.HashMap[String, String](),
@@ -73,7 +76,9 @@ object Resolver {
           PythonEvalType.SQL_SCALAR_PANDAS_ITER_UDF,
           udfDeterministic = true
         )
-      session.udf.registerPython("sumsum", udf)
+      session.udf.registerPython(udfName, udf)
+
+      new SparkUDFModel(spec.name.get, spec.uri, udfName)
     } finally {
       Files.delete(path)
       Files.delete(specPath)

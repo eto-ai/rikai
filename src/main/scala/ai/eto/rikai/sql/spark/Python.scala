@@ -16,37 +16,10 @@
 
 package ai.eto.rikai.sql.spark
 
-import ai.eto.rikai.sql.model.{
-  Model,
-  ModelNotFoundException,
-  ModelSpec,
-  SparkUDFModel
-}
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.rikai.model.Resolver
 
 import scala.sys.process
 import scala.sys.process.{Process, ProcessLogger}
-
-/** [[Python]] is the callback service to call arbitrary Python code
-  * in the SparkSessions' main python interpreter.
-  */
-trait Python {
-
-  /** Resolve a Model from python.
-    *
-    * @param className the name of the python class.
-    * @param spec Model spec.
-    *
-    * @return a Model
-    */
-  @throws[ModelNotFoundException]
-  def resolve(
-      session: SparkSession,
-      className: String,
-      spec: ModelSpec
-  ): Model
-}
 
 object Python {
 
@@ -85,17 +58,5 @@ object Python {
     if (status != 0) {
       throw new RuntimeException(stderr.toString)
     }
-  }
-
-  /** Resolve a Model from Python process. */
-  @throws[ModelNotFoundException]
-  def resolve(
-      session: SparkSession,
-      className: String,
-      spec: ModelSpec
-  ): Model = {
-    Resolver.resolve(session, className, spec)
-
-    new SparkUDFModel(spec.name.get, spec.uri, "sumsum")
   }
 }

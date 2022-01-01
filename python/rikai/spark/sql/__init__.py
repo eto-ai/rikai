@@ -11,28 +11,3 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-from pyspark.sql import SparkSession
-
-from rikai.spark.sql.callback_service import init_cb_service
-
-__all__ = ["init"]
-
-
-def init(spark: SparkSession, enable_dynamic_port: bool = True):
-    """Initialize SQL-ML services.
-
-    .. code-block:: python
-
-        # To start use Rikai SQL-ML in Spark
-        from rikai.spark.sql import init
-
-        spark = (
-            SparkSession
-            ...
-            .getOrCreate)
-        init(spark)
-
-    """
-    # init_cb_service(spark, enable_dynamic_port)
-    pass

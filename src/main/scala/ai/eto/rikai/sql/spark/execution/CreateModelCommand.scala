@@ -68,7 +68,7 @@ case class CreateModelCommand(
     } else if (isModelExists && !replace) {
       throw new ModelAlreadyExistException(s"Model (${name}) already exists")
     } else {
-      val model = Registry.resolve(asSpec)
+      val model = Registry.resolve(spark, asSpec)
       model.options ++= options
       if (replace) {
         catalog(spark).dropModel(name)

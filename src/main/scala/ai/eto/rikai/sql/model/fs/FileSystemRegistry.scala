@@ -24,6 +24,7 @@ import ai.eto.rikai.sql.model.{
 }
 import ai.eto.rikai.sql.spark.Python
 import com.typesafe.scalalogging.LazyLogging
+import org.apache.spark.sql.SparkSession
 
 /** FileSystem-based Model [[Registry]].
   */
@@ -43,9 +44,10 @@ class FileSystemRegistry(val conf: Map[String, String])
     */
   @throws[ModelNotFoundException]
   override def resolve(
+      session: SparkSession,
       spec: ModelSpec
   ): Model = {
     logger.info(s"Resolving ML model from ${spec.uri}")
-    Python.resolve(pyClass, spec)
+    Python.resolve(session, pyClass, spec)
   }
 }

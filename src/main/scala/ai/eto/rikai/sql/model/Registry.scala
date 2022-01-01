@@ -20,6 +20,7 @@ import ai.eto.rikai.sql.spark.Python
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.http.client.utils.URIUtils
 import org.apache.log4j.Logger
+import org.apache.spark.sql.SparkSession
 
 import java.net.URI
 import scala.util.{Success, Try}
@@ -38,6 +39,7 @@ trait Registry {
     */
   @throws[ModelNotFoundException]
   def resolve(
+      session: SparkSession,
       spec: ModelSpec
   ): Model
 }
@@ -55,10 +57,11 @@ abstract class PyImplRegistry extends Registry with LazyLogging {
     */
   @throws[ModelNotFoundException]
   override def resolve(
+      session: SparkSession,
       spec: ModelSpec
   ): Model = {
     logger.info(s"Resolving ML model from ${spec.uri}")
-    Python.resolve(pyClass, spec)
+    Python.resolve(session, pyClass, spec)
   }
 }
 
@@ -184,8 +187,9 @@ private[rikai] object Registry {
   @throws[ModelResolveException]
   @throws[ModelNotFoundException]
   def resolve(
+      session: SparkSession,
       spec: ModelSpec
-  ): Model = getRegistry(spec.uri).resolve(spec)
+  ): Model = getRegistry(spec.uri).resolve(session, spec)
 
   /** Used in testing to reset the registry */
   private[sql] def reset: Unit = {

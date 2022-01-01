@@ -18,7 +18,6 @@ package ai.eto.rikai.sql.model.testing
 
 import java.io.File
 import java.net.URI
-
 import ai.eto.rikai.sql.model.{
   Model,
   ModelNotFoundException,
@@ -27,6 +26,7 @@ import ai.eto.rikai.sql.model.{
   SparkUDFModel
 }
 import com.typesafe.scalalogging.LazyLogging
+import org.apache.spark.sql.SparkSession
 
 /** [[TestRegistry]] is a Registry for the testing purpose.
   *
@@ -46,6 +46,7 @@ class TestRegistry(conf: Map[String, String])
     */
   @throws[ModelNotFoundException]
   override def resolve(
+      session: SparkSession,
       spec: ModelSpec
   ): Model = {
     val parsed = URI.create(spec.uri)

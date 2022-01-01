@@ -16,7 +16,16 @@
 
 package ai.eto.rikai.sql.spark
 
-import ai.eto.rikai.sql.model.{Model, ModelNotFoundException, ModelSpec}
+import ai.eto.rikai.sql.model.{
+  Model,
+  ModelNotFoundException,
+  ModelSpec,
+  SparkUDFModel
+}
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.rikai.model.Resolver
+
+import scala.sys.process.Process
 
 /** [[Python]] is the callback service to call arbitrary Python code
   * in the SparkSessions' main python interpreter.
@@ -32,6 +41,7 @@ trait Python {
     */
   @throws[ModelNotFoundException]
   def resolve(
+      session: SparkSession,
       className: String,
       spec: ModelSpec
   ): Model
@@ -39,6 +49,19 @@ trait Python {
 
 object Python {
   private var python: Option[Python] = None
+
+  /** Python executor */
+  val pythonExec =
+    sys.env.getOrElse(
+      "PYSPARK_PYTHON",
+      sys.env.getOrElse("PYSPARK_DRIVER_PYTHON", "python3")
+    )
+
+  /** Executor arbitrary python code */
+  def execute(code: String): Unit =
+    Process(
+      Seq(Python.pythonExec, "-c", code)
+    ) !!
 
   def register(mr: Python): Unit =
     python = Some(mr)
@@ -55,13 +78,31 @@ object Python {
   /** Resolve a Model from Python process. */
   @throws[ModelNotFoundException]
   def resolve(
+      session: SparkSession,
       className: String,
       spec: ModelSpec
   ): Model = {
-    checkRegistered
-    python.get.resolve(
-      className,
-      spec
-    )
+    print(s"The model we got now: ${spec}")
+
+    Resolver.resolve(session, spec)
+
+//    val path = Files.createTempFile("model-code", ".cpt")
+//    try {
+//      execute(s"""from pyspark.serializers import CloudPickleSerializer;
+//                |from pyspark.sql.types import IntegerType
+//                |from pyspark.sql.functions import udf
+//                |pickle = CloudPickleSerializer()
+//                |f = udf(lambda x: x + 1, IntegerType())
+//                |print("FKC");
+//                |with open("${path}", "wb") as fobj:
+//                |    fobj.write(pickle.dumps((f.func, f.returnType)))
+//                |""".stripMargin)
+//      val cmd = Files.readAllBytes(path)
+//      val udf = UserDefinedPythonFunction("test_sum", new PythonFunction())
+//    } finally {
+//      Files.delete(path)
+//    }
+
+    new SparkUDFModel("test_sum", "sum", "sumsum")
   }
 }

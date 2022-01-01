@@ -232,3 +232,11 @@ def codegen_from_spec(
     """
     udf = udf_from_spec(spec)
     return register_udf(spark, udf, name)
+
+
+def command_from_spec(row_spec: dict, output_path: str):
+    generated = udf_from_spec(row_spec)
+    from pyspark.serializers import CloudPickleSerializer
+    pickle = CloudPickleSerializer()
+    s = pickle.dumps(generated.func)
+    return s

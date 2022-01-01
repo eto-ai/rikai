@@ -25,9 +25,9 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.execution.python.UserDefinedPythonFunction
 import org.apache.spark.sql.types.DataType
 
-import scala.util.Random
 import java.nio.file.Files
 import scala.collection.JavaConverters._
+import scala.util.Random
 
 object Resolver {
 

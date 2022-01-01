@@ -1,3 +1,19 @@
+/*
+ * Copyright 2022 Rikai authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.spark.sql.rikai.model
 
 import ai.eto.rikai.sql.model.ModelSpec
@@ -20,12 +36,10 @@ object Resolver {
     try {
       Python.execute(s"""from pyspark.serializers import CloudPickleSerializer;
                  |from pyspark.sql.types import IntegerType
-                 |from pyspark.sql.functions import udf
                  |pickle = CloudPickleSerializer()
                  |def pd_iter(x):
                  |    print(type(x))
                  |    return x + 1
-                 |f = udf(lambda x: x + 1, IntegerType())
                  |with open("${path}", "wb") as fobj:
                  |    fobj.write(pickle.dumps((pd_iter, IntegerType())))
                  |""".stripMargin)

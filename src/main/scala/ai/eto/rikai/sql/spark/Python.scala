@@ -82,10 +82,8 @@ object Python {
       className: String,
       spec: ModelSpec
   ): Model = {
-    print(s"The model we got now: ${spec}")
-
     Resolver.resolve(session, spec)
 
-    new SparkUDFModel("test_sum", "sum", "sumsum")
+    new SparkUDFModel(spec.name.get, spec.uri, "sumsum")
   }
 }

@@ -49,17 +49,14 @@ class MLPredictTest extends AnyFunSuite with BeforeAndAfterAll {
 
   override def beforeAll(): Unit = {
     downloadResnet()
-
-    Python.execute(
-      """from rikai.spark.sql.codegen.base import command_from_spec"""
-    )
   }
 
   test("Use simple fs model") {
     spark.sql(
       "CREATE MODEL resnet USING '/tmp/resnet.pt'"
     )
-    val df = spark.sql("SELECT ML_PREDICT(test_sum, 1)")
+    val df = spark.sql("SELECT ML_PREDICT(resnet, 1) as s")
     df.show()
+    assert(df.exceptAll(spark.sql("SELECT 2 as s")).isEmpty)
   }
 }

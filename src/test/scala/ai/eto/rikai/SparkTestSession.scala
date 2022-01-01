@@ -17,7 +17,6 @@
 package ai.eto.rikai
 
 import ai.eto.rikai.sql.model.{Catalog, Registry}
-import ai.eto.rikai.sql.spark.Python
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
 

@@ -31,6 +31,7 @@ trait Registry {
 
   /** Resolve a Model from the specific URI.
     *
+    * @param session a live SparkSession.
     * @param spec the spec of a model.
     *
     * @throws ModelNotFoundException if the model does not exist on the registry.
@@ -49,6 +50,7 @@ abstract class PyImplRegistry extends Registry with LazyLogging {
 
   /** Resolve a [[Model]] from the specific URI.
     *
+    * @param session a live SparkSession
     * @param spec Model Spec to send to python.
     *
     * @throws ModelNotFoundException if the model does not exist on the registry.

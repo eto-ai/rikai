@@ -77,6 +77,7 @@ class MLPredictTest extends AnyFunSuite with BeforeAndAfterAll {
           |'s3://eto-public/little_coco_raw/val2017/000000346707.jpg') AS s""".stripMargin
       )
       df.show()
+      df.printSchema()
     } finally {
       Files.delete(specYamlPath)
     }

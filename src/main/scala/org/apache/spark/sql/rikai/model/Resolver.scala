@@ -74,6 +74,7 @@ object Resolver {
     } finally {
       Files.delete(path)
       Files.delete(specPath)
+      Files.delete(dataTypePath)
     }
   }
 

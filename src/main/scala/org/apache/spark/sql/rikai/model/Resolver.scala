@@ -23,7 +23,7 @@ import io.circe.syntax._
 import org.apache.spark.api.python.{PythonEvalType, PythonFunction}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.execution.python.UserDefinedPythonFunction
-import org.apache.spark.sql.types.IntegerType
+import org.apache.spark.sql.types.DataType
 
 import java.nio.file.Files
 import scala.collection.JavaConverters._
@@ -35,11 +35,9 @@ object Resolver {
       spec: ModelSpec
   ): Unit = {
     val specClass = "rikai.spark.sql.codegen.fs.FileModelSpec"
-    val specJson = spec.asJson
-    print(specJson)
     val specPath = Files.createTempFile("model-spec", ".json")
-    print(specPath)
     val path = Files.createTempFile("model-code", ".cpt")
+    val dataTypePath = Files.createTempFile("model-type", ".json")
     try {
       Files.writeString(specPath, spec.asJson.toString)
       Python.execute(s"""from pyspark.serializers import CloudPickleSerializer;
@@ -50,8 +48,12 @@ object Resolver {
                  |pickle = CloudPickleSerializer()
                  |with open("${path}", "wb") as fobj:
                  |    fobj.write(pickle.dumps((func, dataType)))
+                 |with open("${dataTypePath}", "w") as fobj:
+                 |    fobj.write(dataType.json())
                  |""".stripMargin)
       val cmd = Files.readAllBytes(path)
+      val dataTypeJson = Files.readString(dataTypePath)
+      val returnType = DataType.fromJson(dataTypeJson)
       val udf =
         UserDefinedPythonFunction(
           "test_sum",
@@ -60,11 +62,11 @@ object Resolver {
             new java.util.HashMap[String, String](),
             List.empty[String].asJava,
             Python.pythonExec,
-            "3.9",
+            Python.pythonVer,
             Seq.empty.asJava,
             null
           ),
-          IntegerType,
+          returnType,
           PythonEvalType.SQL_SCALAR_PANDAS_ITER_UDF,
           udfDeterministic = true
         )

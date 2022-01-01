@@ -51,11 +51,20 @@ object Python {
   private var python: Option[Python] = None
 
   /** Python executor */
-  val pythonExec: String =
+  lazy val pythonExec: String =
     sys.env.getOrElse(
       "PYSPARK_PYTHON",
       sys.env.getOrElse("PYSPARK_DRIVER_PYTHON", "python3")
     )
+
+  lazy val pythonVer: String =
+    Process(
+      Seq(
+        pythonExec,
+        "-c",
+        "import sys; print('%d.%d' % sys.version_info[:2])"
+      )
+    ).!!.trim()
 
   /** Executor arbitrary python code */
   def execute(code: String): Unit =

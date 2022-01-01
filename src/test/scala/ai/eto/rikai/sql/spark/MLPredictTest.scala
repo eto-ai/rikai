@@ -27,6 +27,8 @@ class MLPredictTest
     with SparkTestSession
     with BeforeAndAfterAll {
 
+  import spark.implicits._
+
   lazy val resnetPath: Path = Files.createTempFile("resnet", ".pt")
 
   private def downloadResnet(): Unit = {
@@ -60,10 +62,14 @@ class MLPredictTest
       spark.sql(
         s"CREATE MODEL resnet USING 'file://${specYamlPath}'"
       )
+      Seq(
+        getClass.getResource("000000304150.jpg").getPath,
+        getClass.getResource("000000419650.jpg").getPath
+      ).toDF("image_uri").createOrReplaceTempView("images")
+
       val df = spark.sql(
         """SELECT
-          |ML_PREDICT(resnet,
-          |'s3://eto-public/little_coco_raw/val2017/000000346707.jpg') AS s""".stripMargin
+          |ML_PREDICT(resnet, image_uri) AS s FROM images""".stripMargin
       )
       df.show()
       df.printSchema()

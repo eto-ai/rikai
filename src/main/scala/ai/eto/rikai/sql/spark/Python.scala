@@ -86,23 +86,6 @@ object Python {
 
     Resolver.resolve(session, spec)
 
-//    val path = Files.createTempFile("model-code", ".cpt")
-//    try {
-//      execute(s"""from pyspark.serializers import CloudPickleSerializer;
-//                |from pyspark.sql.types import IntegerType
-//                |from pyspark.sql.functions import udf
-//                |pickle = CloudPickleSerializer()
-//                |f = udf(lambda x: x + 1, IntegerType())
-//                |print("FKC");
-//                |with open("${path}", "wb") as fobj:
-//                |    fobj.write(pickle.dumps((f.func, f.returnType)))
-//                |""".stripMargin)
-//      val cmd = Files.readAllBytes(path)
-//      val udf = UserDefinedPythonFunction("test_sum", new PythonFunction())
-//    } finally {
-//      Files.delete(path)
-//    }
-
     new SparkUDFModel("test_sum", "sum", "sumsum")
   }
 }

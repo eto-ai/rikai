@@ -22,10 +22,12 @@ object Resolver {
                  |from pyspark.sql.types import IntegerType
                  |from pyspark.sql.functions import udf
                  |pickle = CloudPickleSerializer()
+                 |def pd_iter(x):
+                 |    print(type(x))
+                 |    return x + 1
                  |f = udf(lambda x: x + 1, IntegerType())
-                 |print("FKC");
                  |with open("${path}", "wb") as fobj:
-                 |    fobj.write(pickle.dumps(f.func))
+                 |    fobj.write(pickle.dumps((pd_iter, IntegerType())))
                  |""".stripMargin)
       val cmd = Files.readAllBytes(path)
       val udf =
@@ -33,7 +35,7 @@ object Resolver {
           "test_sum",
           PythonFunction(
             cmd,
-            Map.empty.asJava,
+            new java.util.HashMap[String, String](),
             List.empty[String].asJava,
             Python.pythonExec,
             "3.9",
@@ -41,7 +43,7 @@ object Resolver {
             null
           ),
           IntegerType,
-          PythonEvalType.SQL_SCALAR_PANDAS_ITER_UDF,
+          PythonEvalType.SQL_SCALAR_PANDAS_UDF,
           udfDeterministic = true
         )
       session.udf.registerPython("sumsum", udf)

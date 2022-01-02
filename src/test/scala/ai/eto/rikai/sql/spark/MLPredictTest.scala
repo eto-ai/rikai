@@ -17,6 +17,7 @@
 package ai.eto.rikai.sql.spark
 
 import ai.eto.rikai.SparkTestSession
+import org.apache.spark.sql.types._
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -79,6 +80,23 @@ class MLPredictTest
       )
       df.show()
       df.printSchema()
+      assert(df.count() == 2)
+      assert(
+        df.schema == StructType(
+          Seq(
+            StructField(
+              "s",
+              StructType(
+                Seq(
+                  StructField("boxes", ArrayType(ArrayType(FloatType))),
+                  StructField("scores", ArrayType(FloatType)),
+                  StructField("label_ids", ArrayType(IntegerType))
+                )
+              )
+            )
+          )
+        )
+      )
     } finally {
       Files.delete(specYamlPath)
     }

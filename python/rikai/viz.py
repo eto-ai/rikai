@@ -21,7 +21,7 @@ import numpy as np
 from PIL import Image as PILImage
 from PIL import ImageDraw
 
-from rikai.conf import get_option, CONF_RIKAI_VIZ_COLOR
+from rikai.conf import CONF_RIKAI_VIZ_COLOR, get_option
 from rikai.mixin import Displayable, Drawable
 
 __all__ = ["Style", "Text"]

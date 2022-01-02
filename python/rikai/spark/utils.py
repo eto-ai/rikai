@@ -51,7 +51,7 @@ def init_spark_session(conf=None, app_name="rikai", rikai_version=None):
 
     # Avoid reused session polluting configs
     active_session = SparkSession.getActiveSession()
-    if active_session:
+    if active_session and conf:
         for k, v in conf:
             if active_session.conf.get(k) != v:
                 print(

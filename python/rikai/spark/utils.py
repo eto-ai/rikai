@@ -55,7 +55,7 @@ def init_spark_session(
     active_session = SparkSession.getActiveSession()
     if active_session and conf:
         for k, v in conf.items():
-            if active_session.conf.get(k) != v:
+            if str(active_session.conf.get(k)) != str(v):
                 print(
                     f"active session: want {v} for {k}"
                     f" but got {active_session.conf.get(k)},"

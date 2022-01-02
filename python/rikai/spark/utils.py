@@ -62,6 +62,7 @@ def init_spark_session(
                     f" will restart session"
                 )
                 active_session.stop()
+                break
 
     if not rikai_version:
         rikai_version = get_default_jar_version(use_snapshot=True)

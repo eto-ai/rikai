@@ -28,7 +28,7 @@ import rikai
 from rikai.spark.utils import get_default_jar_version, init_spark_session
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="session")
 def mlflow_client_http(
     tmp_path_factory, resnet_model_uri: str
 ) -> MlflowClient:
@@ -112,6 +112,7 @@ def mlflow_client_http(
 def spark_with_mlflow(mlflow_client_http) -> SparkSession:
     mlflow_tracking_uri = mlflow.get_tracking_uri()
     print(f"Spark with mlflow tracking uri: ${mlflow_tracking_uri}")
+    hadoop_version = "3.2.0"  # TODO(lei): get hadoop version
     rikai_version = get_default_jar_version(use_snapshot=True)
     spark = init_spark_session(
         conf=dict(
@@ -120,6 +121,7 @@ def spark_with_mlflow(mlflow_client_http) -> SparkSession:
                     "spark.jars.packages",
                     ",".join(
                         [
+                            f"org.apache.hadoop:hadoop-aws:{hadoop_version}",
                             "ai.eto:rikai_2.12:{}".format(rikai_version),
                         ]
                     ),

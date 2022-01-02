@@ -112,7 +112,7 @@ def mlflow_client_http(
 def spark_with_mlflow(mlflow_client_http) -> SparkSession:
     mlflow_tracking_uri = mlflow.get_tracking_uri()
     print(f"Spark with mlflow tracking uri: ${mlflow_tracking_uri}")
-
+    rikai_version = get_default_jar_version(use_snapshot=True)
     spark = init_spark_session(
         conf=dict(
             [

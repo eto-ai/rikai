@@ -1,4 +1,4 @@
-#  Copyright 2020 Rikai Authors
+#  Copyright 2022 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -15,4 +15,4 @@
 """Pytorch support"""
 
 
-from rikai.torch.data import DataLoader, Dataset  # noqa: F401
+from rikai.torch.data import Dataset  # noqa: F401

@@ -37,7 +37,8 @@ def from_rikai(
     query : str
         A dataset URI
     output_signature : tuple
-        A (nested) structure of `tf.TypeSpec` objects corresponding to each component.
+        A (nested) structure of `tf.TypeSpec` objects corresponding
+        to each component.
     columns : List[str], optional
         To read only given columns
 

@@ -46,13 +46,15 @@ def get_default_jar_version(use_snapshot=True):
     return match_str
 
 
-def init_spark_session(conf=None, app_name="rikai", rikai_version=None):
+def init_spark_session(
+    conf: dict = None, app_name="rikai", rikai_version=None
+):
     from pyspark.sql import SparkSession
 
     # Avoid reused session polluting configs
     active_session = SparkSession.getActiveSession()
     if active_session and conf:
-        for k, v in conf:
+        for k, v in conf.items():
             if active_session.conf.get(k) != v:
                 print(
                     f"active session: want {v} for {k}"

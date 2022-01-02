@@ -13,12 +13,10 @@
 #  limitations under the License.
 
 import importlib
-import secrets
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Optional
 
 from jsonschema import validate, ValidationError
-from pyspark.sql import SparkSession
 
 from rikai.internal.reflection import find_class
 from rikai.logging import logger
@@ -203,6 +201,6 @@ def udf_from_spec(spec: ModelSpec):
 
 def command_from_spec(registry_class: str, row_spec: dict):
     cls = find_class(registry_class)
-    resolver = cls()
-    func, returnType = resolver.resolve(row_spec)
+    registry = cls()
+    func, returnType = registry.resolve(row_spec)
     return func, returnType

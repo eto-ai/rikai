@@ -20,7 +20,7 @@ import com.typesafe.scalalogging.LazyLogging
 import org.apache.http.client.utils.URIUtils
 import org.apache.log4j.Logger
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.rikai.model.Resolver
+import org.apache.spark.sql.rikai.model.ModelResolver
 
 import java.net.URI
 import scala.util.{Success, Try}
@@ -63,7 +63,7 @@ abstract class PyImplRegistry extends Registry with LazyLogging {
       spec: ModelSpec
   ): Model = {
     logger.info(s"Resolving ML model from ${spec.uri}")
-    Resolver.resolve(session, pyClass, spec)
+    ModelResolver.resolve(session, pyClass, spec)
   }
 }
 

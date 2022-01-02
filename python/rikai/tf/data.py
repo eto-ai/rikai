@@ -14,3 +14,40 @@
 
 """Tensorflow Dataset"""
 
+from pathlib import Path
+from typing import List, Optional, Tuple, Union
+
+import tensorflow as tf
+
+from rikai.parquet import Dataset
+from rikai.parquet.dataset import convert_tensor
+
+__all__ = ["from_rikai"]
+
+
+def from_rikai(
+    data_ref: Union[str, Path],
+    output_signature: Tuple,
+    columns: Optional[List[str]] = None,
+):
+    """Build a Tensorflow (tf) Dataset from rikai dataset.
+
+    Parameters
+    ----------
+    query : str
+        A dataset URI
+    output_signature : tuple
+        A (nested) structure of `tf.TypeSpec` objects corresponding to each component.
+    columns : List[str], optional
+        To read only given columns
+
+    """
+
+    def dataset_generator():
+        dataset = Dataset(data_ref)
+        for item in dataset:
+            yield tuple(convert_tensor(item).values())
+
+    return tf.data.Dataset.from_generator(
+        dataset_generator, output_signature=output_signature
+    )

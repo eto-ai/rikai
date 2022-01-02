@@ -15,14 +15,14 @@
 """Parquet-based Rikai Dataset that supports automatically UDT conversions.
 """
 
-import importlib
-
 # Standard Library
+import importlib
 from functools import partial
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Mapping, Optional, Union
 
 # Third Party
+import numpy as np
 import pandas as pd
 import pyarrow.dataset as ds
 import pyarrow.parquet as pq
@@ -34,6 +34,7 @@ from pyspark.sql.types import UserDefinedType
 # Rikai
 from rikai.io import open_input_stream
 from rikai.logging import logger
+from rikai.mixin import ToNumpy, ToPIL
 from rikai.parquet.resolver import Resolver
 from rikai.parquet.shuffler import RandomShuffler
 
@@ -280,3 +281,25 @@ def _convert_udt_value(value, udt):
     if isinstance(converted_value, (Vector, Matrix)):
         converted_value = converted_value.toArray()
     return converted_value
+
+
+def convert_tensor(row, use_pil: bool = False):
+    """
+    Convert a parquet row into rikai semantic objects.
+    """
+    if not isinstance(row, (Mapping, pd.Series)):
+        # Primitive values
+        return row
+    tensors = {}
+    for key, value in row.items():
+        if isinstance(value, dict):
+            tensors[key] = convert_tensor(value)
+        elif isinstance(value, (list, tuple)):
+            tensors[key] = np.array([convert_tensor(elem) for elem in value])
+        elif use_pil and isinstance(value, ToPIL):
+            tensors[key] = value.to_pil()
+        elif isinstance(value, ToNumpy):
+            tensors[key] = value.to_numpy()
+        else:
+            tensors[key] = value
+    return tensors

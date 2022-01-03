@@ -14,32 +14,9 @@
 
 from typing import Any, Mapping
 
-import numpy as np
-import pandas as pd
-
-from rikai.mixin import ToNumpy, ToPIL
+from rikai.parquet.dataset import convert_tensor
 
 __all__ = ["RikaiToTensor"]
-
-
-def convert_tensor(row, use_pil: bool = False):
-    """Convert a parquet row into rikai semantic objects."""
-    if not isinstance(row, (Mapping, pd.Series)):
-        # Primitive values
-        return row
-    tensors = {}
-    for key, value in row.items():
-        if isinstance(value, dict):
-            tensors[key] = convert_tensor(value)
-        elif isinstance(value, (list, tuple)):
-            tensors[key] = np.array([convert_tensor(elem) for elem in value])
-        elif use_pil and isinstance(value, ToPIL):
-            tensors[key] = value.to_pil()
-        elif isinstance(value, ToNumpy):
-            tensors[key] = value.to_numpy()
-        else:
-            tensors[key] = value
-    return tensors
 
 
 class RikaiToTensor:

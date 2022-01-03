@@ -16,11 +16,11 @@ from __future__ import annotations
 
 import datetime
 import os
+import subprocess
 
 import mlflow
 import pytest
 import torch
-import torchvision
 from mlflow.tracking import MlflowClient
 from pyspark.sql import SparkSession
 
@@ -29,9 +29,34 @@ from rikai.spark.utils import get_default_jar_version, init_spark_session
 
 
 @pytest.fixture(scope="session")
+def mlflow_server():
+    db_path = "/tmp/mlflow.db"
+    db_url = "sqlite://" + db_path
+    dir_path = "/tmp/mlflow/artifact"
+    dir_url = "file:" + dir_path
+    p = subprocess.Popen(
+        [
+            "mlflow",
+            "server",
+            "--host",
+            "0.0.0.0",
+            "--workers",
+            "1",
+            "--backend-store-uri",
+            db_url,
+            "--default-artifact-root",
+            dir_url,
+        ]
+    )
+    yield p
+    p.kill()
+
+
+@pytest.fixture(scope="session")
 def mlflow_client_http(
-    tmp_path_factory, resnet_model_uri: str
+    tmp_path_factory, resnet_model_uri: str, mlflow_server: subprocess.Popen
 ) -> MlflowClient:
+    print(f"ml server : {mlflow_server.args}")
     tracking_uri = os.getenv(
         "TEST_MLFLOW_TRACKING_URI", "http://localhost:5000"
     )

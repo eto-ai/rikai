@@ -35,10 +35,6 @@ jobs:
     - name: sbt install
       run: |
         sbt publishLocal
-    - name: Start docker-compose
-      run: |
-        docker-compose -f .github/docker-compose.yml up -d
-        sleep 10
     - name: cache pip
       uses: actions/cache@v2
       with:
@@ -59,7 +55,6 @@ jobs:
         pytest -x -v --durations=10 --ignore=tests/parquet/internal
       env:
         SPARK_LOCAL_IP: "127.0.0.1"
-        TEST_MLFLOW_TRACKING_URI: "http://localhost:15000"
   mac-build:
     runs-on: macos-11
     timeout-minutes: 10

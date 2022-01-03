@@ -16,37 +16,18 @@
 
 package ai.eto.rikai.sql.model
 
-import scala.collection.JavaConverters.mapAsJavaMap
-
 /** Model Spec is used to pass the create model information to
   * python ModelRegistry.
   */
-class ModelSpec(
-    val name: Option[String],
-    val uri: String,
-    val flavor: Option[String] = None,
-    val schema: Option[String] = None,
-    val options: Option[Map[String, String]] = None,
-    val preprocessor: Option[String] = None,
-    val postprocessor: Option[String] = None
+case class ModelSpec(
+    name: Option[String],
+    uri: String,
+    flavor: Option[String] = None,
+    schema: Option[String] = None,
+    options: Option[Map[String, String]] = None,
+    preprocessor: Option[String] = None,
+    postprocessor: Option[String] = None
 ) {
-
-  def getName: String = name.getOrElse("")
-
-  def getUri: String = uri
-
-  def getSchema: String = schema.getOrElse("")
-
-  def getOptions: java.util.Map[String, String] =
-    mapAsJavaMap(options.getOrElse(Map.empty))
-
-  def getFlavor: String = flavor.getOrElse("")
-
-  /** Provide access to pre-processor via py4j. It can return Null / None in python. */
-  def getPreprocessor: String = preprocessor.orNull
-
-  /** Provide access to post-processor via py4j. It can return Null / None in python. */
-  def getPostprocessor: String = postprocessor.orNull
 
   override def toString: String =
     s"ModelSpec(name=${name}, uri=${uri}, flavor=${flavor})"

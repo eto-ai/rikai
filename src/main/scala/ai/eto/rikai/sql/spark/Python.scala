@@ -16,52 +16,47 @@
 
 package ai.eto.rikai.sql.spark
 
-import ai.eto.rikai.sql.model.{Model, ModelNotFoundException, ModelSpec}
+import org.apache.spark.sql.SparkSession
 
-/** [[Python]] is the callback service to call arbitrary Python code
-  * in the SparkSessions' main python interpreter.
-  */
-trait Python {
-
-  /** Resolve a Model from python.
-    *
-    * @param className the name of the python class.
-    * @param spec Model spec.
-    *
-    * @return a Model
-    */
-  @throws[ModelNotFoundException]
-  def resolve(
-      className: String,
-      spec: ModelSpec
-  ): Model
-}
+import scala.sys.process
+import scala.sys.process.{Process, ProcessLogger}
 
 object Python {
-  private var python: Option[Python] = None
 
-  def register(mr: Python): Unit =
-    python = Some(mr)
-
-  @throws[RuntimeException]
-  def checkRegistered: Unit = {
-    if (python.isEmpty) {
-      throw new RuntimeException("""ModelResolved has not been initialized.
-          |Please make sure "rikai.spark.sql.init" has been called.
-          |""".stripMargin)
-    }
-  }
-
-  /** Resolve a Model from Python process. */
-  @throws[ModelNotFoundException]
-  def resolve(
-      className: String,
-      spec: ModelSpec
-  ): Model = {
-    checkRegistered
-    python.get.resolve(
-      className,
-      spec
+  /** Python executor */
+  lazy val pythonExec: String =
+    sys.env.getOrElse(
+      "PYSPARK_PYTHON",
+      sys.env.getOrElse("PYSPARK_DRIVER_PYTHON", "python3")
     )
+
+  lazy val pythonVer: String =
+    Process(
+      Seq(
+        pythonExec,
+        "-c",
+        "import sys; print('%d.%d' % sys.version_info[:2])"
+      )
+    ).!!.trim()
+
+  /** Executor arbitrary python code */
+  def execute(code: String): Unit =
+    Process(
+      Seq(Python.pythonExec, "-c", code)
+    ) !!
+
+  def execute(code: String, session: SparkSession): Unit = {
+    val stderr = new StringBuilder
+    val stdout = new StringBuilder
+    val workerEnv = session.conf.getAll.toSeq
+    val status = Process(
+      Seq(Python.pythonExec, "-c", code),
+      None,
+      workerEnv: _*
+    ) ! ProcessLogger(stdout append _, stderr append _)
+    print(process.stdout.toString)
+    if (status != 0) {
+      throw new RuntimeException(stderr.toString)
+    }
   }
 }

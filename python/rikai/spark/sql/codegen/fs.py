@@ -14,20 +14,14 @@
 
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Optional, Union
 from urllib.parse import urlparse
 
 import yaml
-from pyspark.sql import SparkSession
 
 from rikai.io import open_uri
 from rikai.logging import logger
-from rikai.spark.sql.codegen.base import (
-    ModelSpec,
-    register_udf,
-    Registry,
-    udf_from_spec,
-)
+from rikai.spark.sql.codegen.base import ModelSpec, Registry, udf_from_spec
 from rikai.spark.sql.exceptions import SpecError
 
 __all__ = ["FileSystemRegistry"]
@@ -50,7 +44,7 @@ class FileModelSpec(ModelSpec):
     def __init__(
         self,
         spec_uri: Union[str, Path],
-        options: Optional[Dict[str, Any]] = None,
+        options: Optional[dict] = None,
         validate: bool = True,
     ):
         with open_uri(spec_uri) as fobj:
@@ -79,57 +73,18 @@ class FileModelSpec(ModelSpec):
         return os.path.join(self.base_dir, origin_uri)
 
 
-def codegen_from_yaml(
-    spark: SparkSession,
-    spec_uri: str,
-    name: Optional[str] = None,
-    options: Optional[Dict[str, str]] = None,
-) -> str:
-    """Generate code from a YAML file.
-
-    Parameters
-    ----------
-    spark : SparkSession
-        A live spark session
-    spec_uri : str
-        the model spec URI
-    name : model name
-        The name of the model.
-    options : dict
-        Optional parameters passed to the model.
-
-    Returns
-    -------
-    str
-        Spark UDF function name for the generated data.
-    """
-    spec = FileModelSpec(spec_uri, options=options)
-    udf = udf_from_spec(spec)
-    return register_udf(spark, udf, name)
-
-
 class FileSystemRegistry(Registry):
     """FileSystem-based Model Registry"""
-
-    def __init__(self, spark: SparkSession):
-        self._spark = spark
-        self._jvm = spark.sparkContext._jvm
 
     def __repr__(self):
         return "FileSystemRegistry"
 
-    def resolve(self, spec):
-        name = spec.getName()
-        uri = spec.getUri()
-        options = spec.getOptions()
+    def resolve(self, raw_spec: dict):
+        uri = raw_spec.get("uri")
+        options = raw_spec.get("options", {})
+        spec = FileModelSpec(uri, options=options)
+        name = spec.name
+        uri = spec.model_uri
         logger.info(f"Resolving model {name} from {uri}")
-        if uri.endswith(".yml") or uri.endswith(".yaml"):
-            func_name = codegen_from_yaml(self._spark, uri, name, options)
-        else:
-            raise ValueError(f"Model URI is not supported: {uri}")
-
-        model = self._jvm.ai.eto.rikai.sql.model.SparkUDFModel(
-            name, uri, func_name, spec.getFlavor()
-        )
-        # TODO: set options
-        return model
+        udf = udf_from_spec(spec)
+        return udf.func, udf.returnType

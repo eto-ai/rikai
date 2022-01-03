@@ -16,36 +16,14 @@
 
 package ai.eto.rikai.sql.model.fs
 
-import ai.eto.rikai.sql.model.{
-  Model,
-  ModelNotFoundException,
-  ModelSpec,
-  Registry
-}
-import ai.eto.rikai.sql.spark.Python
+import ai.eto.rikai.sql.model.PyImplRegistry
 import com.typesafe.scalalogging.LazyLogging
 
-/** FileSystem-based Model [[Registry]].
+/** FileSystem-based Model Registry.
   */
 class FileSystemRegistry(val conf: Map[String, String])
-    extends Registry
+    extends PyImplRegistry
     with LazyLogging {
 
-  private val pyClass: String = "rikai.spark.sql.codegen.fs.FileSystemRegistry"
-
-  /** Resolve a [[Model]] from the specific URI.
-    *
-    * @param spec Model Spec of a model
-    *
-    * @throws ModelNotFoundException if the model does not exist on the registry.
-    *
-    * @return [[Model]] if found.
-    */
-  @throws[ModelNotFoundException]
-  override def resolve(
-      spec: ModelSpec
-  ): Model = {
-    logger.info(s"Resolving ML model from ${spec.uri}")
-    Python.resolve(pyClass, spec)
-  }
+  override def pyClass: String = "rikai.spark.sql.codegen.fs.FileSystemRegistry"
 }

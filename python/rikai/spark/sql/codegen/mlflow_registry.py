@@ -12,8 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Callable, Dict, IO, Mapping, Optional, Union
-from urllib.parse import ParseResult, urlparse
+import os
+from typing import Any, Dict, Optional
+from urllib.parse import urlparse
 
 try:
     import mlflow
@@ -23,14 +24,11 @@ except ImportError:
         "`pip install mlflow` explicitly or install "
         "the correct extras like `pip install rikai[mlflow]`"
     )
-from mlflow.exceptions import MlflowException
 from mlflow.tracking import MlflowClient
-from pyspark.sql import SparkSession
 
 from rikai.logging import logger
-from rikai.spark.sql.codegen.base import codegen_from_spec, ModelSpec, Registry
+from rikai.spark.sql.codegen.base import ModelSpec, Registry, udf_from_spec
 from rikai.spark.sql.codegen.mlflow_logger import (
-    CONF_MLFLOW_ARTIFACT_PATH,
     CONF_MLFLOW_MODEL_FLAVOR,
     CONF_MLFLOW_OUTPUT_SCHEMA,
     CONF_MLFLOW_POST_PROCESSING,
@@ -167,9 +165,7 @@ def _get_model_prop(
 class MlflowRegistry(Registry):
     """MLFlow-based Model Registry"""
 
-    def __init__(self, spark: SparkSession):
-        self._spark = spark
-        self._jvm = spark.sparkContext._jvm
+    def __init__(self):
         self._mlflow_client = None
 
     def __repr__(self):
@@ -187,11 +183,11 @@ class MlflowRegistry(Registry):
 
     @property
     def mlflow_tracking_uri(self):
-        return self._spark.conf.get(CONF_MLFLOW_TRACKING_URI)
+        return os.environ.get(CONF_MLFLOW_TRACKING_URI)
 
     def resolve(self, raw_spec):
-        name = raw_spec.getName()
-        uri = raw_spec.getUri()
+        name = raw_spec["name"]
+        uri = raw_spec["uri"]
         logger.info(f"Resolving model {name} from {uri}")
         logger.info(f"Using tracking uri: {self.mlflow_tracking_uri}")
         parsed = urlparse(uri)
@@ -210,21 +206,18 @@ class MlflowRegistry(Registry):
             self.mlflow_tracking_uri,
             options=self.get_options(raw_spec, run),
         )
-        func_name = codegen_from_spec(self._spark, spec, name)
-        model = self._jvm.ai.eto.rikai.sql.model.SparkUDFModel(
-            name, uri, func_name, raw_spec.getFlavor()
-        )
-        return model
+        udf = udf_from_spec(spec)
+        return udf.func, udf.returnType
 
     def get_model_conf(self, spec, run):
         """
         Get the configurations needed to specify the model
         """
         from_spec = [
-            (CONF_MLFLOW_MODEL_FLAVOR, spec.getFlavor()),
-            (CONF_MLFLOW_PRE_PROCESSING, spec.getPreprocessor()),
-            (CONF_MLFLOW_POST_PROCESSING, spec.getPostprocessor()),
-            (CONF_MLFLOW_OUTPUT_SCHEMA, spec.getSchema()),
+            (CONF_MLFLOW_MODEL_FLAVOR, spec["flavor"]),
+            (CONF_MLFLOW_PRE_PROCESSING, spec.get("preprocessor", None)),
+            (CONF_MLFLOW_POST_PROCESSING, spec.get("postprocessor", None)),
+            (CONF_MLFLOW_OUTPUT_SCHEMA, spec["schema"]),
         ]
         tags = {k: v for k, v in from_spec if v}
         # PEP 448 syntax, right-to-left priority order
@@ -232,7 +225,7 @@ class MlflowRegistry(Registry):
 
     def get_options(self, spec, run):
         options = run.data.params
-        options.update(spec.getOptions() or {})
+        options.update(spec.get("options", {}))
         return options
 
     def get_model_version(

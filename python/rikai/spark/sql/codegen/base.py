@@ -17,6 +17,9 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Optional
 
 from jsonschema import validate, ValidationError
+from pyspark.serializers import CloudPickleSerializer
+from pyspark.sql.functions import udf
+from pyspark.sql.types import BinaryType
 
 from rikai.internal.reflection import find_class
 from rikai.logging import logger
@@ -204,3 +207,11 @@ def command_from_spec(registry_class: str, row_spec: dict):
     registry = cls()
     func, returnType = registry.resolve(row_spec)
     return func, returnType
+
+
+_pickler = CloudPickleSerializer()
+
+
+@udf(returnType=BinaryType())
+def pickle_udt(input):
+    return _pickler.dump(input)

@@ -95,22 +95,41 @@ class SparkUDFModel(
 
   /** Convert a [[Model]] to a Spark Expression in Spark SQL's logical plan. */
   override def asSpark(args: Seq[Expression]): Expression = {
-    UnresolvedFunction(
-      new FunctionIdentifier(postFuncName.get),
-      Seq(
-        UnresolvedFunction(
-          new FunctionIdentifier(funcName),
-          arguments = args.map(arg =>
-            UnresolvedFunction(
-              new FunctionIdentifier(preFuncName.get),
-              Seq(arg),
-              isDistinct = false
-            )
-          ),
-          isDistinct = false
+    /*
+     * Due to Spark Pandas UDF does not support UDT as input or output, as well as
+     * supporting array of structs as output.
+     *
+     * Here we add a pre-processing UDF to pickle the input into binary, and
+     * a post-processing UDF to unpickle the binary returned from the inference
+     * function into nested structs.
+     *
+     * Note that these two functions (UDFs), as a hack, are not visible to the users.
+     * And we will probably later to implement a new PythonRunner or other means.
+     */
+    val innerArgs = preFuncName match {
+      case Some(name) =>
+        args.map(arg =>
+          UnresolvedFunction(
+            new FunctionIdentifier(name),
+            Seq(arg),
+            isDistinct = false
+          )
         )
-      ),
+      case None => args
+    }
+    val sparkFunc = UnresolvedFunction(
+      new FunctionIdentifier(funcName),
+      innerArgs,
       isDistinct = false
     )
+    postFuncName match {
+      case Some(name) =>
+        UnresolvedFunction(
+          new FunctionIdentifier(name),
+          Seq(sparkFunc),
+          isDistinct = false
+        )
+      case None => sparkFunc
+    }
   }
 }

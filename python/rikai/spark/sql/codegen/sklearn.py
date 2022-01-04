@@ -16,9 +16,9 @@ from typing import Iterator
 
 import numpy as np
 import pandas as pd
+from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql.functions import pandas_udf
 from pyspark.sql.types import BinaryType
-from pyspark.serializers import CloudPickleSerializer
 
 __all__ = ["generate_udf"]
 

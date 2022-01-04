@@ -33,10 +33,40 @@ import scala.util.Random
 
 object ModelResolver {
 
-  private case class FuncDesc(func: String, ser: String, deser: String) {
+  private case class FuncDesc(
+      func: String,
+      serializer: String,
+      deserializer: String
+  ) {
     def funcCmd: Seq[Byte] = Base64.getDecoder.decode(func)
-    def serCmd: Seq[Byte] = Base64.getDecoder.decode(ser)
-    def deserCmd: Seq[Byte] = Base64.getDecoder.decode(deser)
+    def serializerFunc: Seq[Byte] = Base64.getDecoder.decode(serializer)
+    def deserializerFunc: Seq[Byte] = Base64.getDecoder.decode(deserializer)
+  }
+
+  private def registerUdf(
+      session: SparkSession,
+      cmd: Seq[Byte],
+      funcName: String,
+      returnType: DataType,
+      evalType: Int
+  ): Unit = {
+    val udf =
+      UserDefinedPythonFunction(
+        funcName,
+        PythonFunction(
+          cmd,
+          new java.util.HashMap[String, String](),
+          List.empty[String].asJava,
+          Python.pythonExec,
+          Python.pythonVer,
+          Seq.empty.asJava,
+          null
+        ),
+        returnType,
+        evalType,
+        udfDeterministic = true
+      )
+    session.udf.registerPython(funcName, udf)
   }
 
   def resolve(
@@ -55,13 +85,13 @@ object ModelResolver {
                  |import base64
                  |spec = json.load(open("${specPath}", "r"))
                  |from rikai.spark.sql.codegen import command_from_spec
-                 |ser_func, func, deser_func, dataType = command_from_spec("${registryClassName}", spec)
+                 |serialize_func, func, deserialize_func, dataType = command_from_spec("${registryClassName}", spec)
                  |pickle = CloudPickleSerializer()
                  |with open("${path}", "w") as fobj:
                  |    json.dump({
                  |        "func": base64.b64encode(pickle.dumps((func.func, func.returnType))).decode('utf-8'),
-                 |        "ser": base64.b64encode(pickle.dumps((ser_func.func, ser_func.returnType))).decode('utf-8'),
-                 |        "deser": base64.b64encode(pickle.dumps((deser_func.func, deser_func.returnType))).decode('utf-8'),
+                 |        "serializer": base64.b64encode(pickle.dumps((serialize_func.func, serialize_func.returnType))).decode('utf-8'),
+                 |        "deserializer": base64.b64encode(pickle.dumps((deserialize_func.func, deserialize_func.returnType))).decode('utf-8'),
                  |    }, fobj)
                  |with open("${dataTypePath}", "w") as fobj:
                  |    fobj.write(dataType.json())
@@ -78,61 +108,29 @@ object ModelResolver {
       val returnType = DataType.fromJson(dataTypeJson)
       val suffix = Random.alphanumeric.take(6)
       val udfName = s"${spec.name}_${suffix}"
-      val udf =
-        UserDefinedPythonFunction(
-          udfName,
-          PythonFunction(
-            cmdMap.funcCmd,
-            new java.util.HashMap[String, String](),
-            List.empty[String].asJava,
-            Python.pythonExec,
-            Python.pythonVer,
-            Seq.empty.asJava,
-            null
-          ),
-          BinaryType,
-          PythonEvalType.SQL_SCALAR_PANDAS_ITER_UDF,
-          udfDeterministic = true
-        )
-      session.udf.registerPython(udfName, udf)
-
-      val postUdfName = s"${udfName}_post"
-      val postUdf =
-        UserDefinedPythonFunction(
-          udfName,
-          PythonFunction(
-            cmdMap.deserCmd,
-            new java.util.HashMap[String, String](),
-            List.empty[String].asJava,
-            Python.pythonExec,
-            Python.pythonVer,
-            Seq.empty.asJava,
-            null
-          ),
-          returnType,
-          PythonEvalType.SQL_BATCHED_UDF,
-          udfDeterministic = true
-        )
-      session.udf.registerPython(postUdfName, postUdf)
-
       val preUdfName = s"${udfName}_pre"
-      val preUdf =
-        UserDefinedPythonFunction(
-          udfName,
-          PythonFunction(
-            cmdMap.serCmd,
-            new java.util.HashMap[String, String](),
-            List.empty[String].asJava,
-            Python.pythonExec,
-            Python.pythonVer,
-            Seq.empty.asJava,
-            null
-          ),
-          BinaryType,
-          PythonEvalType.SQL_BATCHED_UDF,
-          udfDeterministic = true
-        )
-      session.udf.registerPython(preUdfName, preUdf)
+      val postUdfName = s"${udfName}_post"
+      registerUdf(
+        session,
+        cmdMap.funcCmd,
+        udfName,
+        BinaryType,
+        PythonEvalType.SQL_SCALAR_PANDAS_ITER_UDF
+      )
+      registerUdf(
+        session,
+        cmdMap.serializerFunc,
+        preUdfName,
+        BinaryType,
+        PythonEvalType.SQL_BATCHED_UDF
+      )
+      registerUdf(
+        session,
+        cmdMap.deserializerFunc,
+        postUdfName,
+        returnType,
+        PythonEvalType.SQL_BATCHED_UDF
+      )
 
       new SparkUDFModel(
         spec.name.get,

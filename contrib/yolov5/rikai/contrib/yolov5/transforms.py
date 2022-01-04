@@ -34,7 +34,11 @@ from pyspark.serializers import CloudPickleSerializer
 from torch.cuda import amp
 from yolov5.models.common import Detections
 from yolov5.utils.datasets import exif_transpose, letterbox
-from yolov5.utils.general import make_divisible, non_max_suppression, scale_coords
+from yolov5.utils.general import (
+    make_divisible,
+    non_max_suppression,
+    scale_coords,
+)
 from yolov5.utils.torch_utils import time_sync
 
 from rikai.types.vision import Image

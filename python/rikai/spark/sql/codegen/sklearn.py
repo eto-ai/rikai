@@ -43,9 +43,8 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     ) -> Iterator[pd.Series]:
         model = spec.load_model()
         for series in list(iter):
-            print(series, type(series))
             X = np.vstack(series.apply(_pickler.loads).to_numpy())
-            y = _pickler.dumps(model.predict(X))
+            y = [_pickler.dumps(pred.tolist()) for pred in model.predict(X)]
             yield pd.Series(y)
 
     return pandas_udf(sklearn_inference_udf, returnType=BinaryType())

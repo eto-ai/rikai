@@ -17,9 +17,9 @@ from typing import Iterator
 
 import pandas as pd
 import torch
+from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql.functions import pandas_udf
 from pyspark.sql.types import BinaryType
-from pyspark.serializers import CloudPickleSerializer
 from torch.utils.data import DataLoader
 
 from rikai.torch.pandas import PandasDataset

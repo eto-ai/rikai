@@ -29,6 +29,7 @@ from utils import check_ml_predict
 from rikai.spark.sql.codegen.fs import FileModelSpec
 from rikai.spark.sql.exceptions import SpecError
 from rikai.torch.pandas import PandasDataset
+from rikai.types import Image
 
 
 def spec_file(content: Dict[str, Any], tmp_path: Path) -> Path:
@@ -206,18 +207,18 @@ def test_count_objects_model(spark: SparkSession, count_objects_spec: str):
         [
             # http://cocodataset.org/#explore?id=484912
             Row(
-                uri="http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"  # noqa
+                image=Image("http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg")  # noqa
             ),
             # https://cocodataset.org/#explore?id=433013
             Row(
-                uri="http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg"  # noqa
+                image=Image("http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg")  # noqa
             ),
         ],
     )
     df.createOrReplaceTempView("df")
 
     predictions = spark.sql(
-        "SELECT ML_PREDICT(count_objects, uri) as objects FROM df"
+        "SELECT ML_PREDICT(count_objects, image) as objects FROM df"
     )
     assert predictions.schema == StructType(
         [StructField("objects", IntegerType())]

@@ -62,7 +62,9 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
 
         with torch.no_grad():
             for series in iter:
-                dataset = PandasDataset(series, transform=spec.pre_processing)
+                dataset = PandasDataset(
+                    series, transform=spec.pre_processing, unpickle=True
+                )
                 results = []
                 for batch in DataLoader(
                     dataset,

@@ -207,7 +207,7 @@ def udf_from_spec(spec: ModelSpec):
             pickle_udt,
             codegen.generate_udf(spec),
             deserialize_return,
-            deserialize_return.returnType,
+            spec.schema,
         )
     except ModuleNotFoundError:
         logger.error(f"Unsupported model flavor: {spec.flavor}")
@@ -223,3 +223,7 @@ def command_from_spec(registry_class: str, row_spec: dict):
 @udf(returnType=BinaryType())
 def pickle_udt(input):
     return _pickler.dumps(input)
+
+
+def unpickle_transform(data: bytes) -> Any:
+    return _pickler.loads(data)

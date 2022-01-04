@@ -12,36 +12,21 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Callable, Dict, Union
+from typing import Any, Callable, Dict
 
-from pyspark.serializers import CloudPickleSerializer
 from torchvision import transforms as T
 
-from rikai.torch.transforms import RikaiToTensor
-from rikai.types import Box2d, Image
+from rikai.types import Box2d
 
 __all__ = ["pre_processing", "post_processing"]
 
 DEFAULT_MIN_SCORE = 0.5
-_pickler = CloudPickleSerializer()
 
-
-def unpickle(x: bytes) -> Any:
-    return _pickler.loads(x)
-
-
-def _adaptive_image(img: Union[Image, str]) -> Image:
-    if not isinstance(img, Image):
-        img = Image(img)
-    return img
 
 
 def pre_processing(options: Dict[str, Any]) -> Callable:
     return T.Compose(
         [
-            unpickle,
-            _adaptive_image,
-            RikaiToTensor(),
             T.ToTensor(),
         ]
     )

@@ -21,6 +21,7 @@ from torch.utils.data import Dataset
 
 # Rikai
 from rikai.torch.transforms import convert_tensor
+from rikai.spark.sql.codegen.base import unpickle_transform
 
 __all__ = ["PandasDataset"]
 
@@ -40,16 +41,20 @@ class PandasDataset(Dataset):
         self,
         data: Union[pd.DataFrame, pd.Series],
         transform: Optional[Callable] = None,
+        unpickle: bool = False,
     ) -> None:
         assert isinstance(data, (pd.DataFrame, pd.Series))
         self.data = data
         self.transform = transform
+        self.unpickle = unpickle
 
     def __len__(self) -> int:
         return self.data.shape[0]
 
     def __getitem__(self, index: int) -> Any:
         row = self.data.iloc[index]
+        if self.unpickle:
+            row = unpickle_transform(row)
         row = convert_tensor(row)
         if self.transform:
             row = self.transform(row)

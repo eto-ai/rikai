@@ -23,6 +23,7 @@ from pyspark.sql.types import (
 
 from rikai.spark.sql.schema import parse_schema
 from rikai.spark.types import Box2dType
+from rikai.types import Image
 
 
 def check_ml_predict(spark: SparkSession, model_name: str):
@@ -33,18 +34,18 @@ def check_ml_predict(spark: SparkSession, model_name: str):
         [
             # http://cocodataset.org/#explore?id=484912
             Row(
-                uri="http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"  # noqa
+                image=Image("http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg")  # noqa
             ),
             # https://cocodataset.org/#explore?id=433013
             Row(
-                uri="http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg"  # noqa
+                image=Image("http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg")  # noqa
             ),
         ],
     )
     df.createOrReplaceTempView("df")
 
     predictions = spark.sql(
-        f"SELECT ML_PREDICT({model_name}, uri) as predictions FROM df"
+        f"SELECT ML_PREDICT({model_name}, image) as predictions FROM df"
     )
     predictions.show()
     assert predictions.schema == StructType(

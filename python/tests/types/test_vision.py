@@ -38,7 +38,8 @@ def test_image() -> PILImage:
 
 def test_ipython_display(tmp_path, test_image: PILImage):
     # case 1: http uri
-    uri = "https://github.com/eto-ai/rikai/raw/main/python/tests/assets/test_image.jpg"
+    project = "https://github.com/eto-ai/rikai"
+    uri = f"{project}/raw/main/python/tests/assets/test_image.jpg"
     img1 = Image(uri)
     mimebundle1 = img1.display()._repr_mimebundle_()
     assert mimebundle1 == {"text/html": f'<img src="{uri}"/>'}

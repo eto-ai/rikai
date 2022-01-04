@@ -18,7 +18,6 @@ package ai.eto.rikai.sql.spark
 
 import org.apache.spark.sql.SparkSession
 
-import java.nio.file.Files
 import scala.sys.process.{Process, ProcessLogger}
 
 object Python {
@@ -57,38 +56,6 @@ object Python {
     print(stdout.toString)
     if (status != 0) {
       throw new RuntimeException(stderr.toString)
-    }
-  }
-
-  /** Load UDF from the python codebase without starting PySpark */
-  def loadUdf(
-      moduleName: String,
-      func: String,
-      session: SparkSession
-  ): String = {
-    val funcPicklePath = Files.createTempFile("code", ".json")
-    try {
-      Python.execute(
-        s"""from pyspark.serializers import CloudPickleSerializer;
-           |import json
-           |import base64
-           |from ${moduleName} import ${func}
-           |pickle = CloudPickleSerializer()
-           |with open("${funcPicklePath}", "wb") as fobj:
-           |    json.dump({
-           |        "cmd": base64.b64encode(pickle.dumps((func.func, func.returnType))),
-           |        "returnType": func.returnType.json(),
-           |        "evalType": func.evalType,
-           |    }, fobj)
-           |""".stripMargin,
-        session
-      )
-      val funcJson = Files.readString(funcPicklePath)
-      println(f"funcJson: ${funcJson}")
-
-      func
-    } finally {
-      Files.delete(funcPicklePath)
     }
   }
 }

@@ -76,7 +76,7 @@ def post_processing(options: Dict[str, Any]) -> Callable:
         n = len(batch)
         imgs = []
         for item in batch:
-            imgs.append(item.numpy())
+            imgs.append(item.cpu().numpy())
         shape0 = []
         shape1 = []
         for i, im in enumerate(imgs):

@@ -43,11 +43,13 @@ class PandasDataset(Dataset):
         data: Union[pd.DataFrame, pd.Series],
         transform: Optional[Callable] = None,
         unpickle: bool = False,
+        use_pil: bool = False,
     ) -> None:
         assert isinstance(data, (pd.DataFrame, pd.Series))
         self.data = data
         self.transform = transform
         self.unpickle = unpickle
+        self.use_pil = use_pil
 
     def __len__(self) -> int:
         return self.data.shape[0]
@@ -56,7 +58,7 @@ class PandasDataset(Dataset):
         row = self.data.iloc[index]
         if self.unpickle:
             row = unpickle_transform(row)
-        row = convert_tensor(row)
+        row = convert_tensor(row, use_pil=self.use_pil)
         if self.transform:
             row = self.transform(row)
         return row

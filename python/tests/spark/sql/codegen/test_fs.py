@@ -50,7 +50,7 @@ name: resnet
 model:
   uri: {}
   flavor: pytorch
-schema: STRUCT<boxes:ARRAY<ARRAY<float>>, scores:ARRAY<float>, label_ids:ARRAY<int>>
+schema: ARRAY<STRUCT<box:box2d, score:float, label_id:int>>
 transforms:
   pre: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing
   post: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing

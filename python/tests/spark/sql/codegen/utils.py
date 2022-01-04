@@ -22,6 +22,7 @@ from pyspark.sql.types import (
 )
 
 from rikai.spark.sql.schema import parse_schema
+from rikai.spark.types import Box2dType
 
 
 def check_ml_predict(spark: SparkSession, model_name: str):
@@ -50,15 +51,17 @@ def check_ml_predict(spark: SparkSession, model_name: str):
         [
             StructField(
                 "predictions",
-                StructType(
-                    [
-                        StructField(
-                            "boxes",
-                            ArrayType(ArrayType(FloatType())),
-                        ),
-                        StructField("scores", ArrayType(FloatType())),
-                        StructField("label_ids", ArrayType(IntegerType())),
-                    ]
+                ArrayType(
+                    StructType(
+                        [
+                            StructField(
+                                "box",
+                                Box2dType(),
+                            ),
+                            StructField("score", FloatType()),
+                            StructField("label_id", IntegerType()),
+                        ]
+                    )
                 ),
             ),
         ]
@@ -68,7 +71,7 @@ def check_ml_predict(spark: SparkSession, model_name: str):
             StructField(
                 "predictions",
                 parse_schema(
-                    "STRUCT<boxes:ARRAY<ARRAY<float>>, scores:ARRAY<float>, label_ids:ARRAY<int>>"  # noqa
+                    "ARRAY<STRUCT<box:box2d, score:float, label_id:int>>"  # noqa
                 ),
             )
         ]

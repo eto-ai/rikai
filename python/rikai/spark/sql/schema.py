@@ -60,7 +60,6 @@ _SPARK_TYPE_MAPPING = {
 _SPARK_TYPE_MAPPING.update(
     {udt().simpleString(): udt() for udt in UserDefinedType.__subclasses__()}
 )
-print(_SPARK_TYPE_MAPPING)
 
 
 class SchemaError(Exception):

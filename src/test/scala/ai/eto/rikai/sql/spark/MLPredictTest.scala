@@ -47,7 +47,7 @@ class MLPredictTest
       |model:
       |  uri: ${resnetPath}
       |  flavor: pytorch
-      |schema: ARRAY<STRUCT<box:box2d, score:float, label_ids:int>>
+      |schema: ARRAY<STRUCT<box:box2d, score:float, label_id:int>>
       |transforms:
       |  pre: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing
       |  post: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing""".stripMargin
@@ -79,6 +79,7 @@ class MLPredictTest
         """SELECT
           |ML_PREDICT(resnet, image_uri) AS s FROM images""".stripMargin
       )
+      df.cache()
       df.show()
       df.printSchema()
       assert(df.count() == 2)
@@ -91,8 +92,8 @@ class MLPredictTest
                 StructType(
                   Seq(
                     StructField("box", Box2dType),
-                    StructField("scores", FloatType),
-                    StructField("label_ids", IntegerType)
+                    StructField("score", FloatType),
+                    StructField("label_id", IntegerType)
                   )
                 )
               )

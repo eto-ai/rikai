@@ -19,9 +19,10 @@ from typing import Any, Callable, Optional, Union
 import pandas as pd
 from torch.utils.data import Dataset
 
+from rikai.spark.sql.codegen.base import unpickle_transform
+
 # Rikai
 from rikai.torch.transforms import convert_tensor
-from rikai.spark.sql.codegen.base import unpickle_transform
 
 __all__ = ["PandasDataset"]
 

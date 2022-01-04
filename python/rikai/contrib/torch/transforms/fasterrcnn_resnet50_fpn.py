@@ -23,7 +23,6 @@ __all__ = ["pre_processing", "post_processing"]
 DEFAULT_MIN_SCORE = 0.5
 
 
-
 def pre_processing(options: Dict[str, Any]) -> Callable:
     return T.Compose(
         [

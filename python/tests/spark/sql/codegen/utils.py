@@ -34,11 +34,15 @@ def check_ml_predict(spark: SparkSession, model_name: str):
         [
             # http://cocodataset.org/#explore?id=484912
             Row(
-                image=Image("http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg")  # noqa
+                image=Image(
+                    "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"
+                )  # noqa
             ),
             # https://cocodataset.org/#explore?id=433013
             Row(
-                image=Image("http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg")  # noqa
+                image=Image(
+                    "http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg"
+                )  # noqa
             ),
         ],
     )

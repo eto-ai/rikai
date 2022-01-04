@@ -29,8 +29,6 @@ from typing import Any, Callable, Dict
 
 import numpy as np
 import torch
-from PIL import Image
-from pyspark.serializers import CloudPickleSerializer
 from torch.cuda import amp
 from yolov5.models.common import Detections
 from yolov5.utils.datasets import exif_transpose, letterbox
@@ -41,16 +39,12 @@ from yolov5.utils.general import (
 )
 from yolov5.utils.torch_utils import time_sync
 
-from rikai.types.vision import Image
+from rikai.types import Image
 
 __all__ = ["pre_processing", "post_processing", "OUTPUT_SCHEMA"]
 
-_pickler = CloudPickleSerializer()
 
-
-def pre_process_func(data: bytes):
-    im = _pickler.loads(data)
-    im = Image(im).to_pil()
+def pre_process_func(im: Image):
     im = np.asarray(exif_transpose(im))
     if im.shape[0] < 5:  # image in CHW
         im = im.transpose((1, 2, 0))  # reverse dataloader .transpose(2, 0, 1)

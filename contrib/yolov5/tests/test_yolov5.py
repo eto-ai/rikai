@@ -19,10 +19,11 @@ from pathlib import Path
 import mlflow
 import torch
 import yolov5
-from pyspark.sql.session import SparkSession
+from pyspark.sql import Row, SparkSession
 
 import rikai
 from rikai.contrib.yolov5.transforms import OUTPUT_SCHEMA
+from rikai.types import Image
 
 
 def test_yolov5(tmp_path: Path, spark: SparkSession):
@@ -79,9 +80,12 @@ def test_yolov5(tmp_path: Path, spark: SparkSession):
         USING 'mlflow:///yolov5_way_1'
         """
         )
+        spark.createDataFrame(
+            [Row(image=Image(image_path))]
+        ).createOrReplaceTempView("images")
         result1 = spark.sql(
             f"""
-        select ML_PREDICT(yolov5_way_1, '{image_path}') as pred
+        select ML_PREDICT(yolov5_way_1, image) as pred FROM images
         """
         )
 
@@ -108,7 +112,7 @@ def test_yolov5(tmp_path: Path, spark: SparkSession):
         )
         result2 = spark.sql(
             f"""
-        select ML_PREDICT(yolov5_way_2, '{image_path}') as pred
+        select ML_PREDICT(yolov5_way_2, image) as pred FROM images
         """
         )
 

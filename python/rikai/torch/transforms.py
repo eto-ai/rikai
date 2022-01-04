@@ -34,5 +34,4 @@ class RikaiToTensor:
         return "ToTensor"
 
     def __call__(self, record) -> Any:
-        print("CONERT RECORD", record)
         return convert_tensor(record, use_pil=self.use_pil)

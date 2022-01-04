@@ -25,27 +25,27 @@ yolov5 model. It should work for most modules, but for torchscript model, it
 might not work.
 """  # noqa E501
 
-from typing import Any, Callable, Dict, Tuple
+from typing import Any, Callable, Dict
 
 import numpy as np
 import torch
 from PIL import Image
+from pyspark.serializers import CloudPickleSerializer
 from torch.cuda import amp
 from yolov5.models.common import Detections
 from yolov5.utils.datasets import exif_transpose, letterbox
-from yolov5.utils.general import (
-    make_divisible,
-    non_max_suppression,
-    scale_coords,
-)
+from yolov5.utils.general import make_divisible, non_max_suppression, scale_coords
 from yolov5.utils.torch_utils import time_sync
 
 from rikai.types.vision import Image
 
 __all__ = ["pre_processing", "post_processing", "OUTPUT_SCHEMA"]
 
+_pickler = CloudPickleSerializer()
 
-def pre_process_func(im):
+
+def pre_process_func(data: bytes):
+    im = _pickler.loads(data)
     im = Image(im).to_pil()
     im = np.asarray(exif_transpose(im))
     if im.shape[0] < 5:  # image in CHW

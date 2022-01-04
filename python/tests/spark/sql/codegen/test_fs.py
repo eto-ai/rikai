@@ -209,14 +209,16 @@ def test_count_objects_model(spark: SparkSession, count_objects_spec: str):
             # http://cocodataset.org/#explore?id=484912
             Row(
                 image=Image(
-                    "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"
-                )  # noqa
+                    "http://farm2.staticflickr.com/1129/"
+                    "4726871278_4dd241a03a_z.jpg"
+                )
             ),
             # https://cocodataset.org/#explore?id=433013
             Row(
                 image=Image(
-                    "http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg"
-                )  # noqa
+                    "http://farm4.staticflickr.com/3726/"
+                    "9457732891_87c6512b62_z.jpg"
+                )
             ),
         ],
     )

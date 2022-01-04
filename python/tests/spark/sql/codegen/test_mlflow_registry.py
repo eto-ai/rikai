@@ -31,8 +31,7 @@ def test_modelspec(mlflow_client: MlflowClient):
     )
     assert spec.flavor == "pytorch"
     assert spec.schema == parse_schema(
-        "STRUCT<boxes:ARRAY<ARRAY<float>>,"
-        "scores:ARRAY<float>, label_ids:ARRAY<int>>"
+        "ARRAY<STRUCT<box:box2d, score:float, label_id:int>>"
     )
     assert spec._spec["transforms"]["pre"] == (
         "rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn"
@@ -65,10 +64,7 @@ def test_mlflow_model_without_custom_logger(
     spark.sql("CREATE MODEL vanilla_ice USING 'mlflow:/vanilla-mlflow/1'")
     check_ml_predict(spark, "vanilla_ice")
 
-    schema = (
-        "STRUCT<boxes:ARRAY<ARRAY<float>>,"
-        "scores:ARRAY<float>,label_ids:ARRAY<int>>"
-    )
+    schema = "ARRAY<STRUCT<box:box2d, score:float, label_id:int>>"
     pre_processing = (
         "rikai.contrib.torch.transforms."
         "fasterrcnn_resnet50_fpn.pre_processing"

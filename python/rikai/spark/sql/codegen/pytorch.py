@@ -19,7 +19,7 @@ import pandas as pd
 import torch
 from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql.functions import pandas_udf
-from pyspark.sql.types import BinaryType, StructType
+from pyspark.sql.types import BinaryType
 from torch.utils.data import DataLoader
 
 from rikai.io import open_uri
@@ -27,6 +27,8 @@ from rikai.torch.pandas import PandasDataset
 
 DEFAULT_NUM_WORKERS = 8
 DEFAULT_BATCH_SIZE = 4
+
+_pickler = CloudPickleSerializer()
 
 
 def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
@@ -50,7 +52,6 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     batch_size = int(spec.options.get("batch_size", DEFAULT_BATCH_SIZE))
 
     return_type = Iterator[pd.Series]
-    pickler = CloudPickleSerializer()
 
     def torch_inference_udf(
         iter: Iterator[pd.DataFrame],
@@ -76,7 +77,7 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                     predictions = model(batch)
                     if spec.post_processing:
                         predictions = spec.post_processing(predictions)
-                    bin_predictions = [pickler.dumps(p) for p in predictions]
+                    bin_predictions = [_pickler.dumps(p) for p in predictions]
                     results.extend(bin_predictions)
                 yield pd.Series(results)
 

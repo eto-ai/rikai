@@ -11,12 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import py4j
 import pytest
 from mlflow.tracking import MlflowClient
 from pyspark.sql import SparkSession
 from utils import check_ml_predict
 
+from rikai.contrib.torch.detections import OUTPUT_SCHEMA
 from rikai.spark.sql.codegen.mlflow_registry import MlflowModelSpec
 from rikai.spark.sql.schema import parse_schema
 
@@ -30,9 +32,7 @@ def test_modelspec(mlflow_client: MlflowClient):
         tracking_uri="fake",
     )
     assert spec.flavor == "pytorch"
-    assert spec.schema == parse_schema(
-        "ARRAY<STRUCT<box:box2d, score:float, label_id:int>>"
-    )
+    assert spec.schema == parse_schema(OUTPUT_SCHEMA)
     assert spec._spec["transforms"]["pre"] == (
         "rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn"
         ".pre_processing"
@@ -64,7 +64,7 @@ def test_mlflow_model_without_custom_logger(
     spark.sql("CREATE MODEL vanilla_ice USING 'mlflow:/vanilla-mlflow/1'")
     check_ml_predict(spark, "vanilla_ice")
 
-    schema = "ARRAY<STRUCT<box:box2d, score:float, label_id:int>>"
+    schema = OUTPUT_SCHEMA
     pre_processing = (
         "rikai.contrib.torch.transforms."
         "fasterrcnn_resnet50_fpn.pre_processing"

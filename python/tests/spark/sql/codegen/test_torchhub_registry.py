@@ -16,9 +16,7 @@ import py4j
 import pytest
 from pyspark.sql import SparkSession
 
-from rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn import (
-    OUTPUT_SCHEMA,
-)
+from rikai.contrib.torch.detections import OUTPUT_SCHEMA
 
 
 def test_create_model(spark: SparkSession):

@@ -29,6 +29,7 @@ from mlflow.tracking import MlflowClient
 from pyspark.sql import SparkSession
 
 import rikai
+from rikai.contrib.torch.detections import OUTPUT_SCHEMA
 
 # Rikai
 from rikai.spark.utils import get_default_jar_version, init_spark_session
@@ -45,10 +46,6 @@ def mlflow_client_with_tracking_uri(
     experiment_id = mlflow.create_experiment("rikai-test", str(tmp_path))
     # simpliest
     with mlflow.start_run(experiment_id=experiment_id):
-        from rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn import (
-            OUTPUT_SCHEMA,
-        )
-
         mlflow.log_param("optimizer", "Adam")
         # Fake training loop
         model = torch.load(resnet_model_uri)

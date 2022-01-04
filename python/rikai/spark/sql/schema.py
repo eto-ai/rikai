@@ -27,6 +27,7 @@ from pyspark.sql.types import (
     StringType,
     StructField,
     StructType,
+    UserDefinedType,
 )
 
 from rikai.spark.sql.generated.RikaiModelSchemaLexer import (
@@ -38,6 +39,7 @@ from rikai.spark.sql.generated.RikaiModelSchemaParser import (
 from rikai.spark.sql.generated.RikaiModelSchemaVisitor import (
     RikaiModelSchemaVisitor,
 )
+from rikai.spark.types import *
 
 _SPARK_TYPE_MAPPING = {
     "bool": BooleanType(),
@@ -55,6 +57,10 @@ _SPARK_TYPE_MAPPING = {
     "string": StringType(),
     "binary": BinaryType(),
 }
+_SPARK_TYPE_MAPPING.update(
+    {udt().simpleString(): udt() for udt in UserDefinedType.__subclasses__()}
+)
+print(_SPARK_TYPE_MAPPING)
 
 
 class SchemaError(Exception):

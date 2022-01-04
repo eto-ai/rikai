@@ -17,6 +17,7 @@
 package ai.eto.rikai.sql.spark
 
 import ai.eto.rikai.SparkTestSession
+import org.apache.spark.sql.rikai.Box2dType
 import org.apache.spark.sql.types._
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
@@ -46,7 +47,7 @@ class MLPredictTest
       |model:
       |  uri: ${resnetPath}
       |  flavor: pytorch
-      |schema: STRUCT<boxes:ARRAY<ARRAY<float>>, scores:ARRAY<float>, label_ids:ARRAY<int>>
+      |schema: ARRAY<STRUCT<box:box2d, score:float, label_ids:int>>
       |transforms:
       |  pre: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing
       |  post: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing""".stripMargin
@@ -86,11 +87,13 @@ class MLPredictTest
           Seq(
             StructField(
               "s",
-              StructType(
-                Seq(
-                  StructField("boxes", ArrayType(ArrayType(FloatType))),
-                  StructField("scores", ArrayType(FloatType)),
-                  StructField("label_ids", ArrayType(IntegerType))
+              ArrayType(
+                StructType(
+                  Seq(
+                    StructField("box", Box2dType),
+                    StructField("scores", FloatType),
+                    StructField("label_ids", IntegerType)
+                  )
                 )
               )
             )

@@ -30,6 +30,9 @@ from rikai.spark.sql.schema import parse_schema
 __all__ = ["Registry", "ModelSpec"]
 
 
+_pickler = CloudPickleSerializer()
+
+
 def _identity(x):
     return x
 
@@ -181,7 +184,7 @@ def udf_from_spec(spec: ModelSpec):
 
     Returns
     -------
-    str
+    udt_ser_func, udf_func, udt_deser_func, returnType
         Spark UDF function name for the generated data.
     """
     if spec.version != "1.0":
@@ -194,9 +197,18 @@ def udf_from_spec(spec: ModelSpec):
     else:
         codegen_module = f"rikai.contrib.{spec.flavor}.codegen"
 
+    @udf(returnType=spec.schema)
+    def deserialize_return(data: bytes):
+        return _pickler.loads(data)
+
     try:
         codegen = importlib.import_module(codegen_module)
-        return codegen.generate_udf(spec)
+        return (
+            pickle_udt,
+            codegen.generate_udf(spec),
+            deserialize_return,
+            deserialize_return.returnType,
+        )
     except ModuleNotFoundError:
         logger.error(f"Unsupported model flavor: {spec.flavor}")
         raise
@@ -205,13 +217,9 @@ def udf_from_spec(spec: ModelSpec):
 def command_from_spec(registry_class: str, row_spec: dict):
     cls = find_class(registry_class)
     registry = cls()
-    func, returnType = registry.resolve(row_spec)
-    return func, returnType
-
-
-_pickler = CloudPickleSerializer()
+    return registry.resolve(row_spec)
 
 
 @udf(returnType=BinaryType())
 def pickle_udt(input):
-    return _pickler.dump(input)
+    return _pickler.dumps(input)

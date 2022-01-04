@@ -1,4 +1,4 @@
-#  Copyright 2021 Rikai Authors
+#  Copyright 2022 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -14,18 +14,26 @@
 
 from typing import Any, Callable, Dict
 
+from pyspark.serializers import CloudPickleSerializer
 from torchvision import transforms as T
 
 from rikai.contrib.torch.transforms.utils import uri_to_pil
+from rikai.types import Box2d
 
 __all__ = ["pre_processing", "post_processing"]
 
 DEFAULT_MIN_SCORE = 0.5
+_pickler = CloudPickleSerializer()
+
+
+def unpickle(x: bytes) -> Any:
+    return _pickler.loads(x)
 
 
 def pre_processing(options: Dict[str, Any]) -> Callable:
     return T.Compose(
         [
+            unpickle,
             uri_to_pil,
             T.ToTensor(),
         ]
@@ -38,11 +46,7 @@ def post_processing(options: Dict[str, Any]) -> Callable:
     def post_process_func(batch):
         results = []
         for predicts in batch:
-            predict_result = {
-                "boxes": [],
-                "label_ids": [],
-                "scores": [],
-            }
+            predict_result = []
             for box, label, score in zip(
                 predicts["boxes"].tolist(),
                 predicts["labels"].tolist(),
@@ -50,9 +54,13 @@ def post_processing(options: Dict[str, Any]) -> Callable:
             ):
                 if score < min_score:
                     continue
-                predict_result["boxes"].append(box)
-                predict_result["label_ids"].append(label)
-                predict_result["scores"].append(score)
+                predict_result.append(
+                    {
+                        "box": Box2d(*box),
+                        "label_id": label,
+                        "score": score,
+                    }
+                )
 
             results.append(predict_result)
         return results

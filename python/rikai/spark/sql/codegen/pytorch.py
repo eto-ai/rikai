@@ -17,8 +17,9 @@ from typing import Iterator
 
 import pandas as pd
 import torch
+from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql.functions import pandas_udf
-from pyspark.sql.types import StructType
+from pyspark.sql.types import BinaryType, StructType
 from torch.utils.data import DataLoader
 
 from rikai.io import open_uri
@@ -48,11 +49,8 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     )
     batch_size = int(spec.options.get("batch_size", DEFAULT_BATCH_SIZE))
 
-    schema = spec.schema
-    should_return_df = isinstance(schema, StructType)
-    return_type = (
-        Iterator[pd.DataFrame] if should_return_df else Iterator[pd.Series]
-    )
+    return_type = Iterator[pd.Series]
+    pickler = CloudPickleSerializer()
 
     def torch_inference_udf(
         iter: Iterator[pd.DataFrame],
@@ -76,13 +74,11 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                     predictions = model(batch)
                     if spec.post_processing:
                         predictions = spec.post_processing(predictions)
-                    results.extend(predictions)
-                if should_return_df:
-                    yield pd.DataFrame(results)
-                else:
-                    yield pd.Series(results)
+                    bin_predictions = [pickler.dumps(p) for p in predictions]
+                    results.extend(bin_predictions)
+                yield pd.Series(results)
 
-    return pandas_udf(torch_inference_udf, returnType=schema)
+    return pandas_udf(torch_inference_udf, returnType=BinaryType())
 
 
 def load_model_from_uri(uri: str):

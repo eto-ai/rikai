@@ -75,7 +75,10 @@ class SparkUDFModel(
     val name: String,
     val spec_uri: String,
     val funcName: String,
-    val flavor: Option[String]
+    val flavor: Option[String],
+    /** Temporary solution to address PandasUDF and UDT incompatibility */
+    val preFuncName: Option[String] = None,
+    val postFuncName: Option[String] = None
 ) extends Model
     with SparkRunnable {
 
@@ -93,8 +96,20 @@ class SparkUDFModel(
   /** Convert a [[Model]] to a Spark Expression in Spark SQL's logical plan. */
   override def asSpark(args: Seq[Expression]): Expression = {
     UnresolvedFunction(
-      new FunctionIdentifier(funcName),
-      arguments = args,
+      new FunctionIdentifier(postFuncName.get),
+      Seq(
+        UnresolvedFunction(
+          new FunctionIdentifier(funcName),
+          arguments = args.map(arg =>
+            UnresolvedFunction(
+              new FunctionIdentifier(preFuncName.get),
+              Seq(arg),
+              isDistinct = false
+            )
+          ),
+          isDistinct = false
+        )
+      ),
       isDistinct = false
     )
   }

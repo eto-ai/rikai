@@ -86,5 +86,4 @@ class FileSystemRegistry(Registry):
         name = spec.name
         uri = spec.model_uri
         logger.info(f"Resolving model {name} from {uri}")
-        udf = udf_from_spec(spec)
-        return udf.func, udf.returnType
+        return udf_from_spec(spec)

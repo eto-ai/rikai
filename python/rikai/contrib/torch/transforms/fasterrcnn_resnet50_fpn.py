@@ -17,7 +17,7 @@ from typing import Any, Callable, Dict
 from pyspark.serializers import CloudPickleSerializer
 from torchvision import transforms as T
 
-from rikai.contrib.torch.transforms.utils import uri_to_pil
+from rikai.torch.transforms import RikaiToTensor
 from rikai.types import Box2d
 
 __all__ = ["pre_processing", "post_processing"]
@@ -34,7 +34,7 @@ def pre_processing(options: Dict[str, Any]) -> Callable:
     return T.Compose(
         [
             unpickle,
-            uri_to_pil,
+            RikaiToTensor(),
             T.ToTensor(),
         ]
     )

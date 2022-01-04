@@ -17,7 +17,7 @@
 package ai.eto.rikai.sql.spark
 
 import ai.eto.rikai.SparkTestSession
-import org.apache.spark.sql.rikai.Box2dType
+import org.apache.spark.sql.rikai.{Box2dType, Image}
 import org.apache.spark.sql.types._
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
@@ -28,8 +28,6 @@ class MLPredictTest
     extends AnyFunSuite
     with SparkTestSession
     with BeforeAndAfterAll {
-
-  import spark.implicits._
 
   lazy val resnetPath: Path = Files.createTempFile("resnet", ".pt")
 
@@ -70,14 +68,19 @@ class MLPredictTest
         s"CREATE MODEL resnet USING 'file://${specYamlPath}'"
       )
 
-      Seq(
-        getClass.getResource("/000000304150.jpg").getPath,
-        getClass.getResource("/000000419650.jpg").getPath
-      ).toDF("image_uri").createOrReplaceTempView("images")
+      spark
+        .createDataFrame(
+          Seq(
+            (1, new Image(getClass.getResource("/000000304150.jpg").getPath)),
+            (2, new Image(getClass.getResource("/000000419650.jpg").getPath))
+          )
+        )
+        .toDF("image_id", "image")
+        .createOrReplaceTempView("images")
 
       val df = spark.sql(
         """SELECT
-          |ML_PREDICT(resnet, image_uri) AS s FROM images""".stripMargin
+          |ML_PREDICT(resnet, image) AS s FROM images""".stripMargin
       )
       df.cache()
       df.show()

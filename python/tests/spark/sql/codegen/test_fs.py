@@ -26,9 +26,11 @@ from pyspark.sql.types import IntegerType, StructField, StructType
 from torch.utils.data import DataLoader
 from utils import check_ml_predict
 
+from rikai.contrib.torch.detections import OUTPUT_SCHEMA
 from rikai.spark.sql.codegen.fs import FileModelSpec
 from rikai.spark.sql.exceptions import SpecError
 from rikai.torch.pandas import PandasDataset
+from rikai.types import Image
 
 
 def spec_file(content: Dict[str, Any], tmp_path: Path) -> Path:
@@ -50,12 +52,12 @@ name: resnet
 model:
   uri: {}
   flavor: pytorch
-schema: STRUCT<boxes:ARRAY<ARRAY<float>>, scores:ARRAY<float>, label_ids:ARRAY<int>>
+schema: {}
 transforms:
   pre: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing
   post: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing
     """.format(  # noqa: E501
-        resnet_model_uri
+        resnet_model_uri, OUTPUT_SCHEMA
     )
 
     spec_file = tmp_path / "spec.yaml"
@@ -206,18 +208,24 @@ def test_count_objects_model(spark: SparkSession, count_objects_spec: str):
         [
             # http://cocodataset.org/#explore?id=484912
             Row(
-                uri="http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"  # noqa
+                image=Image(
+                    "http://farm2.staticflickr.com/1129/"
+                    "4726871278_4dd241a03a_z.jpg"
+                )
             ),
             # https://cocodataset.org/#explore?id=433013
             Row(
-                uri="http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg"  # noqa
+                image=Image(
+                    "http://farm4.staticflickr.com/3726/"
+                    "9457732891_87c6512b62_z.jpg"
+                )
             ),
         ],
     )
     df.createOrReplaceTempView("df")
 
     predictions = spark.sql(
-        "SELECT ML_PREDICT(count_objects, uri) as objects FROM df"
+        "SELECT ML_PREDICT(count_objects, image) as objects FROM df"
     )
     assert predictions.schema == StructType(
         [StructField("objects", IntegerType())]

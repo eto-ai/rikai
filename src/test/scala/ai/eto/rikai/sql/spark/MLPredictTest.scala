@@ -17,6 +17,7 @@
 package ai.eto.rikai.sql.spark
 
 import ai.eto.rikai.SparkTestSession
+import org.apache.spark.sql.rikai.{Box2dType, Image}
 import org.apache.spark.sql.types._
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
@@ -27,8 +28,6 @@ class MLPredictTest
     extends AnyFunSuite
     with SparkTestSession
     with BeforeAndAfterAll {
-
-  import spark.implicits._
 
   lazy val resnetPath: Path = Files.createTempFile("resnet", ".pt")
 
@@ -46,7 +45,7 @@ class MLPredictTest
       |model:
       |  uri: ${resnetPath}
       |  flavor: pytorch
-      |schema: STRUCT<boxes:ARRAY<ARRAY<float>>, scores:ARRAY<float>, label_ids:ARRAY<int>>
+      |schema: ARRAY<STRUCT<box:box2d, score:float, label_id:int>>
       |transforms:
       |  pre: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing
       |  post: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing""".stripMargin
@@ -69,15 +68,21 @@ class MLPredictTest
         s"CREATE MODEL resnet USING 'file://${specYamlPath}'"
       )
 
-      Seq(
-        getClass.getResource("/000000304150.jpg").getPath,
-        getClass.getResource("/000000419650.jpg").getPath
-      ).toDF("image_uri").createOrReplaceTempView("images")
+      spark
+        .createDataFrame(
+          Seq(
+            (1, new Image(getClass.getResource("/000000304150.jpg").getPath)),
+            (2, new Image(getClass.getResource("/000000419650.jpg").getPath))
+          )
+        )
+        .toDF("image_id", "image")
+        .createOrReplaceTempView("images")
 
       val df = spark.sql(
         """SELECT
-          |ML_PREDICT(resnet, image_uri) AS s FROM images""".stripMargin
+          |ML_PREDICT(resnet, image) AS s FROM images""".stripMargin
       )
+      df.cache()
       df.show()
       df.printSchema()
       assert(df.count() == 2)
@@ -86,11 +91,13 @@ class MLPredictTest
           Seq(
             StructField(
               "s",
-              StructType(
-                Seq(
-                  StructField("boxes", ArrayType(ArrayType(FloatType))),
-                  StructField("scores", ArrayType(FloatType)),
-                  StructField("label_ids", ArrayType(IntegerType))
+              ArrayType(
+                StructType(
+                  Seq(
+                    StructField("box", Box2dType),
+                    StructField("score", FloatType),
+                    StructField("label_id", IntegerType)
+                  )
                 )
               )
             )

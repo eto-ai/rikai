@@ -68,5 +68,4 @@ class TorchHubRegistry(Registry):
         repo_or_dir = "/".join(parts[:-1])
         model = parts[-1]
         spec = TorchHubModelSpec(repo_or_dir, model, raw_spec)
-        udf = udf_from_spec(spec)
-        return udf.func, udf.returnType
+        return udf_from_spec(spec)

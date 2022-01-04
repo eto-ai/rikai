@@ -21,44 +21,54 @@ from pyspark.sql.types import (
     StructType,
 )
 
+from rikai.contrib.torch.detections import OUTPUT_SCHEMA
 from rikai.spark.sql.schema import parse_schema
+from rikai.spark.types import Box2dType
+from rikai.types import Image
 
 
 def check_ml_predict(spark: SparkSession, model_name: str):
-
     # TODO: Replace uri string with Image class after GH#90 is released with
     # the upstream spark
     df = spark.createDataFrame(
         [
             # http://cocodataset.org/#explore?id=484912
             Row(
-                uri="http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"  # noqa
+                image=Image(
+                    "http://farm2.staticflickr.com/1129/"
+                    "4726871278_4dd241a03a_z.jpg"
+                )
             ),
             # https://cocodataset.org/#explore?id=433013
             Row(
-                uri="http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg"  # noqa
+                image=Image(
+                    "http://farm4.staticflickr.com/3726/"
+                    "9457732891_87c6512b62_z.jpg"
+                )
             ),
         ],
     )
     df.createOrReplaceTempView("df")
 
     predictions = spark.sql(
-        f"SELECT ML_PREDICT({model_name}, uri) as predictions FROM df"
+        f"SELECT ML_PREDICT({model_name}, image) as predictions FROM df"
     )
     predictions.show()
     assert predictions.schema == StructType(
         [
             StructField(
                 "predictions",
-                StructType(
-                    [
-                        StructField(
-                            "boxes",
-                            ArrayType(ArrayType(FloatType())),
-                        ),
-                        StructField("scores", ArrayType(FloatType())),
-                        StructField("label_ids", ArrayType(IntegerType())),
-                    ]
+                ArrayType(
+                    StructType(
+                        [
+                            StructField(
+                                "box",
+                                Box2dType(),
+                            ),
+                            StructField("score", FloatType()),
+                            StructField("label_id", IntegerType()),
+                        ]
+                    )
                 ),
             ),
         ]
@@ -67,9 +77,7 @@ def check_ml_predict(spark: SparkSession, model_name: str):
         [
             StructField(
                 "predictions",
-                parse_schema(
-                    "STRUCT<boxes:ARRAY<ARRAY<float>>, scores:ARRAY<float>, label_ids:ARRAY<int>>"  # noqa
-                ),
+                parse_schema(OUTPUT_SCHEMA),
             )
         ]
     )

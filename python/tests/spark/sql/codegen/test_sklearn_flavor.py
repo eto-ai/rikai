@@ -16,6 +16,7 @@ from pathlib import Path
 
 import mlflow
 import numpy as np
+import pytest
 from pyspark.sql import Row, SparkSession
 from pyspark.sql.types import DoubleType, LongType, StructField, StructType
 from sklearn.datasets import make_classification

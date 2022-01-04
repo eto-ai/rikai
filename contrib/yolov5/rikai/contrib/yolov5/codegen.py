@@ -17,16 +17,17 @@ from typing import Iterator
 
 import pandas as pd
 import torch
+from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql.functions import pandas_udf
-from pyspark.sql.types import StructType
+from pyspark.sql.types import BinaryType
 from torch.utils.data import DataLoader
 
-from rikai.io import open_uri
-from rikai.spark.sql.codegen.mlflow_logger import CONF_MLFLOW_MODEL_FLAVOR
 from rikai.torch.pandas import PandasDataset
 
 DEFAULT_NUM_WORKERS = 8
 DEFAULT_BATCH_SIZE = 4
+
+_pickler = CloudPickleSerializer()
 
 
 def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
@@ -48,15 +49,9 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     )
     batch_size = int(spec.options.get("batch_size", DEFAULT_BATCH_SIZE))
 
-    schema = spec.schema
-    should_return_df = isinstance(schema, StructType)
-    return_type = (
-        Iterator[pd.DataFrame] if should_return_df else Iterator[pd.Series]
-    )
-
     def torch_inference_udf(
         iter: Iterator[pd.DataFrame],
-    ) -> return_type:
+    ) -> Iterator[pd.Series]:
         device = torch.device("cuda" if use_gpu else "cpu")
         model = spec.load_model()
         model.to(device)
@@ -64,7 +59,12 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
 
         with torch.no_grad():
             for series in iter:
-                dataset = PandasDataset(series, transform=spec.pre_processing)
+                dataset = PandasDataset(
+                    series,
+                    transform=spec.pre_processing,
+                    unpickle=True,
+                    use_pil=True,
+                )
                 results = []
                 for batch in DataLoader(
                     dataset,
@@ -76,10 +76,8 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                         predictions = spec.post_processing(model, batch)
                     else:
                         predictions = model(batch)
-                    results.extend(predictions)
-                if should_return_df:
-                    yield pd.DataFrame(results)
-                else:
-                    yield pd.Series(results)
+                    bin_preds = [_pickler.dumps(pred) for pred in predictions]
+                    results.extend(bin_preds)
+                yield pd.Series(results)
 
-    return pandas_udf(torch_inference_udf, returnType=schema)
+    return pandas_udf(torch_inference_udf, returnType=BinaryType())

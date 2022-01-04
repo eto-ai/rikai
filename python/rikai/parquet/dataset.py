@@ -285,11 +285,19 @@ def _convert_udt_value(value, udt):
 
 def convert_tensor(row, use_pil: bool = False):
     """
-    Convert a parquet row into rikai semantic objects.
+    Convert a parquet row into tensors.
+
+    If use_pil is set to True, this method returns a PIL image instead,
+    and relies on the customer code to convert PIL image to tensors.
     """
-    if not isinstance(row, (Mapping, pd.Series)):
+    if use_pil and isinstance(row, ToPIL):
+        return row.to_pil()
+    elif isinstance(row, ToNumpy):
+        return row.to_numpy()
+    elif not isinstance(row, (Mapping, pd.Series)):
         # Primitive values
         return row
+
     tensors = {}
     for key, value in row.items():
         if isinstance(value, dict):

@@ -19,6 +19,8 @@ from typing import Any, Callable, Optional, Union
 import pandas as pd
 from torch.utils.data import Dataset
 
+from rikai.spark.sql.codegen.base import unpickle_transform
+
 # Rikai
 from rikai.torch.transforms import convert_tensor
 
@@ -40,17 +42,23 @@ class PandasDataset(Dataset):
         self,
         data: Union[pd.DataFrame, pd.Series],
         transform: Optional[Callable] = None,
+        unpickle: bool = False,
+        use_pil: bool = False,
     ) -> None:
         assert isinstance(data, (pd.DataFrame, pd.Series))
         self.data = data
         self.transform = transform
+        self.unpickle = unpickle
+        self.use_pil = use_pil
 
     def __len__(self) -> int:
         return self.data.shape[0]
 
     def __getitem__(self, index: int) -> Any:
         row = self.data.iloc[index]
-        row = convert_tensor(row)
+        if self.unpickle:
+            row = unpickle_transform(row)
+        row = convert_tensor(row, use_pil=self.use_pil)
         if self.transform:
             row = self.transform(row)
         return row

@@ -16,8 +16,13 @@ from typing import Iterator
 
 import numpy as np
 import pandas as pd
-from pyspark.sql.functions import pandas_udf, PandasUDFType
-from pyspark.sql.types import StructType
+from pyspark.serializers import CloudPickleSerializer
+from pyspark.sql.functions import pandas_udf
+from pyspark.sql.types import BinaryType
+
+__all__ = ["generate_udf"]
+
+_pickler = CloudPickleSerializer()
 
 
 def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
@@ -38,8 +43,8 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     ) -> Iterator[pd.Series]:
         model = spec.load_model()
         for series in list(iter):
-            X = np.vstack(series.to_numpy())
-            y = model.predict(X)
+            X = np.vstack(series.apply(_pickler.loads).to_numpy())
+            y = [_pickler.dumps(pred.tolist()) for pred in model.predict(X)]
             yield pd.Series(y)
 
-    return pandas_udf(sklearn_inference_udf, returnType=spec.schema)
+    return pandas_udf(sklearn_inference_udf, returnType=BinaryType())

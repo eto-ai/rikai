@@ -14,14 +14,18 @@
 
 from pathlib import Path
 
-from pyspark.sql import SparkSession
+from pyspark.sql import Row, SparkSession
 
 from rikai.contrib.yolov5.transforms import OUTPUT_SCHEMA
+from rikai.types import Image
 
 
 def test_yolov5(spark: SparkSession):
     work_dir = Path().absolute().parent.parent
     image_path = f"{work_dir}/python/tests/assets/test_image.jpg"
+    spark.createDataFrame(
+        [Row(image=Image(image_path))]
+    ).createOrReplaceTempView("images")
     spark.sql(
         f"""
 CREATE MODEL yolov5
@@ -35,7 +39,7 @@ USING "torchhub:///ultralytics/yolov5:v6.0/yolov5s";
     )
     result = spark.sql(
         f"""
-    select ML_PREDICT(yolov5, '{image_path}') as pred
+    select ML_PREDICT(yolov5, image) as pred FROM images
     """
     )
 

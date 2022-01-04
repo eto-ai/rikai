@@ -18,7 +18,6 @@ package ai.eto.rikai.sql.spark
 
 import org.apache.spark.sql.SparkSession
 
-import scala.sys.process
 import scala.sys.process.{Process, ProcessLogger}
 
 object Python {
@@ -54,7 +53,7 @@ object Python {
       None,
       workerEnv: _*
     ) ! ProcessLogger(stdout append _, stderr append _)
-    print(process.stdout.toString)
+    print(stdout.toString)
     if (status != 0) {
       throw new RuntimeException(stderr.toString)
     }

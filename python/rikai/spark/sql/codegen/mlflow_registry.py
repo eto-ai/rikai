@@ -206,8 +206,7 @@ class MlflowRegistry(Registry):
             self.mlflow_tracking_uri,
             options=self.get_options(raw_spec, run),
         )
-        udf = udf_from_spec(spec)
-        return udf.func, udf.returnType
+        return udf_from_spec(spec)
 
     def get_model_conf(self, spec, run):
         """

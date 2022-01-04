@@ -1,4 +1,4 @@
-#  Copyright 2021 Rikai Authors
+#  Copyright 2022 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -13,9 +13,5 @@
 #  limitations under the License.
 
 
-from rikai.types.vision import Image
-
-
-def uri_to_pil(uri):
-    # TODO: We can remove this after UDT is supported in Spark
-    return Image(uri).to_pil()
+# Object detection output schema
+OUTPUT_SCHEMA = "array<struct<box:box2d, score:float, label_id:int>>"

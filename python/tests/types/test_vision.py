@@ -23,6 +23,7 @@ import pytest
 from PIL import Image as PILImage
 from PIL import ImageDraw
 
+from rikai.io import open_uri
 from rikai.types.geometry import Box2d
 from rikai.types.vision import Image
 from rikai.viz import Style, Text
@@ -35,30 +36,29 @@ def test_image() -> PILImage:
     return PILImage.fromarray(rescaled)
 
 
-def test_show_embedded_png(tmp_path, test_image):
-    uri = tmp_path / "test.png"
-    test_image.save(uri)
-    result = Image(uri)._repr_png_()
-    with open(uri, "rb") as fh:
-        expected = b2a_base64(fh.read()).decode("ascii")
-        assert result == expected
+def test_ipython_display(tmp_path, test_image: PILImage):
+    # case 1: http uri
+    project = "https://github.com/eto-ai/rikai"
+    uri = f"{project}/raw/main/python/tests/assets/test_image.jpg"
+    img1 = Image(uri)
+    mimebundle1 = img1.display()._repr_mimebundle_()
+    assert mimebundle1 == {"text/html": f'<img src="{uri}"/>'}
 
-        fh.seek(0)
-        embedded_image = Image(fh)
-        assert result == embedded_image._repr_png_()
-
-
-def test_show_embedded_jpeg(tmp_path, test_image):
+    # case 2: non http uri
     uri = tmp_path / "test.jpg"
     test_image.save(uri)
-    result = Image(uri)._repr_jpeg_()
-    with open(uri, "rb") as fh:
-        expected = b2a_base64(fh.read()).decode("ascii")
-        assert result == expected
+    img2 = Image(uri)
+    mimebundle2 = img2.display()._repr_mimebundle_()
+    assert len(mimebundle2) == 1
+    assert "text/html" in mimebundle2
+    assert mimebundle2["text/html"].startswith('<img src="data:image;base64,')
 
-        fh.seek(0)
-        embedded_image = Image(fh)
-        assert result == embedded_image._repr_jpeg_()
+    # case 3: embeded image data
+    img3 = Image(Image.read(uri).data)
+    mimebundle3 = img3.display()._repr_mimebundle_()
+    assert len(mimebundle3) == 1
+    assert "text/html" in mimebundle3
+    assert mimebundle3["text/html"].startswith('<img src="data:image;base64,')
 
 
 def test_convert_to_embedded_image(tmp_path, test_image: PILImage):

@@ -15,8 +15,6 @@ jobs:
         persist-credentials: false
         fetch-depth: 0
         lfs: true
-    - name: Checkout LFS objects
-      run: git lfs pull
     - name: Set git configs for bumpversion
       run: |
         git config user.name 'Rikai Release'
@@ -52,7 +50,7 @@ jobs:
     - name: Stop docker-compose
       run: docker-compose -f .github/docker-compose.yml down
     - name: Install jar for Python tests
-      run: git reset --hard HEAD && sbt publishLocal
+      run: sbt publishLocal
     - name: Python lint
       working-directory: python
       run: pylint rikai || true

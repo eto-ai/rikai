@@ -15,8 +15,6 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
-      - name: Checkout LFS objects
-        run: git lfs pull
       - name: Setup Scala
         uses: olafurpg/setup-scala@v10
         with:
@@ -27,7 +25,7 @@ jobs:
           python-version: 3.9
       - name: sbt install
         run: |
-          git reset --hard HEAD && sbt publishLocal
+          sbt publishLocal
       - name: Install Dependencies
         working-directory: python
         run: |
@@ -47,8 +45,6 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
-      - name: Checkout LFS objects
-        run: git lfs pull
       - name: Setup Scala
         uses: olafurpg/setup-scala@v10
         with:
@@ -59,7 +55,7 @@ jobs:
           python-version: 3.9
       - name: sbt install
         run: |
-          git reset --hard HEAD && sbt publishLocal
+          sbt publishLocal
       - name: Install Rikai
         working-directory: python
         run: |
@@ -79,8 +75,6 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
-      - name: Checkout LFS objects
-        run: git lfs pull
       - name: Setup Scala
         uses: olafurpg/setup-scala@v10
         with:
@@ -91,7 +85,7 @@ jobs:
           python-version: 3.9
       - name: sbt install
         run: |
-          git reset --hard HEAD && sbt publishLocal
+          sbt publishLocal
       - name: Install Dependencies
         working-directory: python
         run: |

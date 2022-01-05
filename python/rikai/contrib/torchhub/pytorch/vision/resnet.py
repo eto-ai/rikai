@@ -16,8 +16,6 @@ from typing import Any, Callable, Dict
 
 from torchvision import transforms as T
 
-from rikai.contrib.torch.transforms.utils import uri_to_pil
-
 """
 Adapted from https://github.com/pytorch/pytorch.github.io/blob/site/assets/hub/pytorch_vision_resnet.ipynb
 """  # noqa E501
@@ -26,7 +24,6 @@ Adapted from https://github.com/pytorch/pytorch.github.io/blob/site/assets/hub/p
 def pre_processing(options: Dict[str, Any]) -> Callable:
     return T.Compose(
         [
-            uri_to_pil,
             T.Resize(256),
             T.CenterCrop(224),
             T.ToTensor(),

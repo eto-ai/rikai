@@ -63,7 +63,7 @@ class MLPredictTest
   test("Use simple fs model") {
     val specYamlPath = Files.createTempFile("spec", ".yml")
     try {
-      Files.writeString(specYamlPath, resnetSpecYaml)
+      Files.write(specYamlPath, resnetSpecYaml.getBytes)
       spark.sql(
         s"CREATE MODEL resnet USING 'file://${specYamlPath}'"
       )

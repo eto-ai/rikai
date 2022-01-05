@@ -78,33 +78,33 @@ object ModelResolver {
     val path = Files.createTempFile("model-code", ".cpt")
     val dataTypePath = Files.createTempFile("model-type", ".json")
     try {
-      Files.writeString(specPath, spec.asJson.toString)
+      Files.write(specPath, spec.asJson.toString.getBytes)
       Python.execute(
         s"""from pyspark.serializers import CloudPickleSerializer;
-                 |import json
-                 |import base64
-                 |spec = json.load(open("${specPath}", "r"))
-                 |from rikai.spark.sql.codegen import command_from_spec
-                 |serialize_func, func, deserialize_func, dataType = command_from_spec("${registryClassName}", spec)
-                 |pickle = CloudPickleSerializer()
-                 |with open("${path}", "w") as fobj:
-                 |    json.dump({
-                 |        "func": base64.b64encode(pickle.dumps((func.func, func.returnType))).decode('utf-8'),
-                 |        "serializer": base64.b64encode(pickle.dumps((serialize_func.func, serialize_func.returnType))).decode('utf-8'),
-                 |        "deserializer": base64.b64encode(pickle.dumps((deserialize_func.func, deserialize_func.returnType))).decode('utf-8'),
-                 |    }, fobj)
-                 |with open("${dataTypePath}", "w") as fobj:
-                 |    fobj.write(dataType.json())
-                 |""".stripMargin,
+           |import json
+           |import base64
+           |spec = json.load(open("${specPath}", "r"))
+           |from rikai.spark.sql.codegen import command_from_spec
+           |serialize_func, func, deserialize_func, dataType = command_from_spec("${registryClassName}", spec)
+           |pickle = CloudPickleSerializer()
+           |with open("${path}", "w") as fobj:
+           |    json.dump({
+           |        "func": base64.b64encode(pickle.dumps((func.func, func.returnType))).decode('utf-8'),
+           |        "serializer": base64.b64encode(pickle.dumps((serialize_func.func, serialize_func.returnType))).decode('utf-8'),
+           |        "deserializer": base64.b64encode(pickle.dumps((deserialize_func.func, deserialize_func.returnType))).decode('utf-8'),
+           |    }, fobj)
+           |with open("${dataTypePath}", "w") as fobj:
+           |    fobj.write(dataType.json())
+           |""".stripMargin,
         session
       )
-      val cmdJson = Files.readString(path)
+      val cmdJson = Files.readAllLines(path).asScala.mkString("\n")
       val cmdMap = decode[FuncDesc](cmdJson) match {
         case Left(failure) => throw failure
         case Right(json)   => json
       }
 
-      val dataTypeJson = Files.readString(dataTypePath)
+      val dataTypeJson = Files.readAllLines(dataTypePath).asScala.mkString("\n")
       val returnType = DataType.fromJson(dataTypeJson)
       val suffix = Random.alphanumeric.take(6)
       val udfName = s"${spec.name}_${suffix}"

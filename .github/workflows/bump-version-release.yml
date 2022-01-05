@@ -15,6 +15,8 @@ jobs:
         persist-credentials: false
         fetch-depth: 0
         lfs: true
+    - name: Checkout LFS objects
+      run: git lfs pull
     - name: Set git configs for bumpversion
       run: |
         git config user.name 'Rikai Release'

@@ -19,6 +19,8 @@ jobs:
       with:
         fetch-depth: 0
         lfs: true
+    - name: Checkout LFS objects
+      run: git lfs pull
     - name: Start docker-compose
       run: |
         docker-compose -f .github/docker-compose.yml up -d

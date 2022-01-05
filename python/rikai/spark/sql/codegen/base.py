@@ -21,7 +21,7 @@ from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql.functions import udf
 from pyspark.sql.types import BinaryType
 
-from rikai.internal.reflection import find_func
+from rikai.internal.reflection import find_class, find_func
 from rikai.logging import logger
 from rikai.spark.sql.codegen.mlflow_logger import KNOWN_FLAVORS
 from rikai.spark.sql.exceptions import SpecError

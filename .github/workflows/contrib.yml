@@ -27,7 +27,7 @@ jobs:
           python-version: 3.9
       - name: sbt install
         run: |
-          sbt publishLocal
+          git reset --hard HEAD && sbt publishLocal
       - name: Install Dependencies
         working-directory: python
         run: |
@@ -59,7 +59,7 @@ jobs:
           python-version: 3.9
       - name: sbt install
         run: |
-          sbt publishLocal
+          git reset --hard HEAD && sbt publishLocal
       - name: Install Rikai
         working-directory: python
         run: |
@@ -91,7 +91,7 @@ jobs:
           python-version: 3.9
       - name: sbt install
         run: |
-          sbt publishLocal
+          git reset --hard HEAD && sbt publishLocal
       - name: Install Dependencies
         working-directory: python
         run: |

@@ -52,7 +52,7 @@ jobs:
     - name: Stop docker-compose
       run: docker-compose -f .github/docker-compose.yml down
     - name: Install jar for Python tests
-      run: sbt publishLocal
+      run: git reset --hard HEAD && sbt publishLocal
     - name: Python lint
       working-directory: python
       run: pylint rikai || true

@@ -11,8 +11,8 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
-      - name: Checkout LFS objects
-        run: git lfs pull
+      - name: clean git
+        run: git reset --hard HEAD
       - uses: olafurpg/setup-scala@v10
       - uses: olafurpg/setup-gpg@v3
       - run: sbt ci-release

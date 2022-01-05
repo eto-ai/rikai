@@ -37,7 +37,7 @@ jobs:
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
     - name: sbt install
       run: |
-        sbt publishLocal
+        git reset --hard HEAD && sbt publishLocal
     - name: Start docker-compose
       run: |
         docker-compose -f .github/docker-compose.yml up -d

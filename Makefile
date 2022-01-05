@@ -49,10 +49,10 @@ fix:
 
 # increment to the next released version and add a release tag
 release:
-	cd python && bumpversion release --tag
+	cd python && bumpversion release --tag --allow-dirty
 .PHONY: release
 
 # from a release build go to the next patch
 patch:
-	cd python && bumpversion patch
+	cd python && bumpversion patch --allow-dirty
 .PHONY: patch

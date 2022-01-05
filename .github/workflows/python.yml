@@ -54,6 +54,11 @@ jobs:
       working-directory: python
       run: |
         python -m pip install -e .[all,dev]
+
+    - name: Pip install again
+      working-directory: python
+      run: |
+        python -m pip install -e .[all,dev]
     - name: Run python tests
       working-directory: python
       run: |

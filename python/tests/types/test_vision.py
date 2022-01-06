@@ -17,15 +17,16 @@ import filecmp
 from binascii import b2a_base64
 from io import BytesIO
 from pathlib import Path
+from typing import Union
 
 import numpy as np
 import pytest
 from PIL import Image as PILImage
-from PIL import ImageDraw
+from PIL import ImageDraw as PILImageDraw
 
 from rikai.io import open_uri
 from rikai.types.geometry import Box2d
-from rikai.types.vision import Image
+from rikai.types.vision import Image, ImageDraw
 from rikai.viz import Style, Text
 
 
@@ -36,29 +37,35 @@ def test_image() -> PILImage:
     return PILImage.fromarray(rescaled)
 
 
+def assert_mimebundle(obj: Union[Image, ImageDraw], prefix):
+    mimebundle = obj.display()._repr_mimebundle_()
+    assert len(mimebundle) == 1
+    assert "text/html" in mimebundle
+    assert mimebundle["text/html"].startswith(prefix)
+
+
 def test_ipython_display(tmp_path, test_image: PILImage):
+    data_uri_prefix = '<img src="data:image;base64,'
+    box2d = Box2d(10, 10, 20, 20)
+
     # case 1: http uri
     project = "https://github.com/eto-ai/rikai"
     uri = f"{project}/raw/main/python/tests/assets/test_image.jpg"
     img1 = Image(uri)
-    mimebundle1 = img1.display()._repr_mimebundle_()
-    assert mimebundle1 == {"text/html": f'<img src="{uri}"/>'}
+    assert_mimebundle(img1, f'<img src="{uri}"/>')
+    assert_mimebundle(img1 | box2d, data_uri_prefix)
 
     # case 2: non http uri
     uri = tmp_path / "test.jpg"
     test_image.save(uri)
     img2 = Image(uri)
-    mimebundle2 = img2.display()._repr_mimebundle_()
-    assert len(mimebundle2) == 1
-    assert "text/html" in mimebundle2
-    assert mimebundle2["text/html"].startswith('<img src="data:image;base64,')
+    assert_mimebundle(img2, data_uri_prefix)
+    assert_mimebundle(img2 | box2d, data_uri_prefix)
 
     # case 3: embeded image data
     img3 = Image(Image.read(uri).data)
-    mimebundle3 = img3.display()._repr_mimebundle_()
-    assert len(mimebundle3) == 1
-    assert "text/html" in mimebundle3
-    assert mimebundle3["text/html"].startswith('<img src="data:image;base64,')
+    assert_mimebundle(img3, data_uri_prefix)
+    assert_mimebundle(img3 | box2d, data_uri_prefix)
 
 
 def test_convert_to_embedded_image(tmp_path, test_image: PILImage):
@@ -149,7 +156,6 @@ def test_show_remote_ref():
     uri = "https://octodex.github.com/images/original.png"
     img = Image(uri)
     # TODO check the actual content
-    assert img._repr_html_() == img.display()._repr_html_()
     assert img.display()._repr_html_() == IPyImage(url=uri)._repr_html_()
 
 
@@ -183,10 +189,10 @@ def test_draw_image():
     box1 = Box2d(1, 2, 10, 12)
     box2 = Box2d(20, 20, 40, 40)
     draw_boxes = img | box1 | box2
-    pil_image = draw_boxes.display()
+    pil_image = draw_boxes.to_image()
 
     expected = Image.from_array(data).to_pil().convert("RGBA")
-    draw = ImageDraw.Draw(expected)
+    draw = PILImageDraw.Draw(expected)
     draw.rectangle((1.0, 2.0, 10.0, 12.0), outline="red")
     draw.rectangle((20, 20, 40, 40), outline="red")
     assert np.array_equal(pil_image.to_numpy(), expected)
@@ -202,10 +208,10 @@ def test_draw_styled_images():
     styled_boxes = img | style(box1) | style(box2)
 
     expected = Image.from_array(data).to_pil().convert("RGBA")
-    draw = ImageDraw.Draw(expected)
+    draw = PILImageDraw.Draw(expected)
     draw.rectangle((1, 2, 10, 12), outline="yellow", width=3)
     draw.rectangle((20, 20, 40, 40), outline="yellow", width=3)
-    assert np.array_equal(styled_boxes.display().to_numpy(), expected)
+    assert np.array_equal(styled_boxes.to_image().to_numpy(), expected)
 
     # Sugar!
     sugar_boxes = (
@@ -215,20 +221,20 @@ def test_draw_styled_images():
     )
 
     sugar_expected = Image.from_array(data).to_pil().convert("RGBA")
-    draw = ImageDraw.Draw(sugar_expected)
+    draw = PILImageDraw.Draw(sugar_expected)
     draw.rectangle((1, 2, 10, 12), outline="green", width=10)
     draw.rectangle((20, 20, 40, 40), outline="green", width=10)
-    assert np.array_equal(sugar_boxes.display().to_numpy(), sugar_expected)
+    assert np.array_equal(sugar_boxes.to_image().to_numpy(), sugar_expected)
 
 
 def test_draw_list_of_boxes():
     data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
     img = Image.from_array(data)
     boxes = [Box2d(1, 2, 10, 12), Box2d(20, 20, 30, 30)]
-    pil_image = (img | boxes).display()
+    pil_image = (img | boxes).to_image()
 
     expected = Image.from_array(data).to_pil().convert("RGBA")
-    draw = ImageDraw.Draw(expected)
+    draw = PILImageDraw.Draw(expected)
     for box in boxes:
         draw.rectangle(box, outline="red")
     assert np.array_equal(pil_image.to_numpy(), expected)
@@ -239,10 +245,10 @@ def test_draw_styled_list_of_boxes():
     img = Image.from_array(data)
     boxes = [Box2d(1, 2, 10, 12), Box2d(20, 20, 30, 30)]
     style = Style(color="yellow", width=3)
-    pil_image = (img | style(boxes)).display()
+    pil_image = (img | style(boxes)).to_image()
 
     expected = Image.from_array(data).to_pil().convert("RGBA")
-    draw = ImageDraw.Draw(expected)
+    draw = PILImageDraw.Draw(expected)
     for box in boxes:
         draw.rectangle(box, outline="yellow", width=3)
     assert np.array_equal(pil_image.to_numpy(), expected)
@@ -251,10 +257,10 @@ def test_draw_styled_list_of_boxes():
 def test_draw_texts():
     data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
     img = Image.from_array(data)
-    pil_image = (img | Text("label", (10, 10))).display()
+    pil_image = (img | Text("label", (10, 10))).to_image()
 
     expected = Image.from_array(data).to_pil().convert("RGBA")
-    draw = ImageDraw.Draw(expected)
+    draw = PILImageDraw.Draw(expected)
     draw.text((10, 10), "label", fill="red")
     assert np.array_equal(pil_image.to_numpy(), expected)
 

@@ -190,23 +190,11 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
             return "Image(<embedded>)"
         return f"Image(uri={self.uri})"
 
-    def _repr_html_(self):
-        """Default visualizer for remote ref (or local ref under cwd)"""
-        return self.display()._repr_html_()
-
     def _repr_mimebundle_(self, include=None, exclude=None):
         """default visualizer for embedded mime bundle"""
         return self.display()._repr_mimebundle_(
             include=include, exclude=exclude
         )
-
-    def _repr_jpeg_(self):
-        """default visualizer for embedded jpeg"""
-        return self.display()._repr_jpeg_()
-
-    def _repr_png_(self):
-        """default visualizer for embedded png"""
-        return self.display()._repr_png_()
 
     def __eq__(self, other) -> bool:
         return isinstance(other, Image) and super().__eq__(other)
@@ -303,7 +291,7 @@ class ImageDraw(Draw):
         super().__init__()
         self.img = img.to_pil()
 
-    def display(self, **kwargs) -> "IPython.display.DisplayObject":
+    def to_image(self) -> Image:
         if not self.layers:
             raise ValueError("Can not render empty displayable draw")
 
@@ -312,6 +300,17 @@ class ImageDraw(Draw):
             layer._render(render)
         return Image.from_pil(render.image)
 
-    def _repr_png_(self):
-        """default visualizer for embedded png"""
-        return self.display()._repr_png_()
+    def display(self, **kwargs) -> "IPython.display.Image":
+        """
+        Custom visualizer for this ImageDraw in jupyter notebook
+
+        Parameters
+        ----------
+        kwargs: dict
+            Optional display arguments
+
+        Returns
+        -------
+        img: IPython.display.Image
+        """
+        return self.to_image().display(**kwargs)

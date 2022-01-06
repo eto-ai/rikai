@@ -79,6 +79,12 @@ class Draw(Displayable, ABC):
         first_layer = self.layers[0] if self.layers else "N/A"
         return f"Draw({first_layer})"
 
+    def _repr_mimebundle_(self, include=None, exclude=None):
+        """default visualizer for embedded mime bundle"""
+        return self.display()._repr_mimebundle_(
+            include=include, exclude=exclude
+        )
+
     def draw(self, layer: Union[Drawable, list[Drawable]]) -> Draw:
         # layer can not be checked against typing.Sequence or typing.Iterable,
         # because many of the Drawables are iterables (i.e., Box2d).

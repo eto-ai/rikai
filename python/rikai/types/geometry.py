@@ -562,7 +562,7 @@ class Mask(ToNumpy, ToDict, Drawable):
         )
 
     @staticmethod
-    def from_polygon(data: list[list[float]]) -> Mask:
+    def from_polygon(data: list[list[float]], height: int, width: int) -> Mask:
         """Build mask from a Polygon
 
         Parameters
@@ -570,8 +570,14 @@ class Mask(ToNumpy, ToDict, Drawable):
         data: list[list[float]]
             Multiple Polygon segmentation data. i.e.,
             ``[[x0, y0, x1, y1, ...], [x0, y0, x1, y1, ...]])``
+        height: int
+            The height of the image which the mask applies to.
+        width: int
+            The width of the image which the mask applies to.
         """
-        return Mask(data, mask_type=Mask.Type.POLYGON)
+        return Mask(
+            data, height=height, width=width, mask_type=Mask.Type.POLYGON
+        )
 
     @staticmethod
     def from_mask(mask: np.ndarray) -> Mask:
@@ -603,7 +609,6 @@ class Mask(ToNumpy, ToDict, Drawable):
             draw = ImageDraw.Draw(im)
             for polygon in self.data:
                 draw.polygon(list(np.array(polygon)), fill=1)
-            im = im.resize((self.width, self.height))
             return np.array(im)
 
     def _render(self, render, **kwargs):

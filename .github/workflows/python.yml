@@ -27,6 +27,8 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
+    - run: pip install -r requirements.txt
+
     - name: cache SBT
       uses: actions/cache@v2
       with:

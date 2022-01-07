@@ -39,7 +39,7 @@ jobs:
     - name: Pip install
       working-directory: python
       run: |
-        pip install -v -e .[all,dev]
+        pip install --upgrade --upgrade-strategy only-if-needed -e .[all,dev]
     - name: cache SBT
       uses: actions/cache@v2
       with:

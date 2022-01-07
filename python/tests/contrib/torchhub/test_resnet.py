@@ -14,13 +14,15 @@
 
 from pathlib import Path
 
-from pyspark.sql import SparkSession
 import torchvision
+from pyspark.sql import SparkSession
 
 from rikai.spark.functions import to_image
+from rikai.spark.utils import init_spark_session
 
 
-def test_resnet(spark: SparkSession):
+def test_resnet():
+    spark = init_spark_session()
     spark.udf.register("to_image", to_image)
     work_dir = Path().absolute().parent
     image_path = f"{work_dir}/python/tests/assets/test_image.jpg"
@@ -39,3 +41,4 @@ def test_resnet(spark: SparkSession):
         """
         )
         assert len(result.head().pred) == 1000
+    spark.stop()

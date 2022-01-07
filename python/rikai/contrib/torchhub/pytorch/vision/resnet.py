@@ -16,14 +16,21 @@ from typing import Any, Callable, Dict
 
 from torchvision import transforms as T
 
+from rikai.types.vision import Image
+
 """
 Adapted from https://github.com/pytorch/pytorch.github.io/blob/site/assets/hub/pytorch_vision_resnet.ipynb
 """  # noqa E501
 
 
+def _ndarray_to_pil(image):
+    return Image.from_array(image).to_pil()
+
+
 def pre_processing(options: Dict[str, Any]) -> Callable:
     return T.Compose(
         [
+            _ndarray_to_pil,
             T.Resize(256),
             T.CenterCrop(224),
             T.ToTensor(),
@@ -36,7 +43,7 @@ def post_processing(options: Dict[str, Any]) -> Callable:
     def post_process_func(batch):
         results = []
         for result in batch:
-            results.append(result.detach().cpu().numpy())
+            results.append(result.detach().cpu().tolist())
         return results
 
     return post_process_func

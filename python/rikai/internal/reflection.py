@@ -25,11 +25,15 @@ def find_class(class_name: str):
 
 
 def check_class(class_name: str):
-    module, cls = class_name.rsplit(".", 1)
+    """
+    Assuming `x.y.z.name` as class_name, check
+    if `from x.y.z import name` works
+    """
     try:
+        module, cls = class_name.rsplit(".", 1)
         mod = importlib.import_module(module)
         return hasattr(mod, cls)
-    except ModuleNotFoundError:
+    except (ModuleNotFoundError, ValueError):
         return False
 
 
@@ -43,9 +47,16 @@ def find_func(func_name: str):
 
 
 def check_func(func_name: str) -> bool:
-    module, cls, func = func_name.rsplit(".", 2)
+    """
+    Assuming `x.y.z.name` as func_name, check
+    if `from x.y import z; z.name` works
+    or `from x.y.z import name` works
+    """
     try:
+        module, cls, func = func_name.rsplit(".", 2)
         mod = importlib.import_module(module)
         return hasattr(getattr(mod, cls), func)
-    except AttributeError:
+    except (AttributeError, ValueError):
         return check_class(func_name)
+    except ModuleNotFoundError:
+        return False

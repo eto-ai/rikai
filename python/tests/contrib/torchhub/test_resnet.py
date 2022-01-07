@@ -24,7 +24,7 @@ def test_resnet(spark: SparkSession):
     spark.udf.register("to_image", to_image)
     work_dir = Path().absolute().parent
     image_path = f"{work_dir}/python/tests/assets/test_image.jpg"
-    version = f"v{torchvision.__version__}"
+    version = f"v{torchvision.__version__.split('+', maxsplit=1)[0]}"
     for n in ["18", "34", "50", "101", "152"]:
         spark.sql(
             f"""

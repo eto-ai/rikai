@@ -53,7 +53,7 @@ jobs:
     - name: Pip install
       working-directory: python
       run: |
-        python3 -m pip install -e .[all,dev]
+        pip install --upgrade-strategy only-if-needed -e .[all,dev]
     - name: Run python tests
       working-directory: python
       run: |

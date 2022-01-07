@@ -80,8 +80,8 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
   override def sqlType: DataType = StructType(
     Seq(
       StructField("type", IntegerType, nullable = false),
-      StructField("height", IntegerType, nullable = true),
-      StructField("width", IntegerType, nullable = true),
+      StructField("height", IntegerType, nullable = false),
+      StructField("width", IntegerType, nullable = false),
       StructField(
         "polygon",
         ArrayType(ArrayType(FloatType))

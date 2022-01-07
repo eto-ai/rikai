@@ -16,16 +16,16 @@ from rikai.internal.reflection import check_class, check_func
 
 
 def test_import_check():
-    proj = 'rikai.contrib.torchhub.pytorch.vision'
-    assert check_class(f'{proj}.resnet.pre_processing')
-    assert check_class(f'{proj}.resnet.post_processing')
-    assert check_func(f'{proj}.resnet.pre_processing')
-    assert check_func(f'{proj}.resnet.post_processing')
+    proj = "rikai.contrib.torchhub.pytorch.vision"
+    assert check_class(f"{proj}.resnet.pre_processing")
+    assert check_class(f"{proj}.resnet.post_processing")
+    assert check_func(f"{proj}.resnet.pre_processing")
+    assert check_func(f"{proj}.resnet.post_processing")
 
-    assert not check_class(f'{proj}.resnet34.pre_processing')
-    assert not check_class(f'{proj}.resnet34.post_processing')
-    assert check_func(f'{proj}.resnet34.pre_processing')
-    assert check_func(f'{proj}.resnet34.post_processing')
+    assert not check_class(f"{proj}.resnet34.pre_processing")
+    assert not check_class(f"{proj}.resnet34.post_processing")
+    assert check_func(f"{proj}.resnet34.pre_processing")
+    assert check_func(f"{proj}.resnet34.post_processing")
 
     assert not check_class("hello")
     assert not check_func("hello")

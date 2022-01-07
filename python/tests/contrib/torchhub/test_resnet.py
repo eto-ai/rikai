@@ -15,6 +15,7 @@
 from pathlib import Path
 
 from pyspark.sql import SparkSession
+import torchvision
 
 from rikai.spark.functions import to_image
 
@@ -28,7 +29,7 @@ def test_resnet(spark: SparkSession):
             f"""
             CREATE MODEL resnet{n}
             OPTIONS (device="cpu", batch_size=32)
-            USING "torchhub:///pytorch/vision:v0.9.1/resnet{n}";
+            USING "torchhub:///pytorch/vision:v{torchvision.__version__}/resnet{n}";
             """
         )
         result = spark.sql(

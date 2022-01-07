@@ -53,10 +53,12 @@ jobs:
     - name: Pip install
       working-directory: python
       run: |
+        PYTHONUSERBASE=/opt/hostedtoolcache/rikai/${{ matrix.python-version }} \
         python -m pip install --target=/opt/hostedtoolcache/rikai/${{ matrix.python-version }} -e .[all,dev]
     - name: Run python tests
       working-directory: python
       run: |
+        pip install pytest
         PYTHONUSERBASE=/opt/hostedtoolcache/rikai/${{ matrix.python-version }} pytest -x -v --durations=10 --ignore=tests/parquet/internal
       env:
         SPARK_LOCAL_IP: "127.0.0.1"

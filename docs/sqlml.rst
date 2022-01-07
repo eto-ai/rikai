@@ -165,8 +165,8 @@ be adopted as the `RETURNS` schema if available.
         TorchHub registry is not for production usage. It is for exploring purpose. To load a
         TorchHub model, it will first download the github repo specified by the `tag_name` and then
         download the pretrained model specified by `hubconf.py` in the downloaded repo. Please be
-        aware of the possible network latency and security vulnerability. In the meantime, the downloaded
-        repo will be imported. It might hijack the installed Python packages and mess it up.
+        aware of the possible network latency and security vulnerability. In the meantime, the
+        downloaded repo will be imported. It might hijack the installed Python packages.
 
 
 MLflow Integration

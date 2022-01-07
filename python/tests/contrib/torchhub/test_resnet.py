@@ -16,8 +16,11 @@ from pathlib import Path
 
 from pyspark.sql import SparkSession
 
+from rikai.spark.functions import to_image
+
 
 def test_resnet(spark: SparkSession):
+    spark.udf.register("to_image", to_image)
     work_dir = Path().absolute().parent
     image_path = f"{work_dir}/python/tests/assets/test_image.jpg"
     for n in ["18", "34", "50", "101", "152"]:
@@ -30,7 +33,7 @@ def test_resnet(spark: SparkSession):
         )
         result = spark.sql(
             f"""
-        select ML_PREDICT(resnet{n}, '{image_path}') as pred
+        select ML_PREDICT(resnet{n}, to_image('{image_path}')) as pred
         """
         )
         assert len(result.head().pred) == 1000

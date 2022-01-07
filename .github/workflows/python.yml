@@ -53,7 +53,7 @@ jobs:
     - name: Pip install
       working-directory: python
       run: |
-        pip -m pip install -e .[all,dev]
+        python3 -m pip install -e .[all,dev]
     - name: Run python tests
       working-directory: python
       run: |

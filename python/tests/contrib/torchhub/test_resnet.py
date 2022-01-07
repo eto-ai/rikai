@@ -24,12 +24,13 @@ def test_resnet(spark: SparkSession):
     spark.udf.register("to_image", to_image)
     work_dir = Path().absolute().parent
     image_path = f"{work_dir}/python/tests/assets/test_image.jpg"
+    version = f"v{torchvision.__version__}"
     for n in ["18", "34", "50", "101", "152"]:
         spark.sql(
             f"""
             CREATE MODEL resnet{n}
             OPTIONS (device="cpu", batch_size=32)
-            USING "torchhub:///pytorch/vision:v{torchvision.__version__}/resnet{n}";
+            USING "torchhub:///pytorch/vision:{version}/resnet{n}";
             """
         )
         result = spark.sql(

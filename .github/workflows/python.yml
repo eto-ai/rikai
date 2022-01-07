@@ -32,7 +32,14 @@ jobs:
         cache: 'pip'
     - name: Cached Pip
       run: pip install -r requirements.txt
-
+    - name: apt update and install
+      run: |
+        sudo apt update
+        sudo apt-get -y -qq install libsnappy-dev ffmpeg
+    - name: Pip install
+      working-directory: python
+      run: |
+        pip install -v -e .[all,dev]
     - name: cache SBT
       uses: actions/cache@v2
       with:
@@ -46,14 +53,6 @@ jobs:
     - name: Start docker-compose
       run: |
         docker-compose -f .github/docker-compose.yml up -d
-    - name: apt update and install
-      run: |
-        sudo apt update
-        sudo apt-get -y -qq install libsnappy-dev ffmpeg
-    - name: Pip install
-      working-directory: python
-      run: |
-        pip install --upgrade-strategy only-if-needed -e .[all,dev]
     - name: Run python tests
       working-directory: python
       run: |

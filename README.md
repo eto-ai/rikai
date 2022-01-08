@@ -13,33 +13,55 @@ Join the community:
 
 # Rikai
 
-Rikai is a [`parquet`](https://parquet.apache.org/) based ML data format built for working with
-unstructured data at scale. Processing large amounts of data for ML is never trivial, but is 
-especially true for images and videos often at the core of deep learning applications. We are
-building Rikai with two main goals:
-1. Enable ML engineers/researchers to have a seamless workflow from Feature Engineering (Spark) to 
-   Training (PyTorch/Tensorflow), from notebook to production.
-2. Enable advanced analytics capabilities to support much faster active learning, model debugging,
-   and monitoring in production pipelines.
+Rikai is a framework specifically designed for AI workflows focused around large scale unstructured datasets
+(e.g., images, videos, sensor data (future), text (future), and more).
+Through every stage of the AI modeling workflow,
+Rikai strives to offer a great developer experience when working with real-world AI datasets.
 
-Current (v0.0.11) main features:
-1. Native support in Jupyter, Scikit-learn, Spark and PyTorch for images, videos and annotations:
-   reduce ad-hoc type conversions and boilerplate when moving between ETL and training.
-2. Custom functionality for working with images and videos at scale: high-level APIs for 
-   processing, filtering, sampling, and more.
-3. Run ML-models via SQL. Forget Smart Homes, build a Smart Data Warehouse.
+The quality of an AI dataset can make or break an AI project, but tooling for AI data is sorely lacking in ergonomics.
+As a result, practitioners must spend most of their time and effort wrestling with their data instead of innovating on the models and use cases.
+Rikai alleviates the pain that AI practitioners experience on a daily basis dealing with the myriad of tedious data tasks,
+so they can focus again on model-building and problem solving.
 
-Roadmap:
-1. TensorFlow integration
-2. Versioning support built into the dataset
-3. Even richer video capabilities (ffmpeg-python integration)
-4. Declarative annotation API (think vega-lite for annotating images/videos)
+To start trying Rikai right away, checkout the [Quickstart Guide](https://rikai.readthedocs.io/en/latest/quickstart.html).
+
+## Main Features
+
+### Data format
+
+The core of Rikai is a data format ("rikai format") based on [Apache Parquet](https://parquet.apache.org/).
+Rikai augments parquet with a rich collection of semantic types design specifically for unstructured data and annotations.
+
+### Integrations
+
+Rikai comes with an extensive set of I/O connectors. For ETL, Rikai is able to consume popular formats like ROS bags and Coco.
+For analysis, it's easy to read Rikai data into pandas/spark DataFrames (Rikai handles serde for the semantic types).
+And for training, Rikai allows direct creation of Pytorch/Tensorflow datasets without manual conversion.
+
+### SQL-ML Engine
+
+Rikai extends Spark SQL with ML capability which allows users to analyze Rikai datasets using own models with SQL
+("Bring your own model")
+
+### Visualization
+
+Carefully crafted data-visualization embedded with semantic types, especially in Jupyter notebooks,
+to help you visualize and inspect your AI data without having to remember complicated raw image manipulations.
+
+## Roadmap
+1. Full TensorFlow support
+2. Improved video support
+3. Text / sensors / geospatial support
+4. Versioning support built into the dataset
+5. Better Rikai UDT-support
+6. Declarative annotation API (think vega-lite for annotating images/videos)
+7. Integrations into dbt and BI tools
 
 ## Example
 
 ```python
 from pyspark.sql import Row
-from pyspark.ml.linalg import DenseMetrix
+from pyspark.ml.linalg import DenseMatrix
 from rikai.types import Image, Box2d
 from rikai.numpy import wrap
 import numpy as np
@@ -67,9 +89,9 @@ df.write.format("rikai").save("s3://path/to/features")
 Train dataset in `Pytorch`
 
 ```python
-from rikai.torch.vision import Dataset
-from rikai.torch import DataLoader # Do not need this with Pytorch 1.8+
+from torch.utils.data import DataLoader
 from torchvision import transforms as T
+from rikai.torch.vision import Dataset
 
 transform = T.Compose([
    T.Resize(640),
@@ -79,16 +101,15 @@ transform = T.Compose([
 
 dataset = Dataset(
    "s3://path/to/features",
-   columns=["image"],
+   image_column="image",
    transform=transform
 )
 loader = DataLoader(
     dataset,
     batch_size=32,
-    shuffle=True,
     num_workers=8,
 )
-for batch in data_loader:
+for batch in loader:
     predicts = model(batch.to(cuda))
 ```
 
@@ -117,18 +138,21 @@ SELECT id, ML_PREDICT(yolo5, image) FROM my_dataset
 WHERE split = "train" LIMIT 100;
 ```
 
+For more details on the model spec, see [SQL-ML documentation](https://rikai.readthedocs.io/en/latest/sqlml.html)
+
 ## Getting Started
 
-Currently Rikai is maintained for <a name="VersionMatrix"></a>Scala 2.12 and Python 3.7 and 3.8.
+Currently Rikai is maintained for <a name="VersionMatrix"></a>Scala 2.12 and Python 3.7, 3.8, 3.9
 
 There are multiple ways to install Rikai:
 
 1. Try it using the included [Dockerfile](#Docker).
-2. OR install it via pip `pip install rikai`, with
+2. Install via pip `pip install rikai`, with
    [extras for gcp, pytorch/tf, and others](#Extras).
-3. OR install it from [source](#Source)
+3. Install from [source](#Source)
 
-Note: if you want to use Rikai with your own pyspark, please consult rikai documentation for tips.
+Note: if you want to use Rikai with your own pyspark, please consult
+[rikai documentation](https://rikai.readthedocs.io/en/latest/spark.html) for tips.
 
 ### <a name="Docker"></a>Docker
 
@@ -179,7 +203,6 @@ sbt publishLocal
 cd python
 pip install -e . # pip install -e .[all] to install all optional extras (see "Install from pypi")
 ```
-
 
 ### Utilities
 

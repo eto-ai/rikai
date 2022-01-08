@@ -3,7 +3,6 @@
 
 How to Release
 ==============
-This section is for package maintainers.
 
 Maven Jar
 ---------

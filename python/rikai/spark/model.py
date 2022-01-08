@@ -24,7 +24,7 @@ from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql import SparkSession
 from pyspark.sql.types import DataType
 
-__all__ = ["create_model", "list_models"]
+__all__ = ["create_model"]
 
 _pickler = CloudPickleSerializer()
 
@@ -39,6 +39,33 @@ def create_model(
     options: Optional[Dict] = None,
     replace_if_exist: bool = False,
 ):
+    """Create a model.
+
+    This method is equivalent to "CREATE MODEL" SQL statement.
+
+    See Rikai SQL ML reference for details
+
+    Parameters
+    ----------
+    name : str
+        Model name
+    model_uri : str or Path
+        The URI or Path to the serialized Model.
+    schema : str
+        Schema string of the return type of the models.
+    flavor : str
+        Model flavor, can be pytorch, sklearn
+    preprocessor : str or Callback
+        The module string of a preprocessor function,
+        or the post-processor function itself.
+    postprocessor : str or Callback
+        The module string of a post-processor function,
+        or the post-processor function itself.
+    options: Dict[str, str]
+        Additional runtime configuration
+    replace_if_exist : bool
+        Set to true to replace model with the same name.
+    """
     active_session = SparkSession.getActiveSession()
     assert (
         active_session is not None

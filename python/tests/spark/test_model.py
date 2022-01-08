@@ -29,9 +29,9 @@ def test_create_model(spark: SparkSession, mlflow_client: MlflowClient):
         return ToTensor()
 
     def only_scores(options: Dict[str, Any]) -> Callable:
+        # Make sure we did not actually use `rikai.contrib.torch.transforms`
         def only_score_func(batch):
-            print(batch)
-            return [0]
+            return [result["scores"].cpu().tolist() for result in batch]
 
         return only_score_func
 

@@ -16,19 +16,23 @@
 """
 
 from pathlib import Path
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, Union, Dict
 import logging
 
 from pyspark.sql import SparkSession
 from pyspark.sql.types import DataType
+
+__all__ = ["create_model", "list_models"]
 
 
 def create_model(
     name: str,
     model_uri: Union[str, Path],
     schema: Union[str, DataType],
+    flavor: Optional[str] = None,
     preprocessor: Union[str, Callable] = None,
     postprocessor: Optional[Union[str, Callable]] = None,
+    options: Optional[Dict] = None,
     replace_if_exist: Optional[bool] = False,
 ):
     active_session = SparkSession.getActiveSession()
@@ -38,6 +42,23 @@ def create_model(
     print(active_session)
 
     logging.info("Register model=%s uri=%s schema=%s", name, model_uri, schema)
+
+    if options is None:
+        options = {}
+    options = {str(k): str(v) for k, v in options.items()}
+
+    jvm = active_session._jvm
+    cmd = jvm.ai.eto.rikai.sql.spark.execution.CreateModelCommand(
+        name,
+        str(model_uri),
+        schema,
+        flavor,
+        preprocessor,
+        postprocessor,
+        replace_if_exist,
+        options,
+    )
+    cmd.run(jvm.SparkSession.getActiveSession().get())
 
 
 def list_models():

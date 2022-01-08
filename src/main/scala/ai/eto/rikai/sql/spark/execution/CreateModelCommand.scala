@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Rikai authors
+ * Copyright 2022 Rikai authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.{Row, SparkSession}
 
+import scala.collection.JavaConverters._
+
 case class CreateModelCommand(
     name: String,
     ifNotExists: Boolean,
@@ -39,6 +41,32 @@ case class CreateModelCommand(
     options: Map[String, String]
 ) extends ModelCommand
     with LazyLogging {
+
+  /** Java-flavor interface, being calling from Rikai python codebase via Py4j.
+    */
+  def this(
+      name: String,
+      uri: String,
+      returns: String,
+      flavor: String,
+      preprocessor: String,
+      postprocessor: String,
+      replace: Boolean,
+      options: java.util.Map[String, String]
+  ) {
+    this(
+      name,
+      true,
+      flavor = Option(flavor),
+      returns = Option(returns),
+      uri = Option(uri),
+      preprocessor = Option(preprocessor),
+      postprocessor = Option(postprocessor),
+      table = None,
+      replace = replace,
+      options = options.asScala.toMap
+    )
+  }
 
   @throws[ModelResolveException]
   private[spark] def asSpec: ModelSpec =

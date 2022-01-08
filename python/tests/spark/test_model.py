@@ -15,12 +15,12 @@
 
 from pyspark.sql import SparkSession
 
-from rikai.spark.model import create_model
 from rikai.contrib.torch.detections import OUTPUT_SCHEMA
+from rikai.spark.model import create_model
 
 
 def test_create_model(spark: SparkSession, resnet_model_uri):
-    print(resnet_model_uri)
-    create_model("resnet", resnet_model_uri, OUTPUT_SCHEMA)
+    print("RESNET URI: ", resnet_model_uri)
+    create_model("resnet", "file://" + str(resnet_model_uri), OUTPUT_SCHEMA)
 
     print(spark.sql("SHOW MODELS").collect())

@@ -145,7 +145,7 @@ def spark(mlflow_tracking_uri: str) -> SparkSession:
                 ),
                 ("spark.port.maxRetries", 128),
                 (
-                    "rikai.sql.ml.registry.test.impl",
+                    "spark.rikai.sql.ml.registry.test.impl",
                     "ai.eto.rikai.sql.model.testing.TestRegistry",
                 ),
                 (
@@ -169,11 +169,11 @@ def spark(mlflow_tracking_uri: str) -> SparkSession:
                 ("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem"),
                 ("spark.hadoop.fs.s3a.access.key", os.environ.get("AWS")),
                 (
-                    "rikai.sql.ml.registry.mlflow.tracking_uri",
+                    "spark.rikai.sql.ml.registry.mlflow.tracking_uri",
                     mlflow_tracking_uri,
                 ),
                 (
-                    "rikai.sql.ml.catalog.impl",
+                    "spark.rikai.sql.ml.catalog.impl",
                     "ai.eto.rikai.sql.model.SimpleCatalog",
                 ),
             ]

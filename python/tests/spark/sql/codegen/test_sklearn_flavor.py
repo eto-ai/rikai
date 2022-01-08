@@ -48,7 +48,7 @@ def test_sklearn_linear_regression(tmp_path: Path, spark: SparkSession):
         )
 
         spark.conf.set(
-            "rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri
+            "spark.rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri
         )
         spark.sql(
             f"""
@@ -97,7 +97,7 @@ def test_sklearn_random_forest(tmp_path: Path, spark: SparkSession):
         )
 
         spark.conf.set(
-            "rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri
+            "spark.rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri
         )
         spark.sql(
             f"""

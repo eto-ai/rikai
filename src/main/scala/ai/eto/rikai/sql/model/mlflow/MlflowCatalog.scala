@@ -122,7 +122,7 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
 
 object MlflowCatalog {
 
-  val TRACKING_URI_KEY = "rikai.sql.ml.registry.mlflow.tracking_uri"
+  val TRACKING_URI_KEY = "spark.rikai.sql.ml.registry.mlflow.tracking_uri"
 
   val ARTIFACT_PATH_KEY = "rikai.model.artifact_path"
   val MODEL_FLAVOR_KEY = "rikai.model.flavor"

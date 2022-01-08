@@ -29,7 +29,9 @@ class TorchHubModelSpec(ModelSpec):
             "model": {"flavor": raw_spec["flavor"], "uri": raw_spec["uri"]},
             "transforms": {
                 "pre": raw_spec.get("preprocessor", None),
+                "preCode": raw_spec.get("serializedPyPreprocessor", None),
                 "post": raw_spec.get("postprocessor", None),
+                "postCode": raw_spec.get("serializedPyPostprocessor", None),
             },
         }
 

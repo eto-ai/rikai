@@ -16,8 +16,16 @@
 
 package ai.eto.rikai.sql.model
 
-/** Model Spec is used to pass the create model information to
-  * python ModelRegistry.
+/** Model Spec is used to pass the create model information to python ModelRegistry.
+  *
+  * @param name Model name
+  * @param uri Model URI
+  * @param flavor
+  * @param schema
+  * @param options
+  * @param preprocessor
+  * @param serializedPyPreprocessor Base64-encoded and pickled python code for preprocessor
+  * @param serializedPyPostprocessor Base64-encoded and pickled python code for post-processor
   */
 case class ModelSpec(
     name: Option[String],
@@ -26,7 +34,9 @@ case class ModelSpec(
     schema: Option[String] = None,
     options: Option[Map[String, String]] = None,
     preprocessor: Option[String] = None,
-    postprocessor: Option[String] = None
+    serializedPyPreprocessor: Option[String] = None,
+    postprocessor: Option[String] = None,
+    serializedPyPostprocessor: Option[String] = None
 ) {
 
   override def toString: String =

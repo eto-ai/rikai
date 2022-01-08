@@ -15,14 +15,18 @@
 """Wraps SQL ML functionalities in Python.
 """
 
-from pathlib import Path
-from typing import Callable, Optional, Union, Dict
+import base64
 import logging
+from pathlib import Path
+from typing import Callable, Dict, Optional, Union
 
+from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql import SparkSession
 from pyspark.sql.types import DataType
 
 __all__ = ["create_model", "list_models"]
+
+_pickler = CloudPickleSerializer()
 
 
 def create_model(
@@ -33,13 +37,12 @@ def create_model(
     preprocessor: Union[str, Callable] = None,
     postprocessor: Optional[Union[str, Callable]] = None,
     options: Optional[Dict] = None,
-    replace_if_exist: Optional[bool] = False,
+    replace_if_exist: bool = False,
 ):
     active_session = SparkSession.getActiveSession()
     assert (
         active_session is not None
     ), "Must run create_model with an active SparkSession"
-    print(active_session)
 
     logging.info("Register model=%s uri=%s schema=%s", name, model_uri, schema)
 
@@ -47,14 +50,33 @@ def create_model(
         options = {}
     options = {str(k): str(v) for k, v in options.items()}
 
+    preprocessor_bytes = None
+    if isinstance(preprocessor, Callable):
+        preprocessor_bytes = base64.b64encode(
+            _pickler.dumps(preprocessor)
+        ).decode("utf-8")
+        preprocessor = None
+
+    postprocessor_bytes = None
+    if isinstance(postprocessor, Callable):
+        postprocessor_bytes = base64.b64encode(
+            _pickler.dumps(postprocessor)
+        ).decode("utf-8")
+        postprocessor = None
+
     jvm = active_session._jvm
+    jvm.ai.eto.rikai.sql.spark.parser.RikaiExtSqlParser.initRegistry(
+        jvm.SparkSession.getActiveSession().get()
+    )
     cmd = jvm.ai.eto.rikai.sql.spark.execution.CreateModelCommand(
         name,
         str(model_uri),
         schema,
         flavor,
         preprocessor,
+        preprocessor_bytes,
         postprocessor,
+        postprocessor_bytes,
         replace_if_exist,
         options,
     )

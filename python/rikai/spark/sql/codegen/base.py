@@ -15,6 +15,7 @@
 import importlib
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Optional
+import base64
 
 from jsonschema import validate, ValidationError
 from pyspark.serializers import CloudPickleSerializer
@@ -74,7 +75,9 @@ MODEL_SPEC_SCHEMA = {
             "type": "object",
             "properties": {
                 "pre": {"type": "string"},
+                "preCode": {"type": "string"},
                 "post": {"type": "string"},
+                "postCode": {"type": "string"},
             },
         },
     },
@@ -147,31 +150,53 @@ class ModelSpec(ABC):
         """Model options"""
         return self._spec["options"]
 
+    @staticmethod
+    def _deserialize_func(code: str):
+        return _pickler.loads(base64.b64decode(code))
+
     @property
     def pre_processing(self) -> Optional[Callable]:
         """Return pre-processing transform if exists"""
-        if (
-            "transforms" not in self._spec
-            or "pre" not in self._spec["transforms"]
-            or self._spec["transforms"]["pre"] is None
-        ):
-            # Passthrough
+        if "transforms" not in self._spec:
             return _identity
-        f = find_class(self._spec["transforms"]["pre"])
-        return f(self.options)
+        if (
+            "pre" in self._spec["transforms"]
+            and "preCode" in self._spec["transforms"]
+        ):
+            raise ValueError(
+                "Can only specify preprocessor class path "
+                "or just pass the code block"
+            )
+
+        f = None
+        if self._spec["transforms"].get("pre", None) is not None:
+            f = find_class(self._spec["transforms"]["pre"])
+        elif self._spec["transforms"].get("preCode", None) is not None:
+            f = self._deserialize_func(self._spec["transforms"]["preCode"])
+
+        return f(self.options) if f else _identity
 
     @property
     def post_processing(self) -> Optional[Callable]:
         """Return post-processing transform if exists"""
-        if (
-            "transforms" not in self._spec
-            or "post" not in self._spec["transforms"]
-            or self._spec["transforms"]["post"] is None
-        ):
-            # Passthrough
+        if "transforms" not in self._spec:
             return _identity
-        f = find_class(self._spec["transforms"]["post"])
-        return f(self.options)
+        if (
+            "post" in self._spec["transforms"]
+            and "postCode" in self._spec["transforms"]
+        ):
+            raise ValueError(
+                "Should only specify postprocessor class path "
+                "or just pass the code block"
+            )
+
+        f = None
+        if self._spec["transforms"].get("post", None) is not None:
+            f = find_class(self._spec["transforms"]["post"])
+        elif self._spec["transforms"].get("postCode", None) is not None:
+            f = self._deserialize_func(self._spec["transforms"]["postCode"])
+
+        return f(self.options) if f else _identity
 
 
 def udf_from_spec(spec: ModelSpec):

@@ -95,7 +95,9 @@ private[parser] class RikaiExtAstBuilder
       returns = returns,
       uri = Option(ctx.uri).map(string),
       preprocessor = preprocessor,
+      serializedPyPreprocessor = None,
       postprocessor = postprocessor,
+      serializedPyPostprocessor = None,
       table = None,
       replace = ctx.REPLACE() != null,
       options = visitOptionList(ctx.optionList())

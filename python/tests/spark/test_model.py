@@ -13,14 +13,56 @@
 #  limitations under the License.
 
 
-from pyspark.sql import SparkSession
+from typing import Dict, Any, Callable
 
-from rikai.contrib.torch.detections import OUTPUT_SCHEMA
+from mlflow.tracking import MlflowClient
+from pyspark.sql import Row, SparkSession
 from rikai.spark.model import create_model
+from rikai.types import Image
 
 
-def test_create_model(spark: SparkSession, resnet_model_uri):
-    print("RESNET URI: ", resnet_model_uri)
-    create_model("resnet", "file://" + str(resnet_model_uri), OUTPUT_SCHEMA)
+def test_create_model(spark: SparkSession, mlflow_client: MlflowClient):
+    def dynamic_preproc(options):
+        from torchvision.transforms import ToTensor
+        return ToTensor()
 
-    print(spark.sql("SHOW MODELS").collect())
+    def only_scores(options: Dict[str, Any]) -> Callable:
+        def only_score_func(batch):
+            print(batch)
+            return [0]
+        return only_score_func
+
+    create_model(
+        "vanilla",
+        "mlflow:/vanilla-mlflow-no-tags/1",
+        "array<float>",
+        flavor="pytorch",
+        preprocessor=dynamic_preproc,
+        postprocessor=only_scores,
+    )
+
+    spark.sql("SHOW MODELS").show()
+    df = spark.createDataFrame(
+        [
+            # http://cocodataset.org/#explore?id=484912
+            Row(
+                image=Image(
+                    "http://farm2.staticflickr.com/1129/"
+                    "4726871278_4dd241a03a_z.jpg"
+                )
+            ),
+            # https://cocodataset.org/#explore?id=433013
+            Row(
+                image=Image(
+                    "http://farm4.staticflickr.com/3726/"
+                    "9457732891_87c6512b62_z.jpg"
+                )
+            ),
+        ],
+    )
+    df.createOrReplaceTempView("df")
+
+    predictions = spark.sql(
+        f"SELECT ML_PREDICT(vanilla, image) as predictions FROM df"
+    )
+    predictions.show()

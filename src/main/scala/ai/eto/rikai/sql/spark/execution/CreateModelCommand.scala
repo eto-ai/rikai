@@ -35,7 +35,9 @@ case class CreateModelCommand(
     returns: Option[String],
     uri: Option[String],
     preprocessor: Option[String],
+    serializedPyPreprocessor: Option[String],
     postprocessor: Option[String],
+    serializedPyPostprocessor: Option[String],
     table: Option[TableIdentifier],
     replace: Boolean,
     options: Map[String, String]
@@ -50,7 +52,9 @@ case class CreateModelCommand(
       returns: String,
       flavor: String,
       preprocessor: String,
+      serializedPyPreprocessor: String,
       postprocessor: String,
+      serializedPostProcessor: String,
       replace: Boolean,
       options: java.util.Map[String, String]
   ) {
@@ -61,7 +65,9 @@ case class CreateModelCommand(
       returns = Option(returns),
       uri = Option(uri),
       preprocessor = Option(preprocessor),
+      serializedPyPreprocessor = Option(serializedPyPreprocessor),
       postprocessor = Option(postprocessor),
+      serializedPyPostprocessor = Option(serializedPostProcessor),
       table = None,
       replace = replace,
       options = options.asScala.toMap
@@ -72,13 +78,15 @@ case class CreateModelCommand(
   private[spark] def asSpec: ModelSpec =
     uri match {
       case Some(u) =>
-        new ModelSpec(
+        ModelSpec(
           name = Some(name),
           uri = Registry.normalize_uri(u).toString,
           flavor = flavor,
           schema = returns,
           preprocessor = preprocessor,
+          serializedPyPreprocessor = serializedPyPreprocessor,
           postprocessor = postprocessor,
+          serializedPyPostprocessor = serializedPyPostprocessor,
           options = Some(options)
         )
       case None =>

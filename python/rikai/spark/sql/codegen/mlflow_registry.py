@@ -112,16 +112,19 @@ class MlflowModelSpec(ModelSpec):
                 "uri": uri,
             },
             "transforms": {
-                "pre": conf.get(CONF_MLFLOW_PRE_PROCESSING, None),
+                "pre": conf.get(
+                    CONF_MLFLOW_PRE_PROCESSING, conf.get("preprocessor", None)
+                ),
+                "preCode": conf.get("serializedPyPreprocessor", None),
                 "post": conf.get(CONF_MLFLOW_POST_PROCESSING, None),
+                "postCode": conf.get("serializedPyPostprocessor", None),
             },
         }
 
         # remove none value of pre/post processing
-        if not spec["transforms"]["pre"]:
-            del spec["transforms"]["pre"]
-        if not spec["transforms"]["post"]:
-            del spec["transforms"]["post"]
+        spec["transforms"] = {
+            k: v for k, v in spec["transforms"].items() if v is not None
+        }
 
         # options
         for key, value in conf.items():
@@ -217,6 +220,8 @@ class MlflowRegistry(Registry):
             (CONF_MLFLOW_PRE_PROCESSING, spec.get("preprocessor", None)),
             (CONF_MLFLOW_POST_PROCESSING, spec.get("postprocessor", None)),
             (CONF_MLFLOW_OUTPUT_SCHEMA, spec["schema"]),
+            ("serializedPyPreprocessor", spec.get("serializedPyPreprocessor", None)),
+            ("serializedPyPostprocessor", spec.get("serializedPyPostprocessor", None)),
         ]
         tags = {k: v for k, v in from_spec if v}
         # PEP 448 syntax, right-to-left priority order

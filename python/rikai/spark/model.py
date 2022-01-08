@@ -82,6 +82,3 @@ def create_model(
     )
     cmd.run(jvm.SparkSession.getActiveSession().get())
 
-
-def list_models():
-    pass

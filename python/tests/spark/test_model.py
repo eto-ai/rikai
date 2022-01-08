@@ -13,10 +13,11 @@
 #  limitations under the License.
 
 
-from typing import Dict, Any, Callable
+from typing import Any, Callable, Dict
 
 from mlflow.tracking import MlflowClient
 from pyspark.sql import Row, SparkSession
+
 from rikai.spark.model import create_model
 from rikai.types import Image
 
@@ -24,12 +25,14 @@ from rikai.types import Image
 def test_create_model(spark: SparkSession, mlflow_client: MlflowClient):
     def dynamic_preproc(options):
         from torchvision.transforms import ToTensor
+
         return ToTensor()
 
     def only_scores(options: Dict[str, Any]) -> Callable:
         def only_score_func(batch):
             print(batch)
             return [0]
+
         return only_score_func
 
     create_model(

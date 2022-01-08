@@ -81,4 +81,3 @@ def create_model(
         options,
     )
     cmd.run(jvm.SparkSession.getActiveSession().get())
-

@@ -220,8 +220,14 @@ class MlflowRegistry(Registry):
             (CONF_MLFLOW_PRE_PROCESSING, spec.get("preprocessor", None)),
             (CONF_MLFLOW_POST_PROCESSING, spec.get("postprocessor", None)),
             (CONF_MLFLOW_OUTPUT_SCHEMA, spec["schema"]),
-            ("serializedPyPreprocessor", spec.get("serializedPyPreprocessor", None)),
-            ("serializedPyPostprocessor", spec.get("serializedPyPostprocessor", None)),
+            (
+                "serializedPyPreprocessor",
+                spec.get("serializedPyPreprocessor", None),
+            ),
+            (
+                "serializedPyPostprocessor",
+                spec.get("serializedPyPostprocessor", None),
+            ),
         ]
         tags = {k: v for k, v in from_spec if v}
         # PEP 448 syntax, right-to-left priority order

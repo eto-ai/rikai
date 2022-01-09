@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, Optional
+from typing import Any
 from urllib.parse import urlparse
 
 import torch
@@ -22,7 +22,7 @@ from rikai.spark.sql.codegen.base import ModelSpec, Registry, udf_from_spec
 
 
 class TorchHubModelSpec(ModelSpec):
-    def __init__(self, repo_or_dir: str, model: str, raw_spec: "ModelSpec"):
+    def __init__(self, repo_or_dir: str, model: str, raw_spec: ModelSpec):
         spec = {
             "version": "1.0",
             "schema": raw_spec["schema"],
@@ -33,6 +33,10 @@ class TorchHubModelSpec(ModelSpec):
                 "post": raw_spec.get("postprocessor", None),
                 "postCode": raw_spec.get("serializedPyPostprocessor", None),
             },
+        }
+
+        spec["transforms"] = {
+            k: v for k, v in spec["transforms"].items() if v is not None
         }
 
         self.repo_or_dir = repo_or_dir

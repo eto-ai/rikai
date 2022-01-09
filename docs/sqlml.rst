@@ -51,6 +51,7 @@ Before we can use ``Rikai SQL-ML``, we need to configure SparkSession:
     from rikai.spark.sql import init
     init(spark)
 
+
 How to Use SQL ML
 -----------------
 
@@ -58,19 +59,20 @@ Rikai extends Spark SQL with four more SQL statements:
 
     .. code-block:: sql
 
-        # Create model
+        -- Create model
         CREATE [OR REPLACE] MODEL model_name
-        {OPTIONS key1=value1,key2=value2,...}
+        [OPTIONS key1=value1,key2=value2,...]
         USING "uri";
 
-        # Describe model
+        -- Describe model
         { DESC | DESCRIBE } MODEL model_name;
 
-        # Show all models
+        -- Show all models
         SHOW MODELS;
 
-        # Delete a model
+        -- Delete a model
         DROP MODEL model_name;
+
 
 Rikai uses URL schema to decide which Model Registry to be used to resolve a
 ML Model. Once one ML model is via ``CREATE MODEL``,
@@ -106,6 +108,66 @@ the content of "s3://bucket/to/spec.yaml" can be:
     .. warning::
 
         YAML-based model spec is still under heavy development.
+
+
+TorchHub Integration
+--------------------
+Rikai supports creating models from the `TorchHub`_ registry. Here is the minimum SQL:
+
+    .. code-block:: sql
+
+        CREATE MODEL resnet50
+        USING "torchhub:///pytorch/vision:v0.9.1/resnet50";
+
+
+It could be expanded to the equivalent and complete SQL:
+
+    .. code-block:: sql
+
+        CREATE MODEL resnet50
+        FLAVOR pytorch
+        OPTIONS (device="cpu")
+        PREPROCESSOR 'rikai.contrib.torchhub.pytorch.vision.resnet50.pre_processing'
+        POSTPROCESSOR 'rikai.contrib.torchhub.pytorch.vision.resnet50.post_processing'
+        RETURNS array<float>
+        USING "torchhub:///pytorch/vision:v0.9.1/resnet50";
+
+
+Most models loaded via TorchHub should adopt the pytorch flavor. In practice, `FLAVOR pytorch`
+can be omitted. Usually, the `FLAVOR` keyword for specifying customized flavor.
+
+TorchHub URI is the only required part.
+    .. code-block:: verbatim
+
+        torchhub:///repo_owner/repo_name[:tag_name]/model_name
+
+
+In this case, here is the corresponding Python snippets to load the model:
+
+    .. code-block:: python
+
+        model = torch.hub.load('pytorch/vision:v0.9.1', 'resnet50', pretrained=True)
+
+
+Given the `repo_owner`, `repo_name` and `model_name`, here is how default PREPROCESSOR and
+POSTPROCESSOR are generated:
+
+    .. code-block:: SQL
+
+        PREPROCESSOR 'rikai.contrib.torchhub.{repo_owner}.{repo_name}.{model_name}.pre_processing'
+        POSTPROCESSOR 'rikai.contrib.torchhub.{repo_owner}.{repo_name}.{model_name}.post_processing'
+
+
+And the value of `rikai.contrib.torchhub.{repo_owner}.{repo_name}.{model_name}.OUTPUT_SCHEMA` will
+be adopted as the `RETURNS` schema if available.
+
+    .. warning::
+        TorchHub registry is not for production usage. It is for exploring purpose. To load a
+        TorchHub model, it will first download the github repo specified by the `tag_name` and then
+        download the pretrained model specified by `hubconf.py` in the downloaded repo. Please be
+        aware of the possible network latency and security vulnerability. In the meantime, the
+        downloaded repo will be imported. It might hijack the installed Python packages.
+
 
 MLflow Integration
 ------------------
@@ -178,3 +240,4 @@ you can always specify flavor, schema, and pre/post-processing classes as run ta
 
 .. _BigQuery ML: https://cloud.google.com/bigquery-ml/docs
 .. _Redshift ML: https://aws.amazon.com/redshift/features/redshift-ml/
+.. _TorchHub: https://pytorch.org/hub/

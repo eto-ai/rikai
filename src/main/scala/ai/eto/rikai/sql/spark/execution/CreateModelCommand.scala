@@ -44,7 +44,7 @@ case class CreateModelCommand(
 ) extends ModelCommand
     with LazyLogging {
 
-  /** Java-flavor interface, being calling from Rikai python codebase via Py4j.
+  /** Java-flavor interface, called from Rikai python codebase via Py4j.
     */
   def this(
       name: String,

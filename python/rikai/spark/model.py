@@ -65,6 +65,12 @@ def create_model(
         Additional runtime configuration
     replace_if_exist : bool
         Set to true to replace model with the same name.
+
+    Notes
+    -----
+    Please consider this a developer API for model transform developers.
+    End users should not use this method.
+
     """
     active_session = SparkSession.getActiveSession()
     assert (

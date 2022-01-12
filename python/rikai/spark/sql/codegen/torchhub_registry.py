@@ -17,7 +17,7 @@ from urllib.parse import urlparse
 
 import torch
 
-from rikai.internal.reflection import check_func, find_func
+from rikai.internal.reflection import find_func, has_func
 from rikai.logging import logger
 from rikai.spark.sql.codegen.base import ModelSpec, Registry, udf_from_spec
 
@@ -41,16 +41,16 @@ class TorchHubModelSpec(ModelSpec):
         schema_f = f"rikai.contrib.torchhub.{repo_proj}.{model}.OUTPUT_SCHEMA"
 
         if not spec["transforms"]["pre"]:
-            if check_func(pre_f):
+            if has_func(pre_f):
                 spec["transforms"]["pre"] = pre_f
             else:
                 del spec["transforms"]["pre"]
         if not spec["transforms"]["post"]:
-            if check_func(post_f):
+            if has_func(post_f):
                 spec["transforms"]["post"] = post_f
             else:
                 del spec["transforms"]["post"]
-        if not spec["schema"] and check_func(schema_f):
+        if not spec["schema"] and has_func(schema_f):
             spec["schema"] = find_func(schema_f)
         if not spec["model"]["flavor"]:
             spec["model"]["flavor"] = "pytorch"

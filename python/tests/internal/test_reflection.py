@@ -12,24 +12,22 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from rikai.internal.reflection import check_class, check_func
+from rikai.internal.reflection import has_func
 
 
 def test_import_check():
     proj = "rikai.contrib.torchhub.pytorch.vision"
-    assert check_class(f"{proj}.resnet.pre_processing")
-    assert check_class(f"{proj}.resnet.post_processing")
-    assert check_func(f"{proj}.resnet.pre_processing")
-    assert check_func(f"{proj}.resnet.post_processing")
+    # Check usage:
+    # from {proj} import resnet; resnet.pre_processing
+    assert has_func(f"{proj}.resnet.pre_processing")
+    assert has_func(f"{proj}.resnet.post_processing")
 
-    assert not check_class(f"{proj}.resnet34.pre_processing")
-    assert not check_class(f"{proj}.resnet34.post_processing")
-    assert check_func(f"{proj}.resnet34.pre_processing")
-    assert check_func(f"{proj}.resnet34.post_processing")
+    # Check usage:
+    # from {proj}.resnet34 import pre_processing
+    assert has_func(f"{proj}.resnet34.pre_processing")
+    assert has_func(f"{proj}.resnet34.post_processing")
 
-    assert not check_class("hello")
-    assert not check_func("hello")
-    assert not check_class("x.hello")
-    assert not check_func("x.hello")
-    assert not check_class("x.y.hello")
-    assert not check_func("x.y.hello")
+    # Negative usages
+    assert not has_func("hello")
+    assert not has_func("x.hello")
+    assert not has_func("x.y.hello")

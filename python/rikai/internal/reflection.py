@@ -24,39 +24,36 @@ def find_class(class_name: str):
     return getattr(mod, cls)
 
 
-def check_class(class_name: str):
+def has_func(func_name: str) -> bool:
     """
-    Assuming `x.y.z.name` as class_name, check
-    if `from x.y.z import name` works
-    """
-    try:
-        module, cls = class_name.rsplit(".", 1)
-        mod = importlib.import_module(module)
-        return hasattr(mod, cls)
-    except (ModuleNotFoundError, ValueError):
-        return False
-
-
-def find_func(func_name: str):
-    module, cls, func = func_name.rsplit(".", 2)
-    try:
-        mod = importlib.import_module(module)
-        return getattr(getattr(mod, cls), func)
-    except AttributeError:
-        return find_class(func_name)
-
-
-def check_func(func_name: str) -> bool:
-    """
-    Assuming `x.y.z.name` as func_name, check
-    if `from x.y import z; z.name` works
-    or `from x.y.z import name` works
+    Assuming `x.y.z.name` as func_name,
+    Check if `from x.y import z; z.name` or `from x.y.z import name` works
     """
     try:
         module, cls, func = func_name.rsplit(".", 2)
         mod = importlib.import_module(module)
         return hasattr(getattr(mod, cls), func)
     except (AttributeError, ValueError):
-        return check_class(func_name)
+        try:
+            module, cls = func_name.rsplit(".", 1)
+            mod = importlib.import_module(module)
+            return hasattr(mod, cls)
+        except (ValueError, ModuleNotFoundError):
+            return False
     except ModuleNotFoundError:
         return False
+
+
+def find_func(func_name: str):
+    """
+    Assuming `x.y.z.name` as func_name
+    Try `from x.y import z; z.name` first, and then `from x.y.z import name`
+    """
+    module, cls, func = func_name.rsplit(".", 2)
+    try:
+        mod = importlib.import_module(module)
+        return getattr(getattr(mod, cls), func)
+    except AttributeError:
+        module, cls = func_name.rsplit(".", 1)
+        mod = importlib.import_module(module)
+        return getattr(mod, cls)

@@ -69,7 +69,7 @@ abstract class PyImplRegistry extends Registry with LazyLogging {
 
 private[rikai] object Registry {
 
-  val REGISTRY_IMPL_PREFIX = "rikai.sql.ml.registry."
+  val REGISTRY_IMPL_PREFIX = "spark.rikai.sql.ml.registry."
   val REGISTRY_IMPL_SUFFIX = ".impl"
 
   /** To provide convenience when using the CREATE MODEL command we allow the user to specify
@@ -78,14 +78,14 @@ private[rikai] object Registry {
     * when `registerAll` is called so there is no guarantee that changing the value of this
     * config after cluster startup will have any impact.
     */
-  val DEFAULT_URI_ROOT_KEY = "rikai.sql.ml.registry.uri.root"
+  val DEFAULT_URI_ROOT_KEY = "spark.rikai.sql.ml.registry.uri.root"
 
   /** Automatically configure registries for file:/ and mlflow:/ model uri's.
     */
   val DEFAULT_REGISTRIES = Map(
-    "rikai.sql.ml.registry.file.impl" -> "ai.eto.rikai.sql.model.fs.FileSystemRegistry",
-    "rikai.sql.ml.registry.mlflow.impl" -> "ai.eto.rikai.sql.model.mlflow.MlflowRegistry",
-    "rikai.sql.ml.registry.torchhub.impl" -> "ai.eto.rikai.sql.model.torchhub.TorchHubRegistry"
+    "spark.rikai.sql.ml.registry.file.impl" -> "ai.eto.rikai.sql.model.fs.FileSystemRegistry",
+    "spark.rikai.sql.ml.registry.mlflow.impl" -> "ai.eto.rikai.sql.model.mlflow.MlflowRegistry",
+    "spark.rikai.sql.ml.registry.torchhub.impl" -> "ai.eto.rikai.sql.model.torchhub.TorchHubRegistry"
   )
   private val logger = Logger.getLogger(Registry.getClass)
 

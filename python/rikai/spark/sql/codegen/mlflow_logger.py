@@ -17,7 +17,7 @@ Rikai SQL ML
 import warnings
 from typing import Any, Optional
 
-CONF_MLFLOW_TRACKING_URI = "rikai.sql.ml.registry.mlflow.tracking_uri"
+CONF_MLFLOW_TRACKING_URI = "spark.rikai.sql.ml.registry.mlflow.tracking_uri"
 CONF_MLFLOW_OUTPUT_SCHEMA = "rikai.output.schema"
 CONF_MLFLOW_SPEC_VERSION = "rikai.spec.version"
 CONF_MLFLOW_PRE_PROCESSING = "rikai.transforms.pre"

@@ -127,11 +127,11 @@ def spark_with_mlflow(mlflow_client_http) -> SparkSession:
                     ),
                 ),
                 (
-                    "rikai.sql.ml.catalog.impl",
+                    "spark.rikai.sql.ml.catalog.impl",
                     "ai.eto.rikai.sql.model.mlflow.MlflowCatalog",
                 ),
                 (
-                    "rikai.sql.ml.registry.mlflow.tracking_uri",
+                    "spark.rikai.sql.ml.registry.mlflow.tracking_uri",
                     mlflow_tracking_uri,
                 ),
             ]

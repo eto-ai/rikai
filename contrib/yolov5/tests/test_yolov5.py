@@ -55,7 +55,7 @@ def test_yolov5(tmp_path: Path, spark: SparkSession):
             device = "cpu"
 
         spark.conf.set(
-            "rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri
+            "spark.rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri
         )
         work_dir = Path().absolute().parent.parent
         image_path = f"{work_dir}/python/tests/assets/test_image.jpg"

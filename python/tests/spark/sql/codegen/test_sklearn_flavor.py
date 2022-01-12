@@ -20,6 +20,7 @@ import pytest
 from pyspark.sql import Row, SparkSession
 from pyspark.sql.types import DoubleType, LongType, StructField, StructType
 from sklearn.datasets import make_classification
+from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LinearRegression
 
@@ -48,7 +49,7 @@ def test_sklearn_linear_regression(tmp_path: Path, spark: SparkSession):
         )
 
         spark.conf.set(
-            "rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri
+            "spark.rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri
         )
         spark.sql(
             f"""
@@ -97,7 +98,7 @@ def test_sklearn_random_forest(tmp_path: Path, spark: SparkSession):
         )
 
         spark.conf.set(
-            "rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri
+            "spark.rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri
         )
         spark.sql(
             f"""
@@ -122,4 +123,40 @@ def test_sklearn_random_forest(tmp_path: Path, spark: SparkSession):
         assert (
             result.collect()
             == spark.createDataFrame([Row(pred=1), Row(pred=1)]).collect()
+        )
+
+
+def test_sklearn_pca(tmp_path: Path, spark: SparkSession):
+    X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
+    model = PCA(n_components=2)
+
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
+    mlflow.set_tracking_uri(tracking_uri)
+    with mlflow.start_run():
+        model.fit(X)
+        model_name = "sklearn_pca"
+        reg_model_name = model_name
+        rikai.mlflow.sklearn.log_model(
+            model,
+            "model",
+            schema="array<float>",
+            registered_model_name=reg_model_name,
+        )
+        spark.conf.set(
+            "spark.rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri
+        )
+        spark.sql(
+            f"""
+            CREATE MODEL {model_name} USING 'mlflow:///{reg_model_name}';
+            """
+        )
+        result = spark.sql(
+            f"""
+            select ML_PREDICT({model_name}, array(3, 2)) as pred
+            """
+        )
+        result.show(1, vertical=False, truncate=False)
+        assert (
+            pytest.approx(result.head().pred) == model.transform([[3, 2]])[0]
         )

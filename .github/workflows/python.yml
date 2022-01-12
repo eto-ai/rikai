@@ -42,8 +42,8 @@ jobs:
     - name: cache pip
       uses: actions/cache@v2
       with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        path: /opt/hostedtoolcache/rikai/${{ matrix.python-version }}
+        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/setup.py') }}
         restore-keys: |
           ${{ runner.os }}-pip-
     - name: apt update and install
@@ -53,11 +53,13 @@ jobs:
     - name: Pip install
       working-directory: python
       run: |
-        python -m pip install -e .[all,dev]
+        PYTHONUSERBASE=/opt/hostedtoolcache/rikai/${{ matrix.python-version }} \
+        python -m pip install --user -e .[all,dev]
     - name: Run python tests
       working-directory: python
       run: |
-        pytest -x -v --durations=10 --ignore=tests/parquet/internal
+        pip install pytest
+        PYTHONUSERBASE=/opt/hostedtoolcache/rikai/${{ matrix.python-version }} pytest -x -v --durations=10 --ignore=tests/parquet/internal
       env:
         SPARK_LOCAL_IP: "127.0.0.1"
         TEST_MLFLOW_TRACKING_URI: "http://localhost:15000"

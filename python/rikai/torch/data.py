@@ -14,16 +14,11 @@
 
 """Pytorch Dataset and DataLoader"""
 import os
-import threading
 import uuid
-import warnings
-from concurrent.futures import as_completed, ThreadPoolExecutor
 from pathlib import Path
-from queue import Empty, Queue
-from typing import Callable, Dict, Generator, List, Optional, Union
+from typing import Callable, List, Union
 
 # Third Party
-import semver
 import torch
 from torch.utils.data import IterableDataset
 
@@ -31,7 +26,7 @@ import rikai.parquet
 
 # Rikai
 from rikai.spark.utils import df_to_rikai
-from rikai.torch.transforms import convert_tensor, RikaiToTensor
+from rikai.torch.transforms import RikaiToTensor
 
 __all__ = ["Dataset"]
 

@@ -38,7 +38,7 @@ class Dataset(rikai.torch.data.Dataset):
         URI of the dataset or the dataset as a pyspark DataFrame
     image_column : str
         The column name for the image data.
-    target_column : str or list[str]
+    target_column : str or list[str], optional
         The column(s) of the target / label.
     transform : Callable, optional
         A function/transform that takes in an :py:class:`PIL.Image.Image` and
@@ -82,16 +82,18 @@ class Dataset(rikai.torch.data.Dataset):
         self,
         uri_or_df: Union[str, Path, "pyspark.sql.DataFrame"],
         image_column: str,
-        target_column: Union[str, List[str]],
+        target_column: Optional[Union[str, List[str]]] = None,
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,
     ):
         self.image_column = image_column
-        self.target_columns = (
-            [target_column]
-            if isinstance(target_column, str)
-            else target_column
-        )
+        self.target_columns = []
+        if target_column:
+            self.target_columns = (
+                [target_column]
+                if isinstance(target_column, str)
+                else target_column
+            )
         super().__init__(
             uri_or_df,
             [self.image_column] + self.target_columns,
@@ -108,8 +110,10 @@ class Dataset(rikai.torch.data.Dataset):
 
     def __iter__(self) -> Iterator:
         for row in super().__iter__():
-            image = row[self.image_column]
+            image = self.transform(row[self.image_column])
+            if self.target_columns is None:
+                return image
             target = tuple([row[col] for col in self.target_columns])
             if len(target) == 1:
                 target = target[0]
-            yield self.transform(image), self.target_transform(target)
+            yield image, self.target_transform(target)

@@ -176,10 +176,7 @@ def spark(mlflow_tracking_uri: str) -> SparkSession:
                     "spark.rikai.sql.ml.catalog.impl",
                     "ai.eto.rikai.sql.model.SimpleCatalog",
                 ),
-                (
-                    "rikai.sql.ml.registry.torchhub.enabled",
-                    "true"
-                )
+                ("rikai.sql.ml.registry.torchhub.enabled", "true"),
             ]
         )
     )

@@ -17,7 +17,7 @@ These domain-specific types implement the following traits.
 * Optionally, :py:class:`~rikai.mixin.Asset` trait, indicates the data being stored externally,
   and can fetch the data on demand.
 
-Typically, there are convinient spark UDFs (:py:mod:`rikai.spark.functions`) provided for these types if fit.
+Typically, there are convenient spark UDFs (:py:mod:`rikai.spark.functions`) provided for these types if fit.
 
 Computer Vision
 ---------------

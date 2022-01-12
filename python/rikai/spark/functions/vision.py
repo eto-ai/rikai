@@ -244,7 +244,8 @@ video_metadata_schema = StructType(
 
 @udf(returnType=video_metadata_schema)
 def video_metadata(video: Union[str, VideoStream]) -> dict:
-    """Return useful video stream metadata about the given video
+    """Return useful video stream metadata like width, height, num_frames,
+    duration, bit_rate, frame_rate, codec, and size about the given video
 
     Parameters
     ----------
@@ -254,15 +255,8 @@ def video_metadata(video: Union[str, VideoStream]) -> dict:
     Returns
     -------
     result: dict
-        { width,
-          height,
-          num_frames,
-          duration,
-          bit_rate,
-          frame_rate,
-          codec,
-          size,
-          _errors }
+        The keys are: width, height, num_frames, duration, bit_rate,
+        frame_rate, codec, size, and _errors
 
     Notes
     -----
@@ -270,13 +264,13 @@ def video_metadata(video: Union[str, VideoStream]) -> dict:
 
     Examples
     --------
-    The following returns the fps rounded to the nearest integer
-    ```
+    The following returns the fps rounded to the nearest integer:
+
     import rikai.spark.functions as RF
     (spark.createDataFrame([(VideoStream(<uri>),)], ['video'])
-          .withColumn('meta', RF.video_metadata('video'))
-          .select('meta.data.frame_rate'))
-    ```
+    .withColumn('meta', RF.video_metadata('video'))
+    .select('meta.data.frame_rate'))
+
     """
     probe_result = _probe(video)
     if probe_result.get("_errors", None):

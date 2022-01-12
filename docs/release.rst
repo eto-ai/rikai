@@ -16,12 +16,10 @@ We release the rikai python package to `pypi`_ via :code:`.github/workflows/pyth
 
 Release Process
 ---------------
-0. Make sure top of master is green and make sure local repo is up to date
-1. Locally, run `make release`. This creates a commit that bumps the version and a tag. The explicit
-   version determines the version for python. The tag determines the jar version (via sbt dynver).
-   The tag and the python version must be aligned (should be automatic).
-2. Push the version bump commit (with the tag!) to remote: `git push origin master --tags`
-3. Wait til the version bump is green on remote.
+0. Make sure top of main is green
+1. Run the bump version for release github action. This tests the head of main again, creates a version bump
+   commit, and a commensurate tag.
+2. Wait til the version bump commit is green on GH.
 4. Via GH UI, create a new release with the new tag. This should trigger the two release workflows.
 5. Check PYPI to make sure the latest version is up. Maven Central takes a few hours to sync but
    you can check sonatype to make sure the latest version is up before that.

@@ -23,10 +23,6 @@ Adapted from https://github.com/pytorch/pytorch.github.io/blob/site/assets/hub/p
 """  # noqa E501
 
 
-def _ndarray_to_pil(image):
-    return Image.from_array(image).to_pil()
-
-
 def pre_processing(options: Dict[str, Any]) -> Callable:
     """
     All pre-trained models expect input images normalized in the same way, i.e.
@@ -37,7 +33,6 @@ def pre_processing(options: Dict[str, Any]) -> Callable:
     """
     return T.Compose(
         [
-            _ndarray_to_pil,
             T.Resize(256),
             T.CenterCrop(224),
             T.ToTensor(),

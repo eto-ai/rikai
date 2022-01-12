@@ -33,6 +33,10 @@ def spark() -> SparkSession:
                         ]
                     ),
                 ),
+                (
+                    "rikai.sql.ml.registry.torchhub.enabled",
+                    "true"
+                )
             ]
         )
     )

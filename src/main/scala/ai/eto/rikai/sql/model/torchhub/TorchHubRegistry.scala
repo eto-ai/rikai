@@ -16,11 +16,25 @@
 
 package ai.eto.rikai.sql.model.torchhub
 
-import ai.eto.rikai.sql.model.PyImplRegistry
+import ai.eto.rikai.RikaiConf
+import ai.eto.rikai.sql.model.{Model, ModelNotFoundException, ModelSpec, PyImplRegistry}
+import org.apache.spark.sql.SparkSession
 
 /** TorchHub-based Model [[Registry]].
   */
 class TorchHubRegistry(val conf: Map[String, String]) extends PyImplRegistry {
+  override def resolve(session: SparkSession, spec: ModelSpec): Model = {
+    if (RikaiConf.TORCHHUB_REG_ENABLED) {
+      super.resolve(session, spec)
+    } else {
+      throw new ModelNotFoundException(message =
+        """
+          |TorchHub Registry is disabled by default for security concerns.
+          |Be cautious and set `rikai.sql.ml.registry.torchhub.enabled` to true
+          |only for personal usage or testing purpose.
+          |""".stripMargin)
+    }
+  }
 
   override def pyClass: String =
     "rikai.spark.sql.codegen.torchhub_registry.TorchHubRegistry"

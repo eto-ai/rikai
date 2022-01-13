@@ -23,5 +23,5 @@ import ai.eto.rikai.sql.model.PyImplRegistry
 class TorchHubRegistry(val conf: Map[String, String]) extends PyImplRegistry {
 
   override def pyClass: String =
-    "rikai.spark.sql.codegen.torchhub_registry.TorchHubRegistry"
+    "rikai.experimental.torchhub.torchhub_registry.TorchHubRegistry"
 }

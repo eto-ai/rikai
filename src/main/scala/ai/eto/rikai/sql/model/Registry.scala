@@ -85,7 +85,6 @@ private[rikai] object Registry {
   val DEFAULT_REGISTRIES = Map(
     "spark.rikai.sql.ml.registry.file.impl" -> "ai.eto.rikai.sql.model.fs.FileSystemRegistry",
     "spark.rikai.sql.ml.registry.mlflow.impl" -> "ai.eto.rikai.sql.model.mlflow.MlflowRegistry",
-    "spark.rikai.sql.ml.registry.torchhub.impl" -> "ai.eto.rikai.sql.model.torchhub.TorchHubRegistry"
   )
   private val logger = Logger.getLogger(Registry.getClass)
 

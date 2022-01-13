@@ -21,12 +21,11 @@ from rikai.spark.functions import to_image
 from rikai.spark.utils import init_spark_session
 
 
-def test_resnet():
-    spark = init_spark_session()
+def test_resnet(spark: SparkSession):
     spark.udf.register("to_image", to_image)
-    work_dir = Path().absolute().parent
+    work_dir = Path().absolute().parent.parent
     image_path = f"{work_dir}/python/tests/assets/test_image.jpg"
-    version = f"v{torchvision.__version__.split('+', maxsplit=1)[0]}"
+    version = f"v0.9.1"
     for n in ["18", "34", "50", "101", "152"]:
         spark.sql(
             f"""
@@ -41,4 +40,3 @@ def test_resnet():
         """
         )
         assert len(result.head().pred) == 1000
-    spark.stop()

@@ -25,7 +25,7 @@ def test_create_model(spark: SparkSession):
     # does not work for torchhub loaded model
     spark.sql(
         f"""
-CREATE MODEL resnet50
+CREATE MODEL create_resnet50
 FLAVOR pytorch
 PREPROCESSOR 'rikai.contrib.torchhub.transforms.resnet50'
 POSTPROCESSOR 'rikai.contrib.torchhub.transforms.resnet50'

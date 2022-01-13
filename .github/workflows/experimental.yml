@@ -36,4 +36,4 @@ jobs:
           python -m pip install --use-feature=in-tree-build .[dev]
       - name: Test rikai-torchhub
         working-directory: experimental/torchhub
-        run: pytest -s -o log_cli=true
+        run: pip freeze && pytest -s -o log_cli=true

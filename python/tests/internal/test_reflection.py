@@ -26,6 +26,7 @@ def test_import_check():
     # from {proj}.resnet34 import pre_processing
     assert has_func(f"{proj}.resnet34.pre_processing")
     assert has_func(f"{proj}.resnet34.post_processing")
+    assert has_func(f"{proj}.resnet18.OUTPUT_SCHEMA")
 
     # Negative usages
     assert not has_func("hello")

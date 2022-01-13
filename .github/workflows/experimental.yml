@@ -33,7 +33,7 @@ jobs:
       - name: Install rikai-torchhub
         working-directory: experimental/torchhub
         run: |
-          python -m pip install --extra-index-url https://rospypi.github.io/simple/ --use-feature=in-tree-build .[dev]
+          python -m pip install --use-feature=in-tree-build .[dev]
       - name: Test rikai-torchhub
         working-directory: experimental/torchhub
         run: pytest

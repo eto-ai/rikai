@@ -33,7 +33,7 @@ jobs:
       - name: Install rikai-torchhub
         working-directory: experimental/torchhub
         run: |
-          python -m pip install --use-feature=in-tree-build .
+          python -m pip install --use-feature=in-tree-build .[dev]
       - name: Test rikai-torchhub
         working-directory: experimental/torchhub
         run: pytest -s -o log_cli=true

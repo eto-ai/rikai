@@ -18,7 +18,7 @@ from pyspark.sql import SparkSession
 from rikai.spark.utils import get_default_jar_version, init_spark_session
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def spark() -> SparkSession:
     rikai_version = get_default_jar_version(use_snapshot=True)
 

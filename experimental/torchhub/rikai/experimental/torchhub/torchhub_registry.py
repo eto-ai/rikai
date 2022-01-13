@@ -51,10 +51,8 @@ class TorchHubModelSpec(ModelSpec):
             else:
                 del spec["transforms"]["post"]
 
-        print(f"schema: {schema_f}\n")
         if not spec["schema"] and has_func(schema_f):
             spec["schema"] = find_func(schema_f)
-        print(f"spec schema: {find_func(schema_f)}\n")
         if not spec["model"]["flavor"]:
             spec["model"]["flavor"] = "pytorch"
 

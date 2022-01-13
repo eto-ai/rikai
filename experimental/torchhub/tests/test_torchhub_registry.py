@@ -14,10 +14,13 @@
 
 import py4j
 import pytest
+import torchvision
 from pyspark.sql import SparkSession
 
 from rikai.contrib.torch.detections import OUTPUT_SCHEMA
 
+
+version = f"v{torchvision.__version__.split('+', maxsplit=1)[0]}"
 
 def test_create_model(spark: SparkSession):
     # TODO: run ml_predict on resnet50
@@ -31,7 +34,7 @@ PREPROCESSOR 'rikai.contrib.torchhub.transforms.resnet50'
 POSTPROCESSOR 'rikai.contrib.torchhub.transforms.resnet50'
 OPTIONS (min_confidence=0.3, device="cpu", batch_size=32)
 RETURNS {OUTPUT_SCHEMA}
-USING "torchhub:///pytorch/vision:v0.9.1/resnet50";
+USING "torchhub:///pytorch/vision:{version}/resnet50";
     """
     )
     assert spark.sql("show models").count() > 0
@@ -47,7 +50,7 @@ PREPROCESSOR 'rikai.contrib.torchhub.transforms.resnet50'
 POSTPROCESSOR 'rikai.contrib.torchhub.transforms.resnet50'
 OPTIONS (min_confidence=0.3, device="cpu", batch_size=32)
 RETURNS {OUTPUT_SCHEMA}
-USING "torchhub:///pytorch/vision:v0.9.1/resnet50/bad";
+USING "torchhub:///pytorch/vision:{version}/resnet50/bad";
         """
         )
 
@@ -60,7 +63,7 @@ PREPROCESSOR 'rikai.contrib.torchhub.transforms.resnet50'
 POSTPROCESSOR 'rikai.contrib.torchhub.transforms.resnet50'
 OPTIONS (min_confidence=0.3, device="cpu", batch_size=32)
 RETURNS {OUTPUT_SCHEMA}
-USING "torchhub:///pytorch/vision:v0.9.1";
+USING "torchhub:///pytorch/vision:{version}";
         """
         )
 
@@ -76,6 +79,6 @@ PREPROCESSOR 'rikai.contrib.torchhub.transforms.resnet50'
 POSTPROCESSOR 'rikai.contrib.torchhub.transforms.resnet50'
 OPTIONS (min_confidence=0.3, device="cpu", batch_size=32)
 RETURNS {OUTPUT_SCHEMA}
-USING "torchhub://pytorch/vision:v0.9.1/model_name";
+USING "torchhub://pytorch/vision:{version}/model_name";
         """
         )

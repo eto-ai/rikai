@@ -33,7 +33,10 @@ def spark() -> SparkSession:
                         ]
                     ),
                 ),
-		("spark.rikai.sql.ml.registry.torchhub.impl", "ai.eto.rikai.sql.model.torchhub.TorchHubRegistry")
+                (
+                    "spark.rikai.sql.ml.registry.torchhub.impl",
+                    "ai.eto.rikai.sql.model.torchhub.TorchHubRegistry",
+                ),
             ]
         )
     )

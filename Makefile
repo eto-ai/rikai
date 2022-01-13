@@ -43,8 +43,8 @@ lint:
 # Fix code style
 fix:
 	sbt scalafmtAll
-	isort python contrib
-	black -l 79 python contrib
+	isort python contrib experimental
+	black -l 79 python contrib experimental
 .PHONY: fix
 
 # increment to the next released version and add a release tag

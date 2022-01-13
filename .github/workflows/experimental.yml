@@ -29,11 +29,11 @@ jobs:
       - name: Install Dependencies
         working-directory: python
         run: |
-          python -m pip install pip==21.1 && python -m pip install -q --use-feature=in-tree-build . wheel && pip freeze
+          python setup.py bdist_wheel && pip install dist/rikai-*.whl
       - name: Install rikai-torchhub
         working-directory: experimental/torchhub
         run: |
           python -m pip install --use-feature=in-tree-build .[dev]
       - name: Test rikai-torchhub
         working-directory: experimental/torchhub
-        run: pip freeze && pytest -s -o log_cli=true
+        run: pytest -s -o log_cli=true

@@ -1,4 +1,4 @@
-#  Copyright 2021 Rikai Authors
+#  Copyright 2022 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -14,11 +14,9 @@
 
 from pathlib import Path
 
-import torchvision
 from pyspark.sql import SparkSession
 
 from rikai.spark.functions import to_image
-from rikai.spark.utils import init_spark_session
 
 
 def test_resnet(spark: SparkSession):

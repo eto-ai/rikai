@@ -29,6 +29,7 @@ def test_resnet(spark: SparkSession):
             f"""
             CREATE MODEL resnet{n}
             OPTIONS (device="cpu", batch_size=32)
+            RETURNS array<float>
             USING "torchhub:///pytorch/vision:{version}/resnet{n}";
             """
         )

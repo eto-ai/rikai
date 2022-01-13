@@ -8,7 +8,7 @@ setup(
     author_email="rikai-dev@eto.ai",
     url="https://github.com/eto-ai/rikai",
     python_requires=">=3.7",
-    install_requires=["rikai > 0.0.19"],
+    install_requires=["rikai[pytorch] > 0.0.19"],
     extras_require={
         "dev": [
             "black",

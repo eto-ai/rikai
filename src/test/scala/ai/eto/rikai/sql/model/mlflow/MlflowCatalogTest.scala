@@ -30,6 +30,8 @@ class MlflowCatalogTest
     with SparkSessionWithMlflow
     with BeforeAndAfterEach {
 
+  import spark.implicits._
+
   var run: RunInfo = null
 
   override def beforeEach(): Unit = {
@@ -83,5 +85,13 @@ class MlflowCatalogTest
       )
     )
 
+    val modelsDf = spark.sql("SHOW MODELS")
+    assert(
+      modelsDf.exceptAll(Seq(
+        ("resnet", "pytorch", "mlflow://resnet", ""),
+        ("ssd", "pytorch", "mlflow://ssd", "")
+      ).toDF("name", "flavor", "uri", "options")).isEmpty
+    )
+    modelsDf.show()
   }
 }

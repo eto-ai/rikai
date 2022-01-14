@@ -132,5 +132,13 @@ class MlflowCatalogTest
         )
       )
     )
+    assert(
+      spark
+        .sql("""
+      SELECT * FROM (
+        SELECT size(ML_PREDICT(ssd, image)) as num_objects FROM images
+      ) WHERE num_objects > 0
+    """).count() == 2
+    )
   }
 }

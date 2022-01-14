@@ -36,6 +36,19 @@ class MlflowCatalogTest
 
   var run: RunInfo = null
 
+  def createModels(): Unit = {
+    val script = getClass.getResource("/create_models.py").getPath
+    Python.run(
+      Seq(
+        script,
+        "--mlflow-uri",
+        testMlflowTrackingUri,
+        "--run-id",
+        run.getRunId
+      )
+    )
+  }
+
   override def beforeEach(): Unit = {
     run = mlflowClient.client.createRun()
     super.beforeEach()
@@ -76,16 +89,7 @@ class MlflowCatalogTest
   }
 
   test("test running a model registered model") {
-    val script = getClass.getResource("/create_models.py").getPath
-    Python.run(
-      Seq(
-        script,
-        "--mlflow-uri",
-        testMlflowTrackingUri,
-        "--run-id",
-        run.getRunId
-      )
-    )
+    createModels()
 
     val modelsDf = spark.sql("SHOW MODELS")
     assert(

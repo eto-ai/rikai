@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Rikai authors
+ * Copyright 2022 Rikai authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package ai.eto.rikai.sql.model.mlflow
 
 import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.ARTIFACT_PATH_KEY
+import ai.eto.rikai.sql.spark.Python
 import org.mlflow.api.proto.ModelRegistry.{CreateModelVersion, ModelVersionTag}
 import org.mlflow.api.proto.Service.RunInfo
 import org.scalatest.BeforeAndAfterEach
@@ -68,5 +69,10 @@ class MlflowCatalogTest
 
     val models = spark.sql("SHOW MODELS")
     models.show()
+  }
+
+  test("test running a model registered model") {
+    val script = getClass.getResource("/create_models.py").getPath
+    Python.run(Seq(script))
   }
 }

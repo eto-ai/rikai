@@ -224,7 +224,8 @@ class MlflowRegistry(Registry):
 
     def get_options(self, spec, run):
         options = run.data.params
-        options.update(spec.get("options", {}))
+        if spec.get("options", {}):
+            options.update(spec.get("options"))
         return options
 
     def get_model_version(

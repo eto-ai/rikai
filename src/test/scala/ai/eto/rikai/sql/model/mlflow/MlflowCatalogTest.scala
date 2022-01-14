@@ -18,7 +18,8 @@ package ai.eto.rikai.sql.model.mlflow
 
 import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.ARTIFACT_PATH_KEY
 import ai.eto.rikai.sql.spark.Python
-import org.apache.spark.sql.rikai.Image
+import org.apache.spark.sql.rikai.{Box2dType, Image}
+import org.apache.spark.sql.types._
 import org.mlflow.api.proto.ModelRegistry.{CreateModelVersion, ModelVersionTag}
 import org.mlflow.api.proto.Service.RunInfo
 import org.scalatest.BeforeAndAfterEach
@@ -88,10 +89,14 @@ class MlflowCatalogTest
 
     val modelsDf = spark.sql("SHOW MODELS")
     assert(
-      modelsDf.exceptAll(Seq(
-        ("resnet", "pytorch", "mlflow://resnet", ""),
-        ("ssd", "pytorch", "mlflow://ssd", "")
-      ).toDF("name", "flavor", "uri", "options")).isEmpty
+      modelsDf
+        .exceptAll(
+          Seq(
+            ("resnet", "pytorch", "mlflow:/resnet", ""),
+            ("ssd", "pytorch", "mlflow:/ssd", "")
+          ).toDF("name", "flavor", "uri", "options")
+        )
+        .isEmpty
     )
     modelsDf.show()
 
@@ -105,6 +110,27 @@ class MlflowCatalogTest
       .toDF("image_id", "image")
       .createOrReplaceTempView("images")
 
-
+    val df =
+      spark.sql("SELECT image_id, ML_PREDICT(ssd, image) as det FROM images")
+    assert(
+      df.schema == StructType(
+        Seq(
+          StructField("image_id", IntegerType, nullable = false),
+          StructField(
+            "det",
+            ArrayType(
+              StructType(
+                Seq(
+                  StructField("box", Box2dType, nullable = true),
+                  StructField("score", FloatType, nullable = true),
+                  StructField("label_id", IntegerType, nullable = true)
+                )
+              )
+            ),
+            nullable = true
+          )
+        )
+      )
+    )
   }
 }

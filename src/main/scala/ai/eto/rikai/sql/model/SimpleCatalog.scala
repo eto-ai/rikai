@@ -16,11 +16,11 @@
 
 package ai.eto.rikai.sql.model
 
-import org.apache.spark.SparkConf
+import org.apache.spark.sql.SparkSession
 
 /** A Simple Catalog in memory. Used for local testing only.
   */
-class SimpleCatalog(conf: SparkConf) extends Catalog {
+class SimpleCatalog(session: SparkSession) extends Catalog {
 
   private var models: Map[String, Model] = Map.empty
 

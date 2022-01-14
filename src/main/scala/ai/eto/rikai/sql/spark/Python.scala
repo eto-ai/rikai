@@ -59,5 +59,7 @@ object Python {
     }
   }
 
-  def run(command: Seq[String]): Unit = Process(Seq(Python.pythonExec) ++ command)!!
+  def run(command: Seq[String]): Unit = Process(
+    Seq(Python.pythonExec) ++ command
+  ) !!
 }

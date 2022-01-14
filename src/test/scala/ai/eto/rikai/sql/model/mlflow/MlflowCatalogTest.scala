@@ -18,6 +18,7 @@ package ai.eto.rikai.sql.model.mlflow
 
 import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.ARTIFACT_PATH_KEY
 import ai.eto.rikai.sql.spark.Python
+import org.apache.spark.sql.rikai.Image
 import org.mlflow.api.proto.ModelRegistry.{CreateModelVersion, ModelVersionTag}
 import org.mlflow.api.proto.Service.RunInfo
 import org.scalatest.BeforeAndAfterEach
@@ -93,5 +94,17 @@ class MlflowCatalogTest
       ).toDF("name", "flavor", "uri", "options")).isEmpty
     )
     modelsDf.show()
+
+    spark
+      .createDataFrame(
+        Seq(
+          (1, new Image(getClass.getResource("/000000304150.jpg").getPath)),
+          (2, new Image(getClass.getResource("/000000419650.jpg").getPath))
+        )
+      )
+      .toDF("image_id", "image")
+      .createOrReplaceTempView("images")
+
+
   }
 }

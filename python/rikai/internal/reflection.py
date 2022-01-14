@@ -22,3 +22,38 @@ def find_class(class_name: str):
     module, cls = class_name.rsplit(".", 1)
     mod = importlib.import_module(module)
     return getattr(mod, cls)
+
+
+def has_func(func_name: str) -> bool:
+    """
+    Assuming `x.y.z.name` as func_name,
+    Check if `from x.y import z; z.name` or `from x.y.z import name` works
+    """
+    try:
+        module, cls, func = func_name.rsplit(".", 2)
+        mod = importlib.import_module(module)
+        return hasattr(getattr(mod, cls), func)
+    except (AttributeError, ValueError):
+        try:
+            module, cls = func_name.rsplit(".", 1)
+            mod = importlib.import_module(module)
+            return hasattr(mod, cls)
+        except (ValueError, ModuleNotFoundError):
+            return False
+    except ModuleNotFoundError:
+        return False
+
+
+def find_func(func_name: str):
+    """
+    Assuming `x.y.z.name` as func_name
+    Try `from x.y import z; z.name` first, and then `from x.y.z import name`
+    """
+    module, cls, func = func_name.rsplit(".", 2)
+    try:
+        mod = importlib.import_module(module)
+        return getattr(getattr(mod, cls), func)
+    except AttributeError:
+        module, cls = func_name.rsplit(".", 1)
+        mod = importlib.import_module(module)
+        return getattr(mod, cls)

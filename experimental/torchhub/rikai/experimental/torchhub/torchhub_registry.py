@@ -1,4 +1,4 @@
-#  Copyright (c) 2021 Rikai Authors
+#  Copyright (c) 2022 Rikai Authors
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -12,11 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, Optional
+from typing import Any
 from urllib.parse import urlparse
 
 import torch
 
+from rikai.internal.reflection import find_func, has_func
 from rikai.logging import logger
 from rikai.spark.sql.codegen.base import ModelSpec, Registry, udf_from_spec
 
@@ -32,6 +33,28 @@ class TorchHubModelSpec(ModelSpec):
                 "post": raw_spec.get("postprocessor", None),
             },
         }
+
+        # remove none value of pre/post processing
+        repo_proj = repo_or_dir.split(":")[0].replace("/", ".")
+        pre_f = f"rikai.contrib.torchhub.{repo_proj}.{model}.pre_processing"
+        post_f = f"rikai.contrib.torchhub.{repo_proj}.{model}.post_processing"
+        schema_f = f"rikai.contrib.torchhub.{repo_proj}.{model}.OUTPUT_SCHEMA"
+
+        if not spec["transforms"]["pre"]:
+            if has_func(pre_f):
+                spec["transforms"]["pre"] = pre_f
+            else:
+                del spec["transforms"]["pre"]
+        if not spec["transforms"]["post"]:
+            if has_func(post_f):
+                spec["transforms"]["post"] = post_f
+            else:
+                del spec["transforms"]["post"]
+
+        if not spec["schema"] and has_func(schema_f):
+            spec["schema"] = find_func(schema_f)
+        if not spec["model"]["flavor"]:
+            spec["model"]["flavor"] = "pytorch"
 
         self.repo_or_dir = repo_or_dir
         self.model = model

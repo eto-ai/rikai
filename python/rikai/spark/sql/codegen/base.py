@@ -21,7 +21,7 @@ from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql.functions import udf
 from pyspark.sql.types import BinaryType
 
-from rikai.internal.reflection import find_class
+from rikai.internal.reflection import find_class, find_func
 from rikai.logging import logger
 from rikai.spark.sql.codegen.mlflow_logger import KNOWN_FLAVORS
 from rikai.spark.sql.exceptions import SpecError
@@ -157,7 +157,7 @@ class ModelSpec(ABC):
         ):
             # Passthrough
             return _identity
-        f = find_class(self._spec["transforms"]["pre"])
+        f = find_func(self._spec["transforms"]["pre"])
         return f(self.options)
 
     @property
@@ -170,7 +170,7 @@ class ModelSpec(ABC):
         ):
             # Passthrough
             return _identity
-        f = find_class(self._spec["transforms"]["post"])
+        f = find_func(self._spec["transforms"]["post"])
         return f(self.options)
 
 

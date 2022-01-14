@@ -31,7 +31,7 @@ class DropModelCommandTest extends AnyFunSuite with SparkTestSession {
 
   def getCatalog(session: SparkSession): SimpleCatalog =
     Catalog
-      .getOrCreate(session.sparkContext.getConf)
+      .getOrCreate(session)
       .asInstanceOf[SimpleCatalog]
 
   test("test drop one model") {

@@ -36,7 +36,7 @@ trait ModelCommand extends RunnableCommand {
   ): LogicalPlan = this.asInstanceOf[LogicalPlan]
 
   def catalog(session: SparkSession): Catalog = {
-    val catalog = Catalog.getOrCreate(session.sparkContext.getConf)
+    val catalog = Catalog.getOrCreate(session)
     catalog
   }
 

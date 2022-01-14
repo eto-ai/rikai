@@ -19,8 +19,8 @@ from pyspark.sql import SparkSession
 
 from rikai.contrib.torch.detections import OUTPUT_SCHEMA
 
-
 version = f"v{torchvision.__version__.split('+', maxsplit=1)[0]}"
+
 
 def test_create_model(spark: SparkSession):
     # TODO: run ml_predict on resnet50

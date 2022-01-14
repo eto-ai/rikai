@@ -17,7 +17,7 @@
 package ai.eto.rikai.sql.model
 
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.spark.SparkConf
+import org.apache.spark.sql.SparkSession
 
 /** Catalog for SQL ML.
   */
@@ -59,20 +59,20 @@ object Catalog extends LazyLogging {
 
   /** A Catalog for local testing. */
   private[rikai] def testing: SimpleCatalog = {
-    getOrCreate(new SparkConf()).asInstanceOf[SimpleCatalog]
+    getOrCreate(SparkSession.getDefaultSession.get).asInstanceOf[SimpleCatalog]
   }
 
   private var catalog: Option[Catalog] = None
 
-  def getOrCreate(conf: SparkConf): Catalog = {
+  def getOrCreate(session: SparkSession): Catalog = {
     val className =
-      conf.get(SQL_ML_CATALOG_IMPL_KEY, SQL_ML_CATALOG_IMPL_DEFAULT)
+      session.conf.get(SQL_ML_CATALOG_IMPL_KEY, SQL_ML_CATALOG_IMPL_DEFAULT)
     if (catalog.isEmpty || catalog.get.getClass.getName != className) {
       catalog = Some(
         Class
           .forName(className)
-          .getDeclaredConstructor(classOf[SparkConf])
-          .newInstance(conf)
+          .getDeclaredConstructor(classOf[SparkSession])
+          .newInstance(session)
           .asInstanceOf[Catalog]
       )
     }

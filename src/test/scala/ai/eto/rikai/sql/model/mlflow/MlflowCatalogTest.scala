@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Rikai authors
+ * Copyright 2022 Rikai authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 package ai.eto.rikai.sql.model.mlflow
 
 import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.ARTIFACT_PATH_KEY
+import ai.eto.rikai.sql.spark.Python
+import org.apache.spark.sql.rikai.{Box2dType, Image}
+import org.apache.spark.sql.types._
 import org.mlflow.api.proto.ModelRegistry.{CreateModelVersion, ModelVersionTag}
 import org.mlflow.api.proto.Service.RunInfo
 import org.scalatest.BeforeAndAfterEach
@@ -28,6 +31,8 @@ class MlflowCatalogTest
     extends AnyFunSuite
     with SparkSessionWithMlflow
     with BeforeAndAfterEach {
+
+  import spark.implicits._
 
   var run: RunInfo = null
 
@@ -68,5 +73,72 @@ class MlflowCatalogTest
 
     val models = spark.sql("SHOW MODELS")
     models.show()
+  }
+
+  test("test running a model registered model") {
+    val script = getClass.getResource("/create_models.py").getPath
+    Python.run(
+      Seq(
+        script,
+        "--mlflow-uri",
+        testMlflowTrackingUri,
+        "--run-id",
+        run.getRunId
+      )
+    )
+
+    val modelsDf = spark.sql("SHOW MODELS")
+    assert(
+      modelsDf
+        .exceptAll(
+          Seq(
+            ("resnet", "pytorch", "mlflow:/resnet", ""),
+            ("ssd", "pytorch", "mlflow:/ssd", "")
+          ).toDF("name", "flavor", "uri", "options")
+        )
+        .isEmpty
+    )
+    modelsDf.show()
+
+    spark
+      .createDataFrame(
+        Seq(
+          (1, new Image(getClass.getResource("/000000304150.jpg").getPath)),
+          (2, new Image(getClass.getResource("/000000419650.jpg").getPath))
+        )
+      )
+      .toDF("image_id", "image")
+      .createOrReplaceTempView("images")
+
+    val df =
+      spark.sql("SELECT image_id, ML_PREDICT(ssd, image) as det FROM images")
+    assert(
+      df.schema == StructType(
+        Seq(
+          StructField("image_id", IntegerType, nullable = false),
+          StructField(
+            "det",
+            ArrayType(
+              StructType(
+                Seq(
+                  StructField("box", Box2dType, nullable = true),
+                  StructField("score", FloatType, nullable = true),
+                  StructField("label_id", IntegerType, nullable = true)
+                )
+              )
+            ),
+            nullable = true
+          )
+        )
+      )
+    )
+    assert(
+      spark
+        .sql("""
+      SELECT * FROM (
+        SELECT size(ML_PREDICT(ssd, image)) as num_objects FROM images
+      ) WHERE num_objects > 0
+    """).count() == 2
+    )
   }
 }

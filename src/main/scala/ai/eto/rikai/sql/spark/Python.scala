@@ -58,4 +58,8 @@ object Python {
       throw new RuntimeException(stderr.toString)
     }
   }
+
+  def run(command: Seq[String]): Unit = Process(
+    Seq(Python.pythonExec) ++ command
+  ) !!
 }

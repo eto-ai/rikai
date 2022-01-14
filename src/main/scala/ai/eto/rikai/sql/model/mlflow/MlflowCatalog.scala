@@ -21,16 +21,24 @@ import ai.eto.rikai.sql.model.mlflow.MlflowCatalog.{
   MODEL_FLAVOR_KEY,
   TRACKING_URI_KEY
 }
-import ai.eto.rikai.sql.model.{Catalog, Model, SparkUDFModel}
-import org.apache.spark.SparkConf
+import ai.eto.rikai.sql.model.{
+  Catalog,
+  Model,
+  ModelSpec,
+  Registry,
+  SparkUDFModel
+}
+import org.apache.spark.sql.SparkSession
 
 import scala.collection.JavaConverters._
 
 /** Use MLflow as a persisted backend for Model Catalog
   */
-class MlflowCatalog(val conf: SparkConf) extends Catalog {
+class MlflowCatalog(session: SparkSession) extends Catalog {
 
-  private val mlflowClient = new MlflowClientExt(conf.get(TRACKING_URI_KEY))
+  private val mlflowClient = new MlflowClientExt(
+    session.conf.get(TRACKING_URI_KEY)
+  )
 
   /** Create a ML Model that can be used in SQL ML in the current database.
     */
@@ -39,12 +47,7 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
       model.name,
       Map() ++ model.flavor.map(MODEL_FLAVOR_KEY -> _)
     )
-    new SparkUDFModel(
-      name,
-      s"mlflow://$name",
-      "<anonymous>",
-      model.flavor
-    )
+    getModel(name).get
   }
 
   /** Return a list of models available for all Sessions */
@@ -63,7 +66,7 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
             Some(
               new SparkUDFModel(
                 name,
-                s"mlflow://$name",
+                s"mlflow:/$name",
                 "<anonymous>",
                 flavor
               )
@@ -90,16 +93,11 @@ class MlflowCatalog(val conf: SparkConf) extends Catalog {
     * @return the model
     */
   override def getModel(name: String): Option[Model] = {
-    mlflowClient.getModel(name).map { modelVersion =>
-      val tagsMap = modelVersion.getTagsList.asScala
-        .map(t => t.getKey -> t.getValue)
-        .toMap
-      new SparkUDFModel(
-        name,
-        s"mlflow://$name",
-        "<anonymous>",
-        tagsMap.get(MODEL_FLAVOR_KEY)
-      )
+    mlflowClient.getModel(name).map { _ =>
+      // TODO: cache the SparkUDFModel in the current session memory.
+      val uri = s"mlflow:/$name"
+      val spec = ModelSpec(name = Some(name), uri = uri)
+      Registry.resolve(session, spec)
     }
   }
 

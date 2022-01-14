@@ -8,7 +8,7 @@ setup(
     author_email="rikai-dev@eto.ai",
     url="https://github.com/eto-ai/rikai",
     python_requires=">=3.7",
-    install_requires=["rikai", "torch", "torchvision"],
+    install_requires=["rikai>=0.0.20", "torch", "torchvision"],
     extras_require={
         "dev": [
             "black",

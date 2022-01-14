@@ -16,14 +16,17 @@
 
 package ai.eto.rikai.sql.model
 
-import org.scalatest.BeforeAndAfterEach
+import ai.eto.rikai.SparkTestSession
 import org.scalatest.funsuite.AnyFunSuite
 
-class CatalogTest extends AnyFunSuite with BeforeAndAfterEach {
+class CatalogTest extends AnyFunSuite with SparkTestSession {
 
   val catalog = Catalog.testing
 
-  override def beforeEach(): Unit = catalog.clear()
+  override def beforeEach(): Unit = {
+    catalog.clear()
+    super.beforeEach()
+  }
 
   test("Test simple catalog") {
     assert(!catalog.modelExists("foo"))

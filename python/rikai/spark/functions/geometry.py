@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Geometry related PySpark UDF"""
+"""Geometry related PySpark UDFs"""
 
 # Third Party
 from pyspark.sql.functions import udf

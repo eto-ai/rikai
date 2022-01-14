@@ -51,6 +51,7 @@ For more details, please read :doc:`quickstart`.
    quickstart
    types
    spark
+   functions
    sqlml
    release
    API References <./api/modules>

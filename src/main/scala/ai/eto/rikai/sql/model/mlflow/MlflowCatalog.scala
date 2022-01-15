@@ -29,6 +29,7 @@ import ai.eto.rikai.sql.model.{
   SparkUDFModel
 }
 import org.apache.spark.sql.SparkSession
+import org.mlflow.tracking.MlflowHttpException
 
 import scala.collection.JavaConverters._
 
@@ -43,11 +44,10 @@ class MlflowCatalog(session: SparkSession) extends Catalog {
   /** Create a ML Model that can be used in SQL ML in the current database.
     */
   override def createModel(model: Model): Model = {
-    val name = mlflowClient.createModel(
-      model.name,
-      Map() ++ model.flavor.map(MODEL_FLAVOR_KEY -> _)
+    throw new NotImplementedError(
+      "CREATE MODEL is not supported with MlflowRegistry yet." +
+        " Please use mlflow python API to register models."
     )
-    getModel(name).get
   }
 
   /** Return a list of models available for all Sessions */
@@ -84,7 +84,16 @@ class MlflowCatalog(session: SparkSession) extends Catalog {
     * @param name is the name of the model.
     */
   override def modelExists(name: String): Boolean = {
-    mlflowClient.getModel(name).nonEmpty
+    try {
+      mlflowClient.getModel(name).nonEmpty
+    } catch {
+      case e: MlflowHttpException => {
+        e.getStatusCode match {
+          case 404 => false
+          case _   => throw e
+        }
+      }
+    }
   }
 
   /** Get the model with a specific name.
@@ -93,11 +102,20 @@ class MlflowCatalog(session: SparkSession) extends Catalog {
     * @return the model
     */
   override def getModel(name: String): Option[Model] = {
-    mlflowClient.getModel(name).map { _ =>
-      // TODO: cache the SparkUDFModel in the current session memory.
-      val uri = s"mlflow:/$name"
-      val spec = ModelSpec(name = Some(name), uri = uri)
-      Registry.resolve(session, spec)
+    try {
+      mlflowClient.getModel(name).map { _ =>
+        // TODO: cache the SparkUDFModel in the current session memory.
+        val uri = s"mlflow:/$name"
+        val spec = ModelSpec(name = Some(name), uri = uri)
+        Registry.resolve(session, spec)
+      }
+    } catch {
+      case e: MlflowHttpException => {
+        e.getStatusCode match {
+          case 404 => None
+          case _   => throw e
+        }
+      }
     }
   }
 

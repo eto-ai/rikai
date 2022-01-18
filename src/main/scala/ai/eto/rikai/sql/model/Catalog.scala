@@ -42,7 +42,7 @@ trait Catalog {
     * @param name is a qualified name pointed to a Model.
     * @return the model
     */
-  def getModel(name: String): Option[Model]
+  def getModel(name: String, session: SparkSession): Option[Model]
 
   /** Drops a model with a specific name
     *

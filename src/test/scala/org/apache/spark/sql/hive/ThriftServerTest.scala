@@ -87,8 +87,8 @@ class ThriftServerTest
       }
     } finally {
       super.afterAll()
-//      SessionState.detachSession()
-//      Hive.closeCurrent()
+      SessionState.detachSession()
+      Hive.closeCurrent()
     }
   }
 
@@ -116,7 +116,7 @@ class ThriftServerTest
     createModels()
     val imageUri = getClass.getResource("/000000304150.jpg").getPath
 
-    spark
+    val df = spark
       .createDataFrame(
         Seq(
           (1, new Image(getClass.getResource("/000000304150.jpg").getPath)),
@@ -124,18 +124,26 @@ class ThriftServerTest
         )
       )
       .toDF("image_id", "image")
-      .createOrReplaceTempView("images")
+    df.write.saveAsTable("images")
+//    df.write.mode("overwrite").saveAsTable("images")
 
     spark.sql("SHOW MODELS").show()
-    println(s"This spark session: ${spark}")
-    spark.sql(s"SELECT ML_PREDICT(ssd, image) FROM images")
-//    withJdbcStatement(stmt => {
-//      val rs = stmt.executeQuery(
-//        s"SELECT ML_PREDICT(ssd, '${imageUri}')"
-//      )
-//      assert(rs.next())
-//      assert(rs.getString(1) == "ssd")
-//    })
+
+    withJdbcStatement(stmt => {
+      val rs = stmt.executeQuery(
+        s"SELECT ML_PREDICT(ssd, image) FROM images"
+      )
+      assert(rs.next())
+    })
+
+    withJdbcStatement(stmt => {
+      val rs = stmt.executeQuery(
+        s"SELECT ML_PREDICT(resnet, image) FROM images"
+      )
+      assert(rs.next())
+    })
+
+    spark.sql("DROP TABLE images")
   }
 
 }

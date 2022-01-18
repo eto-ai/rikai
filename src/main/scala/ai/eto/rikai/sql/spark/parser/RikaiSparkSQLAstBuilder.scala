@@ -42,8 +42,8 @@ private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
   override def visitFunctionCall(ctx: FunctionCallContext): Expression =
     withOrigin(ctx) {
       ctx.functionName.getText.toLowerCase(Locale.ROOT) match {
-        case Predict.name => visitMlPredictFunction(ctx)
-        case _            => super.visitFunctionCall(ctx)
+//        case Predict.name => visitMlPredictFunction(ctx)
+        case _ => super.visitFunctionCall(ctx)
       }
     }
 
@@ -61,7 +61,7 @@ private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
 
       val model_name = arguments.head
       val model = model_name match {
-        case arg: UnresolvedAttribute => catalog.getModel(arg.name)
+        case arg: UnresolvedAttribute => catalog.getModel(arg.name, session)
         case arg: Literal => {
           println(s"Take this literally: ${model_name}")
           val model =

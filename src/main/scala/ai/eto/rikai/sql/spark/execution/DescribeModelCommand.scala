@@ -25,7 +25,7 @@ case class DescribeModelCommand(name: String) extends ModelCommand {
   override val output: Seq[Attribute] = ModelCommand.output
 
   override def run(session: SparkSession): Seq[Row] = {
-    catalog(session).getModel(name) match {
+    catalog(session).getModel(name, session) match {
       case Some(model) =>
         Seq(
           Row(

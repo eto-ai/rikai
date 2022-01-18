@@ -29,7 +29,7 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
       .count()
     assert(Catalog.testing.modelExists("model_created"))
 
-    val model = Catalog.testing.getModel("model_created").get
+    val model = Catalog.testing.getModel("model_created", spark).get
     assert(model.name == "model_created")
     assert(model.spec_uri == "test://model/created/from/uri")
     assert(model.options.isEmpty)
@@ -43,7 +43,7 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
           "USING 'test://foo/options'"
       )
       .count()
-    val model = Catalog.testing.getModel("qualified_opt").get
+    val model = Catalog.testing.getModel("qualified_opt", spark).get
     assert(
       model.options == Seq(
         "foo" -> "bar",
@@ -80,12 +80,12 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
     spark.sql(
       "CREATE OR REPLACE MODEL replace_model USING 'test://model/to_be_replaced'"
     )
-    val to_be_replaced = Catalog.testing.getModel("replace_model").get
+    val to_be_replaced = Catalog.testing.getModel("replace_model", spark).get
     assert(to_be_replaced.spec_uri == "test://model/to_be_replaced")
     spark.sql(
       "CREATE OR REPLACE MODEL replace_model USING 'test://model/replaced'"
     )
-    val replaced = Catalog.testing.getModel("replace_model").get
+    val replaced = Catalog.testing.getModel("replace_model", spark).get
     assert(replaced.spec_uri == "test://model/replaced")
   }
 
@@ -95,7 +95,7 @@ class CreateModelCommandTest extends AnyFunSuite with SparkTestSession {
         "FLAVOR tensorflow " +
         "USING 'test://model/tfmodel'"
     )
-    val model = Catalog.testing.getModel("tfmodel").get
+    val model = Catalog.testing.getModel("tfmodel", spark).get
     assert(model.flavor.isDefined)
     assert(model.flavor.contains("tensorflow"))
   }

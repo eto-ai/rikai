@@ -52,7 +52,7 @@ class SimpleCatalog(session: SparkSession) extends Catalog {
     * @param name is a qualified name pointed to a Model.
     * @return the model
     */
-  override def getModel(name: String): Option[Model] =
+  override def getModel(name: String, session: SparkSession): Option[Model] =
     synchronized {
       models get name
     }

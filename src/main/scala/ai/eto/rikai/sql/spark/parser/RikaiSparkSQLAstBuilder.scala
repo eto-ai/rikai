@@ -63,10 +63,11 @@ private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
       val model = model_name match {
         case arg: UnresolvedAttribute => catalog.getModel(arg.name)
         case arg: Literal => {
+          println(s"Take this literally: ${model_name}")
           val model =
             Registry.resolve(
               session,
-              new ModelSpec(name = None, uri = arg.toString)
+              ModelSpec(name = None, uri = arg.toString)
             )
           Some(model)
         }
@@ -76,9 +77,17 @@ private[parser] class RikaiSparkSQLAstBuilder(session: SparkSession)
             ctx
           )
       }
+      println(
+        s"Resolved model ${model}"
+      )
 
       model match {
-        case Some(r: SparkRunnable) => r.asSpark(arguments.drop(1))
+        case Some(r: SparkRunnable) => {
+          println(
+            s"Final model: ${r.asSpark(arguments.drop(1))}, name=${arguments}"
+          )
+          r.asSpark(arguments.drop(1))
+        }
         case None =>
           throw new ParseException(
             s"Model ${arguments.head} does not exist",

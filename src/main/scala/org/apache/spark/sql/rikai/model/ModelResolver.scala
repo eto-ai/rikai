@@ -66,6 +66,7 @@ object ModelResolver {
         evalType,
         udfDeterministic = true
       )
+    println(s"Registered function: ${funcName} ${session}")
     session.udf.registerPython(funcName, udf)
   }
 
@@ -106,8 +107,8 @@ object ModelResolver {
 
       val dataTypeJson = Files.readAllLines(dataTypePath).asScala.mkString("\n")
       val returnType = DataType.fromJson(dataTypeJson)
-      val suffix = Random.alphanumeric.take(6)
-      val udfName = s"${spec.name}_${suffix}"
+      val suffix: String = Random.alphanumeric.take(6).mkString
+      val udfName = s"${spec.name.getOrElse("model")}_${suffix}"
       val preUdfName = s"${udfName}_pre"
       val postUdfName = s"${udfName}_post"
       registerUdf(

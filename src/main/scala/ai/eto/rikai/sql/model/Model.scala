@@ -123,9 +123,9 @@ class SparkUDFModel(
       isDistinct = false
     )
     postFuncName match {
-      case Some(name) =>
+      case Some(n: String) =>
         UnresolvedFunction(
-          new FunctionIdentifier(name),
+          new FunctionIdentifier(n),
           Seq(sparkFunc),
           isDistinct = false
         )

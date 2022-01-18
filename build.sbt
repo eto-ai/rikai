@@ -52,7 +52,8 @@ scmInfo := Some(
 )
 
 libraryDependencies ++= {
-  val sparkVersion = if (scalaVersion.value.compareTo("2.12.15") >= 0)  "3.2.0" else "3.1.2"
+  val sparkVersion =
+    if (scalaVersion.value.compareTo("2.12.15") >= 0) "3.2.0" else "3.1.2"
   val awsVersion = "2.15.69"
   val log4jVersion = "2.17.1"
   val scalaLoggingVersion = "3.9.4"
@@ -64,14 +65,17 @@ libraryDependencies ++= {
 
   Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided,
-    "com.thoughtworks.enableIf" %% "enableif" % enableifVersion exclude(
+    "com.thoughtworks.enableIf" %% "enableif" % enableifVersion exclude (
       "org.scala-lang", "scala-reflect"
     ),
     "org.apache.spark" %% "spark-sql" % sparkVersion % Provided,
+    "org.apache.spark" %% "spark-core" % sparkVersion % Test classifier "tests",
+    "org.apache.spark" %% "spark-hive-thriftserver" % sparkVersion % Test,
+    "org.apache.spark" %% "spark-hive-thriftserver" % sparkVersion % Test classifier "tests",
     "software.amazon.awssdk" % "s3" % awsVersion % Provided,
     "org.xerial.snappy" % "snappy-java" % snappyVersion,
     "org.apache.logging.log4j" % "log4j-core" % log4jVersion % Runtime,
-    "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion exclude(
+    "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion exclude (
       "org.scala-lang", "scala-reflect"
     ),
     "org.scalatest" %% "scalatest-funsuite" % scalatestVersion % Test,
@@ -88,7 +92,9 @@ libraryDependencies ++= {
     Nil
   } else {
     Seq(
-      compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full)
+      compilerPlugin(
+        "org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full
+      )
     )
   }
 }

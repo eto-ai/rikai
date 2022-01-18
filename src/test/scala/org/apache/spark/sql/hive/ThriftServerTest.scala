@@ -16,14 +16,15 @@
 
 package org.apache.spark.sql.hive
 
-import ai.eto.rikai.SparkTestSession
+import ai.eto.rikai.sql.model.mlflow.SparkSessionWithMlflow
+import ai.eto.rikai.sql.spark.Python
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.hadoop.hive.conf.HiveConf.ConfVars
 import org.apache.hadoop.hive.ql.metadata.Hive
 import org.apache.hadoop.hive.ql.session.SessionState
 import org.apache.hive.service.cli.thrift.ThriftCLIService
 import org.apache.spark.sql.hive.thriftserver.{HiveThriftServer2, ServerMode}
-import org.apache.spark.sql.rikai.Image
+import org.mlflow.api.proto.Service.RunInfo
 import org.scalatest.concurrent.Eventually.eventually
 import org.scalatest.concurrent.Waiters.{interval, timeout}
 import org.scalatest.funsuite.AnyFunSuite
@@ -35,12 +36,25 @@ import scala.concurrent.duration.DurationInt
 /** Test running Rikai with ThriftServer (HiveServer2) over JDBC connection. */
 class ThriftServerTest
     extends AnyFunSuite
-    with SparkTestSession
+    with SparkSessionWithMlflow
     with LazyLogging {
 
   /** Manage a HiveServer with Rikai SparkExtension. */
   private var hiveServer: HiveThriftServer2 = _
   private var serverPort: Int = _
+
+  def createModels(): Unit = {
+    val script = getClass.getResource("/create_models.py").getPath
+    Python.run(
+      Seq(
+        script,
+        "--mlflow-uri",
+        testMlflowTrackingUri,
+        "--run-id",
+        run.getRunId
+      )
+    )
+  }
 
   override def beforeAll() {
     super.beforeAll()
@@ -98,24 +112,17 @@ class ThriftServerTest
     }
   }
 
-  test("test mlpredict over hiveserver") {
-    spark
-      .createDataFrame(
-        Seq(
-          (1, new Image(getClass.getResource("/000000304150.jpg").getPath)),
-          (2, new Image(getClass.getResource("/000000419650.jpg").getPath))
-        )
-      )
-      .toDF("image_id", "image")
-      .createOrReplaceTempView("images")
-
+  test("test ML_PREDICT on HiveServer2") {
+    createModels()
     val imageUri = getClass.getResource("/000000304150.jpg").getPath
+
+    spark.sql("SHOW MODELS").show()
     withJdbcStatement(stmt => {
       val rs = stmt.executeQuery(
-        s"SELECT '${imageUri}'"
+        s"SELECT ML_PREDICT(ssd, '${imageUri}')"
       )
       assert(rs.next())
-      assert(rs.getString(1) == imageUri)
+      assert(rs.getString(1) == "ssd")
     })
   }
 

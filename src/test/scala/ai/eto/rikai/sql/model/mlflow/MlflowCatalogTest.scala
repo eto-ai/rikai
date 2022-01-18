@@ -21,7 +21,6 @@ import ai.eto.rikai.sql.spark.Python
 import org.apache.spark.sql.rikai.{Box2dType, Image}
 import org.apache.spark.sql.types._
 import org.mlflow.api.proto.ModelRegistry.{CreateModelVersion, ModelVersionTag}
-import org.mlflow.api.proto.Service.RunInfo
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -34,8 +33,6 @@ class MlflowCatalogTest
 
   import spark.implicits._
 
-  var run: RunInfo = null
-
   def createModels(): Unit = {
     val script = getClass.getResource("/create_models.py").getPath
     Python.run(
@@ -47,17 +44,6 @@ class MlflowCatalogTest
         run.getRunId
       )
     )
-  }
-
-  override def beforeEach(): Unit = {
-    run = mlflowClient.client.createRun()
-    super.beforeEach()
-  }
-
-  override def afterEach(): Unit = {
-    mlflowClient.client.deleteRun(run.getRunId)
-    clearModels()
-    super.afterEach()
   }
 
   test("test list registered models") {

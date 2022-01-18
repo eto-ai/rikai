@@ -18,7 +18,13 @@ import ai.eto.rikai.sql.spark.expressions.Predict
 import ai.eto.rikai.sql.spark.parser.{RikaiExtSqlParser, RikaiSparkSQLParser}
 import org.apache.spark.sql.SparkSessionExtensions
 import org.apache.spark.sql.catalyst.FunctionIdentifier
-import org.apache.spark.sql.catalyst.expressions.{Expression, ExpressionInfo}
+import org.apache.spark.sql.catalyst.expressions.{
+  Attribute,
+  Expression,
+  ExpressionInfo
+}
+import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
+import org.apache.spark.sql.catalyst.rules.Rule
 import org.apache.spark.sql.rikai.expressions.{Area, IOU}
 
 /** Rikai SparkSession extensions to enable Spark SQL ML.
@@ -49,6 +55,23 @@ class RikaiSparkSessionExtensions extends (SparkSessionExtensions => Unit) {
       new ExpressionInfo("org.apache.spark.sql.rikai.expressions", "IOU"),
       (exprs: Seq[Expression]) => IOU(exprs.head, exprs(1))
     )
+
+    extensions.injectCheckRule(session => {
+      println(s"Check rule: ${session}")
+      _ => Unit
+    })
+
+    object Dummy extends Rule[LogicalPlan] {
+      override def apply(plan: LogicalPlan): LogicalPlan = {
+        println(s"Apply dummy plan: ${plan}")
+        plan
+      }
+    }
+
+    extensions.injectResolutionRule(session => {
+      println(s"Inject Dummy: session: ${session}");
+      Dummy
+    })
 
   }
 }

@@ -24,7 +24,7 @@ import org.apache.hadoop.hive.ql.metadata.Hive
 import org.apache.hadoop.hive.ql.session.SessionState
 import org.apache.hive.service.cli.thrift.ThriftCLIService
 import org.apache.spark.sql.hive.thriftserver.{HiveThriftServer2, ServerMode}
-import org.mlflow.api.proto.Service.RunInfo
+import org.apache.spark.sql.rikai.Image
 import org.scalatest.concurrent.Eventually.eventually
 import org.scalatest.concurrent.Waiters.{interval, timeout}
 import org.scalatest.funsuite.AnyFunSuite
@@ -87,8 +87,8 @@ class ThriftServerTest
       }
     } finally {
       super.afterAll()
-      SessionState.detachSession()
-      Hive.closeCurrent()
+//      SessionState.detachSession()
+//      Hive.closeCurrent()
     }
   }
 
@@ -116,14 +116,26 @@ class ThriftServerTest
     createModels()
     val imageUri = getClass.getResource("/000000304150.jpg").getPath
 
-    spark.sql("SHOW MODELS").show()
-    withJdbcStatement(stmt => {
-      val rs = stmt.executeQuery(
-        s"SELECT ML_PREDICT(ssd, '${imageUri}')"
+    spark
+      .createDataFrame(
+        Seq(
+          (1, new Image(getClass.getResource("/000000304150.jpg").getPath)),
+          (2, new Image(getClass.getResource("/000000419650.jpg").getPath))
+        )
       )
-      assert(rs.next())
-      assert(rs.getString(1) == "ssd")
-    })
+      .toDF("image_id", "image")
+      .createOrReplaceTempView("images")
+
+    spark.sql("SHOW MODELS").show()
+    println(s"This spark session: ${spark}")
+    spark.sql(s"SELECT ML_PREDICT(ssd, image) FROM images")
+//    withJdbcStatement(stmt => {
+//      val rs = stmt.executeQuery(
+//        s"SELECT ML_PREDICT(ssd, '${imageUri}')"
+//      )
+//      assert(rs.next())
+//      assert(rs.getString(1) == "ssd")
+//    })
   }
 
 }

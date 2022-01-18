@@ -41,6 +41,8 @@ class MlflowCatalog(session: SparkSession) extends Catalog {
     session.conf.get(TRACKING_URI_KEY)
   )
 
+  private var cachedModel: Map[String, Model] = Map.empty
+
   /** Create a ML Model that can be used in SQL ML in the current database.
     */
   override def createModel(model: Model): Model = {
@@ -103,14 +105,17 @@ class MlflowCatalog(session: SparkSession) extends Catalog {
     */
   override def getModel(name: String): Option[Model] = {
     try {
-      mlflowClient.getModel(name).map { _ =>
-        // TODO: cache the SparkUDFModel in the current session memory.
-        val uri = s"mlflow:/$name"
-        val spec = ModelSpec(name = Some(name), uri = uri)
-        val model = Registry.resolve(session, spec)
-        println(s"Resolving model: ${name} with ${spec}, got ${model}")
-        model
+      if (!cachedModel.contains(name)) {
+        mlflowClient.getModel(name).foreach { _ =>
+          // TODO: cache the SparkUDFModel in the current session memory.
+          val uri = s"mlflow:/$name"
+          val spec = ModelSpec(name = Some(name), uri = uri)
+          val model = Registry.resolve(session, spec)
+          println(s"Resolving model: ${name} with ${spec}, got ${model}")
+          cachedModel += (name -> model)
+        }
       }
+      cachedModel.get(name)
     } catch {
       case e: MlflowHttpException => {
         e.getStatusCode match {

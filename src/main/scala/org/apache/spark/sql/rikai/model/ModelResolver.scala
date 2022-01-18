@@ -66,7 +66,6 @@ object ModelResolver {
         evalType,
         udfDeterministic = true
       )
-    println(s"Registered function: ${funcName} ${session}")
     session.udf.registerPython(funcName, udf)
   }
 

@@ -28,6 +28,8 @@ class RikaiSparkSQLParserTest extends AnyFunSuite with SparkTestSession {
   df.createOrReplaceTempView("df")
 
   test("Test parse ML_PREDICT expression") {
+    cancel("TODO: temporarily disabled")
+
     spark.udf.register("foo", (s: Int) => s + 2)
 
     val scores =

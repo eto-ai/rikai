@@ -55,8 +55,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
     __UDT__ = ImageType()
 
     def __init__(
-        self,
-        image: Union[bytes, bytearray, IOBase, str, Path],
+        self, image: Union[bytes, bytearray, IOBase, str, Path], width, height
     ):
         data, uri = None, None
         if isinstance(image, IOBase):
@@ -65,6 +64,8 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
             data = image
         else:
             uri = image
+        self.width = width
+        self.height = height
         super().__init__(data=data, uri=uri)
 
     @classmethod
@@ -140,11 +141,12 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
         """  # noqa: E501
 
         format = format if format else options.rikai.image.default.format
+        (width, height) = img.size
 
         if uri is None:
             buf = BytesIO()
             img.save(buf, format=format, **kwargs)
-            return Image(buf.getvalue())
+            return Image(buf.getvalue(), width, height)
 
         parsed = urlparse(normalize_uri(uri))
         if parsed.scheme == "file":
@@ -154,7 +156,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
                 img.save(fobj, format=format, **kwargs)
                 fobj.flush()
                 copy(fobj.name, uri)
-        return Image(uri)
+        return Image(uri, width, height)
 
     def display(self, **kwargs):
         """
@@ -183,7 +185,8 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
                 return Image(url=url, format=inferred_format)
 
     def draw(self, drawable: Union[Drawable, list[Drawable]]) -> Draw:
-        return ImageDraw(self).draw(drawable)
+        # TODO get height/width of image draw
+        return ImageDraw(self).draw(drawable, self.height, self.width)
 
     def __repr__(self) -> str:
         if self.is_embedded:
@@ -288,7 +291,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
 
 class ImageDraw(Draw):
     def __init__(self, img: Image):
-        super().__init__()
+        super().__init__(img.width, img.height)
         self.img = img.to_pil()
 
     def to_image(self) -> Image:
@@ -297,6 +300,7 @@ class ImageDraw(Draw):
 
         render = PILRenderer(self.img)
         for layer in self.layers:
+            # TODO add option
             layer._render(render)
         return Image.from_pil(render.image)
 

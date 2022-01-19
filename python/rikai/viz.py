@@ -72,8 +72,10 @@ class Style(Drawable):
 class Draw(Displayable, ABC):
     """Draw is a container that contain the elements for visualized lazily."""
 
-    def __init__(self):
+    def __init__(self, canvas_width, canvas_height):
         self.layers = []
+        self.canvas_width = canvas_width
+        self.canvas_height = canvas_height
 
     def __repr__(self):
         first_layer = self.layers[0] if self.layers else "N/A"
@@ -85,7 +87,12 @@ class Draw(Displayable, ABC):
             include=include, exclude=exclude
         )
 
-    def draw(self, layer: Union[Drawable, list[Drawable]]) -> Draw:
+    def draw(
+        self,
+        layer: Union[Drawable, list[Drawable]],
+        canvas_width,
+        canvas_height,
+    ) -> Draw:
         # layer can not be checked against typing.Sequence or typing.Iterable,
         # because many of the Drawables are iterables (i.e., Box2d).
         if isinstance(layer, Drawable):
@@ -98,7 +105,7 @@ class Draw(Displayable, ABC):
         return self
 
     def __or__(self, other: Union[Drawable, list[Drawable]]) -> Draw:
-        return self.draw(other)
+        return self.draw(other, self.canvas_width, self.canvas_height)
 
 
 class Renderer(ABC):

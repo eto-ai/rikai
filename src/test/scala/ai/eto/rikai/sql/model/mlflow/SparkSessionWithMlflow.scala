@@ -71,6 +71,7 @@ trait SparkSessionWithMlflow
   override def afterEach(): Unit = {
     mlflowClient.client.deleteRun(run.getRunId)
     clearModels()
+    dropTables()
     super.afterEach()
   }
 
@@ -81,6 +82,13 @@ trait SparkSessionWithMlflow
       .asScala
       //The MLFlow client does not support delete a model
       .foreach(m => mlflowClient.deleteModel(m.getName))
+  }
+
+  private def dropTables(): Unit = {
+    spark.catalog
+      .listTables()
+      .collect()
+      .foreach(t => spark.sql(s"DROP TABLE ${t.name}"))
   }
 
   override protected def afterAll(): Unit = {

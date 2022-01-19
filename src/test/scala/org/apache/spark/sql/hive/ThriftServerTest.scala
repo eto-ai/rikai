@@ -114,8 +114,6 @@ class ThriftServerTest
 
   test("test ML_PREDICT on HiveServer2") {
     createModels()
-    val imageUri = getClass.getResource("/000000304150.jpg").getPath
-
     val df = spark
       .createDataFrame(
         Seq(
@@ -125,7 +123,6 @@ class ThriftServerTest
       )
       .toDF("image_id", "image")
     df.write.saveAsTable("images")
-//    df.write.mode("overwrite").saveAsTable("images")
 
     spark.sql("SHOW MODELS").show()
 
@@ -142,8 +139,6 @@ class ThriftServerTest
       )
       assert(rs.next())
     })
-
-    spark.sql("DROP TABLE images")
   }
 
 }

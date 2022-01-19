@@ -38,7 +38,7 @@ import org.apache.spark.sql.{SparkSession, SparkSessionExtensions}
 private class MlPredictRule(val session: SparkSession)
     extends Rule[LogicalPlan] {
 
-  val catalog = Catalog.getOrCreate(session)
+  val modelCatalog = Catalog.getOrCreate(session)
 
   private def resolveModel(
       name: String,
@@ -54,7 +54,7 @@ private class MlPredictRule(val session: SparkSession)
     val model_name = arguments.head
     val model = model_name match {
       case arg: UnresolvedAttribute =>
-        catalog.getModel(arg.name, session)
+        modelCatalog.getModel(arg.name, session)
       case arg: Literal => {
         val model =
           Registry.resolve(

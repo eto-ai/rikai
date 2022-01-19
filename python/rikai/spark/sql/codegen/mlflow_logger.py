@@ -11,10 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 """Custom Mlflow model logger to make sure models have the right logging for
 Rikai SQL ML
 """
+
+import tempfile
 import warnings
+import os
 from typing import Any, Optional
 
 CONF_MLFLOW_TRACKING_URI = "spark.rikai.sql.ml.registry.mlflow.tracking_uri"
@@ -43,6 +47,37 @@ class MlflowLogger:
         """
         self.spec_version = MlflowLogger._CURRENT_MODEL_SPEC_VERSION
         self.flavor = flavor
+
+    def _log_tensorflow_model(
+        self,
+        model: Any,
+        artifact_path: str,
+        registered_model_name: str,
+        **kwargs,
+    ):
+        import tensorflow as tf
+
+        try:
+            import mlflow
+        except ImportError as e:
+            raise ImportError(
+                "Couldn't import mlflow. Please make sure to "
+                "`pip install mlflow` explicitly or install "
+                "the correct extras like `pip install rikai[mlflow]`"
+            ) from e
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+
+            tf.saved_model.save(model, tmp_dir)
+
+            mlflow.tensorflow.log_model(
+                tf_saved_model_dir=tmp_dir,
+                tf_meta_graph_tags=[tf.saved_model.SERVING],
+                tf_signature_def_key=next(iter(model.signatures.keys())),
+                artifact_path=artifact_path,
+                registered_model_name=registered_model_name,
+                **kwargs,
+            )
 
     def log_model(
         self,
@@ -112,12 +147,21 @@ class MlflowLogger:
 
         # no need to set the tracking uri here since this is intended to be
         # called inside the training loop within mlflow.start_run
-        getattr(mlflow, self.flavor).log_model(
-            model,
-            artifact_path,
-            registered_model_name=registered_model_name,
-            **kwargs,
-        )
+        if self.flavor == "tensorflow":
+            self._log_tensorflow_model(
+                model,
+                artifact_path,
+                registered_model_name=registered_model_name,
+                **kwargs,
+            )
+        else:
+            getattr(mlflow, self.flavor).log_model(
+                model,
+                artifact_path,
+                registered_model_name=registered_model_name,
+                **kwargs,
+            )
+
         tags = {
             CONF_MLFLOW_SPEC_VERSION: MlflowLogger._CURRENT_MODEL_SPEC_VERSION,
             CONF_MLFLOW_MODEL_FLAVOR: customized_flavor
@@ -162,6 +206,6 @@ class MlflowLogger:
                 )
 
 
-KNOWN_FLAVORS = ["pytorch", "sklearn"]
+KNOWN_FLAVORS = ["pytorch", "sklearn", "tensorflow"]
 for flavor in KNOWN_FLAVORS:
     globals()[flavor] = MlflowLogger(flavor)

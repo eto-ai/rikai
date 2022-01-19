@@ -15,13 +15,64 @@
 from typing import Iterator
 
 import pandas as pd
-
 from pyspark.sql.functions import pandas_udf
 from pyspark.sql.types import BinaryType
+import numpy as np
 
 from rikai.spark.sql.codegen.base import ModelSpec
+from rikai.tf.transforms import convert_tensor
+from rikai.torch.pandas import PandasDataset
+from rikai.types import Image
+
+import tensorflow as tf
 
 DEFAULT_BATCH_SIZE = 4
+
+
+__all__ = ["generate_udf", "load_model_from_uri"]
+
+
+def infer_output_signature(df: pd.DataFrame):
+    if df.empty:
+        raise ValueError("DataFrame is empty")
+
+    first_row = df.loc[0]
+    output_signature = []
+    for col in df.columns:
+        value = first_row[col]
+        if isinstance(value, Image):
+            print("Image shape: ", value.to_numpy().shape)
+            image_arr = value.to_numpy()
+            if len(image_arr.shape) == 2:
+                output_signature.append(
+                    tf.TensorSpec(shape=(None, None), dtype=tf.uint8, name=col)
+                )
+            elif len(image_arr.shape) == 3:
+                output_signature.append(
+                    tf.TensorSpec(
+                        shape=(
+                            None,
+                            None,
+                            image_arr.shape[2],
+                        ),
+                        dtype=tf.uint8,
+                        name=col,
+                    )
+                )
+            else:
+                raise ValueError(
+                    f"Image should only have 2d or 3d shape, got {image_arr.shape}"
+                )
+        elif isinstance(value, np.ndarray):
+            output_signature.append(tf.TensorSpec.from_tensor(value))
+        else:
+            output_signature.append(tf.TensorSpec.from_tensor(value))
+    return tuple(output_signature)
+
+
+def only_value(data):
+    print(data)
+    return list(data.values())
 
 
 def generate_udf(spec: ModelSpec):
@@ -35,14 +86,27 @@ def generate_udf(spec: ModelSpec):
         import tensorflow as tf
 
         model = spec.load_model()
-
+        signature = None
         for df in iter:
-            print(df)
-            data = tf.data.Dataset.from_tensor_slices(df)
-            data = data.batch(batch_size).map(spec.pre_processing)
+            ds = PandasDataset(df)
 
-            print(data)
-            raw_predictions = model(data)
+            if signature is None:
+                signature = infer_output_signature(df)
+
+            print("SIGANTURES: ", signature)
+            data = tf.data.Dataset.from_generator(
+                ds, output_signature=signature
+            )
+
+            data = data.batch(1)
+            if spec.pre_processing:
+                data = data.map(spec.pre_processing)
+
+            print(list(data.take(1)))
+            for elem in data:
+                raw_predictions = model(elem)
+                print(raw_predictions)
+            # model.signatures["serving_default"](data)
             return [1] * len(df)
 
     return pandas_udf(tf_inference_udf, returnType=BinaryType())

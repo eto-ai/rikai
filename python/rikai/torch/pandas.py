@@ -61,4 +61,8 @@ class PandasDataset(Dataset):
         row = convert_tensor(row, use_pil=self.use_pil)
         if self.transform:
             row = self.transform(row)
-        return row
+        return tuple(row.values())
+
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        "Return itself as an generator"
+        return iter(self)

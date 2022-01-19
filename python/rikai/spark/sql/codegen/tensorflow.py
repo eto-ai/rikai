@@ -14,22 +14,23 @@
 
 from typing import Iterator
 
+import numpy as np
 import pandas as pd
+import tensorflow as tf
+from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql.functions import pandas_udf
 from pyspark.sql.types import BinaryType
-import numpy as np
 
 from rikai.spark.sql.codegen.base import ModelSpec
-from rikai.tf.transforms import convert_tensor
 from rikai.torch.pandas import PandasDataset
 from rikai.types import Image
-
-import tensorflow as tf
 
 DEFAULT_BATCH_SIZE = 4
 
 
 __all__ = ["generate_udf", "load_model_from_uri"]
+
+_pickler = CloudPickleSerializer()
 
 
 def infer_output_signature(df: pd.DataFrame):
@@ -41,7 +42,6 @@ def infer_output_signature(df: pd.DataFrame):
     for col in df.columns:
         value = first_row[col]
         if isinstance(value, Image):
-            print("Image shape: ", value.to_numpy().shape)
             image_arr = value.to_numpy()
             if len(image_arr.shape) == 2:
                 output_signature.append(
@@ -88,12 +88,10 @@ def generate_udf(spec: ModelSpec):
         model = spec.load_model()
         signature = None
         for df in iter:
-            ds = PandasDataset(df)
-
             if signature is None:
                 signature = infer_output_signature(df)
 
-            print("SIGANTURES: ", signature)
+            ds = PandasDataset(df)
             data = tf.data.Dataset.from_generator(
                 ds, output_signature=signature
             )
@@ -102,12 +100,11 @@ def generate_udf(spec: ModelSpec):
             if spec.pre_processing:
                 data = data.map(spec.pre_processing)
 
-            print(list(data.take(1)))
-            for elem in data:
-                raw_predictions = model(elem)
-                print(raw_predictions)
-            # model.signatures["serving_default"](data)
-            return [1] * len(df)
+            results = []
+            for batch in data:
+                raw_predictions = model(batch)
+                raw_predictions = spec.post_processing(raw_predictions)
+                yield pd.Series([_pickler.dumps(p) for p in raw_predictions])
 
     return pandas_udf(tf_inference_udf, returnType=BinaryType())
 

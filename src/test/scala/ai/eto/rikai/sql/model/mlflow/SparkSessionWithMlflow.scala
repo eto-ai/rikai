@@ -19,15 +19,21 @@ package ai.eto.rikai.sql.model.mlflow
 import ai.eto.rikai.sql.model.{Catalog, Registry}
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.sql.SparkSession
-import org.scalatest.{BeforeAndAfterAll, Suite}
+import org.mlflow.api.proto.Service.RunInfo
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
 
 import scala.collection.JavaConverters._
 
-trait SparkSessionWithMlflow extends LazyLogging with BeforeAndAfterAll {
+trait SparkSessionWithMlflow
+    extends LazyLogging
+    with BeforeAndAfterAll
+    with BeforeAndAfterEach {
   this: Suite =>
 
   val testMlflowTrackingUri: String =
     sys.env.getOrElse("TEST_MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
+
+  var run: RunInfo = _
 
   lazy val spark: SparkSession = {
     SparkSession.builder
@@ -57,13 +63,32 @@ trait SparkSessionWithMlflow extends LazyLogging with BeforeAndAfterAll {
 
   lazy val mlflowClient = new MlflowClientExt(testMlflowTrackingUri)
 
-  private[mlflow] def clearModels(): Unit = {
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    run = mlflowClient.client.createRun()
+  }
+
+  override def afterEach(): Unit = {
+    mlflowClient.client.deleteRun(run.getRunId)
+    clearModels()
+    dropTables()
+    super.afterEach()
+  }
+
+  private def clearModels(): Unit = {
     mlflowClient
       .searchRegisteredModels()
       .getRegisteredModelsList
       .asScala
       //The MLFlow client does not support delete a model
       .foreach(m => mlflowClient.deleteModel(m.getName))
+  }
+
+  private def dropTables(): Unit = {
+    spark.catalog
+      .listTables()
+      .collect()
+      .foreach(t => spark.sql(s"DROP TABLE ${t.name}"))
   }
 
   override protected def afterAll(): Unit = {

@@ -91,7 +91,7 @@ class SparkUDFModel(
   }
 
   override def toString: String =
-    s"SparkUDFModel(name=${name}, uri=${spec_uri})"
+    s"SparkUDFModel(name=${name}, uri=${spec_uri}, udf=${funcName})"
 
   /** Convert a [[Model]] to a Spark Expression in Spark SQL's logical plan. */
   override def asSpark(args: Seq[Expression]): Expression = {
@@ -123,9 +123,9 @@ class SparkUDFModel(
       isDistinct = false
     )
     postFuncName match {
-      case Some(name) =>
+      case Some(n: String) =>
         UnresolvedFunction(
-          new FunctionIdentifier(name),
+          new FunctionIdentifier(n),
           Seq(sparkFunc),
           isDistinct = false
         )

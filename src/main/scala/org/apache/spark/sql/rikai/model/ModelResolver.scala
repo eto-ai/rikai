@@ -24,7 +24,7 @@ import io.circe.syntax._
 import org.apache.spark.api.python.{PythonEvalType, PythonFunction}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.execution.python.UserDefinedPythonFunction
-import org.apache.spark.sql.types.{DataType, BinaryType}
+import org.apache.spark.sql.types.{BinaryType, DataType}
 
 import java.nio.file.Files
 import java.util.Base64
@@ -106,10 +106,11 @@ object ModelResolver {
 
       val dataTypeJson = Files.readAllLines(dataTypePath).asScala.mkString("\n")
       val returnType = DataType.fromJson(dataTypeJson)
-      val suffix = Random.alphanumeric.take(6)
-      val udfName = s"${spec.name}_${suffix}"
+      val suffix: String = Random.alphanumeric.take(6).mkString.toLowerCase
+      val udfName = s"${spec.name.getOrElse("model")}_${suffix}"
       val preUdfName = s"${udfName}_pre"
       val postUdfName = s"${udfName}_post"
+
       registerUdf(
         session,
         cmdMap.funcCmd,

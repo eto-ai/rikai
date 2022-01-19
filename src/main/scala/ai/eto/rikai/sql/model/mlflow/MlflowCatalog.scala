@@ -101,13 +101,15 @@ class MlflowCatalog(session: SparkSession) extends Catalog {
     * @param name is a qualified name pointed to a Model.
     * @return the model
     */
-  override def getModel(name: String): Option[Model] = {
+  override def getModel(name: String, session: SparkSession): Option[Model] = {
     try {
       mlflowClient.getModel(name).map { _ =>
-        // TODO: cache the SparkUDFModel in the current session memory.
+        // TODO: cache the SparkUDFModel in the process. It might have multiple
+        // SparkSessions exist.
         val uri = s"mlflow:/$name"
         val spec = ModelSpec(name = Some(name), uri = uri)
-        Registry.resolve(session, spec)
+        val model = Registry.resolve(session, spec)
+        model
       }
     } catch {
       case e: MlflowHttpException => {

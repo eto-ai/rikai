@@ -40,7 +40,7 @@ def test_open_https_uri():
 
 
 def test_image_use_https_uri():
-    img = Image(WIKIPEDIA)
+    img = Image(WIKIPEDIA, None, None)
 
     fobj = BytesIO(
         requests.get(WIKIPEDIA, headers={"User-agent": USER_AGENT}).content

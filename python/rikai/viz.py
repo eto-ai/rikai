@@ -90,8 +90,6 @@ class Draw(Displayable, ABC):
     def draw(
         self,
         layer: Union[Drawable, list[Drawable]],
-        canvas_width,
-        canvas_height,
     ) -> Draw:
         # layer can not be checked against typing.Sequence or typing.Iterable,
         # because many of the Drawables are iterables (i.e., Box2d).
@@ -105,7 +103,7 @@ class Draw(Displayable, ABC):
         return self
 
     def __or__(self, other: Union[Drawable, list[Drawable]]) -> Draw:
-        return self.draw(other, self.canvas_width, self.canvas_height)
+        return self.draw(other)
 
 
 class Renderer(ABC):

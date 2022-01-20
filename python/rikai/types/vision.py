@@ -185,8 +185,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
                 return Image(url=url, format=inferred_format)
 
     def draw(self, drawable: Union[Drawable, list[Drawable]]) -> Draw:
-        # TODO get height/width of image draw
-        return ImageDraw(self).draw(drawable, self.height, self.width)
+        return ImageDraw(self).draw(drawable)
 
     def __repr__(self) -> str:
         if self.is_embedded:
@@ -300,8 +299,11 @@ class ImageDraw(Draw):
 
         render = PILRenderer(self.img)
         for layer in self.layers:
-            # TODO add option
-            layer._render(render)
+            layer._render(
+                render,
+                canvas_width=self.canvas_width,
+                canvas_height=self.canvas_height,
+            )
         return Image.from_pil(render.image)
 
     def display(self, **kwargs) -> "IPython.display.Image":

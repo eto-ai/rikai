@@ -153,6 +153,7 @@ class PILRenderer(Renderer):
         xy,
         color: str = get_option(CONF_RIKAI_VIZ_COLOR),
         fill: bool = True,
+        **kwargs,
     ):
         if fill:
             overlay = PILImage.new("RGBA", self.img.size, (255, 255, 255, 0))
@@ -168,7 +169,11 @@ class PILRenderer(Renderer):
             self.draw.polygon(xy=xy, outline=color)
 
     def text(
-        self, xy, text: str, color: str = get_option(CONF_RIKAI_VIZ_COLOR)
+        self,
+        xy,
+        text: str,
+        color: str = get_option(CONF_RIKAI_VIZ_COLOR),
+        **kwargs,
     ):
         self.draw.text(xy, text, fill=color)
 

@@ -60,7 +60,7 @@ class FileModelSpec(ModelSpec):
             from rikai.spark.sql.codegen.pytorch import load_model_from_uri
 
             return load_model_from_uri(self.model_uri)
-        elif self.flavor in ("tensorflow", "tf"):
+        elif self.flavor == "tensorflow":
             from rikai.spark.sql.codegen.tensorflow import load_model_from_uri
 
             return load_model_from_uri(self.model_uri)

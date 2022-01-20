@@ -21,12 +21,14 @@ import tensorflow as tf
 import tensorflow_hub as hub
 from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql import Row, SparkSession
+from pyspark.sql.types import FloatType, IntegerType, StructField, StructType
 
 import rikai
 from rikai.contrib.tensorflow.models.ssd import HUB_URL as SSD_HUB_URL
 from rikai.contrib.tensorflow.models.ssd import OUTPUT_SCHEMA
 from rikai.spark.sql.codegen.fs import FileModelSpec
 from rikai.spark.sql.codegen.tensorflow import generate_udf
+from rikai.spark.types import Box2dType
 from rikai.types import Image
 
 
@@ -105,8 +107,10 @@ def test_tf_with_mlflow(tmp_path: Path, spark: SparkSession):
             "model",
             schema=OUTPUT_SCHEMA,
             registered_model_name="tf_ssd",
-            pre_processing="rikai.contrib.tensorflow.models.ssd.pre_processing",
-            post_processing="rikai.contrib.tensorflow.models.ssd.post_processing",
+            pre_processing="rikai.contrib.tensorflow.models"
+            + ".ssd.pre_processing",
+            post_processing="rikai.contrib.tensorflow.models"
+            + ".ssd.post_processing",
         )
 
     spark.sql("CREATE MODEL ssd USING 'mlflow:///tf_ssd'")
@@ -131,4 +135,8 @@ def test_tf_with_mlflow(tmp_path: Path, spark: SparkSession):
     )
     df.createOrReplaceTempView("images")
 
-    spark.sql("SELECT ML_PREDICT(ssd, image) FROM images").show()
+    df = spark.sql("SELECT ML_PREDICT(ssd, image) as det FROM images")
+    df.show()
+    assert df.schema == StructType(
+        [StructField("detection_boxes", Box2dType())]
+    )

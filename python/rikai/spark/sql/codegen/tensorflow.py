@@ -53,8 +53,6 @@ def infer_output_signature(blob: bytes):
             raise ValueError(
                 f"Image should only have 2d or 3d shape, got {image_arr.shape}"
             )
-    elif isinstance(row, np.ndarray):
-        return tf.TensorSpec.from_tensor(row)
     else:
         return tf.TensorSpec.from_tensor(row)
 

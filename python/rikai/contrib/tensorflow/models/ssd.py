@@ -54,4 +54,7 @@ def post_processing(options: Dict[str, Any]) -> Callable:
     return post_process_func
 
 
-OUTPUT_SCHEMA = "array<struct<detection_boxes:box2d, detection_scores:float, detection_classes:int>>"
+OUTPUT_SCHEMA = (
+    "array<struct<detection_boxes:box2d, detection_scores:float,"
+    + "detection_classes:int>>"
+)

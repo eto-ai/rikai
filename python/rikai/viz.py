@@ -140,7 +140,11 @@ class PILRenderer(Renderer):
         return self.img
 
     def rectangle(
-        self, xy, color: str = get_option(CONF_RIKAI_VIZ_COLOR), width: int = 1
+        self,
+        xy,
+        color: str = get_option(CONF_RIKAI_VIZ_COLOR),
+        width: int = 1,
+        **kwargs,
     ):
         self.draw.rectangle(xy, outline=color, width=width)
 

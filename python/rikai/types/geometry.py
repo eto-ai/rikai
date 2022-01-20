@@ -22,7 +22,7 @@ from numbers import Real
 from typing import Optional, Sequence, Tuple, Union
 
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import ImageDraw
 
 from rikai.mixin import Drawable, ToDict, ToNumpy
 from rikai.spark.types.geometry import (
@@ -31,7 +31,7 @@ from rikai.spark.types.geometry import (
     MaskType,
     PointType,
 )
-from rikai.types import rle
+from rikai.types import Image, rle
 
 __all__ = ["Point", "Box3d", "Box2d", "Mask"]
 
@@ -73,6 +73,43 @@ class Point(ToNumpy, ToDict):
 
     def to_dict(self) -> dict:
         return {"x": self.x, "y": self.y, "z": self.z}
+
+
+class RelativeBox2d(Drawable):
+    def __init__(self, xmin: float, ymin: float, xmax: float, ymax: float):
+        assert (
+            0 <= xmin <= xmax
+        ), f"xmin({xmin}) and xmax({xmax}) must satisfy 0 <= xmin <= xmax"
+        assert (
+            0 <= ymin <= ymax
+        ), f"ymin({ymin}) and ymax({ymax}) must satisfy 0 <= ymin <= ymax"
+        self.xmin = float(xmin)
+        self.ymin = float(ymin)
+        self.xmax = float(xmax)
+        self.ymax = float(ymax)
+
+    def _render(self, render: "rikai.viz.Renderer", **kwargs) -> None:
+        canvas_width = kwargs["canvas_width"]
+        canvas_height = kwargs["canvas_height"]
+        self.toBox2d(canvas_width, canvas_height)._render(render, **kwargs)
+
+    def toBox2d(self, canvas_width, canvas_height):
+        return Box2d(
+            self.xmin * canvas_width,
+            self.ymin * canvas_height,
+            self.xmax * canvas_width,
+            self.ymax * canvas_height,
+        )
+
+    def toBox2d(self, img: Image):
+        canvas_width = img.width
+        canvas_height = img.height
+        return Box2d(
+            self.xmin * canvas_width,
+            self.ymin * canvas_height,
+            self.xmax * canvas_width,
+            self.ymax * canvas_height,
+        )
 
 
 class Box2d(ToNumpy, Sequence, ToDict, Drawable):

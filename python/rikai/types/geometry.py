@@ -31,7 +31,8 @@ from rikai.spark.types.geometry import (
     MaskType,
     PointType,
 )
-from rikai.types import Image, rle
+from rikai.types import rle
+from rikai.types.vision import Image
 
 __all__ = ["Point", "Box3d", "Box2d", "Mask"]
 

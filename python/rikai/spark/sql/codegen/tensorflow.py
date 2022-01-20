@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import functools
 from typing import Iterator
 
 import numpy as np
@@ -27,13 +26,6 @@ from rikai.torch.pandas import PandasDataset
 from rikai.types import Image
 
 DEFAULT_BATCH_SIZE = 4
-
-from tensorflow.compat.v1 import ConfigProto
-from tensorflow.compat.v1 import InteractiveSession
-
-config = ConfigProto()
-config.gpu_options.allow_growth = True
-session = InteractiveSession(config=config)
 
 
 __all__ = ["generate_udf", "load_model_from_uri"]

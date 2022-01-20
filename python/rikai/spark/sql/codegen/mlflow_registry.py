@@ -81,7 +81,12 @@ class MlflowModelSpec(ModelSpec):
         old_uri = mlflow.get_tracking_uri()
         try:
             mlflow.set_tracking_uri(self.tracking_uri)
-            return getattr(mlflow, self.flavor).load_model(self.model_uri)
+            if self.flavor == "tensorflow":
+                return mlflow.pyfunc.load_model(
+                    self.model_uri
+                )._model_impl.model
+            else:
+                return getattr(mlflow, self.flavor).load_model(self.model_uri)
         finally:
             mlflow.set_tracking_uri(old_uri)
 

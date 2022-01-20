@@ -28,6 +28,13 @@ from rikai.types import Image
 
 DEFAULT_BATCH_SIZE = 4
 
+from tensorflow.compat.v1 import ConfigProto
+from tensorflow.compat.v1 import InteractiveSession
+
+config = ConfigProto()
+config.gpu_options.allow_growth = True
+session = InteractiveSession(config=config)
+
 
 __all__ = ["generate_udf", "load_model_from_uri"]
 
@@ -68,8 +75,9 @@ def generate_udf(spec: ModelSpec):
     def tf_inference_udf(
         iter: Iterator[pd.DataFrame],
     ) -> Iterator[pd.Series]:
+
         model = spec.load_model()
-        print("MLFLOW MODEL: ", type(model), dir(model))
+
         signature = None
         for df in iter:
             if signature is None:
@@ -77,17 +85,21 @@ def generate_udf(spec: ModelSpec):
 
             ds = PandasDataset(df, unpickle=True)
             data = tf.data.Dataset.from_generator(
-                ds, output_signature=signature
+                ds,
+                output_signature=tf.TensorSpec(
+                    shape=(None, None, 3), dtype=tf.uint8, name="input_tensor"
+                ),
             )
 
             if spec.pre_processing:
                 data = data.map(spec.pre_processing)
             data = data.batch(batch_size)
 
+            predictions = []
             for batch in data:
-                raw_predictions = model.predict({"input_tensor": batch})
-                raw_predictions = spec.post_processing(raw_predictions)
-                yield pd.Series([_pickler.dumps(p) for p in raw_predictions])
+                raw_predictions = model(batch)
+                predictions.extend(spec.post_processing(raw_predictions))
+            yield pd.Series([_pickler.dumps(p) for p in predictions])
 
     return pandas_udf(tf_inference_udf, returnType=BinaryType())
 

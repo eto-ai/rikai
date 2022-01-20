@@ -45,7 +45,7 @@ def post_processing(options: Dict[str, Any]) -> Callable:
                     {
                         "detection_boxes": Box2d(*box),
                         "detection_classes": int(label_class),
-                        "detection_scores": score,
+                        "detection_scores": float(score),
                     }
                 )
             results.append(predict_result)

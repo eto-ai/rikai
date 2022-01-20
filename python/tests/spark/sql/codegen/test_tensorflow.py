@@ -17,7 +17,6 @@ from pathlib import Path
 
 import mlflow
 import pandas as pd
-import pytest
 import tensorflow as tf
 import tensorflow_hub as hub
 from pyspark.serializers import CloudPickleSerializer
@@ -101,15 +100,16 @@ def test_tf_with_mlflow(tmp_path: Path, spark: SparkSession):
     with mlflow.start_run():
         model_path = str(tmp_path / "model.pt")
         tf.saved_model.save(m, model_path)
-        # m.save(model_path)
         rikai.mlflow.tensorflow.log_model(
             m,
             "model",
             schema=OUTPUT_SCHEMA,
-            registered_model_name="tfssd",
+            registered_model_name="tf_ssd",
+            pre_processing="rikai.contrib.tensorflow.models.ssd.pre_processing",
+            post_processing="rikai.contrib.tensorflow.models.ssd.post_processing",
         )
 
-    spark.sql("CREATE MODEL ssd USING 'mlflow:///tfssd'")
+    spark.sql("CREATE MODEL ssd USING 'mlflow:///tf_ssd'")
     spark.sql("SHOW MODELS").show()
     df = spark.createDataFrame(
         [

@@ -22,7 +22,7 @@ from numbers import Real
 from typing import Optional, Sequence, Tuple, Union
 
 import numpy as np
-from PIL import ImageDraw
+from PIL import Image, ImageDraw
 
 from rikai.mixin import Drawable, ToDict, ToNumpy
 from rikai.spark.types.geometry import (
@@ -32,7 +32,7 @@ from rikai.spark.types.geometry import (
     PointType,
 )
 from rikai.types import rle
-from rikai.types.vision import Image
+from rikai.types.vision import Image as RikaiImage
 
 __all__ = ["Point", "Box3d", "Box2d", "Mask"]
 
@@ -102,7 +102,7 @@ class RelativeBox2d(Drawable):
             self.ymax * canvas_height,
         )
 
-    def toBox2d(self, img: Image):
+    def toBox2d(self, img: RikaiImage):
         canvas_width = img.width
         canvas_height = img.height
         return Box2d(

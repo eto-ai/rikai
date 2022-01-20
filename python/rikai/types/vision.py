@@ -55,7 +55,10 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
     __UDT__ = ImageType()
 
     def __init__(
-        self, image: Union[bytes, bytearray, IOBase, str, Path], width, height
+        self,
+        image: Union[bytes, bytearray, IOBase, str, Path],
+        width=None,
+        height=None,
     ):
         data, uri = None, None
         if isinstance(image, IOBase):

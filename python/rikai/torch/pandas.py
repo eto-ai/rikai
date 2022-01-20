@@ -62,3 +62,7 @@ class PandasDataset(Dataset):
         if self.transform:
             row = self.transform(row)
         return row
+
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        "Return itself as an generator"
+        return iter(self)

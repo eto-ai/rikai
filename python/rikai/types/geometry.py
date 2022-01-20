@@ -32,7 +32,6 @@ from rikai.spark.types.geometry import (
     PointType,
 )
 from rikai.types import rle
-from rikai.types.vision import Image as RikaiImage
 
 __all__ = ["Point", "Box3d", "Box2d", "Mask"]
 
@@ -77,6 +76,8 @@ class Point(ToNumpy, ToDict):
 
 
 class RelativeBox2d(Drawable):
+    from rikai.types.vision import Image as RikaiImage
+
     def __init__(self, xmin: float, ymin: float, xmax: float, ymax: float):
         assert (
             0 <= xmin <= xmax

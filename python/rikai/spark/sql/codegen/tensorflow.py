@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import functools
 from typing import Iterator
 
 import numpy as np
@@ -33,46 +34,30 @@ __all__ = ["generate_udf", "load_model_from_uri"]
 _pickler = CloudPickleSerializer()
 
 
-def infer_output_signature(df: pd.DataFrame):
-    if df.empty:
-        raise ValueError("DataFrame is empty")
+def infer_output_signature(blob: bytes):
+    row = _pickler.loads(blob)
 
-    first_row = df.loc[0]
-    output_signature = []
-    for col in df.columns:
-        value = first_row[col]
-        if isinstance(value, Image):
-            image_arr = value.to_numpy()
-            if len(image_arr.shape) == 2:
-                output_signature.append(
-                    tf.TensorSpec(shape=(None, None), dtype=tf.uint8, name=col)
-                )
-            elif len(image_arr.shape) == 3:
-                output_signature.append(
-                    tf.TensorSpec(
-                        shape=(
-                            None,
-                            None,
-                            image_arr.shape[2],
-                        ),
-                        dtype=tf.uint8,
-                        name=col,
-                    )
-                )
-            else:
-                raise ValueError(
-                    f"Image should only have 2d or 3d shape, got {image_arr.shape}"
-                )
-        elif isinstance(value, np.ndarray):
-            output_signature.append(tf.TensorSpec.from_tensor(value))
+    if isinstance(row, Image):
+        image_arr = row.to_numpy()
+        if len(image_arr.shape) == 2:
+            return tf.TensorSpec(shape=(None, None), dtype=tf.uint8)
+        elif len(image_arr.shape) == 3:
+            return tf.TensorSpec(
+                shape=(
+                    None,
+                    None,
+                    image_arr.shape[2],
+                ),
+                dtype=tf.uint8,
+            )
         else:
-            output_signature.append(tf.TensorSpec.from_tensor(value))
-    return tuple(output_signature)
-
-
-def only_value(data):
-    print(data)
-    return list(data.values())
+            raise ValueError(
+                f"Image should only have 2d or 3d shape, got {image_arr.shape}"
+            )
+    elif isinstance(row, np.ndarray):
+        return tf.TensorSpec.from_tensor(row)
+    else:
+        return tf.TensorSpec.from_tensor(row)
 
 
 def generate_udf(spec: ModelSpec):
@@ -83,26 +68,24 @@ def generate_udf(spec: ModelSpec):
     def tf_inference_udf(
         iter: Iterator[pd.DataFrame],
     ) -> Iterator[pd.Series]:
-        import tensorflow as tf
-
         model = spec.load_model()
+        print("MLFLOW MODEL: ", type(model), dir(model))
         signature = None
         for df in iter:
             if signature is None:
-                signature = infer_output_signature(df)
+                signature = infer_output_signature(df.iloc[0])
 
-            ds = PandasDataset(df)
+            ds = PandasDataset(df, unpickle=True)
             data = tf.data.Dataset.from_generator(
                 ds, output_signature=signature
             )
 
-            data = data.batch(1)
             if spec.pre_processing:
                 data = data.map(spec.pre_processing)
+            data = data.batch(batch_size)
 
-            results = []
             for batch in data:
-                raw_predictions = model(batch)
+                raw_predictions = model.predict({"input_tensor": batch})
                 raw_predictions = spec.post_processing(raw_predictions)
                 yield pd.Series([_pickler.dumps(p) for p in raw_predictions])
 

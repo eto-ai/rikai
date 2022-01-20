@@ -36,6 +36,8 @@ def test_tf_inference_runner(tmp_path: Path):
     model_path = str(tmp_path / "model")
     tf.saved_model.save(m, model_path)
 
+    pickler = CloudPickleSerializer()
+
     spec_path = str(tmp_path / "spec.yml")
     with open(spec_path, "w") as spec_yml:
         spec_yml.write(
@@ -45,6 +47,8 @@ model:
   uri: {}
   flavor: tensorflow
 schema: {}
+options:
+  batch_size: 1
 transforms:
   pre: rikai.contrib.tensorflow.models.ssd.pre_processing
   post: rikai.contrib.tensorflow.models.ssd.post_processing
@@ -57,26 +61,25 @@ transforms:
     udf = generate_udf(spec)
 
     df_iter = [
-        pd.DataFrame(
+        pd.Series(
             [
-                {
-                    "image": Image(
+                pickler.dumps(
+                    Image(
                         "http://farm2.staticflickr.com/1129/"
                         "4726871278_4dd241a03a_z.jpg"
                     )
-                },
-                {
-                    "image": Image(
+                ),
+                pickler.dumps(
+                    Image(
                         "http://farm4.staticflickr.com/3726/"
                         "9457732891_87c6512b62_z.jpg"
                     )
-                },
+                ),
             ]
         )
     ]
     output = udf.func(df_iter)
 
-    pickler = CloudPickleSerializer()
     for batch in output:
         for detections in batch:
             detections = pickler.loads(detections)
@@ -102,7 +105,7 @@ def test_tf_with_mlflow(tmp_path: Path, spark: SparkSession):
         rikai.mlflow.tensorflow.log_model(
             m,
             "model",
-            schema="array<float>",
+            schema=OUTPUT_SCHEMA,
             registered_model_name="tfssd",
         )
 

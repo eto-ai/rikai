@@ -220,9 +220,6 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
         with self.to_pil() as pil_img:
             return np.asarray(pil_img)
 
-    def __array__(self, dtype=None):
-        return self.to_numpy()
-
     def to_dict(self) -> dict:
         if self.is_embedded:
             return {"data": base64.b64encode(self.data).decode("ascii")}

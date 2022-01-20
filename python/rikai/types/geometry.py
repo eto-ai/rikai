@@ -76,8 +76,6 @@ class Point(ToNumpy, ToDict):
 
 
 class RelativeBox2d(Drawable):
-    from rikai.types.vision import Image as RikaiImage
-
     def __init__(self, xmin: float, ymin: float, xmax: float, ymax: float):
         assert (
             0 <= xmin <= xmax
@@ -103,7 +101,7 @@ class RelativeBox2d(Drawable):
             self.ymax * canvas_height,
         )
 
-    def toBox2d(self, img: RikaiImage):
+    def toBox2d(self, img: "rikai.types.vision.RikaiImage"):
         canvas_width = img.width
         canvas_height = img.height
         return Box2d(

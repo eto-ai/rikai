@@ -21,7 +21,13 @@ import tensorflow as tf
 import tensorflow_hub as hub
 from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql import Row, SparkSession
-from pyspark.sql.types import FloatType, IntegerType, StructField, StructType
+from pyspark.sql.types import (
+    ArrayType,
+    FloatType,
+    IntegerType,
+    StructField,
+    StructType,
+)
 
 import rikai
 from rikai.contrib.tensorflow.models.ssd import HUB_URL as SSD_HUB_URL
@@ -137,6 +143,24 @@ def test_tf_with_mlflow(tmp_path: Path, spark: SparkSession):
 
     df = spark.sql("SELECT ML_PREDICT(ssd, image) as det FROM images")
     df.show()
+    df.createOrReplaceTempView("detections")
     assert df.schema == StructType(
-        [StructField("detection_boxes", Box2dType())]
+        [
+            StructField(
+                "det",
+                ArrayType(
+                    StructType(
+                        [
+                            StructField("detection_boxes", Box2dType()),
+                            StructField("detection_scores", FloatType()),
+                            StructField("detection_classes", IntegerType()),
+                        ]
+                    )
+                ),
+            )
+        ]
+    )
+    assert (
+        spark.sql("SELECT det FROM detections WHERE size(det) > 1").count()
+        == 2
     )

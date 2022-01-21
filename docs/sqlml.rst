@@ -8,8 +8,8 @@ ML-enabled SQL
 
     Make your Data Warehouse as Smart as your ML models
 
-Similar capabilities have been provided by products, like `BigQuery ML`_ and `Redshift ML`_.
-Rikai SQL ML is designed to be extensible to any Model Registry, no matter it is ``on-prem`` or ``cloud-native``,
+Similar capabilities have been provided by existing products, like `BigQuery ML`_ and `Redshift ML`_.
+Rikai SQL ML is extensible to any Model Registry, no matter it is ``on-prem`` or ``cloud-native``,
 ``open-source`` or ``proprietary``.
 
 As a result, ``Rikai SQL-ML`` can be easily integrated into existing machine learning infrastructure,
@@ -30,7 +30,7 @@ Before we can use ``Rikai SQL-ML``, we need to configure SparkSession:
         SparkSession
         .builder
         .appName("spark-app")
-        .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.5")
+        .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.21")
         .config(
             "spark.sql.extensions",
             "ai.eto.rikai.sql.spark.RikaiSparkSessionExtensions",
@@ -46,11 +46,6 @@ Before we can use ``Rikai SQL-ML``, we need to configure SparkSession:
         .master("local[*]")
         .getOrCreate()
     )
-
-    # Initialize Spark SQL-ML
-    from rikai.spark.sql import init
-    init(spark)
-
 
 How to Use SQL ML
 -----------------

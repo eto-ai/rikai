@@ -73,18 +73,14 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
         self._height = h
 
     def width(self):
-        if self._width:
-            return self._width
-        else:
+        if not self._width:
             self._init_size()
-            return self._width
+        return self._width
 
     def height(self):
-        if self._height:
-            return self._height
-        else:
+        if not self._height:
             self._init_size()
-            return self._height
+        return self._height
 
     @classmethod
     def from_array(

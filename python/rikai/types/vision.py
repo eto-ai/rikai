@@ -67,9 +67,27 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
             data = image
         else:
             uri = image
-        self.width = width
-        self.height = height
+        self._width = width
+        self._height = height
         super().__init__(data=data, uri=uri)
+
+    def width(self):
+        if self._width:
+            return self._width
+        else:
+            (w, h) = self.to_pil().size
+            self._width = w
+            self._height = h
+            return self._width
+
+    def height(self):
+        if self._height:
+            return self._height
+        else:
+            (w, h) = self.to_pil().size
+            self._width = w
+            self._height = h
+            return self._height
 
     @classmethod
     def from_array(
@@ -293,8 +311,9 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
 
 class ImageDraw(Draw):
     def __init__(self, img: Image):
-        super().__init__(img.width, img.height)
         self.img = img.to_pil()
+        (width, height) = self.img.size
+        super().__init__(width, height)
 
     def to_image(self) -> Image:
         if not self.layers:

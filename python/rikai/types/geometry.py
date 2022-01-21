@@ -102,8 +102,8 @@ class RelativeBox2d(Drawable):
         )
 
     def toBox2d(self, img: "rikai.types.vision.RikaiImage"):
-        canvas_width = img.width
-        canvas_height = img.height
+        canvas_width = img.width()
+        canvas_height = img.height()
         return Box2d(
             self.xmin * canvas_width,
             self.ymin * canvas_height,

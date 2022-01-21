@@ -49,13 +49,12 @@ Carefully crafted data-visualization embedded with semantic types, especially in
 to help you visualize and inspect your AI data without having to remember complicated raw image manipulations.
 
 ## Roadmap
-1. Full TensorFlow support
-2. Improved video support
-3. Text / sensors / geospatial support
-4. Versioning support built into the dataset
-5. Better Rikai UDT-support
-6. Declarative annotation API (think vega-lite for annotating images/videos)
-7. Integrations into dbt and BI tools
+1. Improved video support
+2. Text / sensors / geospatial support
+3. Versioning support built into the dataset
+4. Better Rikai UDT-support
+5. Declarative annotation API (think vega-lite for annotating images/videos)
+6. Integrations into dbt and BI tools
 
 ## Example
 

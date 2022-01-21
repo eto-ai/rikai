@@ -14,7 +14,6 @@
 
 import base64
 import filecmp
-from binascii import b2a_base64
 from io import BytesIO
 from pathlib import Path
 from typing import Union
@@ -24,8 +23,7 @@ import pytest
 from PIL import Image as PILImage
 from PIL import ImageDraw as PILImageDraw
 
-from rikai.io import open_uri
-from rikai.types.geometry import Box2d
+from rikai.types.geometry import Box2d, RelativeBox2d
 from rikai.types.vision import Image, ImageDraw
 from rikai.viz import Style, Text
 
@@ -196,6 +194,26 @@ def test_draw_image():
     draw.rectangle((1.0, 2.0, 10.0, 12.0), outline="red")
     draw.rectangle((20, 20, 40, 40), outline="red")
     assert np.array_equal(pil_image.to_numpy(), expected)
+
+
+def test_relative_draw():
+    (canvas_w, canvas_h) = (100, 100)
+    data = np.random.randint(0, 255, size=(canvas_w, canvas_h), dtype=np.uint8)
+    img = Image.from_array(data)
+
+    (x1, y1, x2, y2) = (20, 20, 40, 40)
+    rel_box = RelativeBox2d(
+        x1 / canvas_w, y1 / canvas_h, x2 / canvas_w, y2 / canvas_h
+    )
+    box = Box2d(x1, y1, x2, y2)
+
+    assert rel_box.toBox2d((canvas_w, canvas_h)) == box
+    assert rel_box.toBox2d(img) == box
+
+    rel_pil = (img | rel_box).to_image()
+    pil = (img | box).to_image()
+
+    assert np.array_equal(rel_pil.to_numpy(), pil.to_numpy())
 
 
 def test_draw_styled_images():

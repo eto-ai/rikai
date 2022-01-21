@@ -33,7 +33,7 @@ from rikai.spark.types.geometry import (
 )
 from rikai.types import rle
 
-__all__ = ["Point", "Box3d", "Box2d", "Mask"]
+__all__ = ["Point", "Box3d", "Box2d", "RelativeBox2d", "Mask"]
 
 
 class Point(ToNumpy, ToDict):
@@ -91,25 +91,51 @@ class RelativeBox2d(Drawable):
     def _render(self, render: "rikai.viz.Renderer", **kwargs) -> None:
         canvas_width = kwargs["canvas_width"]
         canvas_height = kwargs["canvas_height"]
-        self.toBox2d(canvas_width, canvas_height)._render(render, **kwargs)
+        self.toBox2d((canvas_width, canvas_height))._render(render, **kwargs)
 
-    def toBox2d(self, canvas_width, canvas_height):
-        return Box2d(
-            self.xmin * canvas_width,
-            self.ymin * canvas_height,
-            self.xmax * canvas_width,
-            self.ymax * canvas_height,
-        )
+    def toBox2d(
+        self, size: Union["rikai.types.vision.Image", Tuple[float, float]]
+    ):
+        if type(size).__name__ == "Image":  # Are there more decent ways?
+            canvas_width = size.width()
+            canvas_height = size.height()
+            return Box2d(
+                self.xmin * canvas_width,
+                self.ymin * canvas_height,
+                self.xmax * canvas_width,
+                self.ymax * canvas_height,
+            )
+        elif isinstance(size, Tuple):
+            (canvas_width, canvas_height) = size
+            return Box2d(
+                self.xmin * canvas_width,
+                self.ymin * canvas_height,
+                self.xmax * canvas_width,
+                self.ymax * canvas_height,
+            )
+        else:
+            raise TypeError(
+                "pass in a rikai.types.vision.RikaiImage or Tuple[float,float]"
+            )
 
-    def toBox2d(self, img: "rikai.types.vision.RikaiImage"):
-        canvas_width = img.width()
-        canvas_height = img.height()
-        return Box2d(
-            self.xmin * canvas_width,
-            self.ymin * canvas_height,
-            self.xmax * canvas_width,
-            self.ymax * canvas_height,
-        )
+
+# def toBox2d(self, canvas_width, canvas_height):
+#     return Box2d(
+#         self.xmin * canvas_width,
+#         self.ymin * canvas_height,
+#         self.xmax * canvas_width,
+#         self.ymax * canvas_height,
+#     )
+#
+# def toBox2d(self, img: "rikai.types.vision.RikaiImage"):
+#     canvas_width = img.width()
+#     canvas_height = img.height()
+#     return Box2d(
+#         self.xmin * canvas_width,
+#         self.ymin * canvas_height,
+#         self.xmax * canvas_width,
+#         self.ymax * canvas_height,
+#     )
 
 
 class Box2d(ToNumpy, Sequence, ToDict, Drawable):

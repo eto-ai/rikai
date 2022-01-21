@@ -65,7 +65,7 @@ When it is ready, we can submit the script via ``spark-submit``
 
     spark-submit \
       --master yarn \
-      --packages ai.eto:rikai_0.12:0.0.16 \
+      --packages ai.eto:rikai_0.12:0.0.21 \
       script.py
 
 

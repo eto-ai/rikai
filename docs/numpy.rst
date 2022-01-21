@@ -42,9 +42,75 @@ At its core, ``rikai.numpy.view`` enables transparently SerDe for numpy.
         df.write.format("rikai").save("s3a://bucket/path/to/dataset")
 
 
-
 Automatically tensor conversion for Tensorflow and Pytorch
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Conviently, Rikai offers pytorch and tensorflow native datasets to automatically
+convert numpy array into ``torch.Tensor`` or ``tf.Tensor``.
+
+For example, using ``rikai.torch.data.Dataset`` in ``pytorch``:
+
+    .. code-block:: python
+
+        from rikai.torch.data import Dataset
+
+        dataset = Dataset("s3://bucket/path/to/dataset")
+        # Compatible with the official pytorch DataLoader
+        loader = torch.utils.data.DataLoader(
+            dataset,
+            batch_size=8,
+            num_workers=8
+        )
+
+        model = ...
+        model.eval()
+        for batch in loader:
+            # data has already been converted from numpy array
+            # to torch.Tensor
+            print(batch)
+            predictions = model(batch)
+
+        # Sample output:
+        # {'mask': tensor([[[0.9037, 0.9284, 0.6832, 0.5378], ..., dtype=torch.float64),
+        #  'id': tensor([997]),
+        #  'image': tensor([[[  5,   7,  52,  ...,  35,  74,  16],
+        #  [110,  12,  45,  ..., 101,  35,  97],
+        #   ...
+        #  [ 25,  62,  91,  ..., 114,  71,  27]]], dtype=torch.uint8)},
+
+Rikai supports ``tensorflow`` too:
+
+    .. code-block:: python
+
+        import tensorflow as tf
+        import tensorflow_hub
+
+        from rikai.tf.data import from_rikai
+
+        dataset = (
+            from_rikai(
+                "s3://bucket/to/dataset",
+                output_signature=(
+                    tf.TensorSpec(shape=(), dtype=tf.uint8),
+                    tf.TensorSpec(shape=(None, None), dtype=tf.uint8),
+                ),
+            )
+            .map(pre_processing)
+            .batch(1)
+            .prefetch(tf.data.AUTOTUNE)
+        )
+
+        model = tensorflow_hub.load("https://tfhub.dev/...")
+        for id, img in dataset:
+            print(id, img)
+            predictions = model(img)
+
+        # Sample output:
+        # tf.Tensor(99, shape=(), dtype=uint8) tf.Tensor(
+        # [[ 81  39   4 ... 111  16  80]
+        # ...
+        # [ 15  53 121 ...   5 115  18]], shape=(128, 128), dtype=uint8)
+
 
 Semantic types are Tensor convertible
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

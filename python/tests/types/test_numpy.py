@@ -12,13 +12,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from pathlib import Path
 
 import numpy as np
 from pyspark.ml.linalg import DenseMatrix
 from pyspark.sql import Row, SparkSession
+from pyspark.sql.functions import udf
+import PIL
 
 # Rikai
 from rikai.numpy import view
+from rikai.spark.types import NDArrayType
 from rikai.types import Box2d, Image
 
 
@@ -34,7 +38,7 @@ def test_spark_show_numpy(spark: SparkSession, capsys):
     assert "ndarray(uint8" in stdout
 
 
-def test_readme_example(spark: SparkSession):
+def test_readme_example(spark: SparkSession, tmp_path: Path):
     df = spark.createDataFrame(
         [
             {
@@ -51,4 +55,19 @@ def test_readme_example(spark: SparkSession):
             }
         ]
     )
+    df.write.format("rikai").save(str(tmp_path))
+
+
+def test_numpy_in_udf(spark: SparkSession, tmp_path: Path):
+    df = spark.createDataFrame([Row(data=view(np.random.rand(256, 256)))])
+
+    @udf(returnType=NDArrayType())
+    def resize_mask(arr: np.ndarray) -> np.ndarray:
+        img = PIL.Image.fromarray(arr)
+        resized_img = img.resize((32, 32))
+        return view(np.asarray(resized_img))
+
+    df = df.withColumn("resized", resize_mask("data"))
     df.show()
+
+    df.write.format("rikai").save(str(tmp_path))

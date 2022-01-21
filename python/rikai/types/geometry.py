@@ -119,25 +119,6 @@ class RelativeBox2d(Drawable):
             )
 
 
-# def toBox2d(self, canvas_width, canvas_height):
-#     return Box2d(
-#         self.xmin * canvas_width,
-#         self.ymin * canvas_height,
-#         self.xmax * canvas_width,
-#         self.ymax * canvas_height,
-#     )
-#
-# def toBox2d(self, img: "rikai.types.vision.RikaiImage"):
-#     canvas_width = img.width()
-#     canvas_height = img.height()
-#     return Box2d(
-#         self.xmin * canvas_width,
-#         self.ymin * canvas_height,
-#         self.xmax * canvas_width,
-#         self.ymax * canvas_height,
-#     )
-
-
 class Box2d(ToNumpy, Sequence, ToDict, Drawable):
     """2-D Bounding Box, defined by ``(xmin, ymin, xmax, ymax)``
 

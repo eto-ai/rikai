@@ -4,17 +4,17 @@
 Numpy and Tensor Interoperability
 =================================
 
-Numpy ``ndarray`` and Tensors are at the core of machine learning
+Numpy :class:`~numpy.ndarray` and Tensors are at the core of machine learning
 development.
-Rikai makes it effortless to work with Numpy ``ndarray`` and tensors,
-and automatically converts array to the appropriate tensor format
-(i.e., ``torch.Tensor`` or ``tf.Tensor``).
+Rikai makes it effortless to work with :class:`numpy.ndarray` and tensors,
+and automatically converts an array to the appropriate tensor format
+(i.e., :class:`torch.Tensor` or :class:`tf.Tensor`).
 
 Work with numpy directly
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Rikai makes it super easy to work with numpy array in Spark.
-At its core, ``rikai.numpy.view`` enables transparently SerDe for numpy.
+At its core, :func:`rikai.numpy.view` enables transparently SerDe for numpy.
 
     .. code-block:: python
 
@@ -46,9 +46,9 @@ Automatically tensor conversion for Tensorflow and Pytorch
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Conviently, Rikai offers pytorch and tensorflow native datasets to automatically
-convert numpy array into ``torch.Tensor`` or ``tf.Tensor``.
+convert numpy array into :class:`torch.Tensor` or :class:`tf.Tensor`.
 
-For example, using ``rikai.torch.data.Dataset`` in ``pytorch``:
+For example, using :class:`rikai.torch.data.Dataset` in ``pytorch``:
 
     .. code-block:: python
 
@@ -115,6 +115,38 @@ Rikai supports ``tensorflow`` too:
 Semantic types are Tensor convertible
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+You might have already realized now, :doc:`Semantic Types <types>` like :class:`~rikai.types.Image`,
+are automatically converted to tensors in the above examples. This is because many of the semantic
+types have implemented :class:`~rikai.mixin.ToNumpy` interface.
+
+Rikai firstly convert a :class:`~rikai.mixin.ToNumpy` object to :class:`numpy.ndarray`, and then the
+training framework-specific dataset classes (:class:`rikai.torch.data.Dataset` and :class:`rikai.tf.data.from_rikai`)
+convert such array into framework-specific tensor.
+
+To give a few examples:
+
+* :func:`rikai.types.Image.to_numpy` converts image into a ``np.ndarray(..., shape=(height, width, channel), dtype=np.uint8)``.
+
+* :func:`rikai.types.Box2d.to_numpy` converts a 2-D bounding box to
+  ``np.ndarray([xmin, ymin, xmax, ymax], dtype=np.float32)``.
+
+* :func:`rikai.types.Mask.to_numpy` converts a 2-D mask array (usually for Segmentation)
+  into ``np.ndarray(..., shape=(height, width), dtype=np.uint8)``
+
 
 How to develop your tensor-convertible types
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To allow Rikai dataset automatically convert your type into :class:`numpy.ndarray` or tensors,
+you should let your class to implement the :class:`rikai.mixin.ToNumpy` mixin.
+
+.. code-block:: python
+
+    from rikai.mixin import ToNumpy
+
+    class MyDataType(ToNumpy):
+
+        __UDT__ = ...
+
+        def to_numpy(self) -> np.ndarray:
+            ...

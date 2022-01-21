@@ -18,13 +18,13 @@ from pyspark.ml.linalg import DenseMatrix
 from pyspark.sql import Row, SparkSession
 
 # Rikai
-from rikai.numpy import wrap
+from rikai.numpy import view
 from rikai.types import Box2d, Image
 
 
 def test_spark_show_numpy(spark: SparkSession, capsys):
-    data = wrap(np.random.rand(50, 50, 3))
-    data2 = wrap(np.array([1, 2, 3], dtype=np.uint8))
+    data = view(np.random.rand(50, 50, 3))
+    data2 = view(np.array([1, 2, 3], dtype=np.uint8))
     df = spark.createDataFrame([{"np": data}, {"np": data2}])
     df.show()
     assert np.array_equal(data, df.first().np)
@@ -44,7 +44,7 @@ def test_readme_example(spark: SparkSession):
                 "annotations": [
                     Row(
                         label="cat",
-                        mask=wrap(np.random.rand(256, 256)),
+                        mask=view(np.random.rand(256, 256)),
                         bbox=Box2d(xmin=1.0, ymin=2.0, xmax=3.0, ymax=4.0),
                     )
                 ],

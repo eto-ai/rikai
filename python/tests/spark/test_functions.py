@@ -28,7 +28,7 @@ from pyspark.sql.functions import col, concat, lit
 from pyspark.sql.types import ArrayType, StructField, StructType
 
 # Rikai
-from rikai.numpy import wrap
+from rikai.numpy import view
 from rikai.spark.functions import (
     area,
     box2d,
@@ -173,7 +173,7 @@ def test_numpy_to_image(spark: SparkSession, tmp_path: Path):
 
     """
     df = spark.createDataFrame(
-        [Row(id=1, data=wrap(np.ones((32, 32), dtype=np.uint8)))]
+        [Row(id=1, data=view(np.ones((32, 32), dtype=np.uint8)))]
     )
     df = df.withColumn(
         "image",

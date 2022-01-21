@@ -22,7 +22,7 @@ import torch
 from torch.utils.data import DataLoader as torchDataLoader
 
 # Rikai
-from rikai.numpy import wrap
+from rikai.numpy import view
 from rikai.torch import Dataset
 from rikai.types import Image
 
@@ -42,7 +42,7 @@ def test_torch_dataset(spark, tmp_path, num_workers):
         image_uri = asset_dir / f"{i}.png"
         Image.from_array(image_data, image_uri),
 
-        array = wrap(np.random.random_sample((3, 4)))
+        array = view(np.random.random_sample((3, 4)))
         data.append(
             {
                 "id": i,

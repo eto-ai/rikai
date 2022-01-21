@@ -4,16 +4,16 @@
 Numpy and Tensor Interoperability
 =================================
 
-Numpy ``ndarray`` and Tensors are at the core of machine learning,
-especially deep learning, development.
-Rikai makes it effortless to work with Numpy ndarray and tensors,
+Numpy ``ndarray`` and Tensors are at the core of machine learning
+development.
+Rikai makes it effortless to work with Numpy ``ndarray`` and tensors,
 and automatically converts array to the appropriate tensor format
 (i.e., ``torch.Tensor`` or ``tf.Tensor``).
 
 Work with numpy directly
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Rikai makes it super easy to work with numpy array in Spark
+Rikai makes it super easy to work with numpy array in Spark.
 At its core, ``rikai.numpy.view`` enables transparently SerDe for numpy.
 
     .. code-block:: python
@@ -27,7 +27,7 @@ At its core, ``rikai.numpy.view`` enables transparently SerDe for numpy.
 
         @udf(returnType=NDArrayType())
         def resize_mask(arr: np.ndarray) -> np.ndarray:
-            """Directly work with numpy array"""
+            """Directly work with native numpy array"""
             img = PIL.Image.fromarray(arr)
             resized_img = img.resize((32, 32))
             return view(np.asarray(resized_img))
@@ -43,16 +43,12 @@ At its core, ``rikai.numpy.view`` enables transparently SerDe for numpy.
 
 
 
-
-
-
-
 Automatically tensor conversion for Tensorflow and Pytorch
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Semantic types are Tensor convertable
+Semantic types are Tensor convertible
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-How to develop your own tensor-convertable types
+How to develop your tensor-convertible types
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

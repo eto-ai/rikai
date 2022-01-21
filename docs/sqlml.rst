@@ -8,7 +8,6 @@ ML-enabled SQL
 
     Make your Data Warehouse as Smart as your ML models
 
-Similar capabilities have been provided by existing products, like `BigQuery ML`_ and `Redshift ML`_.
 Rikai SQL ML is extensible to any Model Registry, no matter it is ``on-prem`` or ``cloud-native``,
 ``open-source`` or ``proprietary``.
 
@@ -202,7 +201,7 @@ Once models are trained, you can add the model to the Rikai model catalog and qu
 
         SELECT id, ML_PREDICT(model_foo, image) FROM df;
 
-There are several options to refer to an mlflow model. If you specify only the mlflow model name as
+There are several options to refer to a mlflow model. If you specify only the mlflow model name as
 in the above example (i.e., my_resnet_model), Rikai will automatically use the latest version. If
 you have models in different stages as supported by mlflow, you can specify the stage like
 `mlflow://my_resnet_model/production` and Rikai will select the latest version whose
@@ -229,10 +228,8 @@ you can always specify flavor, schema, and pre/post-processing classes as run ta
 
     .. warning::
 
-        The Rikai model spec and SQL-ML API is still under heavy development so expect breaking changes!
+        The Rikai model spec and SQL-ML API are still under heavy development so expect breaking changes!
 
 
 
-.. _BigQuery ML: https://cloud.google.com/bigquery-ml/docs
-.. _Redshift ML: https://aws.amazon.com/redshift/features/redshift-ml/
 .. _TorchHub: https://pytorch.org/hub/

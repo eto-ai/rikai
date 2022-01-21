@@ -57,8 +57,6 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
     def __init__(
         self,
         image: Union[bytes, bytearray, IOBase, str, Path],
-        width=None,
-        height=None,
     ):
         data, uri = None, None
         if isinstance(image, IOBase):
@@ -67,26 +65,25 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
             data = image
         else:
             uri = image
-        self._width = width
-        self._height = height
         super().__init__(data=data, uri=uri)
+
+    def _init_size(self):
+        (w, h) = self.to_pil().size
+        self._width = w
+        self._height = h
 
     def width(self):
         if self._width:
             return self._width
         else:
-            (w, h) = self.to_pil().size
-            self._width = w
-            self._height = h
+            self._init_size()
             return self._width
 
     def height(self):
         if self._height:
             return self._height
         else:
-            (w, h) = self.to_pil().size
-            self._width = w
-            self._height = h
+            self._init_size()
             return self._height
 
     @classmethod

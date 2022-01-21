@@ -38,7 +38,7 @@ import numpy as np
 from rikai.mixin import ToNumpy
 from rikai.spark.types import NDArrayType
 
-__all__ = ["wrap", "array", "empty"]
+__all__ = ["view", "array", "empty"]
 
 
 class ndarray(np.ndarray, ToNumpy):  # pylint: disable=invalid-name
@@ -52,8 +52,8 @@ class ndarray(np.ndarray, ToNumpy):  # pylint: disable=invalid-name
         return np.copy(self)
 
 
-def wrap(data: np.ndarray) -> np.ndarray:
-    """Wrap a numpy array to be able to work Spark and Parquet.
+def view(data: np.ndarray) -> np.ndarray:
+    """Create a Spark/Parquet compatible view for a numpy array.
 
     Parameters
     ----------
@@ -63,16 +63,16 @@ def wrap(data: np.ndarray) -> np.ndarray:
     Returns
     -------
     np.ndarray
-        A Numpy array that is compatible with Spark User Defined Type.
+        A Numpy array view that is compatible with Spark User Defined Type.
 
 
     Example
     -------
     >>> import numpy as np
-    >>> from rikai.numpy import wrap
+    >>> from rikai.numpy import view
     >>>
     >>> arr = np.array([1, 2, 3], dtype=np.int64)
-    >>> df = spark.createDataFrame([Row(id=1, mask=wrap(arr))])
+    >>> df = spark.createDataFrame([Row(id=1, mask=view(arr))])
     >>> df.write.format("rikai").save("s3://foo/bar")
     """
     return data.view(ndarray)
@@ -100,4 +100,4 @@ def empty(shape, dtype=float, order="C") -> np.ndarray:
 
     :py:func:`numpy.empty`
     """
-    return wrap(np.empty(shape, dtype=dtype, order=order))
+    return view(np.empty(shape, dtype=dtype, order=order))

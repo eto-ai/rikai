@@ -105,6 +105,8 @@ class NDArrayType(UserDefinedType):
         )
 
     def deserialize(self, datum: Row) -> np.ndarray:
+        import rikai.numpy
+
         return (
             np.frombuffer(datum[2], dtype=np.dtype(datum[0]))
             .reshape(datum[1])

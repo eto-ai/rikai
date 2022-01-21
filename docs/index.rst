@@ -50,6 +50,7 @@ For more details, please read :doc:`quickstart`.
 
    quickstart
    types
+   numpy
    spark
    functions
    sqlml

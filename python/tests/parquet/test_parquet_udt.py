@@ -19,7 +19,6 @@ import numpy as np
 import pytest
 from pyspark.ml.linalg import DenseMatrix, Vectors
 from pyspark.sql import Row
-from pyspark.sql.functions import exp
 from pyspark.sql.session import SparkSession
 from pyspark.sql.types import (
     ArrayType,
@@ -30,6 +29,7 @@ from pyspark.sql.types import (
 )
 
 # Rikai
+import rikai.numpy
 from rikai.parquet import Dataset
 from rikai.spark.types import Box2dType, NDArrayType
 from rikai.testing.asserters import assert_count_equal
@@ -120,7 +120,7 @@ def test_numpy(spark: SparkSession, tmp_path, data_type):
     import rikai
 
     test_dir = str(tmp_path)
-    expected = [{"n": rikai.array(range(4), dtype=data_type)}]
+    expected = [{"n": rikai.numpy.array(range(4), dtype=data_type)}]
 
     df = spark.createDataFrame(
         expected,

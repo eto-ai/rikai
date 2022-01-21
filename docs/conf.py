@@ -80,4 +80,8 @@ intersphinx_mapping = {
     "PyTorch": ("http://pytorch.org/docs/master/", None),
     "Torchvision": ("https://pytorch.org/vision/stable/", None),
     "PIL": ("https://pillow.readthedocs.io/en/stable", None),
+    "tensorflow": (
+        "https://www.tensorflow.org/api_docs/python",
+        "https://github.com/GPflow/tensorflow-intersphinx/raw/master/tf2_py_objects.inv",
+    ),
 }

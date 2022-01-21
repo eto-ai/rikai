@@ -67,10 +67,16 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
             uri = image
         super().__init__(data=data, uri=uri)
 
-    def _init_size(self):
+    def _init_size(self, **kwargs):
+        if kwargs["width"] and kwargs["height"]:
+            self._width = kwargs["width"]
+            self._height = kwargs["height"]
+            return self
+
         (w, h) = self.to_pil().size
         self._width = w
         self._height = h
+        return self
 
     def width(self):
         if not self._width:
@@ -160,7 +166,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
         if uri is None:
             buf = BytesIO()
             img.save(buf, format=format, **kwargs)
-            return Image(buf.getvalue(), width, height)
+            return Image(buf.getvalue())._init_size(width=width, height=height)
 
         parsed = urlparse(normalize_uri(uri))
         if parsed.scheme == "file":
@@ -170,7 +176,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
                 img.save(fobj, format=format, **kwargs)
                 fobj.flush()
                 copy(fobj.name, uri)
-        return Image(uri, width, height)
+        return Image(uri)._init_size(width=width, height=height)
 
     def display(self, **kwargs):
         """

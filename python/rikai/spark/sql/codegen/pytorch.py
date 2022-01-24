@@ -62,35 +62,36 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
         model.to(device)
         model.eval()
 
-        with torch.no_grad():
-            for series in iter:
-                dataset = PandasDataset(
-                    series,
-                    transform=spec.pre_processing,
-                    unpickle=True,
-                    use_pil=True,
-                )
-                results = []
-                for batch in DataLoader(
-                    dataset,
-                    batch_size=batch_size,
-                    num_workers=num_workers,
-                ):
-                    if isinstance(batch, torch.Tensor):
-                        batch = batch.to(device)
-                    predictions = model(batch)
-                    if spec.post_processing:
-                        predictions = spec.post_processing(predictions)
-                    bin_predictions = [_pickler.dumps(p) for p in predictions]
-                    results.extend(bin_predictions)
-                yield pd.Series(results)
-
-        # Release GPU memory
-        # https://blog.paperspace.com/pytorch-memory-multi-gpu-debugging/?ref=tfrecipes
-        if use_gpu:
-            model = model.cpu()
-            del model
-            torch.cuda.empty_cache()
+        try:
+            with torch.no_grad():
+                for series in iter:
+                    dataset = PandasDataset(
+                        series,
+                        transform=spec.pre_processing,
+                        unpickle=True,
+                        use_pil=True,
+                    )
+                    results = []
+                    for batch in DataLoader(
+                        dataset,
+                        batch_size=batch_size,
+                        num_workers=num_workers,
+                    ):
+                        if isinstance(batch, torch.Tensor):
+                            batch = batch.to(device)
+                        predictions = model(batch)
+                        if spec.post_processing:
+                            predictions = spec.post_processing(predictions)
+                        bin_predictions = [_pickler.dumps(p) for p in predictions]
+                        results.extend(bin_predictions)
+                    yield pd.Series(results)
+        finally:
+            # Release GPU memory
+            # https://blog.paperspace.com/pytorch-memory-multi-gpu-debugging/?ref=tfrecipes
+            if use_gpu:
+                model = model.cpu()
+                del model
+                torch.cuda.empty_cache()
 
     return pandas_udf(torch_inference_udf, returnType=BinaryType())
 

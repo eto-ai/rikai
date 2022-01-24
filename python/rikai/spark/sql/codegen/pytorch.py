@@ -82,7 +82,9 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                         predictions = model(batch)
                         if spec.post_processing:
                             predictions = spec.post_processing(predictions)
-                        bin_predictions = [_pickler.dumps(p) for p in predictions]
+                        bin_predictions = [
+                            _pickler.dumps(p) for p in predictions
+                        ]
                         results.extend(bin_predictions)
                     yield pd.Series(results)
         finally:

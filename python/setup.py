@@ -61,7 +61,7 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         "antlr4-python3-runtime==4.8",
-        "ipython",
+        "ipython>=7.3.0",
         "jsonschema",
         "numpy",
         "opencv-python-headless",

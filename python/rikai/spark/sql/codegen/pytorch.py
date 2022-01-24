@@ -43,7 +43,8 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     -------
     A Spark Pandas UDF.
     """
-    use_gpu = spec.options.get("device", "cpu") == "gpu"
+    default_device = "gpu" if torch.cuda.is_available() else "cpu"
+    use_gpu = spec.options.get("device", default_device) == "gpu"
     num_workers = int(
         spec.options.get(
             "num_workers", min(os.cpu_count(), DEFAULT_NUM_WORKERS)
@@ -83,6 +84,13 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                     bin_predictions = [_pickler.dumps(p) for p in predictions]
                     results.extend(bin_predictions)
                 yield pd.Series(results)
+
+        # Release GPU memory
+        # https://blog.paperspace.com/pytorch-memory-multi-gpu-debugging/?ref=tfrecipes
+        if use_gpu:
+            model = model.cpu()
+            del model
+            torch.cuda.empty_cache()
 
     return pandas_udf(torch_inference_udf, returnType=BinaryType())
 

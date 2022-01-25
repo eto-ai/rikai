@@ -126,6 +126,7 @@ WHERE split = "train" LIMIT 100;
 Rikai can use MLflow as its model registry. This allows you to automatically pickup the latest
 model version if you're using the mlflow model registry. Here is a list of supported model flavors:
 + PyTorch (pytorch)
++ Tensorflow (tensorflow)
 + Scikit-learn (sklearn)
 
 ```sql

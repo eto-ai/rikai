@@ -18,10 +18,11 @@ https://pytorch.org/vision/stable/models.html#torchvision.models.detection.ssd30
 
 """
 
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 import torch
 import torch.nn.functional as F
+from torch import Tensor
 from torchvision.models.detection.ssd import SSD
 from torchvision.ops.boxes import batched_nms, clip_boxes_to_image
 
@@ -76,7 +77,7 @@ class SSDClassScoresExtractor(torch.nn.Module):
         features = self.backend.backbone(images.tensors)
         features = list(features.values())
         head_outputs = self.backend.head(features)
-        anchors = self.backend.anchor_generator(images, features)
+        pred_anchors = self.backend.anchor_generator(images, features)
 
         scores = head_outputs["cls_logits"]
         bbox_regression = head_outputs["bbox_regression"]
@@ -85,9 +86,9 @@ class SSDClassScoresExtractor(torch.nn.Module):
         num_classes = pred_scores.size(-1)
         device = pred_scores.device
 
-        detections = []
+        detections: List[Dict[str, Tensor]] = []
         for boxes, scores, anchors, image_shape in zip(
-            bbox_regression, pred_scores, anchors, images.image_sizes
+            bbox_regression, pred_scores, pred_anchors, images.image_sizes
         ):
             boxes = self.backend.box_coder.decode_single(boxes, anchors)
             boxes = clip_boxes_to_image(boxes, image_shape)

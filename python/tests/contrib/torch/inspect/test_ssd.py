@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from pathlib import Path
+
 import torch
 from torchvision.models.detection.ssd import ssd300_vgg16
 from torchvision.transforms import ToTensor
@@ -23,13 +25,13 @@ TEST_IMAGE = Image(
     "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"
 )
 
+model = ssd300_vgg16(pretrained=True)
+model.eval()
+class_scores_extractor = SSDClassScoresExtractor(model)
+class_scores_extractor.eval()
+
 
 def test_predict_value_equal():
-    model = ssd300_vgg16(pretrained=True)
-    model.eval()
-    class_scores_extractor = SSDClassScoresExtractor(model)
-    class_scores_extractor.eval()
-
     batch = [ToTensor()(TEST_IMAGE.to_pil())]
     with torch.no_grad():
         detections = model(batch)[0]
@@ -63,5 +65,22 @@ def test_predict_value_equal():
     )
 
 
-def test_ssd_class_score_module_serialization():
-    pass
+def assert_model_equal(expect: torch.nn.Module, actual: torch.nn.Module):
+    for act, exp in zip(
+        actual.parameters(recurse=True),
+        expect.parameters(recurse=True),
+    ):
+        assert torch.equal(act, exp)
+
+
+def test_ssd_class_score_module_serialization(tmp_path: Path):
+    # test save model
+    torch.save(class_scores_extractor, tmp_path / "model.pt")
+
+    m = torch.load(tmp_path / "model.pt")
+    assert_model_equal(class_scores_extractor, m)
+
+    script_model = torch.jit.script(class_scores_extractor)
+    torch.jit.save(script_model, tmp_path / "script.pt")
+    actual_script_model = torch.jit.load(tmp_path / "script.pt")
+    assert_model_equal(script_model, actual_script_model)

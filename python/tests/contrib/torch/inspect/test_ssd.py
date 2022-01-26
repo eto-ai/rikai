@@ -114,14 +114,15 @@ def test_ssd_class_score_module_mlflow(tmp_path: Path):
 
 
 def test_ssd_class_scores_module_with_spark(spark: SparkSession):
-    rikai.mlflow.pytorch.log_model(
-        class_scores_extractor,
-        "models",
-        SSDClassScoresExtractor.SCHEMA,
-        registered_model_name="ssd_class_scores",
-        pre_processing="rikai.contrib.torch.inspect.ssd.class_scores_extractor_pre_processing",  # noqa: E501
-        post_processing="rikai.contrib.torch.inspect.ssd.class_scores_extractor_post_processing",  # noqa: E501
-    )
+    with mlflow.start_run():
+        rikai.mlflow.pytorch.log_model(
+            class_scores_extractor,
+            "models",
+            SSDClassScoresExtractor.SCHEMA,
+            registered_model_name="ssd_class_scores",
+            pre_processing="rikai.contrib.torch.inspect.ssd.class_scores_extractor_pre_processing",  # noqa: E501
+            post_processing="rikai.contrib.torch.inspect.ssd.class_scores_extractor_post_processing",  # noqa: E501
+        )
 
     spark.sql("CREATE MODEL class_scores USING 'mlflow:/ssd_class_scores'")
     spark.sql("SHOW MODELS").show()

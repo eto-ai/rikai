@@ -18,7 +18,7 @@ https://pytorch.org/vision/stable/models.html#torchvision.models.detection.ssd30
 
 """
 
-from typing import Dict, List, Tuple
+from typing import Callable, Dict, List, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -26,7 +26,14 @@ from torch import Tensor
 from torchvision.models.detection.ssd import SSD
 from torchvision.ops.boxes import batched_nms, clip_boxes_to_image
 
-__all__ = ["SSDClassScoresExtractor"]
+from rikai.contrib.torch.transforms.ssd import pre_processing
+from rikai.types import Box2d
+
+__all__ = [
+    "SSDClassScoresExtractor",
+    "class_scores_extractor_post_processing",
+    "class_scores_extractor_pre_processing",
+]
 
 
 class SSDClassScoresExtractor(torch.nn.Module):
@@ -48,7 +55,7 @@ class SSDClassScoresExtractor(torch.nn.Module):
     """  # noqa: E501
 
     # SCHEMA to be used in Rikai SQL ML
-    SCHEMA = "array<struct<box:box2d, scores:array<float>, labels:array<int>>>"
+    SCHEMA = "array<struct<box:box2d, scores:array<float>, label_ids:array<int>>>"
 
     def __init__(self, backend: SSD, topk_candidates: int = 2):
         super().__init__()
@@ -151,3 +158,32 @@ class SSDClassScoresExtractor(torch.nn.Module):
             detections, images.image_sizes, original_image_sizes
         )
         return detections
+
+
+class_scores_extractor_pre_processing = pre_processing
+
+
+def class_scores_extractor_post_processing(
+    options: Dict[str, str]
+) -> Callable:
+    def post_process_func(batch):
+        results = []
+        for predicts in batch:
+            predict_result = []
+            for box, label, score in zip(
+                predicts["boxes"].tolist(),
+                predicts["labels"].tolist(),
+                predicts["scores"].tolist(),
+            ):
+                predict_result.append(
+                    {
+                        "box": Box2d(*box),
+                        "label_ids": label,
+                        "scores": score,
+                    }
+                )
+
+            results.append(predict_result)
+        return results
+
+    return post_process_func

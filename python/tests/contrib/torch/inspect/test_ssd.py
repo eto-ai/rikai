@@ -16,10 +16,23 @@ from pathlib import Path
 
 import mlflow
 import torch
+from pyspark.sql import SparkSession, Row
+from pyspark.sql.types import (
+    StructType,
+    ArrayType,
+    StructField,
+    FloatType,
+    IntegerType,
+)
 from torchvision.models.detection.ssd import ssd300_vgg16
 from torchvision.transforms import ToTensor
 
-from rikai.contrib.torch.inspect.ssd import SSDClassScoresExtractor
+import rikai
+from rikai.contrib.torch.inspect.ssd import (
+    SSDClassScoresExtractor,
+    pre_processing,
+)
+from rikai.spark.types import Box2dType
 from rikai.types import Image
 
 TEST_IMAGE = Image(
@@ -98,3 +111,47 @@ def test_ssd_class_score_module_mlflow(tmp_path: Path):
 
     m = mlflow.pytorch.load_model(f"models:/classes/1")
     assert_model_equal(m, class_scores_extractor)
+
+
+def test_ssd_class_scores_module_with_spark(spark: SparkSession):
+    rikai.mlflow.pytorch.log_model(
+        class_scores_extractor,
+        "models",
+        SSDClassScoresExtractor.SCHEMA,
+        registered_model_name="ssd_class_scores",
+        pre_processing="rikai.contrib.torch.inspect.ssd.class_scores_extractor_pre_processing",
+        post_processing="rikai.contrib.torch.inspect.ssd.class_scores_extractor_post_processing",
+    )
+
+    spark.sql("CREATE MODEL class_scores USING 'mlflow:/ssd_class_scores'")
+    spark.sql("SHOW MODELS").show()
+
+    spark.createDataFrame([Row(image=TEST_IMAGE)]).createOrReplaceTempView(
+        "images"
+    )
+
+    df = spark.sql(
+        "SELECT ML_PREDICT(class_scores, image) as confidence FROM images"
+    )
+    df.cache()
+    df.show()
+
+    assert df.schema == StructType(
+        [
+            StructField(
+                "confidence",
+                ArrayType(
+                    StructType(
+                        [
+                            StructField("box", Box2dType()),
+                            StructField("scores", ArrayType(FloatType())),
+                            StructField("label_ids", ArrayType(IntegerType())),
+                        ]
+                    )
+                ),
+            )
+        ]
+    )
+
+    assert df.count() == 1
+    assert df.selectExpr("explode(confidence)").count() > 1

@@ -30,7 +30,7 @@ __all__ = ["SSDClassScoresExtractor"]
 
 
 class SSDClassScoresExtractor(torch.nn.Module):
-    """Extracts the score (confidence) of each class for
+    """Extracts the scores (confidences) of each class for
     all the detected bounding box.
 
     Parameters
@@ -42,6 +42,9 @@ class SSDClassScoresExtractor(torch.nn.Module):
 
     Returns
     -------
+    [Dict[str, Tensor]]
+        With the form of
+        ``{"boxes": FloatTensor[N, 4], "labels": Int64Tensor[N, k], "scores": Tensor[N, k]}``
     """
 
     # SCHEMA to be used in Rikai SQL ML

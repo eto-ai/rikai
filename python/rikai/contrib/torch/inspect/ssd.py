@@ -55,7 +55,9 @@ class SSDClassScoresExtractor(torch.nn.Module):
     """  # noqa: E501
 
     # SCHEMA to be used in Rikai SQL ML
-    SCHEMA = "array<struct<box:box2d, scores:array<float>, label_ids:array<int>>>"
+    SCHEMA = (
+        "array<struct<box:box2d, scores:array<float>, label_ids:array<int>>>"
+    )
 
     def __init__(self, backend: SSD, topk_candidates: int = 2):
         super().__init__()

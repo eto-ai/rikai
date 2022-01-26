@@ -15,10 +15,10 @@
 from pathlib import Path
 
 import numpy as np
+import PIL
 from pyspark.ml.linalg import DenseMatrix
 from pyspark.sql import Row, SparkSession
 from pyspark.sql.functions import udf
-import PIL
 
 # Rikai
 from rikai.numpy import view

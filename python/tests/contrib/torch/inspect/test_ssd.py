@@ -30,7 +30,6 @@ from torchvision.transforms import ToTensor
 import rikai
 from rikai.contrib.torch.inspect.ssd import (
     SSDClassScoresExtractor,
-    pre_processing,
 )
 from rikai.spark.types import Box2dType
 from rikai.types import Image
@@ -51,20 +50,10 @@ def test_predict_value_equal():
         detections = model(batch)[0]
         class_scores = class_scores_extractor(batch)[0]
 
-    # In torchvision 0.11.0, there is a bug in the order to find max value
+    # In torchvision 0.11.0, there is a bug in the order of finding max value
     # of a label.
     correct_idx = detections["scores"] == class_scores["scores"][:, 0]
     assert len(correct_idx) > len(detections["scores"]) * 0.8
-
-    print("BUG FROM PYTORCH")
-    print(
-        f"SCORES: pytorch: {detections['scores'][~correct_idx]},"
-        f" we got: {class_scores['scores'][~correct_idx]}"
-    )
-    print(
-        f"LABELS: pytorch: {detections['labels'][~correct_idx]}, "
-        f" we got: {class_scores['labels'][~correct_idx]}"
-    )
 
     assert torch.equal(
         detections["boxes"][correct_idx], class_scores["boxes"][correct_idx]

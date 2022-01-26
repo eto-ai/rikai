@@ -75,6 +75,8 @@ class SSDClassScoresExtractor(torch.nn.Module):
 
         # Reuse the code in torchvision's SSD.forward(), but returns multiple
         # classes and scores for each box.
+        # TODO(GH-517): abstract the confidence extraction code for multiple
+        #       torchvision models.
 
         # get the original image sizes
         original_image_sizes: List[Tuple[int, int]] = []

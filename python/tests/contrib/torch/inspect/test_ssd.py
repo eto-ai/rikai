@@ -14,6 +14,7 @@
 
 from pathlib import Path
 
+import mlflow
 import torch
 from torchvision.models.detection.ssd import ssd300_vgg16
 from torchvision.transforms import ToTensor
@@ -84,3 +85,13 @@ def test_ssd_class_score_module_serialization(tmp_path: Path):
     torch.jit.save(script_model, tmp_path / "script.pt")
     actual_script_model = torch.jit.load(tmp_path / "script.pt")
     assert_model_equal(script_model, actual_script_model)
+
+
+def test_ssd_class_score_module_mlflow(tmp_path: Path):
+    tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
+    mlflow.set_tracking_uri(tracking_uri)
+
+    mlflow.pytorch.log_model(class_scores_extractor, "model", registered_model_name="classes")
+
+    m = mlflow.pytorch.load_model(f"models:/classes/1")
+    assert_model_equal(m, class_scores_extractor)

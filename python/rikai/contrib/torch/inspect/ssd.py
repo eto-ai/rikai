@@ -18,7 +18,7 @@ https://pytorch.org/vision/stable/models.html#torchvision.models.detection.ssd30
 
 """
 
-from typing import List
+from typing import List, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -44,6 +44,7 @@ class SSDClassScoresExtractor(torch.nn.Module):
     -------
     """
 
+    # SCHEMA to be used in Rikai SQL ML
     SCHEMA = "array<struct<box:box2d, scores:array<float>, labels:array<int>>>"
 
     def __init__(self, backend: SSD, topk_candidates: int = 2):
@@ -59,6 +60,13 @@ class SSDClassScoresExtractor(torch.nn.Module):
     ):
         if self.training:
             raise ValueError("This feature extractor only supports eval mode.")
+
+        # get the original image sizes
+        original_image_sizes: List[Tuple[int, int]] = []
+        for img in images:
+            val = img.shape[-2:]
+            assert len(val) == 2
+            original_image_sizes.append((val[0], val[1]))
 
         images, _ = self.backend.transform(images, None)
 
@@ -93,6 +101,7 @@ class SSDClassScoresExtractor(torch.nn.Module):
                 score = score[keep_idxs]
                 all_scores = scores[keep_idxs]
                 box = boxes[keep_idxs]
+
                 # keep only topk scoring predictions
                 num_topk = min(self.backend.topk_candidates, score.size(0))
                 score, idxs = score.topk(num_topk)
@@ -102,6 +111,14 @@ class SSDClassScoresExtractor(torch.nn.Module):
                 image_boxes.append(box)
                 image_scores.append(score)
                 image_all_scores.append(all_scores)
+                image_labels.append(
+                    torch.full_like(
+                        score,
+                        fill_value=label,
+                        dtype=torch.int64,
+                        device=device,
+                    )
+                )
 
             image_boxes = torch.cat(image_boxes, dim=0)
             image_scores = torch.cat(image_scores, dim=0)
@@ -116,9 +133,15 @@ class SSDClassScoresExtractor(torch.nn.Module):
                 self.backend.nms_thresh,
             )
             keep = keep[: self.backend.detections_per_img]
-            # print(keep)
-            print(image_boxes[keep], scores.shape, scores[keep, 1:].shape)
-            print(scores[keep, 1:][0])
-            print(image_all_scores[keep], image_all_scores[keep].shape)
-            print(image_all_scores[keep, 1:].topk(2))
+            top_scores, idx = image_all_scores[keep, 1:].topk(2)
+            detections.append(
+                {
+                    "boxes": image_boxes[keep],
+                    "scores": top_scores,
+                    "labels": idx + 1,
+                }
+            )
+        detections = self.backend.transform.postprocess(
+            detections, images.image_sizes, original_image_sizes
+        )
         return detections

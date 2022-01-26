@@ -45,7 +45,7 @@ class SSDClassScoresExtractor(torch.nn.Module):
     [Dict[str, Tensor]]
         With the form of
         ``{"boxes": FloatTensor[N, 4], "labels": Int64Tensor[N, k], "scores": Tensor[N, k]}``
-    """
+    """  # noqa: E501
 
     # SCHEMA to be used in Rikai SQL ML
     SCHEMA = "array<struct<box:box2d, scores:array<float>, labels:array<int>>>"

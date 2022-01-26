@@ -16,9 +16,9 @@
 Rikai SQL ML
 """
 
+import os
 import tempfile
 import warnings
-import os
 from typing import Any, Optional
 
 CONF_MLFLOW_TRACKING_URI = "spark.rikai.sql.ml.registry.mlflow.tracking_uri"

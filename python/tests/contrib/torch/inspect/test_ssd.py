@@ -11,13 +11,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import torch
-
-from rikai.types import Image
-from rikai.contrib.torch.inspect.ssd import SSDClassScoresExtractor
-
 from torchvision.models.detection.ssd import ssd300_vgg16
 from torchvision.transforms import ToTensor
+
+from rikai.contrib.torch.inspect.ssd import SSDClassScoresExtractor
+from rikai.types import Image
 
 TEST_IMAGE = Image(
     "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"
@@ -61,3 +61,7 @@ def test_predict_value_equal():
         detections["labels"][correct_idx],
         class_scores["labels"][correct_idx][:, 0],
     )
+
+
+def test_ssd_class_score_module_serialization():
+    pass

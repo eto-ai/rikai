@@ -22,9 +22,8 @@ from typing import List, Tuple
 
 import torch
 import torch.nn.functional as F
-from torchvision.ops.boxes import batched_nms, clip_boxes_to_image
 from torchvision.models.detection.ssd import SSD
-
+from torchvision.ops.boxes import batched_nms, clip_boxes_to_image
 
 __all__ = ["SSDClassScoresExtractor"]
 
@@ -60,6 +59,9 @@ class SSDClassScoresExtractor(torch.nn.Module):
     ):
         if self.training:
             raise ValueError("This feature extractor only supports eval mode.")
+
+        # Reuse the code in torchvision's SSD.forward(), but returns multiple
+        # classes and scores for each box.
 
         # get the original image sizes
         original_image_sizes: List[Tuple[int, int]] = []

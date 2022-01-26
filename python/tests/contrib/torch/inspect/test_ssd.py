@@ -91,9 +91,10 @@ def test_ssd_class_score_module_mlflow(tmp_path: Path):
     tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
     mlflow.set_tracking_uri(tracking_uri)
 
-    mlflow.pytorch.log_model(
-        class_scores_extractor, "model", registered_model_name="classes"
-    )
+    with mlflow.start_run():
+        mlflow.pytorch.log_model(
+            class_scores_extractor, "model", registered_model_name="classes"
+        )
 
     m = mlflow.pytorch.load_model(f"models:/classes/1")
     assert_model_equal(m, class_scores_extractor)

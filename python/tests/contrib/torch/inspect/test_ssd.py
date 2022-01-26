@@ -12,6 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from rikai.types import Image
+
+TEST_IMAGE = Image("http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg")
 
 def test_predict_value_equal():
     pass

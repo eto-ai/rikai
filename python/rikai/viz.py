@@ -198,4 +198,5 @@ class Text(Drawable):
         self.color = color
 
     def _render(self, render: Renderer, **kwargs):
-        return render.text(self.xy, self.text, color=self.color, **kwargs)
+        kwargs["color"] = kwargs.get("color", self.color)
+        return render.text(self.xy, self.text, **kwargs)

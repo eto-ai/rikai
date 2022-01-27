@@ -150,7 +150,7 @@ class SSDClassScoresExtractor(torch.nn.Module):
                 self.backend.nms_thresh,
             )
             keep = keep[: self.backend.detections_per_img]
-            top_scores, idx = image_all_scores[keep, 1:].topk(2)
+            top_scores, idx = image_all_scores[keep, 1:].topk(self.topk_candidates)
             detections.append(
                 {
                     "boxes": image_boxes[keep],

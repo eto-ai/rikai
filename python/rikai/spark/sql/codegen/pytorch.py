@@ -31,6 +31,19 @@ DEFAULT_BATCH_SIZE = 4
 _pickler = CloudPickleSerializer()
 
 
+def collate_fn(batch):
+    return batch
+
+
+def move_tensor_to_device(data, device):
+    if isinstance(data, torch.Tensor):
+        return data.to(device)
+    elif isinstance(data, list):
+        return [move_tensor_to_device(elem, device) for elem in data]
+    # Do nothing
+    return data
+
+
 def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     """Construct a UDF to run pytorch model.
 
@@ -76,9 +89,9 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                         dataset,
                         batch_size=batch_size,
                         num_workers=num_workers,
+                        collate_fn=collate_fn,
                     ):
-                        if isinstance(batch, torch.Tensor):
-                            batch = batch.to(device)
+                        batch = move_tensor_to_device(batch, device)
                         predictions = model(batch)
                         if spec.post_processing:
                             predictions = spec.post_processing(predictions)

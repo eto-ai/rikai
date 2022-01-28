@@ -48,7 +48,7 @@ def post_processing(options: Dict[str, Any]) -> Callable:
                 predict_result.append(
                     {
                         "box": Box2d(*box),
-                        "label_id": label,
+                        "label": label,
                         "score": score,
                     }
                 )

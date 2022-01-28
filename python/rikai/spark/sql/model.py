@@ -139,7 +139,11 @@ class SpecPayload(ABC):
     def model_spec(self) -> "ModelSpec":
         if self.model_type:
             return parse_model_spec(self)
-        return AnnoymouseModelSpec(self._spec.get("schema", None), self.pre_processing, self.post_processing)
+        return AnonymousModelSpec(
+            self._spec.get("schema", None),
+            self.pre_processing,
+            self.post_processing,
+        )
 
     @property
     def model_uri(self) -> str:
@@ -226,7 +230,7 @@ class ModelSpec(ToDict, ABC):
         pass
 
 
-class AnnoymouseModelSpec(ModelSpec):
+class AnonymousModelSpec(ModelSpec):
     def __init__(
         self,
         schema: str,

@@ -59,9 +59,7 @@ def generate_udf(payload: SpecPayload):
     options = payload.options
     use_gpu = options.get("device", default_device) == "gpu"
     num_workers = int(
-        options.get(
-            "num_workers", min(os.cpu_count(), DEFAULT_NUM_WORKERS)
-        )
+        options.get("num_workers", min(os.cpu_count(), DEFAULT_NUM_WORKERS))
     )
     batch_size = int(options.get("batch_size", DEFAULT_BATCH_SIZE))
 

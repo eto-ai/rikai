@@ -33,9 +33,7 @@ class FasterRCNNSpec(ModelSpec):
         self.spec: Optional[SpecPayload] = None
 
     def to_dict(self) -> dict:
-        return {
-
-        }
+        return {}
         pass
 
     def schema(self) -> str:
@@ -86,5 +84,6 @@ class FasterRCNNSpec(ModelSpec):
         model = self.model.cpu()
         del model
         torch.cuda.empty_cache()
+
 
 SPEC = FasterRCNNSpec()

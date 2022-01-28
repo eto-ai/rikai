@@ -97,7 +97,7 @@ def convert_instance(
 
     images = [
         {
-            "id": img[id],
+            "id": img["id"],
             "date_captured": img["date_captured"],
             "width": img["width"],
             "height": img["height"],

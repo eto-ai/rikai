@@ -14,15 +14,14 @@
 
 from typing import Iterator
 
-import numpy as np
 import pandas as pd
 import tensorflow as tf
 from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql.functions import pandas_udf
 from pyspark.sql.types import BinaryType
 
+from rikai.pytorch.pandas import PandasDataset
 from rikai.spark.sql.codegen.base import ModelSpec
-from rikai.torch.pandas import PandasDataset
 from rikai.types import Image
 
 DEFAULT_BATCH_SIZE = 4

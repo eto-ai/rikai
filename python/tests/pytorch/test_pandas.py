@@ -16,7 +16,7 @@
 import numpy as np
 import pandas as pd
 
-from rikai.torch.pandas import PandasDataset
+from rikai.pytorch.pandas import PandasDataset
 from rikai.types.geometry import Box2d
 
 

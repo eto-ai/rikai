@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 """Pytorch Dataset and DataLoader"""
+
 import os
 import uuid
 from pathlib import Path
@@ -22,11 +23,10 @@ from typing import Callable, List, Union
 import torch
 from torch.utils.data import IterableDataset
 
-import rikai.parquet
-
 # Rikai
+import rikai.parquet
+from rikai.pytorch.transforms import RikaiToTensor
 from rikai.spark.utils import df_to_rikai
-from rikai.torch.transforms import RikaiToTensor
 
 __all__ = ["Dataset"]
 

@@ -16,5 +16,4 @@ from .torchvision import ObjectDetectionModelSpec
 
 __all__ = ["SPEC"]
 
-
-SPEC = ObjectDetectionModelSpec("faster_rcnn_resnet50_fpn")
+SPEC = ObjectDetectionModelSpec("ssd")

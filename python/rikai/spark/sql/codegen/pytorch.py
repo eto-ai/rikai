@@ -25,7 +25,7 @@ from torch.utils.data import DataLoader
 from rikai.io import open_uri
 from rikai.spark.sql.models import ModelSpec
 from rikai.pytorch.pandas import PandasDataset
-from rikai.spark.sql.model import SpecPayload
+from rikai.spark.sql.model import SpecPayload, AnonymousModelType
 
 DEFAULT_NUM_WORKERS = 8
 DEFAULT_BATCH_SIZE = 4
@@ -69,7 +69,12 @@ def generate_udf(payload: SpecPayload):
         iter: Iterator[pd.DataFrame],
     ) -> return_type:
         device = torch.device("cuda" if use_gpu else "cpu")
+        print("WHAT MODEL IS: ", type(model))
         model.load_model(payload, device=device)
+        if isinstance(model, AnonymousModelType):
+            # We will remove them after AnonymousModelType deprecation
+            model.model.eval()
+            model.model.to(device)
 
         try:
             with torch.no_grad():

@@ -201,15 +201,15 @@ class SpecPayload(ABC):
 
 class ModelType(ABC):
     @abstractmethod
+    def load_model(self, spec: SpecPayload, **kwargs):
+        pass
+
+    @abstractmethod
     def schema(self) -> str:
         pass
 
     def dataType(self) -> "pyspark.sql.types.DataType":
         return parse_schema(self.schema())
-
-    @abstractmethod
-    def load_model(self, raw_spec: SpecPayload, device: str = None):
-        pass
 
     @abstractmethod
     def transform(self) -> Callable:
@@ -239,17 +239,16 @@ class AnonymousModelType(ModelType):
 
         warnings.warn(
             "Using schema and pre_processing/post_processing explicitly"
-            "is deprecated. Please migrate to an concrete ModelType"
+            "is deprecated and will be removed in Rikai 0.2. "
+            "Please migrate to an concrete ModelType."
         )
 
     def schema(self) -> str:
         return self._schema
 
-    def load_model(self, raw_spec: SpecPayload, device: str = None):
-        # TODO: This interface is too tight to Pytorch
-        self.model = raw_spec.load_model()
-        self.model.to(device)
-        self.model.eval()
+    def load_model(self, spec: SpecPayload, **kwargs):
+        self.model = spec.load_model()
+        self.spec = spec
 
     def transform(self) -> Callable:
         return self.pre_processing

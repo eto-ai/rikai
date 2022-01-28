@@ -20,8 +20,9 @@ from typing import Any, Callable, Optional
 import torch.nn
 from torchvision.transforms import ToTensor
 
-from rikai.spark.sql.model import ModelType, SpecPayload
+from rikai.spark.sql.model import SpecPayload
 from rikai.types import Box2d
+from . import TorchModelType
 
 __all__ = ["ObjectDetectionModelType"]
 
@@ -29,7 +30,7 @@ __all__ = ["ObjectDetectionModelType"]
 DEFAULT_MIN_SCORE = 0.5
 
 
-class ObjectDetectionModelType(ModelType):
+class ObjectDetectionModelType(TorchModelType):
     """Shared ModelSpec for object detections in Torchvision
 
     https://pytorch.org/vision/stable/models.html
@@ -37,19 +38,10 @@ class ObjectDetectionModelType(ModelType):
 
     def __init__(self, name: str):
         super().__init__()
-        self.model: Optional[torch.nn.Module] = None
-        self.spec: Optional[SpecPayload] = None
+        self.name = name
 
     def schema(self) -> str:
         return "array<struct<box:box2d, score:float, label:int>>"
-
-    def load_model(self, raw_spec: SpecPayload, device=None):
-        self.model = raw_spec.load_model()
-        self.model.eval()
-        if device:
-            self.model = self.model.to(device)
-        self.spec = raw_spec
-        return self
 
     def transform(self) -> Callable:
         return ToTensor()

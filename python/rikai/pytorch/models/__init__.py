@@ -13,3 +13,25 @@
 #  limitations under the License.
 
 """Rikai-implemented PyTorch models and executors."""
+from abc import ABC
+from typing import Optional
+
+import torch
+from rikai.spark.sql.model import ModelType, SpecPayload
+
+__all__ = ["TorchModelType"]
+
+
+class TorchModelType(ModelType, ABC):
+    """Base ModelType for PyTorch models."""
+
+    def __init__(self):
+        self.model: Optional[torch.nn.Module] = None
+        self.spec: Optional[SpecPayload] = None
+
+    def load_model(self, spec: SpecPayload, **kwargs):
+        self.model = spec.load_model()
+        self.model.eval()
+        if "device" in kwargs:
+            self.model.to(kwargs.get("device"))
+        self.spec = spec

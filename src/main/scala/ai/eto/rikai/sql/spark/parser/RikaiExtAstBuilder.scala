@@ -56,7 +56,7 @@ private[parser] class RikaiExtAstBuilder
     }
     val modelType: Option[String] = ctx.modeltype match {
       case null => None
-      case _ => Option(ctx.modeltype.getText)
+      case _    => Option(ctx.modeltype.getText)
     }
     val ifNotExists: Boolean = List(ctx.IF(), ctx.NOT(), ctx.EXISTS())
       .map(x => x != null)

@@ -54,7 +54,9 @@ class RikaiExtAstSqlParserTest extends AnyFunSuite {
   }
 
   test("parse model type") {
-    val cmd = parser.parsePlan("CREATE MODEL foo FLAVOR pytorch MODEL_TYPE ssd USING 'abc'")
+    val cmd = parser.parsePlan(
+      "CREATE MODEL foo FLAVOR pytorch MODEL_TYPE ssd USING 'abc'"
+    )
     assert(cmd.isInstanceOf[CreateModelCommand])
     val create = cmd.asInstanceOf[CreateModelCommand]
     assert(create.modelType.contains("ssd"))

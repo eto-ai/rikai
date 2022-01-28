@@ -113,7 +113,7 @@ class MlflowCatalogTest
                 Seq(
                   StructField("box", Box2dType, nullable = true),
                   StructField("score", FloatType, nullable = true),
-                  StructField("label_id", IntegerType, nullable = true)
+                  StructField("label", IntegerType, nullable = true)
                 )
               )
             ),

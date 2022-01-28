@@ -27,9 +27,9 @@ from torch.utils.data import DataLoader
 from utils import check_ml_predict
 
 from rikai.contrib.torch.detections import OUTPUT_SCHEMA
+from rikai.pytorch.pandas import PandasDataset
 from rikai.spark.sql.codegen.fs import FileModelSpec
 from rikai.spark.sql.exceptions import SpecError
-from rikai.torch.pandas import PandasDataset
 from rikai.types import Image
 
 

@@ -24,8 +24,8 @@ When use the rikai data in training, the serialized numpy data will be
 automatically converted into the appropriate format, i.e.,
 :py:class:`torch.Tensor` in Pytorch:
 
->>> from rikai.torch import DataLoader
->>> data_loader = DataLoader("s3://path/to/features")
+>>> from rikai.pytorch.data import Dataset
+>>> data_loader = Dataset("s3://path/to/features")
 >>> next(data_loader)
 {"mask": tensor([1, 2, 3])}
 

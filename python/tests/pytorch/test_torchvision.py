@@ -22,8 +22,8 @@ import torch
 from pyspark.sql import DataFrame, Row, SparkSession
 from torchvision import transforms
 
-from rikai.torch.vision import Dataset
-from rikai.types import Box2d, Image
+from rikai.pytorch.vision import Dataset
+from rikai.types import Image
 
 
 def test_vision_dataset(spark: SparkSession, tmp_path: Path):

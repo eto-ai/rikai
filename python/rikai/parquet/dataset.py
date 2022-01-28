@@ -76,9 +76,9 @@ class Dataset:
 
     Notes
     -----
-    - Typically user should not directly use this class. Instead users are
+    - Typically user should not directly use this class. Instead, users are
       encouraged to use framework-native readers, for example, using
-      :py:class:`rikai.torch.data.DataLoader` in
+      :py:class:`rikai.pytorch.data.Dataset` in
       `Pytorch <https://pytorch.org/>`_
     """
 

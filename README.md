@@ -90,7 +90,7 @@ Train dataset in `Pytorch`
 ```python
 from torch.utils.data import DataLoader
 from torchvision import transforms as T
-from rikai.torch.vision import Dataset
+from rikai.pytorch.vision import Dataset
 
 transform = T.Compose([
    T.Resize(640),
@@ -109,7 +109,7 @@ loader = DataLoader(
     num_workers=8,
 )
 for batch in loader:
-    predicts = model(batch.to(cuda))
+    predicts = model(batch.to("cuda"))
 ```
 
 Using a ML model in Spark SQL (**experiemental**)

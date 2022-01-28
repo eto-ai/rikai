@@ -16,7 +16,7 @@ import numpy as np
 import tensorflow as tf
 from pyspark.sql import Row
 
-from rikai.tf.data import from_rikai
+from rikai.tensorflow.data import from_rikai
 from rikai.types import Image
 
 

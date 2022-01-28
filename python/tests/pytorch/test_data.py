@@ -23,7 +23,7 @@ from torch.utils.data import DataLoader as torchDataLoader
 
 # Rikai
 from rikai.numpy import view
-from rikai.torch import Dataset
+from rikai.pytorch import Dataset
 from rikai.types import Image
 
 

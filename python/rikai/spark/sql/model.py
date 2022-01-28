@@ -21,11 +21,12 @@ from jsonschema.validators import validate
 
 from rikai.internal.reflection import find_func
 from rikai.logging import logger
-from rikai.mixin import ToDict
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
 
+
 __all__ = ["SpecPayload", "ModelSpec"]
+
 
 # JSON schema specification for the model payload specifications
 # used to validate model spec input
@@ -203,7 +204,7 @@ class SpecPayload(ABC):
         return f(self.options)
 
 
-class ModelSpec(ToDict, ABC):
+class ModelSpec(ABC):
     @abstractmethod
     def schema(self) -> str:
         pass
@@ -258,6 +259,3 @@ class AnonymousModelSpec(ModelSpec):
         if self.post_processing:
             batch = self.post_processing(batch)
         return batch
-
-    def to_dict(self) -> dict:
-        pass

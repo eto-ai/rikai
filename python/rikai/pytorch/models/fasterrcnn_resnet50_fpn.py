@@ -32,10 +32,6 @@ class FasterRCNNSpec(ModelSpec):
         self.model: Optional[torch.nn.Module] = None
         self.spec: Optional[SpecPayload] = None
 
-    def to_dict(self) -> dict:
-        return {}
-        pass
-
     def schema(self) -> str:
         return "array<struct<box:box2d, score:float, label:int>>"
 

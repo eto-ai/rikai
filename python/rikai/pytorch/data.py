@@ -60,7 +60,7 @@ class Dataset(IterableDataset):
     Example
     -------
 
-    >>> from rikai.torch.data import Dataset
+    >>> from rikai.pytorch.data import Dataset
     >>> from torch.utils.data import DataLoader
     >>>
     >>> dataset = Dataset("dataset", columns=["image", "label_id"])

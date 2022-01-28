@@ -22,12 +22,14 @@ from __future__ import annotations
 import json
 import os
 from itertools import islice
-from typing import Optional
+from pathlib import Path
+from typing import Optional, Union
 
 from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.functions import col, lit
+from pyspark.sql.functions import col, collect_list, lit, struct, udf
 from pyspark.sql.types import (
     ArrayType,
+    DoubleType,
     FloatType,
     IntegerType,
     LongType,
@@ -41,11 +43,25 @@ try:
 except ImportError as exc:
     raise ImportError("Please install pycocotools") from exc
 
+from rikai.io import open_uri
 from rikai.spark.functions import image_copy
-from rikai.spark.types import Box2dType, ImageType
-from rikai.types import Box2d, Image
+from rikai.spark.types import Box2dType, ImageType, MaskType
+from rikai.types import Box2d, Image, Mask
 
 __all__ = ["convert"]
+
+ANNOTATION_TYPE = StructType(
+    [
+        StructField("image_id", IntegerType()),
+        StructField("area", DoubleType()),
+        StructField("label_id", IntegerType()),
+        StructField("ann_id", LongType()),
+        StructField("bbox", Box2dType()),
+        StructField("segmentation", MaskType()),
+        StructField("supercategory", StringType()),
+        StructField("label", StringType()),
+    ]
+)
 
 
 def load_categories(annotation_file):
@@ -53,6 +69,90 @@ def load_categories(annotation_file):
     with open(annotation_file) as fobj:
         ann = json.load(fobj)
         return {c["id"]: c for c in ann["categories"]}
+
+
+@udf(returnType=ArrayType(ANNOTATION_TYPE))
+def rescale_bbox(annotations, height, width):
+    """Rescale bounding box to relative scale [0, 1] to the image."""
+    ret = []
+    for ann in annotations:
+        ann = ann.asDict()
+        ann["bbox"] = ann["bbox"] / (width, height)
+        ret.append(ann)
+    return ret
+
+
+def convert_instance(
+    spark: SparkSession,
+    annotation_json: Union[str, Path],
+    image_dir: Union[str, Path],
+) -> DataFrame:
+
+    with open_uri(annotation_json) as fobj:
+        data = json.load(fobj)
+    images_map = {img["id"]: img for img in data["images"]}
+    total_images = len(images_map)
+
+    categories_map = {c["id"]: c for c in data["categories"]}
+
+    image_df = spark.createDataFrame(
+        data["images"],
+        schema=StructType(
+            [
+                StructField("id", IntegerType()),
+                StructField("date_captured", StringType()),
+                StructField("width", IntegerType()),
+                StructField("height", IntegerType()),
+                StructField("file_name", StringType()),
+            ]
+        ),
+    ).repartition(max(1, total_images // 500))
+
+    annotations_df = spark.createDataFrame(
+        [
+            {
+                "image_id": ann["image_id"],
+                "area": float(ann["area"]),
+                "label_id": ann["category_id"],
+                "ann_id": ann["id"],
+                "bbox": Box2d.from_top_left(*ann["bbox"]),
+                "segmentation": Mask.from_coco_rle(
+                    ann["segmentation"]["counts"],
+                    height=ann["segmentation"]["size"][0],
+                    width=ann["segmentation"]["size"][1],
+                )
+                if ann["iscrowd"]
+                else Mask.from_polygon(
+                    ann["segmentation"],
+                    height=images_map[ann["image_id"]]["height"],
+                    width=images_map[ann["image_id"]]["width"],
+                ),
+                "label": categories_map[ann["category_id"]]["name"],
+                "supercategory": categories_map[ann["category_id"]][
+                    "supercategory"
+                ],
+            }
+            for ann in data["annotations"]
+        ],
+        schema=ANNOTATION_TYPE,
+    )
+
+    annotations_per_image = annotations_df.groupBy("image_id").agg(
+        collect_list(struct(annotations_df.columns)).alias("raw_annotations")
+    )
+
+    # Join annotations first then load images into the dataset
+    images_meta_df = (
+        image_df.join(
+            annotations_per_image,
+            image_df.id == annotations_per_image.image_id,
+        )
+        .withColumn(
+            "annotations", rescale_bbox("raw_annotations", "height", "width")
+        )
+        .drop("id", "raw_annotations")
+    )
+    return images_meta_df
 
 
 def convert(

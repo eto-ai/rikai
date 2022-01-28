@@ -239,7 +239,8 @@ class AnonymousModelType(ModelType):
 
         warnings.warn(
             "Using schema and pre_processing/post_processing explicitly"
-            "is deprecated. Please migrate to an concrete ModelType")
+            "is deprecated. Please migrate to an concrete ModelType"
+        )
 
     def schema(self) -> str:
         return self._schema

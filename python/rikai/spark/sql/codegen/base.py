@@ -55,7 +55,7 @@ def udf_from_spec(spec: SpecPayload):
     Parameters
     ----------
     spec : SpecPayload
-        A model spec
+       Model spec payload
 
     Returns
     -------

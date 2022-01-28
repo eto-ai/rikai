@@ -27,6 +27,12 @@ DEFAULT_MIN_SCORE = 0.5
 
 
 class FasterRCNNSpec(ModelSpec):
+    """Model Spec for Faster-RCNN model in Torchvision
+
+    https://pytorch.org/vision/stable/models.html#object-detection-instance-segmentation-and-person-keypoint-detection
+
+    """
+
     def __init__(self):
         super().__init__()
         self.model: Optional[torch.nn.Module] = None

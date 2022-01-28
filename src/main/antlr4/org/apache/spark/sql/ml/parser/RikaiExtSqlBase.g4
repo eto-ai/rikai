@@ -22,6 +22,7 @@ singleStatement
 statement
     : CREATE (OR REPLACE)? MODEL (IF NOT EXISTS)? model=qualifiedName
       (FLAVOR flavor=identifier)?
+      (MODEL_TYPE modeltype=qualifiedName)?
       (PREPROCESSOR preprocess=processorClause)?
       (POSTPROCESSOR postprocess=processorClause)?
       (OPTIONS optionList)?
@@ -46,7 +47,7 @@ quotedIdentifier
     ;
 
 nonReserved
-    : CREATE | DESC | DESCRIBE | MODEL | MODELS | OPTIONS | REPLACE
+    : CREATE | DESC | DESCRIBE | MODEL | MODEL_TYPE | MODELS | OPTIONS | REPLACE
     ;
 
 ARRAY: 'ARRAY';
@@ -61,6 +62,7 @@ FLAVOR: 'FLAVOR';
 IF: 'IF';
 LIKE: 'LIKE';
 MODEL: 'MODEL';
+MODEL_TYPE: 'MODEL_TYPE';
 MODELS: 'MODELS';
 NOT: 'NOT';
 OPTIONS: 'OPTIONS';

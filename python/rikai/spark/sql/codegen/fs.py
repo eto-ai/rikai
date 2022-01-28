@@ -21,13 +21,13 @@ import yaml
 
 from rikai.io import open_uri
 from rikai.logging import logger
-from rikai.spark.sql.codegen.base import SpecPayload, Registry, udf_from_spec
+from rikai.spark.sql.codegen.base import ModelSpec, Registry, udf_from_spec
 from rikai.spark.sql.exceptions import SpecError
 
 __all__ = ["FileSystemRegistry"]
 
 
-class FileSpecPayload(SpecPayload):
+class FileModelSpec(ModelSpec):
     """Model Spec.
 
     Parameters
@@ -86,7 +86,7 @@ class FileSystemRegistry(Registry):
     def resolve(self, raw_spec: dict):
         uri = raw_spec.get("uri")
         options = raw_spec.get("options", {})
-        spec = FileSpecPayload(uri, options=options)
+        spec = FileModelSpec(uri, options=options)
         name = spec.name
         uri = spec.model_uri
         logger.info(f"Resolving model {name} from {uri}")

@@ -27,7 +27,7 @@ from rikai.spark.sql.exceptions import SpecError
 
 __all__ = ["Registry"]
 
-from rikai.spark.sql.model import SpecPayload
+from rikai.spark.sql.model import ModelSpec
 
 _pickler = CloudPickleSerializer()
 
@@ -40,21 +40,21 @@ class Registry(ABC):
     """Base class of a Model Registry"""
 
     @abstractmethod
-    def resolve(self, spec: "SpecPayload"):
+    def resolve(self, spec: "ModelSpec"):
         """Resolve a model from a model URI.
 
         Parameters
         ----------
-        spec : SpecPayload
+        spec : ModelSpec
         """
 
 
-def udf_from_spec(spec: SpecPayload):
+def udf_from_spec(spec: ModelSpec):
     """Return a UDF from a given ModelSpec
 
     Parameters
     ----------
-    spec : SpecPayload
+    spec : ModelSpec
        Model spec payload
 
     Returns

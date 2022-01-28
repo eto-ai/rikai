@@ -23,9 +23,8 @@ from pyspark.sql.types import BinaryType
 from torch.utils.data import DataLoader
 
 from rikai.io import open_uri
-from rikai.spark.sql.models import ModelSpec
 from rikai.pytorch.pandas import PandasDataset
-from rikai.spark.sql.model import SpecPayload, AnonymousModelType
+from rikai.spark.sql.model import ModelSpec, AnonymousModelType
 
 DEFAULT_NUM_WORKERS = 8
 DEFAULT_BATCH_SIZE = 4
@@ -42,12 +41,12 @@ def move_tensor_to_device(data, device):
     return data
 
 
-def generate_udf(payload: SpecPayload):
+def generate_udf(payload: ModelSpec):
     """Construct a UDF to run pytorch model.
 
     Parameters
     ----------
-    payload : SpecPayload
+    payload : ModelSpec
         the model specifications object
 
     Returns

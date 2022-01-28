@@ -21,7 +21,7 @@ from pyspark.sql.functions import pandas_udf
 from pyspark.sql.types import BinaryType
 
 from rikai.pytorch.pandas import PandasDataset
-from rikai.spark.sql.codegen.base import SpecPayload
+from rikai.spark.sql.codegen.base import ModelSpec
 from rikai.types import Image
 
 DEFAULT_BATCH_SIZE = 4
@@ -56,7 +56,7 @@ def infer_output_signature(blob: bytes):
         return tf.TensorSpec.from_tensor(row)
 
 
-def generate_udf(spec: SpecPayload):
+def generate_udf(spec: ModelSpec):
     """Construct a UDF to run Tensorflow (Karas) Model"""
 
     batch_size = int(spec.options.get("batch_size", DEFAULT_BATCH_SIZE))

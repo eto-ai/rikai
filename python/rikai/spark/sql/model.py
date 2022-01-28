@@ -26,7 +26,7 @@ from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
 
 
-__all__ = ["SpecPayload", "ModelType"]
+__all__ = ["ModelSpec", "ModelType"]
 
 
 # JSON schema specification for the model payload specifications
@@ -93,7 +93,7 @@ def parse_model_type(flavor: str, model_type: str):
         )
 
 
-class SpecPayload(ABC):
+class ModelSpec(ABC):
     """Model Spec Payload
 
     Parameters
@@ -201,7 +201,7 @@ class SpecPayload(ABC):
 
 class ModelType(ABC):
     @abstractmethod
-    def load_model(self, spec: SpecPayload, **kwargs):
+    def load_model(self, spec: ModelSpec, **kwargs):
         pass
 
     @abstractmethod
@@ -246,7 +246,7 @@ class AnonymousModelType(ModelType):
     def schema(self) -> str:
         return self._schema
 
-    def load_model(self, spec: SpecPayload, **kwargs):
+    def load_model(self, spec: ModelSpec, **kwargs):
         self.model = spec.load_model()
         self.spec = spec
 

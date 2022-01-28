@@ -17,7 +17,7 @@ from abc import ABC
 from typing import Optional
 
 import torch
-from rikai.spark.sql.model import ModelType, SpecPayload
+from rikai.spark.sql.model import ModelType, ModelSpec
 
 __all__ = ["TorchModelType"]
 
@@ -27,9 +27,9 @@ class TorchModelType(ModelType, ABC):
 
     def __init__(self):
         self.model: Optional[torch.nn.Module] = None
-        self.spec: Optional[SpecPayload] = None
+        self.spec: Optional[ModelSpec] = None
 
-    def load_model(self, spec: SpecPayload, **kwargs):
+    def load_model(self, spec: ModelSpec, **kwargs):
         self.model = spec.load_model()
         self.model.eval()
         if "device" in kwargs:

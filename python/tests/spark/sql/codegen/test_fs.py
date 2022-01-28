@@ -27,7 +27,7 @@ from torch.utils.data import DataLoader
 from utils import check_ml_predict
 
 from rikai.pytorch.pandas import PandasDataset
-from rikai.spark.sql.codegen.fs import FileSpecPayload
+from rikai.spark.sql.codegen.fs import FileModelSpec
 from rikai.spark.sql.exceptions import SpecError
 from rikai.types import Image
 
@@ -101,7 +101,7 @@ def assert_dataloader_transform(transform):
 
 
 def test_validate_yaml_spec(tmp_path):
-    spec = FileSpecPayload(
+    spec = FileModelSpec(
         spec_file(
             {
                 "version": "1.2",
@@ -127,10 +127,10 @@ def test_validate_yaml_spec(tmp_path):
 
 def test_validate_misformed_spec(tmp_path):
     with pytest.raises(SpecError):
-        FileSpecPayload(spec_file({}, tmp_path))
+        FileModelSpec(spec_file({}, tmp_path))
 
     with pytest.raises(SpecError, match=".*version' is a required property.*"):
-        FileSpecPayload(
+        FileModelSpec(
             spec_file(
                 {
                     "name": "test_yaml_model",
@@ -142,7 +142,7 @@ def test_validate_misformed_spec(tmp_path):
         )
 
     with pytest.raises(SpecError, match=".*'model' is a required property.*"):
-        FileSpecPayload(
+        FileModelSpec(
             spec_file(
                 {
                     "version": "1.0",
@@ -154,7 +154,7 @@ def test_validate_misformed_spec(tmp_path):
         )
 
     with pytest.raises(SpecError, match=".*'uri' is a required property.*"):
-        FileSpecPayload(
+        FileModelSpec(
             spec_file(
                 {
                     "version": "1.0",
@@ -168,7 +168,7 @@ def test_validate_misformed_spec(tmp_path):
 
 
 def test_construct_spec_with_options(tmp_path):
-    spec = FileSpecPayload(
+    spec = FileModelSpec(
         spec_file(
             {
                 "version": "1.0",
@@ -231,7 +231,7 @@ def test_count_objects_model(spark: SparkSession, count_objects_spec: str):
 
 
 def test_relative_model_uri(tmp_path):
-    spec = FileSpecPayload(
+    spec = FileModelSpec(
         spec_file(
             {
                 "version": "1.2",

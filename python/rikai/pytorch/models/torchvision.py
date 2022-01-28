@@ -20,7 +20,7 @@ from typing import Any, Callable, Optional
 import torch.nn
 from torchvision.transforms import ToTensor
 
-from rikai.spark.sql.model import SpecPayload
+from rikai.spark.sql.model import ModelSpec
 from rikai.types import Box2d
 from . import TorchModelType
 

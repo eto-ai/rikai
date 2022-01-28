@@ -95,8 +95,19 @@ def convert_instance(
 
     categories_map = {c["id"]: c for c in data["categories"]}
 
+    images = [
+        {
+            "id": img[id],
+            "date_captured": img["date_captured"],
+            "width": img["width"],
+            "height": img["height"],
+            "file_name": img["file_name"],
+            "image": Image(Path(image_dir) / img["file_name"])
+        }
+        for img in data["images"]
+    ]
     image_df = spark.createDataFrame(
-        data["images"],
+        images,
         schema=StructType(
             [
                 StructField("id", IntegerType()),
@@ -104,6 +115,7 @@ def convert_instance(
                 StructField("width", IntegerType()),
                 StructField("height", IntegerType()),
                 StructField("file_name", StringType()),
+                StructField("image", ImageType()),
             ]
         ),
     ).repartition(max(1, total_images // 500))

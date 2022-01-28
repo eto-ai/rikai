@@ -67,6 +67,7 @@ MODEL_SPEC_SCHEMA = {
             "properties": {
                 "uri": {"type": "string"},
                 "flavor": {"type": "string"},
+                "model_type": {"type": "string"},
             },
             "required": ["uri"],
         },
@@ -78,7 +79,7 @@ MODEL_SPEC_SCHEMA = {
             },
         },
     },
-    "required": ["version", "schema", "model"],
+    "required": ["version", "model"],
 }
 
 
@@ -127,6 +128,11 @@ class ModelSpec(ABC):
     def model_uri(self) -> str:
         """Return Model artifact URI"""
         return self._spec["model"]["uri"]
+
+    @property
+    def model_type(self) -> str:
+        """Return model type"""
+        return self._spec["model"]["model_type"]
 
     @abstractmethod
     def load_model(self) -> Any:

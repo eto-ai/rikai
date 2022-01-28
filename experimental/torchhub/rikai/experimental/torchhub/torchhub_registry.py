@@ -19,11 +19,12 @@ import torch
 
 from rikai.internal.reflection import find_func, has_func
 from rikai.logging import logger
-from rikai.spark.sql.codegen.base import SpecPayload, Registry, udf_from_spec
+from rikai.spark.sql.codegen.base import Registry, udf_from_spec
+from rikai.spark.sql.model import SpecPayload
 
 
 class TorchHubSpecPayload(SpecPayload):
-    def __init__(self, repo_or_dir: str, model: str, raw_spec: "SpecPayload"):
+    def __init__(self, repo_or_dir: str, model: str, raw_spec: SpecPayload):
         spec = {
             "version": "1.0",
             "schema": raw_spec["schema"],

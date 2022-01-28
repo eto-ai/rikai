@@ -14,15 +14,24 @@
 
 """Rikai-implemented PyTorch models and executors."""
 
-from abc import ABC
+from abc import ABC, abstractmethod
+from typing import Any, Callable
 
 from rikai.mixin import ToDict
 
 
 class Spec(ABC, ToDict):
+    @abstractmethod
     def schema(self) -> str:
         pass
 
-    def to_dict(self) -> dict:
-        """Convert a model to dict / json"""
+    @abstractmethod
+    def transform(self) -> Callable:
         pass
+
+    @abstractmethod
+    def predict(self, *args, **kwargs) -> Any:
+        pass
+
+    def __call__(self, *args, **kwargs) -> Any:
+        return self.predict(*args, **kwargs)

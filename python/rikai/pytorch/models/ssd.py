@@ -12,8 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .torchvision import ObjectDetectionModelSpec
+from .torchvision import ObjectDetectionModelType
 
-__all__ = ["SPEC"]
+__all__ = ["MODEL_TYPE"]
 
-SPEC = ObjectDetectionModelSpec("ssd")
+MODEL_TYPE = ObjectDetectionModelType("ssd")

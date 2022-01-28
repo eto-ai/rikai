@@ -54,7 +54,7 @@ def generate_udf(payload: SpecPayload):
     -------
     A Spark Pandas UDF.
     """
-    spec = payload.model_spec
+    model = payload.model_type
     default_device = "gpu" if torch.cuda.is_available() else "cpu"
     options = payload.options
     use_gpu = options.get("device", default_device) == "gpu"
@@ -69,14 +69,14 @@ def generate_udf(payload: SpecPayload):
         iter: Iterator[pd.DataFrame],
     ) -> return_type:
         device = torch.device("cuda" if use_gpu else "cpu")
-        spec.load_model(payload, device=device)
+        model.load_model(payload, device=device)
 
         try:
             with torch.no_grad():
                 for series in iter:
                     dataset = PandasDataset(
                         series,
-                        transform=spec.transform(),
+                        transform=model.transform(),
                         unpickle=True,
                         use_pil=True,
                     )
@@ -87,7 +87,7 @@ def generate_udf(payload: SpecPayload):
                         num_workers=num_workers,
                     ):
                         batch = move_tensor_to_device(batch, device)
-                        predictions = spec(batch)
+                        predictions = model(batch)
                         bin_predictions = [
                             _pickler.dumps(p) for p in predictions
                         ]
@@ -97,7 +97,7 @@ def generate_udf(payload: SpecPayload):
             # Release GPU memory
             # https://blog.paperspace.com/pytorch-memory-multi-gpu-debugging/?ref=tfrecipes
             if use_gpu:
-                spec.release()
+                model.release()
 
     return pandas_udf(torch_inference_udf, returnType=BinaryType())
 

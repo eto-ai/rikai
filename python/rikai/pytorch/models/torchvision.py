@@ -20,16 +20,16 @@ from typing import Any, Callable, Optional
 import torch.nn
 from torchvision.transforms import ToTensor
 
-from rikai.spark.sql.model import ModelSpec, SpecPayload
+from rikai.spark.sql.model import ModelType, SpecPayload
 from rikai.types import Box2d
 
-__all__ = ["ObjectDetectionModelSpec"]
+__all__ = ["ObjectDetectionModelType"]
 
 
 DEFAULT_MIN_SCORE = 0.5
 
 
-class ObjectDetectionModelSpec(ModelSpec):
+class ObjectDetectionModelType(ModelType):
     """Shared ModelSpec for object detections in Torchvision
 
     https://pytorch.org/vision/stable/models.html

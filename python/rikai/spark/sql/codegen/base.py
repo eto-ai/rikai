@@ -72,7 +72,7 @@ def udf_from_spec(spec: SpecPayload):
     else:
         codegen_module = f"rikai.contrib.{spec.flavor}.codegen"
 
-    schema = spec.model_spec.dataType()
+    schema = spec.model_type.dataType()
 
     @udf(returnType=schema)
     def deserialize_return(data: bytes):

@@ -15,6 +15,7 @@
 import importlib
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Optional
+import warnings
 
 from jsonschema.exceptions import ValidationError
 from jsonschema.validators import validate
@@ -25,7 +26,7 @@ from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
 
 
-__all__ = ["SpecPayload", "ModelSpec"]
+__all__ = ["SpecPayload", "ModelType"]
 
 
 # JSON schema specification for the model payload specifications
@@ -69,9 +70,7 @@ def is_fully_qualified_name(name: str) -> bool:
     return "." in name
 
 
-def parse_model_spec(payload: "SpecPayload"):
-    flavor = payload.flavor
-    model_type = payload.model_type
+def parse_model_type(flavor: str, model_type: str):
     model_modules_candidates = []
     if is_fully_qualified_name(model_type):
         model_modules_candidates.append(model_type)
@@ -85,8 +84,7 @@ def parse_model_spec(payload: "SpecPayload"):
     for model_module in model_modules_candidates:
         try:
             model_mod = importlib.import_module(model_module)
-            print(model_mod)
-            return getattr(model_mod, "SPEC", None)
+            return getattr(model_mod, "MODEL_TYPE", None)
         except ModuleNotFoundError:
             pass
     else:
@@ -137,24 +135,21 @@ class SpecPayload(ABC):
         return self._spec["name"]
 
     @property
-    def model_spec(self) -> "ModelSpec":
-        if self.model_type:
-            return parse_model_spec(self)
-        return AnonymousModelSpec(
-            self._spec.get("schema", None),
-            self.pre_processing,
-            self.post_processing,
-        )
-
-    @property
     def model_uri(self) -> str:
         """Return Model artifact URI"""
         return self._spec["model"]["uri"]
 
     @property
-    def model_type(self) -> str:
+    def model_type(self) -> "ModelType":
         """Return model type"""
-        return self._spec["model"].get("type", None)
+        mtype = self._spec["model"].get("type", None)
+        if mtype:
+            return parse_model_type(self.flavor, mtype)
+        return AnonymousModelType(
+            self._spec.get("schema", None),
+            self.pre_processing,
+            self.post_processing,
+        )
 
     @abstractmethod
     def load_model(self) -> Any:
@@ -170,7 +165,7 @@ class SpecPayload(ABC):
         """Return the output schema of the model."""
         if "schema" in self._spec:
             return parse_schema(self._spec["schema"])
-        return self.model_spec.schema
+        return self.model_type.schema
 
     @property
     def options(self) -> Dict[str, Any]:
@@ -204,7 +199,7 @@ class SpecPayload(ABC):
         return f(self.options)
 
 
-class ModelSpec(ABC):
+class ModelType(ABC):
     @abstractmethod
     def schema(self) -> str:
         pass
@@ -231,7 +226,7 @@ class ModelSpec(ABC):
         pass
 
 
-class AnonymousModelSpec(ModelSpec):
+class AnonymousModelType(ModelType):
     def __init__(
         self,
         schema: str,
@@ -241,6 +236,10 @@ class AnonymousModelSpec(ModelSpec):
         self._schema = schema
         self.pre_processing = pre_processing
         self.post_processing = post_processing
+
+        warnings.warn(
+            "Using schema and pre_processing/post_processing explicitly"
+            "is deprecated. Please migrate to an concrete ModelType")
 
     def schema(self) -> str:
         return self._schema

@@ -75,10 +75,12 @@ def parse_model_spec(payload: "SpecPayload"):
     if is_fully_qualified_name(model_type):
         model_modules_candidates.append(model_type)
     else:
-        model_modules_candidates.extend([
-            f"rikai.{flavor}.models.{model_type}",
-            f"rikai.contrib.{flavor}.models.{model_type}"
-        ])
+        model_modules_candidates.extend(
+            [
+                f"rikai.{flavor}.models.{model_type}",
+                f"rikai.contrib.{flavor}.models.{model_type}",
+            ]
+        )
     for model_module in model_modules_candidates:
         try:
             model_mod = importlib.import_module(model_module)
@@ -87,8 +89,9 @@ def parse_model_spec(payload: "SpecPayload"):
         except ModuleNotFoundError:
             pass
     else:
-        raise ModuleNotFoundError(f"Model spec not found for model: {model_type}/{flavor}")
-
+        raise ModuleNotFoundError(
+            f"Model spec not found for model: {model_type}/{flavor}"
+        )
 
 
 class SpecPayload(ABC):
@@ -134,7 +137,9 @@ class SpecPayload(ABC):
 
     @property
     def model_spec(self) -> "ModelSpec":
-        return parse_model_spec(self)
+        if self.model_type:
+            return parse_model_spec(self)
+        return AnnoymouseModelSpec(self._spec.get("schema", None), self.pre_processing, self.post_processing)
 
     @property
     def model_uri(self) -> str:
@@ -144,7 +149,7 @@ class SpecPayload(ABC):
     @property
     def model_type(self) -> str:
         """Return model type"""
-        return self._spec["model"]["type"]
+        return self._spec["model"].get("type", None)
 
     @abstractmethod
     def load_model(self) -> Any:
@@ -171,9 +176,9 @@ class SpecPayload(ABC):
     def pre_processing(self) -> Optional[Callable]:
         """Return pre-processing transform if exists"""
         if (
-                "transforms" not in self._spec
-                or "pre" not in self._spec["transforms"]
-                or self._spec["transforms"]["pre"] is None
+            "transforms" not in self._spec
+            or "pre" not in self._spec["transforms"]
+            or self._spec["transforms"]["pre"] is None
         ):
             # Passthrough
             return _identity
@@ -184,9 +189,9 @@ class SpecPayload(ABC):
     def post_processing(self) -> Optional[Callable]:
         """Return post-processing transform if exists"""
         if (
-                "transforms" not in self._spec
-                or "post" not in self._spec["transforms"]
-                or self._spec["transforms"]["post"] is None
+            "transforms" not in self._spec
+            or "post" not in self._spec["transforms"]
+            or self._spec["transforms"]["post"] is None
         ):
             # Passthrough
             return _identity
@@ -203,7 +208,7 @@ class ModelSpec(ToDict, ABC):
         return parse_schema(self.schema())
 
     @abstractmethod
-    def load_model(self, raw_spec: SpecPayload):
+    def load_model(self, raw_spec: SpecPayload, device: str = None):
         pass
 
     @abstractmethod
@@ -218,4 +223,37 @@ class ModelSpec(ToDict, ABC):
         return self.predict(*args, **kwargs)
 
     def release(self):
+        pass
+
+
+class AnnoymouseModelSpec(ModelSpec):
+    def __init__(
+        self,
+        schema: str,
+        pre_processing: Optional[Callable],
+        post_processing: Optional[Callable],
+    ):
+        self._schema = schema
+        self.pre_processing = pre_processing
+        self.post_processing = post_processing
+
+    def schema(self) -> str:
+        return self._schema
+
+    def load_model(self, raw_spec: SpecPayload, device: str = None):
+        # TODO: This interface is too tight to Pytorch
+        self.model = raw_spec.load_model()
+        self.model.to(device)
+        self.model.eval()
+
+    def transform(self) -> Callable:
+        return self.pre_processing
+
+    def predict(self, *args, **kwargs) -> Any:
+        batch = self.model(*args, **kwargs)
+        if self.post_processing:
+            batch = self.post_processing(batch)
+        return batch
+
+    def to_dict(self) -> dict:
         pass

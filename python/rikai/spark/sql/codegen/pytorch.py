@@ -71,7 +71,7 @@ def generate_udf(payload: SpecPayload):
         iter: Iterator[pd.DataFrame],
     ) -> return_type:
         device = torch.device("cuda" if use_gpu else "cpu")
-        spec.load_model(payload, device)
+        spec.load_model(payload, device=device)
 
         try:
             with torch.no_grad():

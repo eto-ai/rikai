@@ -1,9 +1,13 @@
 repos:
   - repo: https://github.com/pre-commit/mirrors-isort
-    rev: v5.5.2  # pick the isort version you'd like to use from https://github.com/pre-commit/mirrors-isort/releases
+    rev: v5.10.1  # pick the isort version you'd like to use from https://github.com/pre-commit/mirrors-isort/releases
     hooks:
       - id: isort
   - repo: https://github.com/psf/black
-    rev: stable
+    rev: 21.12b0
     hooks:
       - id: black
+  - repo: https://github.com/softwaremill/scala-pre-commit-hooks
+    rev: v0.3.0
+    hooks:
+      - id: sbt-scalafmt

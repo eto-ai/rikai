@@ -16,21 +16,19 @@ from pathlib import Path
 
 import mlflow
 import torch
-from pyspark.sql import SparkSession, Row
+from pyspark.sql import Row, SparkSession
 from pyspark.sql.types import (
-    StructType,
     ArrayType,
-    StructField,
     FloatType,
     IntegerType,
+    StructField,
+    StructType,
 )
 from torchvision.models.detection.ssd import ssd300_vgg16
 from torchvision.transforms import ToTensor
 
 import rikai
-from rikai.contrib.torch.inspect.ssd import (
-    SSDClassScoresExtractor,
-)
+from rikai.contrib.torch.inspect.ssd import SSDClassScoresExtractor
 from rikai.spark.types import Box2dType
 from rikai.types import Image
 

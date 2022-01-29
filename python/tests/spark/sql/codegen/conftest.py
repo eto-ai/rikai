@@ -109,7 +109,7 @@ def mlflow_client_http(
 
 
 @pytest.fixture(scope="class")
-def spark_with_mlflow(mlflow_client_http) -> SparkSession:
+def spark_with_mlflow(mlflow_client_http, rikai_package_name) -> SparkSession:
     mlflow_tracking_uri = mlflow.get_tracking_uri()
     print(f"Spark with mlflow tracking uri: ${mlflow_tracking_uri}")
     hadoop_version = "3.2.0"  # TODO(lei): get hadoop version
@@ -122,7 +122,7 @@ def spark_with_mlflow(mlflow_client_http) -> SparkSession:
                     ",".join(
                         [
                             f"org.apache.hadoop:hadoop-aws:{hadoop_version}",
-                            "ai.eto:rikai_2.12:{}".format(rikai_version),
+                            "{}:{}".format(rikai_package_name, rikai_version),
                         ]
                     ),
                 ),

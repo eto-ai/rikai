@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import os
 
 import pytest
 from pyspark.sql import SparkSession
@@ -19,7 +20,16 @@ from rikai.spark.utils import get_default_jar_version, init_spark_session
 
 
 @pytest.fixture(scope="session")
-def spark() -> SparkSession:
+def rikai_package_name():
+    name = "ai.eto:rikai_2.12"
+    scala_version = os.getenv("SCALA_VERSION")
+    if scala_version and scala_version.startswith("2.13"):
+        name = "ai.eto:rikai_2.13"
+    return name
+
+
+@pytest.fixture(scope="session")
+def spark(rikai_package_name) -> SparkSession:
     rikai_version = get_default_jar_version(use_snapshot=True)
 
     return init_spark_session(
@@ -29,7 +39,7 @@ def spark() -> SparkSession:
                     "spark.jars.packages",
                     ",".join(
                         [
-                            "ai.eto:rikai_2.12:{}".format(rikai_version),
+                            "{}:{}".format(rikai_package_name, rikai_version),
                         ]
                     ),
                 ),

@@ -36,6 +36,15 @@ from rikai.spark.utils import get_default_jar_version, init_spark_session
 
 
 @pytest.fixture(scope="session")
+def rikai_package_name():
+    name = "ai.eto:rikai_2.12"
+    scala_version = os.getenv("SCALA_VERSION")
+    if scala_version and scala_version.startswith("2.13"):
+        name = "ai.eto:rikai_2.13"
+    return name
+
+
+@pytest.fixture(scope="session")
 def mlflow_client_with_tracking_uri(
     tmp_path_factory, resnet_model_uri: str
 ) -> (MlflowClient, str):
@@ -118,7 +127,7 @@ def mlflow_tracking_uri(mlflow_client_with_tracking_uri):
 
 
 @pytest.fixture(scope="module")
-def spark(mlflow_tracking_uri: str) -> SparkSession:
+def spark(mlflow_tracking_uri: str, rikai_package_name: str) -> SparkSession:
     print(f"ml flow tracking uri for spark: ${mlflow_tracking_uri}")
     rikai_version = get_default_jar_version(use_snapshot=True)
     hadoop_version = "3.2.0"  # TODO(lei): get hadoop version
@@ -131,7 +140,7 @@ def spark(mlflow_tracking_uri: str) -> SparkSession:
                     ",".join(
                         [
                             f"org.apache.hadoop:hadoop-aws:{hadoop_version}",
-                            "ai.eto:rikai_2.12:{}".format(rikai_version),
+                            "{}:{}".format(rikai_package_name, rikai_version),
                         ]
                     ),
                 ),

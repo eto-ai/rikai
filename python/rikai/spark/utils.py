@@ -63,18 +63,8 @@ def init_spark_session(
                 active_session.stop()
                 break
 
-    if not rikai_version:
-        rikai_version = get_default_jar_version(use_snapshot=True)
     builder = (
         SparkSession.builder.appName(app_name)
-        .config(
-            "spark.jars.packages",
-            ",".join(
-                [
-                    "ai.eto:rikai_2.12:{}".format(rikai_version),
-                ]
-            ),
-        )
         .config(
             "spark.sql.extensions",
             "ai.eto.rikai.sql.spark.RikaiSparkSessionExtensions",

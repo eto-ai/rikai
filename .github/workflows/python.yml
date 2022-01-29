@@ -11,7 +11,8 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.8] # TODO add 3.7, 3.9 after test
+        scala-version: [ 2.12.10, 2.13.7 ]
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v2
@@ -32,10 +33,11 @@ jobs:
         path: |
           ~/.ivy2/cache
           ~/.sbt
-        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+        key: ${{ matrix.scala-version }}-sbt-${{ hashFiles('**/build.sbt') }}
     - name: sbt install
       run: |
-        sbt publishLocal
+        export SCALA_VERSION=${{matrix.scala-version}}
+        sbt ++${{matrix.scala-version}} publishLocal
     - name: Start docker-compose
       run: |
         docker-compose -f .github/docker-compose.yml up -d

@@ -36,7 +36,8 @@ jobs:
         key: ${{ matrix.scala-version }}-sbt-${{ hashFiles('**/build.sbt') }}
     - name: sbt install
       run: |
-        export SCALA_VERSION=${{matrix.scala-version}}
+        # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-environment-variable
+        echo "{SCALA_VERSION}=${{matrix.scala-version}}" >> $GITHUB_ENV
         sbt ++${{matrix.scala-version}} publishLocal
     - name: Start docker-compose
       run: |

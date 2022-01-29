@@ -102,7 +102,7 @@ def convert_instance(
             "width": img["width"],
             "height": img["height"],
             "file_name": img["file_name"],
-            "image": Image(Path(image_dir) / img["file_name"])
+            "image": Image(Path(image_dir) / img["file_name"]),
         }
         for img in data["images"]
     ]

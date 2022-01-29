@@ -32,10 +32,6 @@ DEFAULT_BATCH_SIZE = 4
 _pickler = CloudPickleSerializer()
 
 
-def collate_fn(batch):
-    return batch
-
-
 def move_tensor_to_device(data, device):
     if isinstance(data, torch.Tensor):
         return data.to(device)

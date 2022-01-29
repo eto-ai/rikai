@@ -1,3 +1,4 @@
+import os
 import pathlib
 
 from setuptools import find_packages, setup
@@ -47,6 +48,14 @@ all = (
 )
 
 
+def spark_version():
+    version = "3.1.2"
+    scala_version = os.getenv("SCALA_VERSION")
+    if scala_version and scala_version.startswith("2.13"):
+        version = "3.2.0"
+    return version
+
+
 setup(
     name="rikai",
     version=about["version"],
@@ -68,7 +77,7 @@ setup(
         "pandas",
         "Pillow",
         "pyarrow>=6.0",
-        "pyspark==3.1.2",
+        "pyspark=={}".format(spark_version()),
         "pyyaml",
         "requests",
         "semver",

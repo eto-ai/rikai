@@ -23,6 +23,7 @@ from pyspark.sql.types import BinaryType
 from torch.utils.data import DataLoader
 
 from rikai.io import open_uri
+from rikai.spark.sql.codegen.base import ModelSpec
 from rikai.torch.pandas import PandasDataset
 
 DEFAULT_NUM_WORKERS = 8
@@ -44,7 +45,7 @@ def move_tensor_to_device(data, device):
     return data
 
 
-def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
+def generate_udf(spec: ModelSpec):
     """Construct a UDF to run pytorch model.
 
     Parameters
@@ -89,7 +90,6 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                         dataset,
                         batch_size=batch_size,
                         num_workers=num_workers,
-                        collate_fn=collate_fn,
                     ):
                         batch = move_tensor_to_device(batch, device)
                         predictions = model(batch)

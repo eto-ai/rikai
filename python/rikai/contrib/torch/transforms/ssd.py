@@ -24,7 +24,10 @@ DEFAULT_MIN_SCORE = 0.5
 
 
 def pre_processing(options: Dict[str, Any]) -> Callable:
-    return T.ToTensor()
+    return T.Compose([
+        T.Resize((300, 300)),
+        T.ToTensor(),
+    ])
 
 
 def post_processing(options: Dict[str, Any]) -> Callable:

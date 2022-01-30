@@ -73,16 +73,20 @@ private class MlPredictRule(val session: SparkSession)
     }
   }
 
-  @enableIf(
-    scala.util.Properties.versionNumberString.compareTo("2.12.15") >= 0
+  @enableIf(c =>
+    c.classPath.exists(
+      _.getPath.matches(".*spark-catalyst_2\\.\\d+-3\\.2\\..*")
+    )
   )
   private def getFuncName(f: UnresolvedFunction): String = {
     // After Spark 3.2
     f.nameParts.last
   }
 
-  @enableIf(
-    scala.util.Properties.versionNumberString.compareTo("2.12.15") < 0
+  @enableIf(c =>
+    c.classPath.exists(
+      _.getPath.matches(".*spark-catalyst_2\\.\\d+-3\\.1\\..*")
+    )
   )
   private def getFuncName(f: UnresolvedFunction): String = {
     f.name.funcName

@@ -21,6 +21,7 @@ import torch.nn
 from torchvision.transforms import ToTensor
 
 from rikai.types import Box2d
+
 from . import TorchModelType
 
 __all__ = ["ObjectDetectionModelType"]

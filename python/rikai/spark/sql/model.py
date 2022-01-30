@@ -13,9 +13,9 @@
 #  limitations under the License.
 
 import importlib
+import warnings
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Optional, TypeVar
-import warnings
 
 from jsonschema.exceptions import ValidationError
 from jsonschema.validators import validate
@@ -24,7 +24,6 @@ from rikai.internal.reflection import find_func
 from rikai.logging import logger
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
-
 
 __all__ = ["ModelSpec", "ModelType", "AnonymousModelType"]
 
@@ -203,8 +202,7 @@ class ModelSpec(ABC):
 
 
 class ModelType(ABC):
-    """Declare a Rikai-compatible Model Type.
-    """
+    """Declare a Rikai-compatible Model Type."""
 
     @abstractmethod
     def load_model(self, spec: ModelSpec, **kwargs):

@@ -17,7 +17,8 @@ from abc import ABC
 from typing import Optional
 
 import torch
-from rikai.spark.sql.model import ModelType, ModelSpec
+
+from rikai.spark.sql.model import ModelSpec, ModelType
 
 __all__ = ["TorchModelType"]
 

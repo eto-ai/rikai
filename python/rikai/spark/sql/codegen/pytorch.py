@@ -24,7 +24,7 @@ from torch.utils.data import DataLoader
 
 from rikai.io import open_uri
 from rikai.pytorch.pandas import PandasDataset
-from rikai.spark.sql.model import ModelSpec, AnonymousModelType
+from rikai.spark.sql.model import AnonymousModelType, ModelSpec
 
 DEFAULT_NUM_WORKERS = 8
 DEFAULT_BATCH_SIZE = 4

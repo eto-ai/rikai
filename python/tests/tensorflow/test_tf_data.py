@@ -24,7 +24,9 @@ def test_tf_dataset(spark, tmp_path):
     dataset_dir = tmp_path / "data"
     data = []
     for i in range(100):
-        image_data = np.random.randint(0, 128, size=(128, 128, 3), dtype=np.uint8)
+        image_data = np.random.randint(
+            0, 128, size=(128, 128, 3), dtype=np.uint8
+        )
         image = Image.from_array(image_data)
 
         data.append(Row(id=i, image=image))

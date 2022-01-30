@@ -236,13 +236,20 @@ class ModelType(ABC):
 
     @abstractmethod
     def predict(self, *args, **kwargs) -> Any:
-        """Run model inference and convert return types into Rikai-compatible types."""
+        """Run model inference and convert return types into
+        Rikai-compatible types.
+
+        """
         pass
 
     def __call__(self, *args, **kwargs) -> Any:
         return self.predict(*args, **kwargs)
 
     def release(self):
+        """Release underneath resources if applicable.
+
+        It will be called after a model runner finishes a partition in Spark.
+        """
         # Noop by default
         pass
 

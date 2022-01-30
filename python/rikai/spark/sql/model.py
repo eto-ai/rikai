@@ -14,7 +14,7 @@
 
 import importlib
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, TypeVar
 import warnings
 
 from jsonschema.exceptions import ValidationError
@@ -27,6 +27,9 @@ from rikai.spark.sql.schema import parse_schema
 
 
 __all__ = ["ModelSpec", "ModelType", "AnonymousModelType"]
+
+
+M = TypeVar("M")  # Model Type
 
 
 # JSON schema specification for the model payload specifications
@@ -200,12 +203,24 @@ class ModelSpec(ABC):
 
 
 class ModelType(ABC):
+    """Declare a Rikai-compatible Model Type.
+    """
+
     @abstractmethod
     def load_model(self, spec: ModelSpec, **kwargs):
+        """Lazy loading the model from a :class:`ModelSpec`."""
         pass
 
     @abstractmethod
     def schema(self) -> str:
+        """Return the string value of model schema.
+
+        Examples
+        --------
+
+        >>> model_type.schema()
+        ... "array<struct<box:box2d, score:float, label_id:int>>"
+        """
         pass
 
     def dataType(self) -> "pyspark.sql.types.DataType":
@@ -213,10 +228,17 @@ class ModelType(ABC):
 
     @abstractmethod
     def transform(self) -> Callable:
+        """A callable to pre-process the data before calling inference.
+
+        It will be feed into :class:`torch.data.DataLoader` or
+        :class:`tensorflow.data.Dataset.map`.
+
+        """
         pass
 
     @abstractmethod
     def predict(self, *args, **kwargs) -> Any:
+        """Run model inference and convert return types into Rikai-compatible types."""
         pass
 
     def __call__(self, *args, **kwargs) -> Any:
@@ -237,11 +259,13 @@ class AnonymousModelType(ModelType):
         self._schema = schema
         self.pre_processing = pre_processing
         self.post_processing = post_processing
+        self.model: Optional[M] = None
+        self.spec: Optional[ModelSpec] = None
 
         warnings.warn(
             "Using schema and pre_processing/post_processing explicitly"
             "is deprecated and will be removed in Rikai 0.2. "
-            "Please migrate to an concrete ModelType."
+            "Please migrate to a concrete ModelType."
         )
 
     def schema(self) -> str:
@@ -252,9 +276,14 @@ class AnonymousModelType(ModelType):
         self.spec = spec
 
     def transform(self) -> Callable:
+        """Adaptor for the pre-processing."""
         return self.pre_processing
 
     def predict(self, *args, **kwargs) -> Any:
+        """Predict combines model inference and post-processing that
+        converts inference outputs into Rikai types.
+
+        """
         batch = self.model(*args, **kwargs)
         if self.post_processing:
             batch = self.post_processing(batch)

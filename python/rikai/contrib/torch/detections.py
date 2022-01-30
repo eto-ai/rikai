@@ -14,4 +14,4 @@
 
 
 # Object detection output schema
-OUTPUT_SCHEMA = "array<struct<box:box2d, score:float, label:int>>"
+OUTPUT_SCHEMA = "array<struct<box:box2d, score:float, label_id:int>>"

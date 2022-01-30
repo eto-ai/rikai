@@ -27,7 +27,7 @@ except ImportError:
 from mlflow.tracking import MlflowClient
 
 from rikai.logging import logger
-from rikai.spark.sql.codegen.base import ModelSpec, Registry, udf_from_spec
+from rikai.spark.sql.codegen.base import SpecPayload, Registry, udf_from_spec
 from rikai.spark.sql.codegen.mlflow_logger import (
     CONF_MLFLOW_MODEL_FLAVOR,
     CONF_MLFLOW_OUTPUT_SCHEMA,
@@ -42,7 +42,7 @@ from rikai.spark.sql.exceptions import SpecError
 __all__ = ["MlflowRegistry"]
 
 
-class MlflowModelSpec(ModelSpec):
+class MlflowSpecPayload(SpecPayload):
     """Model Spec.
 
     Parameters
@@ -205,7 +205,7 @@ class MlflowRegistry(Registry):
             raise ValueError("Expect schema: mlflow, but got {parsed.scheme}")
         parts = parsed.path.strip("/").split("/", 1)
         model_uri, run = self.get_model_version(*parts)
-        spec = MlflowModelSpec(
+        spec = MlflowSpecPayload(
             model_uri,
             self.get_model_conf(raw_spec, run),
             self.mlflow_tracking_uri,

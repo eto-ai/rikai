@@ -19,14 +19,14 @@ from pyspark.sql import SparkSession
 from utils import check_ml_predict
 
 from rikai.contrib.torch.detections import OUTPUT_SCHEMA
-from rikai.spark.sql.codegen.mlflow_registry import MlflowModelSpec
+from rikai.spark.sql.codegen.mlflow_registry import MlflowSpecPayload
 from rikai.spark.sql.schema import parse_schema
 
 
 def test_modelspec(mlflow_client: MlflowClient):
     mv = mlflow_client.search_model_versions("name='rikai-test'")[0]
     run = mlflow_client.get_run(run_id=mv.run_id)
-    spec = MlflowModelSpec(
+    spec = MlflowSpecPayload(
         "models:/rikai-test/{}".format(mv.version),
         run.data.tags,
         tracking_uri="fake",

@@ -32,7 +32,7 @@ from pyspark.sql.types import (
 import rikai
 from rikai.contrib.tensorflow.models.ssd import HUB_URL as SSD_HUB_URL
 from rikai.contrib.tensorflow.models.ssd import OUTPUT_SCHEMA
-from rikai.spark.sql.codegen.fs import FileModelSpec
+from rikai.spark.sql.codegen.fs import FileSpecPayload
 from rikai.spark.sql.codegen.tensorflow import generate_udf
 from rikai.spark.types import Box2dType
 from rikai.types import Image
@@ -64,7 +64,7 @@ transforms:
             )
         )
 
-    spec = FileModelSpec(spec_path)
+    spec = FileSpecPayload(spec_path)
     udf = generate_udf(spec)
 
     df_iter = [

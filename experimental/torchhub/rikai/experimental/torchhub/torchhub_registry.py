@@ -19,11 +19,11 @@ import torch
 
 from rikai.internal.reflection import find_func, has_func
 from rikai.logging import logger
-from rikai.spark.sql.codegen.base import ModelSpec, Registry, udf_from_spec
+from rikai.spark.sql.codegen.base import SpecPayload, Registry, udf_from_spec
 
 
-class TorchHubModelSpec(ModelSpec):
-    def __init__(self, repo_or_dir: str, model: str, raw_spec: "ModelSpec"):
+class TorchHubSpecPayload(SpecPayload):
+    def __init__(self, repo_or_dir: str, model: str, raw_spec: "SpecPayload"):
         spec = {
             "version": "1.0",
             "schema": raw_spec["schema"],
@@ -90,5 +90,5 @@ class TorchHubRegistry(Registry):
             raise ValueError("Bad URI, expected torchhub:///<org>/<prj>/<mdl>")
         repo_or_dir = "/".join(parts[:-1])
         model = parts[-1]
-        spec = TorchHubModelSpec(repo_or_dir, model, raw_spec)
+        spec = TorchHubSpecPayload(repo_or_dir, model, raw_spec)
         return udf_from_spec(spec)

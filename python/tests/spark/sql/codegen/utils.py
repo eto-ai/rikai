@@ -21,7 +21,6 @@ from pyspark.sql.types import (
     StructType,
 )
 
-from rikai.contrib.torch.detections import OUTPUT_SCHEMA
 from rikai.spark.sql.schema import parse_schema
 from rikai.spark.types import Box2dType
 from rikai.types import Image
@@ -66,7 +65,7 @@ def check_ml_predict(spark: SparkSession, model_name: str):
                                 Box2dType(),
                             ),
                             StructField("score", FloatType()),
-                            StructField("label_id", IntegerType()),
+                            StructField("label", IntegerType()),
                         ]
                     )
                 ),
@@ -77,7 +76,7 @@ def check_ml_predict(spark: SparkSession, model_name: str):
         [
             StructField(
                 "predictions",
-                parse_schema(OUTPUT_SCHEMA),
+                parse_schema("array<struct<box:box2d, score:float, label:int>>"),
             )
         ]
     )

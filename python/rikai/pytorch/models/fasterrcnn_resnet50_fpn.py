@@ -17,8 +17,7 @@ from typing import Any, Callable, Optional
 import torch
 from torchvision.transforms import ToTensor
 
-from rikai.pytorch.models import Spec
-from rikai.spark.sql.codegen.base import ModelSpec
+from rikai.spark.sql.model import ModelSpec, SpecPayload
 from rikai.types import Box2d
 
 __all__ = ["SPEC"]
@@ -27,11 +26,11 @@ __all__ = ["SPEC"]
 DEFAULT_MIN_SCORE = 0.5
 
 
-class FasterRCNNSpec(Spec):
+class FasterRCNNSpec(ModelSpec):
     def __init__(self):
         super().__init__()
         self.model: Optional[torch.nn.Module] = None
-        self.spec: Optional[ModelSpec] = None
+        self.spec: Optional[SpecPayload] = None
 
     def to_dict(self) -> dict:
         return {
@@ -42,9 +41,13 @@ class FasterRCNNSpec(Spec):
     def schema(self) -> str:
         return "array<struct<box:box2d, score:float, label:int>>"
 
-    def load_model(self, raw_spec: ModelSpec):
+    def load_model(self, raw_spec: SpecPayload, device=None):
         self.model = raw_spec.load_model()
+        self.model.eval()
+        if device:
+            self.model = self.model.to(device)
         self.spec = raw_spec
+        return self
 
     def transform(self) -> Callable:
         return ToTensor()
@@ -79,5 +82,9 @@ class FasterRCNNSpec(Spec):
             results.append(predict_result)
         return results
 
+    def release(self):
+        model = self.model.cpu()
+        del model
+        torch.cuda.empty_cache()
 
 SPEC = FasterRCNNSpec()

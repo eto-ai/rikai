@@ -13,30 +13,3 @@
 #  limitations under the License.
 
 """Rikai-implemented PyTorch models and executors."""
-
-from abc import ABC, abstractmethod
-from typing import Any, Callable
-
-from rikai.mixin import ToDict
-from rikai.spark.sql.codegen.base import ModelSpec
-
-
-class Spec(ToDict, ABC):
-    @abstractmethod
-    def schema(self) -> str:
-        pass
-
-    @abstractmethod
-    def load_model(self, raw_spec: ModelSpec):
-        pass
-
-    @abstractmethod
-    def transform(self) -> Callable:
-        pass
-
-    @abstractmethod
-    def predict(self, *args, **kwargs) -> Any:
-        pass
-
-    def __call__(self, *args, **kwargs) -> Any:
-        return self.predict(*args, **kwargs)

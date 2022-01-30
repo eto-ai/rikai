@@ -14,21 +14,20 @@
 
 import importlib
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, Optional
+from typing import Any
 
-from jsonschema import validate, ValidationError
 from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql.functions import udf
 from pyspark.sql.types import BinaryType
 
-from rikai.internal.reflection import find_class, find_func
+from rikai.internal.reflection import find_class
 from rikai.logging import logger
 from rikai.spark.sql.codegen.mlflow_logger import KNOWN_FLAVORS
 from rikai.spark.sql.exceptions import SpecError
-from rikai.spark.sql.schema import parse_schema
 
-__all__ = ["Registry", "ModelSpec"]
+__all__ = ["Registry"]
 
+from rikai.spark.sql.model import SpecPayload
 
 _pickler = CloudPickleSerializer()
 
@@ -41,151 +40,21 @@ class Registry(ABC):
     """Base class of a Model Registry"""
 
     @abstractmethod
-    def resolve(self, spec: "ModelSpec"):
+    def resolve(self, spec: "SpecPayload"):
         """Resolve a model from a model URI.
 
         Parameters
         ----------
-        spec : ModelSpec
+        spec : SpecPayload
         """
 
 
-# JSON schema specification for the model specifications
-# used to validate model spec input
-MODEL_SPEC_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "version": {
-            "type": "string",
-            "description": "Model SPEC format version",
-        },
-        "name": {"type": "string", "description": "Model name"},
-        "schema": {"type": "string"},
-        "model": {
-            "type": "object",
-            "description": "model description",
-            "properties": {
-                "uri": {"type": "string"},
-                "flavor": {"type": "string"},
-                "model_type": {"type": "string"},
-            },
-            "required": ["uri"],
-        },
-        "transforms": {
-            "type": "object",
-            "properties": {
-                "pre": {"type": "string"},
-                "post": {"type": "string"},
-            },
-        },
-    },
-    "required": ["version", "model"],
-}
-
-
-class ModelSpec(ABC):
-    """Model Spec.
-
-    Parameters
-    ----------
-    spec : dict
-        Dictionary representation of an input spec
-    validate : bool, default True.
-        Validate the spec during construction. Default ``True``.
-    """
-
-    def __init__(self, spec: Dict[str, Any], validate: bool = True):
-        self._spec = spec
-        self._spec["options"] = self._spec.get("options", {})
-        if validate:
-            self.validate()
-
-    def validate(self):
-        """Validate model spec
-
-        Raises
-        ------
-        SpecError
-            If the spec is not well-formatted.
-        """
-        logger.debug("Validating spec: %s", self._spec)
-        try:
-            validate(instance=self._spec, schema=MODEL_SPEC_SCHEMA)
-        except ValidationError as e:
-            raise SpecError(e.message) from e
-
-    @property
-    def version(self) -> str:
-        """Returns spec version."""
-        return str(self._spec["version"])
-
-    @property
-    def name(self) -> str:
-        """Return model name"""
-        return self._spec["name"]
-
-    @property
-    def model_uri(self) -> str:
-        """Return Model artifact URI"""
-        return self._spec["model"]["uri"]
-
-    @property
-    def model_type(self) -> str:
-        """Return model type"""
-        return self._spec["model"]["model_type"]
-
-    @abstractmethod
-    def load_model(self) -> Any:
-        """Load the model artifact specified in this spec"""
-
-    @property
-    def flavor(self) -> str:
-        """Model flavor"""
-        return self._spec["model"].get("flavor", "")
-
-    @property
-    def schema(self) -> str:
-        """Return the output schema of the model."""
-        return parse_schema(self._spec["schema"])
-
-    @property
-    def options(self) -> Dict[str, Any]:
-        """Model options"""
-        return self._spec["options"]
-
-    @property
-    def pre_processing(self) -> Optional[Callable]:
-        """Return pre-processing transform if exists"""
-        if (
-            "transforms" not in self._spec
-            or "pre" not in self._spec["transforms"]
-            or self._spec["transforms"]["pre"] is None
-        ):
-            # Passthrough
-            return _identity
-        f = find_func(self._spec["transforms"]["pre"])
-        return f(self.options)
-
-    @property
-    def post_processing(self) -> Optional[Callable]:
-        """Return post-processing transform if exists"""
-        if (
-            "transforms" not in self._spec
-            or "post" not in self._spec["transforms"]
-            or self._spec["transforms"]["post"] is None
-        ):
-            # Passthrough
-            return _identity
-        f = find_func(self._spec["transforms"]["post"])
-        return f(self.options)
-
-
-def udf_from_spec(spec: ModelSpec):
+def udf_from_spec(spec: SpecPayload):
     """Return a UDF from a given ModelSpec
 
     Parameters
     ----------
-    spec : ModelSpec
+    spec : SpecPayload
         A model spec
 
     Returns
@@ -203,7 +72,9 @@ def udf_from_spec(spec: ModelSpec):
     else:
         codegen_module = f"rikai.contrib.{spec.flavor}.codegen"
 
-    @udf(returnType=spec.schema)
+    schema = spec.model_spec.dataType()
+
+    @udf(returnType=schema)
     def deserialize_return(data: bytes):
         return _pickler.loads(data)
 
@@ -213,7 +84,7 @@ def udf_from_spec(spec: ModelSpec):
             pickle_udt,
             codegen.generate_udf(spec),
             deserialize_return,
-            spec.schema,
+            schema,
         )
     except ModuleNotFoundError:
         logger.error(f"Unsupported model flavor: {spec.flavor}")

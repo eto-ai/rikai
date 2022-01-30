@@ -23,8 +23,9 @@ from pyspark.sql.types import BinaryType
 from torch.utils.data import DataLoader
 
 from rikai.io import open_uri
-from rikai.spark.sql.codegen.base import ModelSpec
+from rikai.spark.sql.models import ModelSpec
 from rikai.pytorch.pandas import PandasDataset
+from rikai.spark.sql.model import SpecPayload
 
 DEFAULT_NUM_WORKERS = 8
 DEFAULT_BATCH_SIZE = 4
@@ -41,26 +42,28 @@ def move_tensor_to_device(data, device):
     return data
 
 
-def generate_udf(spec: ModelSpec):
+def generate_udf(payload: SpecPayload):
     """Construct a UDF to run pytorch model.
 
     Parameters
     ----------
-    spec : ModelSpec
+    payload : SpecPayload
         the model specifications object
 
     Returns
     -------
     A Spark Pandas UDF.
     """
+    spec = payload.model_spec
     default_device = "gpu" if torch.cuda.is_available() else "cpu"
-    use_gpu = spec.options.get("device", default_device) == "gpu"
+    options = payload.options
+    use_gpu = options.get("device", default_device) == "gpu"
     num_workers = int(
-        spec.options.get(
+        options.get(
             "num_workers", min(os.cpu_count(), DEFAULT_NUM_WORKERS)
         )
     )
-    batch_size = int(spec.options.get("batch_size", DEFAULT_BATCH_SIZE))
+    batch_size = int(options.get("batch_size", DEFAULT_BATCH_SIZE))
 
     return_type = Iterator[pd.Series]
 
@@ -68,16 +71,14 @@ def generate_udf(spec: ModelSpec):
         iter: Iterator[pd.DataFrame],
     ) -> return_type:
         device = torch.device("cuda" if use_gpu else "cpu")
-        model = spec.load_model()
-        model.to(device)
-        model.eval()
+        spec.load_model(payload, device)
 
         try:
             with torch.no_grad():
                 for series in iter:
                     dataset = PandasDataset(
                         series,
-                        transform=spec.pre_processing,
+                        transform=spec.transform(),
                         unpickle=True,
                         use_pil=True,
                     )
@@ -88,9 +89,7 @@ def generate_udf(spec: ModelSpec):
                         num_workers=num_workers,
                     ):
                         batch = move_tensor_to_device(batch, device)
-                        predictions = model(batch)
-                        if spec.post_processing:
-                            predictions = spec.post_processing(predictions)
+                        predictions = spec(batch)
                         bin_predictions = [
                             _pickler.dumps(p) for p in predictions
                         ]
@@ -100,9 +99,7 @@ def generate_udf(spec: ModelSpec):
             # Release GPU memory
             # https://blog.paperspace.com/pytorch-memory-multi-gpu-debugging/?ref=tfrecipes
             if use_gpu:
-                model = model.cpu()
-                del model
-                torch.cuda.empty_cache()
+                spec.release()
 
     return pandas_udf(torch_inference_udf, returnType=BinaryType())
 

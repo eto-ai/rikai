@@ -25,7 +25,7 @@ __all__ = ["generate_udf"]
 _pickler = CloudPickleSerializer()
 
 
-def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
+def generate_udf(spec: "rikai.spark.sql.codegen.base.SpecPayload"):
     """Construct a UDF to run sklearn model.
 
     Parameters

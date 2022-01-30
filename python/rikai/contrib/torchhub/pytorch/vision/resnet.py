@@ -16,8 +16,6 @@ from typing import Any, Callable, Dict
 
 from torchvision import transforms as T
 
-from rikai.types.vision import Image
-
 """
 Adapted from https://github.com/pytorch/pytorch.github.io/blob/site/assets/hub/pytorch_vision_resnet.ipynb
 """  # noqa E501

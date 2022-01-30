@@ -30,6 +30,7 @@ case class CreateModelCommand(
     name: String,
     ifNotExists: Boolean,
     flavor: Option[String],
+    modelType: Option[String],
     returns: Option[String],
     uri: Option[String],
     preprocessor: Option[String],
@@ -44,10 +45,11 @@ case class CreateModelCommand(
   private[spark] def asSpec: ModelSpec =
     uri match {
       case Some(u) =>
-        new ModelSpec(
+        ModelSpec(
           name = Some(name),
           uri = Registry.normalize_uri(u).toString,
           flavor = flavor,
+          modelType = modelType,
           schema = returns,
           preprocessor = preprocessor,
           postprocessor = postprocessor,

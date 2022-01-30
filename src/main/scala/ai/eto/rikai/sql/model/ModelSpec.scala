@@ -23,6 +23,7 @@ case class ModelSpec(
     name: Option[String],
     uri: String,
     flavor: Option[String] = None,
+    modelType: Option[String] = None,
     schema: Option[String] = None,
     options: Option[Map[String, String]] = None,
     preprocessor: Option[String] = None,

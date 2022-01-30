@@ -12,25 +12,52 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Callable, Dict
+"""ModelSpecs for official torchvision models
+"""
 
-from torchvision import transforms as T
+from typing import Any, Callable
+
+import torch.nn
+from torchvision.transforms import ToTensor
 
 from rikai.types import Box2d
 
-__all__ = ["pre_processing", "post_processing"]
+from . import TorchModelType
+
+__all__ = ["ObjectDetectionModelType"]
+
 
 DEFAULT_MIN_SCORE = 0.5
 
 
-def pre_processing(options: Dict[str, Any]) -> Callable:
-    return T.ToTensor()
+class ObjectDetectionModelType(TorchModelType):
+    """Shared ModelSpec for object detections in Torchvision
 
+    https://pytorch.org/vision/stable/models.html
+    """
 
-def post_processing(options: Dict[str, Any]) -> Callable:
-    min_score = float(options.get("min_score", DEFAULT_MIN_SCORE))
+    def __init__(self, name: str):
+        super().__init__()
+        self.name = name
 
-    def post_process_func(batch):
+    def __repr__(self):
+        return f"ModelType({self.name})"
+
+    def schema(self) -> str:
+        return "array<struct<box:box2d, score:float, label_id:int>>"
+
+    def transform(self) -> Callable:
+        return ToTensor()
+
+    def predict(self, images, *args, **kwargs) -> Any:
+        assert (
+            self.model is not None
+        ), "model has not been initialized via load_model"
+        min_score = float(
+            self.spec.options.get("min_score", DEFAULT_MIN_SCORE)
+        )
+
+        batch = self.model(images)
         results = []
         for predicts in batch:
             predict_result = []
@@ -52,4 +79,7 @@ def post_processing(options: Dict[str, Any]) -> Callable:
             results.append(predict_result)
         return results
 
-    return post_process_func
+    def release(self):
+        model = self.model.cpu()
+        del model
+        torch.cuda.empty_cache()

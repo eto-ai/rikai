@@ -26,7 +26,6 @@ from pyspark.sql.types import IntegerType, StructField, StructType
 from torch.utils.data import DataLoader
 from utils import check_ml_predict
 
-from rikai.contrib.torch.detections import OUTPUT_SCHEMA
 from rikai.pytorch.pandas import PandasDataset
 from rikai.spark.sql.codegen.fs import FileModelSpec
 from rikai.spark.sql.exceptions import SpecError
@@ -52,12 +51,9 @@ name: resnet
 model:
   uri: {}
   flavor: pytorch
-schema: {}
-transforms:
-  pre: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing
-  post: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing
+  type: fasterrcnn_resnet50_fpn
     """.format(  # noqa: E501
-        resnet_model_uri, OUTPUT_SCHEMA
+        resnet_model_uri
     )
 
     spec_file = tmp_path / "spec.yaml"

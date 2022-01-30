@@ -54,6 +54,7 @@ private[parser] class RikaiExtAstBuilder
           case _         => None
         }
     }
+    val modelType: Option[String] = Option(ctx.modeltype).map(_.getText)
     val ifNotExists: Boolean = List(ctx.IF(), ctx.NOT(), ctx.EXISTS())
       .map(x => x != null)
       .forall(identity)
@@ -91,6 +92,7 @@ private[parser] class RikaiExtAstBuilder
     CreateModelCommand(
       ctx.model.getText,
       flavor = flavor,
+      modelType = modelType,
       ifNotExists = ifNotExists,
       returns = returns,
       uri = Option(ctx.uri).map(string),

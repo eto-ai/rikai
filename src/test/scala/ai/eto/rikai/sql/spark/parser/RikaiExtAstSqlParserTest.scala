@@ -53,6 +53,15 @@ class RikaiExtAstSqlParserTest extends AnyFunSuite {
     assert(create.returns.contains("STRUCT<foo:int, bar:ARRAY<STRING>>"))
   }
 
+  test("parse model type") {
+    val cmd = parser.parsePlan(
+      "CREATE MODEL foo FLAVOR pytorch MODEL_TYPE ssd USING 'abc'"
+    )
+    assert(cmd.isInstanceOf[CreateModelCommand])
+    val create = cmd.asInstanceOf[CreateModelCommand]
+    assert(create.modelType.contains("ssd"))
+  }
+
   test("parse returns UDTs") {
     val cmd = parser.parsePlan(
       "CREATE MODEL udts RETURNS STRUCT<foo:int, bar:ARRAY<Box2d>> USING 'gs://udt/bucket'"

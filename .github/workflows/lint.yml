@@ -19,6 +19,7 @@ jobs:
         with:
           python-version: 3.9
       - name: Make Lint
+        working-directory: python
         run: |
           pip install --user -e .[dev]
           make lint

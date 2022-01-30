@@ -37,6 +37,7 @@ jobs:
     - name: sbt install
       run: |
         echo "SPARK_VERSION=${{matrix.spark-version}}" >> $GITHUB_ENV
+        export SPARK_VERSION=${{matrix.spark-version}}
         sbt publishLocal
     - name: Start docker-compose
       run: |

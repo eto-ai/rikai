@@ -24,7 +24,9 @@ def test_tf_dataset(spark, tmp_path):
     dataset_dir = tmp_path / "data"
     data = []
     for i in range(100):
-        image_data = np.random.randint(0, 128, size=(128, 128), dtype=np.uint8)
+        image_data = np.random.randint(
+            0, 128, size=(128, 128, 3), dtype=np.uint8
+        )
         image = Image.from_array(image_data)
 
         data.append(Row(id=i, image=image))
@@ -35,7 +37,7 @@ def test_tf_dataset(spark, tmp_path):
         dataset_dir,
         output_signature=(
             tf.TensorSpec(shape=(), dtype=tf.uint8),
-            tf.TensorSpec(shape=(None, None), dtype=tf.uint8),
+            tf.TensorSpec(shape=(None, None, 3), dtype=tf.uint8),
         ),
     )
 
@@ -43,5 +45,5 @@ def test_tf_dataset(spark, tmp_path):
     for row, (id, img) in zip(data, dataset):
         assert id.get_shape() == ()
         assert tf.constant(row.id, dtype=tf.uint8) == id
-        assert img.get_shape() == (128, 128)
+        assert img.get_shape() == (128, 128, 3)
         assert np.array_equal(row.image.to_numpy(), img.numpy())

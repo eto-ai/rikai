@@ -213,7 +213,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
         The caller should close the image.
         https://pillow.readthedocs.io/en/stable/reference/open_files.html#image-lifecycle
         """
-        return PILImage.open(self.open())
+        return PILImage.open(self.open()).convert("RGB")
 
     def to_numpy(self) -> np.ndarray:
         """Convert this image into an :py:class:`numpy.ndarray`."""

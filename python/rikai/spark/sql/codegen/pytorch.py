@@ -23,6 +23,7 @@ from pyspark.sql.types import BinaryType
 from torch.utils.data import DataLoader
 
 from rikai.io import open_uri
+from rikai.spark.sql.codegen.base import ModelSpec
 from rikai.pytorch.pandas import PandasDataset
 
 DEFAULT_NUM_WORKERS = 8
@@ -31,7 +32,16 @@ DEFAULT_BATCH_SIZE = 4
 _pickler = CloudPickleSerializer()
 
 
-def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
+def move_tensor_to_device(data, device):
+    if isinstance(data, torch.Tensor):
+        return data.to(device)
+    elif isinstance(data, list):
+        return [move_tensor_to_device(elem, device) for elem in data]
+    # Do nothing
+    return data
+
+
+def generate_udf(spec: ModelSpec):
     """Construct a UDF to run pytorch model.
 
     Parameters
@@ -77,8 +87,7 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
                         batch_size=batch_size,
                         num_workers=num_workers,
                     ):
-                        if isinstance(batch, torch.Tensor):
-                            batch = batch.to(device)
+                        batch = move_tensor_to_device(batch, device)
                         predictions = model(batch)
                         if spec.post_processing:
                             predictions = spec.post_processing(predictions)

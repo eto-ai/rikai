@@ -32,7 +32,7 @@ from rikai.viz import Style, Text
 
 @pytest.fixture
 def test_image() -> PILImage:
-    data = np.random.random((100, 100))
+    data = np.random.random((100, 100, 3))
     rescaled = (255.0 / data.max() * (data - data.min())).astype(np.uint8)
     return PILImage.fromarray(rescaled)
 
@@ -86,7 +86,7 @@ def test_convert_to_embedded_image(tmp_path, test_image: PILImage):
 
 
 def test_format_kwargs(tmp_path):
-    data = np.random.random((100, 100))
+    data = np.random.random((100, 100, 3))
     rescaled = (255.0 / data.max() * (data - data.min())).astype(np.uint8)
     result_uri = tmp_path / "result.jpg"
     Image.from_array(rescaled, result_uri, format="jpeg", optimize=True)
@@ -109,7 +109,7 @@ def test_format_kwargs(tmp_path):
 
 
 def test_embeded_image_from_bytesio():
-    data = np.random.random((100, 100))
+    data = np.random.random((100, 100, 3))
     rescaled = (255.0 / data.max() * (data - data.min())).astype(np.uint8)
     im = PILImage.fromarray(rescaled)
     buf = BytesIO()
@@ -120,7 +120,7 @@ def test_embeded_image_from_bytesio():
 
 
 def test_crop_image():
-    data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
+    data = np.random.randint(0, 255, size=(100, 100, 3), dtype=np.uint8)
     im = Image.from_array(data)
     patch = im.crop(Box2d(10, 10, 30, 30))
     cropped_data = patch.to_numpy()
@@ -173,7 +173,7 @@ def test_save_image_as_external(tmp_path):
 
 
 def test_to_dict():
-    data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
+    data = np.random.randint(0, 255, size=(100, 100, 3), dtype=np.uint8)
     img = Image.from_array(data)
     assert (
         base64.decodebytes(img.to_dict()["data"].encode("utf-8")) == img.data
@@ -183,7 +183,7 @@ def test_to_dict():
 
 
 def test_draw_image():
-    data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
+    data = np.random.randint(0, 255, size=(100, 100, 3), dtype=np.uint8)
     img = Image.from_array(data)
 
     box1 = Box2d(1, 2, 10, 12)
@@ -191,15 +191,16 @@ def test_draw_image():
     draw_boxes = img | box1 | box2
     pil_image = draw_boxes.to_image()
 
-    expected = Image.from_array(data).to_pil().convert("RGBA")
+    expected = Image.from_array(data).to_pil()
     draw = PILImageDraw.Draw(expected)
     draw.rectangle((1.0, 2.0, 10.0, 12.0), outline="red")
     draw.rectangle((20, 20, 40, 40), outline="red")
+    print(pil_image.to_numpy().shape, data.shape)
     assert np.array_equal(pil_image.to_numpy(), expected)
 
 
 def test_draw_styled_images():
-    data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)
+    data = np.random.randint(0, 255, size=(100, 100, 3), dtype=np.uint8)
     img = Image.from_array(data)
     box1 = Box2d(1, 2, 10, 12)
     box2 = Box2d(20, 20, 40, 40)
@@ -207,7 +208,7 @@ def test_draw_styled_images():
     style = Style(color="yellow", width=3)
     styled_boxes = img | style(box1) | style(box2)
 
-    expected = Image.from_array(data).to_pil().convert("RGBA")
+    expected = Image.from_array(data).to_pil()
     draw = PILImageDraw.Draw(expected)
     draw.rectangle((1, 2, 10, 12), outline="yellow", width=3)
     draw.rectangle((20, 20, 40, 40), outline="yellow", width=3)
@@ -220,7 +221,7 @@ def test_draw_styled_images():
         | box2 @ {"color": "green", "width": 10}
     )
 
-    sugar_expected = Image.from_array(data).to_pil().convert("RGBA")
+    sugar_expected = Image.from_array(data).to_pil()
     draw = PILImageDraw.Draw(sugar_expected)
     draw.rectangle((1, 2, 10, 12), outline="green", width=10)
     draw.rectangle((20, 20, 40, 40), outline="green", width=10)
@@ -233,7 +234,7 @@ def test_draw_list_of_boxes():
     boxes = [Box2d(1, 2, 10, 12), Box2d(20, 20, 30, 30)]
     pil_image = (img | boxes).to_image()
 
-    expected = Image.from_array(data).to_pil().convert("RGBA")
+    expected = Image.from_array(data).to_pil()
     draw = PILImageDraw.Draw(expected)
     for box in boxes:
         draw.rectangle(box, outline="red")
@@ -247,7 +248,7 @@ def test_draw_styled_list_of_boxes():
     style = Style(color="yellow", width=3)
     pil_image = (img | style(boxes)).to_image()
 
-    expected = Image.from_array(data).to_pil().convert("RGBA")
+    expected = Image.from_array(data).to_pil()
     draw = PILImageDraw.Draw(expected)
     for box in boxes:
         draw.rectangle(box, outline="yellow", width=3)
@@ -259,7 +260,7 @@ def test_draw_texts():
     img = Image.from_array(data)
     pil_image = (img | Text("label", (10, 10))).to_image()
 
-    expected = Image.from_array(data).to_pil().convert("RGBA")
+    expected = Image.from_array(data).to_pil()
     draw = PILImageDraw.Draw(expected)
     draw.text((10, 10), "label", fill="red")
     assert np.array_equal(pil_image.to_numpy(), expected)

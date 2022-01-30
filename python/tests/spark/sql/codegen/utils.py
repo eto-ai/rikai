@@ -65,7 +65,7 @@ def check_ml_predict(spark: SparkSession, model_name: str):
                                 Box2dType(),
                             ),
                             StructField("score", FloatType()),
-                            StructField("label", IntegerType()),
+                            StructField("label_id", IntegerType()),
                         ]
                     )
                 ),
@@ -77,7 +77,7 @@ def check_ml_predict(spark: SparkSession, model_name: str):
             StructField(
                 "predictions",
                 parse_schema(
-                    "array<struct<box:box2d, score:float, label:int>>"
+                    "array<struct<box:box2d, score:float, label_id:int>>"
                 ),
             )
         ]

@@ -44,7 +44,7 @@ class ObjectDetectionModelType(TorchModelType):
         return f"ModelType({self.name})"
 
     def schema(self) -> str:
-        return "array<struct<box:box2d, score:float, label:int>>"
+        return "array<struct<box:box2d, score:float, label_id:int>>"
 
     def transform(self) -> Callable:
         return ToTensor()
@@ -71,7 +71,7 @@ class ObjectDetectionModelType(TorchModelType):
                 predict_result.append(
                     {
                         "box": Box2d(*box),
-                        "label": label,
+                        "label_id": label,
                         "score": score,
                     }
                 )

@@ -12,6 +12,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7, 3.8, 3.9]
+        spark-version: [3.1.2, 3.2.0]
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v2
@@ -35,6 +36,7 @@ jobs:
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
     - name: sbt install
       run: |
+        echo "SPARK_VERSION=${{matrix.spark-version}}" >> $GITHUB_ENV
         sbt publishLocal
     - name: Start docker-compose
       run: |

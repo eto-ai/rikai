@@ -47,7 +47,7 @@ all = (
     + aws
 )
 
-if os.environ["SPARK_VERSION"]:
+if os.environ.get("SPARK_VERSION", None):
     spark_version = os.environ["SPARK_VERSION"]
 else:
     spark_version = "3.1.2"

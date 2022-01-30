@@ -22,6 +22,7 @@ jobs:
         working-directory: python
         run: |
           pip install --user -e .[dev]
+          cd ..
           make lint
       - name: Python lint
         working-directory: python

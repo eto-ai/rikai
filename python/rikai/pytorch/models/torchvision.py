@@ -15,12 +15,11 @@
 """ModelSpecs for official torchvision models
 """
 
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 import torch.nn
 from torchvision.transforms import ToTensor
 
-from rikai.spark.sql.model import ModelSpec
 from rikai.types import Box2d
 from . import TorchModelType
 
@@ -39,6 +38,9 @@ class ObjectDetectionModelType(TorchModelType):
     def __init__(self, name: str):
         super().__init__()
         self.name = name
+
+    def __repr__(self):
+        return f"ModelType({self.name})"
 
     def schema(self) -> str:
         return "array<struct<box:box2d, score:float, label:int>>"

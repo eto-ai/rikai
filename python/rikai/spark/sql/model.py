@@ -26,7 +26,7 @@ from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
 
 
-__all__ = ["ModelSpec", "ModelType"]
+__all__ = ["ModelSpec", "ModelType", "AnonymousModelType"]
 
 
 # JSON schema specification for the model payload specifications
@@ -223,6 +223,7 @@ class ModelType(ABC):
         return self.predict(*args, **kwargs)
 
     def release(self):
+        # Noop by default
         pass
 
 

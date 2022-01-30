@@ -17,4 +17,9 @@ from .torchvision import ObjectDetectionModelType
 __all__ = ["MODEL_TYPE"]
 
 
-MODEL_TYPE = ObjectDetectionModelType("faster_rcnn_resnet50_fpn")
+class FasterRCNNModelType(ObjectDetectionModelType):
+    def __init__(self):
+        super().__init__("faster_rcnn_resnet50_fpn")
+
+
+MODEL_TYPE = FasterRCNNModelType()

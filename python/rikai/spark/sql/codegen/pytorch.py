@@ -68,7 +68,6 @@ def generate_udf(payload: ModelSpec):
         iter: Iterator[pd.DataFrame],
     ) -> return_type:
         device = torch.device("cuda" if use_gpu else "cpu")
-        print("WHAT MODEL IS: ", type(model))
         model.load_model(payload, device=device)
         if isinstance(model, AnonymousModelType):
             # We will remove them after AnonymousModelType deprecation

@@ -46,7 +46,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: /opt/hostedtoolcache/rikai/${{ matrix.python-version }}
-        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/setup.py') }}
+        key: ${{ runner.os }}-pip-${{ matrix.spark-version }}-${{ hashFiles('**/setup.py') }}
         restore-keys: |
           ${{ runner.os }}-pip-
     - name: apt update and install

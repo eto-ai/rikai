@@ -14,7 +14,7 @@ with open(
 
 # extras
 dev = [
-    "black==21.11b1",
+    "black==22.1.0",
     "bump2version",
     "flake8",
     "isort",

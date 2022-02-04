@@ -82,16 +82,13 @@ def test_simple_struct():
 
 def test_std_msgs_header(spark: SparkSession, tmp_path):
     """Test `std_msgs/Header`"""
-    assert (
-        StructType(
-            [
-                StructField("seq", LongType()),
-                StructField("stamp", TimestampType()),
-                StructField("frame_id", StringType()),
-            ]
-        )
-        == as_spark_schema(std_msgs.msg.Header)
-    )
+    assert StructType(
+        [
+            StructField("seq", LongType()),
+            StructField("stamp", TimestampType()),
+            StructField("frame_id", StringType()),
+        ]
+    ) == as_spark_schema(std_msgs.msg.Header)
 
     now = time.time_ns()
     header = as_json(
@@ -122,34 +119,31 @@ def test_simple_spark_schema():
         UInt32
     )
 
-    assert (
-        StructType(
-            [
-                StructField(
-                    "layout",
-                    StructType(
-                        [
-                            StructField(
-                                "dim",
-                                ArrayType(
-                                    StructType(
-                                        [
-                                            StructField("label", StringType()),
-                                            StructField("size", LongType()),
-                                            StructField(
-                                                "stride",
-                                                LongType(),
-                                            ),
-                                        ]
-                                    )
-                                ),
+    assert StructType(
+        [
+            StructField(
+                "layout",
+                StructType(
+                    [
+                        StructField(
+                            "dim",
+                            ArrayType(
+                                StructType(
+                                    [
+                                        StructField("label", StringType()),
+                                        StructField("size", LongType()),
+                                        StructField(
+                                            "stride",
+                                            LongType(),
+                                        ),
+                                    ]
+                                )
                             ),
-                            StructField("data_offset", LongType()),
-                        ]
-                    ),
+                        ),
+                        StructField("data_offset", LongType()),
+                    ]
                 ),
-                StructField("data", BinaryType()),
-            ]
-        )
-        == as_spark_schema(std_msgs.msg.ByteMultiArray)
-    )
+            ),
+            StructField("data", BinaryType()),
+        ]
+    ) == as_spark_schema(std_msgs.msg.ByteMultiArray)

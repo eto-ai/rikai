@@ -31,12 +31,13 @@ import org.apache.spark.sql.types._
   * @param ymax y-corrdinate of the bottom-right of the box.
   */
 @SQLUserDefinedType(udt = classOf[Box2dType])
+@SerialVersionUID(1L)
 class Box2d(
     val xmin: Double,
     val ymin: Double,
     val xmax: Double,
     val ymax: Double
-) {
+) extends Serializable {
 
   override def equals(b: Any): Boolean = {
     b match {

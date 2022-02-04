@@ -27,7 +27,8 @@ import org.apache.spark.unsafe.types.UTF8String
   * @param vid
   */
 @SQLUserDefinedType(udt = classOf[YouTubeVideoType])
-class YouTubeVideo(val vid: String) {
+@SerialVersionUID(1L)
+class YouTubeVideo(val vid: String) extends Serializable {
   override def toString: String = s"YouTubeVideo(vid='$vid')"
 }
 
@@ -67,7 +68,8 @@ class YouTubeVideoType extends UserDefinedType[YouTubeVideo] {
   * @param uri
   */
 @SQLUserDefinedType(udt = classOf[VideoStreamType])
-class VideoStream(val uri: String) {
+@SerialVersionUID(1L)
+class VideoStream(val uri: String) extends Serializable {
   override def toString: String = s"VideoStream(uri='$uri')"
 }
 
@@ -109,7 +111,8 @@ class VideoStreamType extends UserDefinedType[VideoStream] {
   *                or negative to indicate end of video
   */
 @SQLUserDefinedType(udt = classOf[SegmentType])
-class Segment(val start_fno: Int, val end_fno: Int) {
+@SerialVersionUID(1L)
+class Segment(val start_fno: Int, val end_fno: Int) extends Serializable {
   require(start_fno >= 0, "Start frame number must be non-negative")
   require(
     end_fno >= start_fno || end_fno < 0,

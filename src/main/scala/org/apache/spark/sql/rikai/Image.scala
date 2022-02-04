@@ -70,7 +70,8 @@ private[spark] class ImageType extends UserDefinedType[Image] {
   */
 @SQLUserDefinedType(udt = classOf[ImageType])
 @SerialVersionUID(1L)
-class Image(val data: Option[Array[Byte]], val uri: Option[String]) extends Serializable {
+class Image(val data: Option[Array[Byte]], val uri: Option[String])
+    extends Serializable {
 
   def this(uri: String) = {
     this(None, Some(uri))

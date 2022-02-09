@@ -1,3 +1,4 @@
+import os
 import pathlib
 
 from setuptools import find_packages, setup
@@ -13,7 +14,7 @@ with open(
 
 # extras
 dev = [
-    "black",
+    "black==22.1.0",
     "bump2version",
     "flake8",
     "isort",
@@ -46,6 +47,10 @@ all = (
     + aws
 )
 
+if os.environ.get("SPARK_VERSION", None):
+    spark_version = os.environ["SPARK_VERSION"]
+else:
+    spark_version = "3.1.2"
 
 setup(
     name="rikai",
@@ -68,7 +73,7 @@ setup(
         "pandas",
         "Pillow",
         "pyarrow>=6.0",
-        "pyspark==3.1.2",
+        f"pyspark=={spark_version}",
         "pyyaml",
         "requests",
         "semver",

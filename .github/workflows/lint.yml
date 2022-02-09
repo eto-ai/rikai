@@ -19,8 +19,10 @@ jobs:
         with:
           python-version: 3.9
       - name: Make Lint
+        working-directory: python
         run: |
-          pip install isort black pylint pycodestyle flake8
+          pip install --user -e .[dev]
+          cd ..
           make lint
       - name: Python lint
         working-directory: python

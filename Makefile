@@ -36,15 +36,14 @@ python/rikai/spark/sql/generated/RikaiModelSchemaParser.py: src/main/antlr4/org/
 
 lint:
 	sbt scalafmtCheckAll
-	black -l 79 --check python contrib/
+	black --check python contrib experimental
 	pycodestyle python contrib/
 .PHONY: lint
 
 # Fix code style
 fix:
 	sbt scalafmtAll
-	isort python contrib experimental
-	black -l 79 python contrib experimental
+	black python contrib experimental
 .PHONY: fix
 
 # increment to the next released version and add a release tag

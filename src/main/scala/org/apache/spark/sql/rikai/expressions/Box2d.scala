@@ -45,7 +45,11 @@ case class Area(child: Expression)
 
   override def prettyName: String = "area"
 
-  @enableIf(scala.util.Properties.versionNumberString.compareTo("2.12.15") >= 0)
+  @enableIf(c =>
+    c.classPath.exists(
+      _.getPath.matches(".*spark-catalyst_2\\.\\d+-3\\.2\\..*")
+    )
+  )
   override def withNewChildInternal(newChild: Expression): Expression =
     copy(child = newChild)
 }
@@ -70,7 +74,11 @@ case class IOU(leftBox: Expression, rightBox: Expression)
 
   override def prettyName: String = "iou"
 
-  @enableIf(scala.util.Properties.versionNumberString.compareTo("2.12.15") >= 0)
+  @enableIf(c =>
+    c.classPath.exists(
+      _.getPath.matches(".*spark-catalyst_2\\.\\d+-3\\.2\\..*")
+    )
+  )
   override def withNewChildrenInternal(
       newLeft: Expression,
       newRight: Expression

@@ -26,11 +26,12 @@ import Utils.approxEqual
   * @constructor create a 3-D Point
   */
 @SQLUserDefinedType(udt = classOf[PointType])
+@SerialVersionUID(1L)
 class Point(
     val x: Double,
     val y: Double,
     val z: Double
-) {
+) extends Serializable {
 
   override def equals(p: Any): Boolean =
     p match {

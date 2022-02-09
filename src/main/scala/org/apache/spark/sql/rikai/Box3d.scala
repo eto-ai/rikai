@@ -36,13 +36,14 @@ import Utils.approxEqual
   * @see [[https://github.com/waymo-research/waymo-open-dataset/blob/master/waymo_open_dataset/label.proto Waymo Dataset Spec]]
   */
 @SQLUserDefinedType(udt = classOf[Box3dType])
+@SerialVersionUID(1L)
 class Box3d(
     val center: Point,
     val length: Double,
     val width: Double,
     val height: Double,
     val heading: Double
-) {
+) extends Serializable {
 
   override def equals(b: Any): Boolean =
     b match {

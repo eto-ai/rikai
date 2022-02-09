@@ -36,13 +36,14 @@ object MaskTypeEnum extends Enumeration {
 /** Mask of an 2-D image.
   */
 @SQLUserDefinedType(udt = classOf[MaskType])
+@SerialVersionUID(1L)
 class Mask(
     val maskType: MaskTypeEnum.Type,
     val polygon: Option[Array[Array[Float]]] = None,
     val height: Option[Int] = None,
     val width: Option[Int] = None,
     val rle: Option[Array[Int]] = None
-) {
+) extends Serializable {
 
   override def toString: String = {
     s"Mask($maskType)"

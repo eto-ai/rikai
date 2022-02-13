@@ -113,7 +113,7 @@ class PointType(UserDefinedType):
         return Point(datum[0], datum[1], datum[2])
 
     def simpleString(self) -> str:
-        return "PointType"
+        return "point"
 
 
 class Box3dType(UserDefinedType):
@@ -151,7 +151,7 @@ class Box3dType(UserDefinedType):
         return Box3d(datum[0], datum[1], datum[2], datum[3], datum[4])
 
     def simpleString(self) -> str:
-        return "Box3dType"
+        return "box3d"
 
 
 class MaskType(UserDefinedType):
@@ -208,4 +208,4 @@ class MaskType(UserDefinedType):
             raise ValueError(f"Unrecognized mask type: {datum[0]}")
 
     def simpleString(self) -> str:
-        return "Mask"
+        return "mask"

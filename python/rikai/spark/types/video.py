@@ -60,7 +60,7 @@ class VideoStreamType(UserDefinedType):
         return VideoStream(datum[0])
 
     def simpleString(self) -> str:
-        return "VideoStreamType"
+        return "videostream"
 
 
 class YouTubeVideoType(UserDefinedType):
@@ -101,7 +101,7 @@ class YouTubeVideoType(UserDefinedType):
         return YouTubeVideo(datum[0])
 
     def simpleString(self) -> str:
-        return "YouTubeVideoType"
+        return "youtubevideo"
 
 
 class SegmentType(UserDefinedType):
@@ -145,4 +145,4 @@ class SegmentType(UserDefinedType):
         return Segment(datum[0], datum[1])
 
     def simpleString(self) -> str:
-        return "SegmentType"
+        return "segment"

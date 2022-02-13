@@ -61,4 +61,4 @@ class ImageType(UserDefinedType):
         return Image(datum[0] or datum[1])
 
     def simpleString(self) -> str:
-        return "ImageType"
+        return "image"

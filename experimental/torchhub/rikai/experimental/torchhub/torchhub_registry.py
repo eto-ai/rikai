@@ -35,12 +35,11 @@ class TorchHubModelSpec(ModelSpec):
             },
         }
 
-        # remove none value of pre/post processing
         repo_proj = repo_or_dir.split(":")[0].replace("/", ".")
+
+        # fill in the convention or remove none value of pre/post processing
         pre_f = f"rikai.contrib.torchhub.{repo_proj}.{model}.pre_processing"
         post_f = f"rikai.contrib.torchhub.{repo_proj}.{model}.post_processing"
-        schema_f = f"rikai.contrib.torchhub.{repo_proj}.{model}.OUTPUT_SCHEMA"
-
         if not spec["transforms"]["pre"]:
             if has_func(pre_f):
                 spec["transforms"]["pre"] = pre_f
@@ -52,8 +51,11 @@ class TorchHubModelSpec(ModelSpec):
             else:
                 del spec["transforms"]["post"]
 
+        schema_f = f"rikai.contrib.torchhub.{repo_proj}.{model}.OUTPUT_SCHEMA"
         if not spec["schema"] and has_func(schema_f):
             spec["schema"] = find_func(schema_f)
+
+        # defaults to the `pytorch` flavor
         if not spec["model"]["flavor"]:
             spec["model"]["flavor"] = "pytorch"
 

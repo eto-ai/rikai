@@ -15,7 +15,7 @@ setup(
             "isort",
             # for testing
             "pytest",
-            "torch"
+            "torch",
         ]
     },
     packages=find_namespace_packages(include=["rikai.*"]),

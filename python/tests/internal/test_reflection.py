@@ -18,15 +18,13 @@ from rikai.internal.reflection import has_func
 def test_import_check():
     proj = "rikai.contrib.torchhub.pytorch.vision"
     # Check usage:
-    # from {proj} import resnet; resnet.pre_processing
-    assert has_func(f"{proj}.resnet.pre_processing")
-    assert has_func(f"{proj}.resnet.post_processing")
+    # from {proj} import resnet; resnet.MODEL_TYPE
+    assert has_func(f"{proj}.resnet.MODEL_TYPE")
 
     # Check usage:
     # from {proj}.resnet34 import pre_processing
-    assert has_func(f"{proj}.resnet34.pre_processing")
-    assert has_func(f"{proj}.resnet34.post_processing")
-    assert has_func(f"{proj}.resnet18.OUTPUT_SCHEMA")
+    assert has_func(f"{proj}.resnet34.MODEL_TYPE")
+    assert has_func(f"{proj}.resnet18.MODEL_TYPE")
 
     # Negative usages
     assert not has_func("hello")

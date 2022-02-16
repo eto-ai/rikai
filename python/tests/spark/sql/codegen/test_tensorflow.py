@@ -30,7 +30,7 @@ from pyspark.sql.types import (
 )
 
 import rikai
-from rikai.contrib.tensorflow.models.ssd import HUB_URL as SSD_HUB_URL
+from rikai.contrib.tfhub.tensorflow.ssd import HUB_URL as SSD_HUB_URL
 from rikai.contrib.tensorflow.models.ssd import OUTPUT_SCHEMA
 from rikai.spark.sql.codegen.fs import FileModelSpec
 from rikai.spark.sql.codegen.tensorflow import generate_udf

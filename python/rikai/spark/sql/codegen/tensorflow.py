@@ -32,8 +32,11 @@ __all__ = ["generate_udf", "load_model_from_uri"]
 _pickler = CloudPickleSerializer()
 
 
-def infer_output_signature(blob: bytes):
-    row = _pickler.loads(blob)
+def infer_output_signature(blob, is_udf: bool):
+    if is_udf:
+        row = _pickler.loads(blob)
+    else:
+        row = blob
 
     if isinstance(row, Image):
         image_arr = row.to_numpy()
@@ -56,7 +59,7 @@ def infer_output_signature(blob: bytes):
         return tf.TensorSpec.from_tensor(row)
 
 
-def generate_udf(spec: ModelSpec):
+def _generate(spec: ModelSpec, is_udf: bool = True):
     """Construct a UDF to run Tensorflow (Karas) Model"""
 
     batch_size = int(spec.options.get("batch_size", DEFAULT_BATCH_SIZE))
@@ -70,9 +73,9 @@ def generate_udf(spec: ModelSpec):
         signature = None
         for df in iter:
             if signature is None:
-                signature = infer_output_signature(df.iloc[0])
+                signature = infer_output_signature(df.iloc[0], is_udf)
 
-            ds = PandasDataset(df, unpickle=True)
+            ds = PandasDataset(df, unpickle=is_udf, use_pil=True)
             data = tf.data.Dataset.from_generator(
                 ds,
                 output_signature=tf.TensorSpec(
@@ -88,9 +91,21 @@ def generate_udf(spec: ModelSpec):
             for batch in data:
                 raw_predictions = model(batch)
                 predictions.extend(spec.post_processing(raw_predictions))
-            yield pd.Series([_pickler.dumps(p) for p in predictions])
+            results = [_pickler.dumps(p) if is_udf else p for p in predictions]
+            yield pd.Series(results)
 
-    return pandas_udf(tf_inference_udf, returnType=BinaryType())
+    if is_udf:
+        return pandas_udf(tf_inference_udf, returnType=BinaryType())
+    else:
+        return tf_inference_udf
+
+
+def generate_inference_func(payload: ModelSpec):
+    return _generate(payload, False)
+
+
+def generate_udf(payload: ModelSpec):
+    return _generate(payload, True)
 
 
 def load_model_from_uri(uri: str):

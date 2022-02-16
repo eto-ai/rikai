@@ -17,22 +17,31 @@
 https://arxiv.org/abs/1512.02325
 """
 
+
 from typing import Any, Callable, Dict
 
-from rikai.types import Box2d
+from rikai.tensorflow.models import TensorflowModelType
+from rikai.spark.sql.model import _identity
 
 HUB_URL = "https://tfhub.dev/tensorflow/ssd_mobilenet_v2/2"
 
 
-def pre_processing(options: Dict[str, Any]):
-    def pre_processor_func(batch):
-        return batch
+class SSDModelType(TensorflowModelType):
+    def schema(self) -> str:
+        return (
+            "array<struct<detection_boxes:box2d,"
+            "detection_scores:float, detection_classes:int>>"
+        )
 
-    return pre_processor_func
+    def transform(self) -> Callable:
+        return _identity
 
+    def predict(self, images, *args, **kwargs) -> Any:
+        assert (
+            self.model is not None
+        ), "model has not been initialized via load_model"
+        batch = self.model(images)
 
-def post_processing(options: Dict[str, Any]) -> Callable:
-    def post_process_func(batch):
         results = []
         for boxes, classes, scores in zip(
             batch["detection_boxes"].numpy(),
@@ -51,10 +60,5 @@ def post_processing(options: Dict[str, Any]) -> Callable:
             results.append(predict_result)
         return results
 
-    return post_process_func
 
-
-OUTPUT_SCHEMA = (
-    "array<struct<detection_boxes:box2d, detection_scores:float,"
-    + "detection_classes:int>>"
-)
+MODEL_TYPE = SSDModelType()

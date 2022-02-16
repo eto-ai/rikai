@@ -36,3 +36,10 @@ class TorchModelType(ModelType, ABC):
         if "device" in kwargs:
             self.model.to(kwargs.get("device"))
         self.spec = spec
+
+    # Release GPU memory
+    # https://blog.paperspace.com/pytorch-memory-multi-gpu-debugging/?ref=tfrecipes
+    def release(self):
+        model = self.model.cpu()
+        del model
+        torch.cuda.empty_cache()

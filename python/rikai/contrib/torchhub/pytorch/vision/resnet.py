@@ -60,10 +60,5 @@ class ResnetModelType(TorchModelType):
             results.append(result.detach().cpu().tolist())
         return results
 
-    def release(self):
-        model = self.model.cpu()
-        del model
-        torch.cuda.empty_cache()
-
 
 MODEL_TYPE = ResnetModelType()

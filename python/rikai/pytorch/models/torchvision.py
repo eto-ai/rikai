@@ -78,8 +78,3 @@ class ObjectDetectionModelType(TorchModelType):
 
             results.append(predict_result)
         return results
-
-    def release(self):
-        model = self.model.cpu()
-        del model
-        torch.cuda.empty_cache()

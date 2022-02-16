@@ -97,8 +97,6 @@ def generate_udf(payload: ModelSpec):
                         results.extend(bin_predictions)
                     yield pd.Series(results)
         finally:
-            # Release GPU memory
-            # https://blog.paperspace.com/pytorch-memory-multi-gpu-debugging/?ref=tfrecipes
             if use_gpu:
                 model.release()
 

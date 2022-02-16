@@ -41,7 +41,7 @@ def move_tensor_to_device(data, device):
     return data
 
 
-def generate(payload: ModelSpec, is_udf: bool = True):
+def generate_udf(payload: ModelSpec):
     """Construct a UDF to run pytorch model.
 
     Parameters
@@ -80,7 +80,7 @@ def generate(payload: ModelSpec, is_udf: bool = True):
                     dataset = PandasDataset(
                         series,
                         transform=model.transform(),
-                        unpickle=is_udf,
+                        unpickle=True,
                         use_pil=True,
                     )
                     results = []
@@ -92,8 +92,7 @@ def generate(payload: ModelSpec, is_udf: bool = True):
                         batch = move_tensor_to_device(batch, device)
                         predictions = model(batch)
                         bin_predictions = [
-                            _pickler.dumps(p) if is_udf else p
-                            for p in predictions
+                            _pickler.dumps(p) for p in predictions
                         ]
                         results.extend(bin_predictions)
                     yield pd.Series(results)
@@ -103,14 +102,7 @@ def generate(payload: ModelSpec, is_udf: bool = True):
             if use_gpu:
                 model.release()
 
-    if is_udf:
-        return pandas_udf(torch_inference_udf, returnType=BinaryType())
-    else:
-        return torch_inference_udf
-
-
-def generate_udf(payload: ModelSpec):
-    return generate(payload)
+    return pandas_udf(torch_inference_udf, returnType=BinaryType())
 
 
 def load_model_from_uri(uri: str):

@@ -49,25 +49,6 @@ class Registry(ABC):
         """
 
 
-def codegen_from_spec(spec: ModelSpec):
-    if spec.flavor in KNOWN_FLAVORS:
-        codegen_module = f"rikai.spark.sql.codegen.{spec.flavor}"
-    else:
-        codegen_module = f"rikai.contrib.{spec.flavor}.codegen"
-
-    try:
-        codegen = importlib.import_module(codegen_module)
-        return codegen
-    except ModuleNotFoundError:
-        logger.error(f"Unsupported model flavor: {spec.flavor}")
-        raise
-
-
-def func_from_spec(spec: ModelSpec):
-    codegen = codegen_from_spec(spec)
-    return codegen.generate(spec, is_udf=False)
-
-
 def udf_from_spec(spec: ModelSpec):
     """Return a UDF from a given ModelSpec
 
@@ -86,19 +67,28 @@ def udf_from_spec(spec: ModelSpec):
             f"Only spec version 1.0 is supported, got {spec.version}"
         )
 
+    if spec.flavor in KNOWN_FLAVORS:
+        codegen_module = f"rikai.spark.sql.codegen.{spec.flavor}"
+    else:
+        codegen_module = f"rikai.contrib.{spec.flavor}.codegen"
+
     schema = spec.model_type.dataType()
 
     @udf(returnType=schema)
     def deserialize_return(data: bytes):
         return _pickler.loads(data)
 
-    codegen = codegen_from_spec(spec)
-    return (
-        pickle_udt,
-        codegen.generate_udf(spec),
-        deserialize_return,
-        schema,
-    )
+    try:
+        codegen = importlib.import_module(codegen_module)
+        return (
+            pickle_udt,
+            codegen.generate_udf(spec),
+            deserialize_return,
+            schema,
+        )
+    except ModuleNotFoundError:
+        logger.error(f"Unsupported model flavor: {spec.flavor}")
+        raise
 
 
 def command_from_spec(registry_class: str, row_spec: dict):

@@ -85,8 +85,7 @@ def parse_model_type(flavor: str, model_type: str):
         )
     for model_module in model_modules_candidates:
         try:
-            model_mod = importlib.import_module(model_module)
-            return getattr(model_mod, "MODEL_TYPE", None)
+            return find_func(f"{model_module}.MODEL_TYPE")
         except ModuleNotFoundError:
             pass
     else:

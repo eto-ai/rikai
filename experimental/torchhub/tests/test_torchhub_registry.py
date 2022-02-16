@@ -17,7 +17,6 @@ import pytest
 import torchvision
 from pyspark.sql import SparkSession
 
-from rikai.contrib.torch.detections import OUTPUT_SCHEMA
 
 version = f"v{torchvision.__version__.split('+', maxsplit=1)[0]}"
 
@@ -29,11 +28,7 @@ def test_create_model(spark: SparkSession):
     spark.sql(
         f"""
 CREATE MODEL create_resnet50
-FLAVOR pytorch
-PREPROCESSOR 'rikai.contrib.torchhub.pytorch.vision.resnet50.pre_processing'
-POSTPROCESSOR 'rikai.contrib.torchhub.pytorch.vision.resnet50.post_processing'
 OPTIONS (min_confidence=0.3, device="cpu", batch_size=32)
-RETURNS {OUTPUT_SCHEMA}
 USING "torchhub:///pytorch/vision:{version}/resnet50";
     """
     )
@@ -45,11 +40,7 @@ def test_bad_uri(spark: SparkSession):
         spark.sql(
             f"""
 CREATE MODEL resnet50_bad_case_1
-FLAVOR pytorch
-PREPROCESSOR 'rikai.contrib.torchhub.pytorch.vision.resnet50.pre_processing'
-POSTPROCESSOR 'rikai.contrib.torchhub.pytorch.vision.resnet50.post_processing'
 OPTIONS (min_confidence=0.3, device="cpu", batch_size=32)
-RETURNS {OUTPUT_SCHEMA}
 USING "torchhub:///pytorch/vision:{version}/resnet50/bad";
         """
         )
@@ -58,11 +49,7 @@ USING "torchhub:///pytorch/vision:{version}/resnet50/bad";
         spark.sql(
             f"""
 CREATE MODEL resnet50_bad_case_2
-FLAVOR pytorch
-PREPROCESSOR 'rikai.contrib.torchhub.pytorch.vision.resnet50.pre_processing'
-POSTPROCESSOR 'rikai.contrib.torchhub.pytorch.vision.resnet50.post_processing'
 OPTIONS (min_confidence=0.3, device="cpu", batch_size=32)
-RETURNS {OUTPUT_SCHEMA}
 USING "torchhub:///pytorch/vision:{version}";
         """
         )
@@ -75,10 +62,7 @@ USING "torchhub:///pytorch/vision:{version}";
             f"""
 CREATE MODEL resnet50_bad_case_3
 FLAVOR pytorch
-PREPROCESSOR 'rikai.contrib.torchhub.pytorch.vision.resnet50.pre_processing'
-POSTPROCESSOR 'rikai.contrib.torchhub.pytorch.vision.resnet50.post_processing'
 OPTIONS (min_confidence=0.3, device="cpu", batch_size=32)
-RETURNS {OUTPUT_SCHEMA}
 USING "torchhub://pytorch/vision:{version}/model_name";
         """
         )

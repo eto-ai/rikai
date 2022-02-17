@@ -16,18 +16,16 @@
 from abc import ABC
 from typing import Optional
 
-import torch
-
 from rikai.spark.sql.model import ModelSpec, ModelType
 
 __all__ = ["TensorflowModelType"]
 
 
 class TensorflowModelType(ModelType, ABC):
-    """Base ModelType for PyTorch models."""
+    """Base ModelType for Tensorflow models."""
 
     def __init__(self):
-        self.model: Optional[torch.nn.Module] = None
+        self.model = None
         self.spec: Optional[ModelSpec] = None
 
     def load_model(self, spec: ModelSpec, **kwargs):

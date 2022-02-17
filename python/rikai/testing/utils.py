@@ -17,15 +17,10 @@ from urllib.parse import urlparse
 
 import pandas as pd
 
-from rikai.spark.sql.codegen.base import func_from_spec
+from rikai.spark.sql.codegen.base import codegen_from_spec
 from rikai.spark.sql.codegen.fs import FileSystemRegistry
 from rikai.spark.sql.codegen.mlflow_registry import MlflowRegistry
 from rikai.spark.sql.model import ModelSpec
-
-
-def _apply_model_func(func, inputs):
-    results_list = [results for results in func(inputs)]
-    return results_list
 
 
 def _make_model_spec(raw_spec: "ModelSpec") -> ModelSpec:
@@ -51,11 +46,21 @@ def _make_model_spec(raw_spec: "ModelSpec") -> ModelSpec:
     return reg.make_model_spec(raw_spec)
 
 
+def _apply_model_func(func, inputs):
+    results_list = [results for results in func(inputs)]
+    return results_list
+
+
+def _func_from_spec(spec: ModelSpec):
+    codegen = codegen_from_spec(spec)
+    return codegen.generate_inference_func(spec)
+
+
 def apply_model_spec(
     spec: "ModelSpec",
     inputs: Union[Iterator[pd.Series], Iterator[pd.DataFrame]],
 ) -> Iterator[pd.Series]:
     if not isinstance(spec, ModelSpec):
         spec = _make_model_spec(spec)
-    func = func_from_spec(spec)
+    func = _func_from_spec(spec)
     return _apply_model_func(func, inputs)

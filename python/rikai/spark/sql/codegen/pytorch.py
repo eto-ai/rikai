@@ -41,7 +41,7 @@ def move_tensor_to_device(data, device):
     return data
 
 
-def generate(payload: ModelSpec, is_udf: bool = True):
+def _generate(payload: ModelSpec, is_udf: bool = True):
     """Construct a UDF to run pytorch model.
 
     Parameters
@@ -107,8 +107,12 @@ def generate(payload: ModelSpec, is_udf: bool = True):
         return torch_inference_udf
 
 
+def generate_inference_func(payload: ModelSpec):
+    return _generate(payload, False)
+
+
 def generate_udf(payload: ModelSpec):
-    return generate(payload)
+    return _generate(payload, True)
 
 
 def load_model_from_uri(uri: str):

@@ -75,11 +75,6 @@ def codegen_from_spec(spec: ModelSpec):
         raise
 
 
-def func_from_spec(spec: ModelSpec):
-    codegen = codegen_from_spec(spec)
-    return codegen.generate(spec, is_udf=False)
-
-
 def udf_from_spec(spec: ModelSpec):
     """Return a UDF from a given ModelSpec
 

@@ -20,10 +20,7 @@ import pandas as pd
 from pyspark.sql import SparkSession
 
 from rikai.spark.functions import to_image
-from rikai.experimental.torchhub.torchhub_registry import (
-    TorchHubRegistry,
-)
-from rikai.spark.sql.codegen.base import func_from_spec
+from rikai.testing.utils import apply_model_spec
 
 
 version = f"v{torchvision.__version__.split('+', maxsplit=1)[0]}"
@@ -32,20 +29,17 @@ image_path = f"{work_dir}/python/tests/assets/test_image.jpg"
 
 
 def test_resnet_model_type():
-    reg = TorchHubRegistry()
-    spec = reg.make_model_spec(
+    inputs_list = [pd.Series(Image(image_path))]
+    results_list = apply_model_spec(
         {
-            "schema": None,
-            "modelType": None,
-            "flavor": None,
             "name": "resnet50",
             "uri": f"torchhub:///pytorch/vision:{version}/resnet50",
-        }
+        },
+        inputs_list,
     )
-    func = func_from_spec(spec)
-    input = [pd.Series(Image(image_path))]
-    results_list = [results for results in func(input)]
-    assert len(results_list[0][0]) == 1000
+    assert len(results_list) == 1
+    series = results_list[0]
+    assert len(series[0]) == 1000
 
 
 def test_resnet(spark: SparkSession):

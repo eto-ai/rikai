@@ -38,7 +38,7 @@ class MlflowLogger:
 
     """
 
-    _CURRENT_MODEL_SPEC_VERSION = "1.1"
+    _CURRENT_MODEL_SPEC_VERSION = "1.0"
 
     def __init__(self, flavor: str):
         """

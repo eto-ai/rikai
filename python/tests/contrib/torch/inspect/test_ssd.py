@@ -105,7 +105,7 @@ def test_ssd_class_scores_module_with_spark(spark: SparkSession):
         rikai.mlflow.pytorch.log_model(
             class_scores_extractor,
             "models",
-            SSDClassScoresExtractor.SCHEMA,
+            schema=SSDClassScoresExtractor.SCHEMA,
             registered_model_name="ssd_class_scores",
             pre_processing="rikai.contrib.torch.inspect.ssd.class_scores_extractor_pre_processing",  # noqa: E501
             post_processing="rikai.contrib.torch.inspect.ssd.class_scores_extractor_post_processing",  # noqa: E501

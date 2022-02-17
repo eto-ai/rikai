@@ -112,7 +112,7 @@ class MlflowModelSpec(ModelSpec):
                 CONF_MLFLOW_SPEC_VERSION,
                 MlflowLogger._CURRENT_MODEL_SPEC_VERSION,
             ),
-            "schema": _get_model_prop(conf, CONF_MLFLOW_OUTPUT_SCHEMA),
+            "schema": conf.get(CONF_MLFLOW_OUTPUT_SCHEMA, None),
             "model": {
                 "flavor": _get_model_prop(conf, CONF_MLFLOW_MODEL_FLAVOR),
                 "uri": uri,
@@ -131,6 +131,8 @@ class MlflowModelSpec(ModelSpec):
             del spec["transforms"]["post"]
         if not spec["model"]["type"]:
             del spec["model"]["type"]
+        if not spec["schema"]:
+            del spec["schema"]
 
         # options
         for key, value in conf.items():

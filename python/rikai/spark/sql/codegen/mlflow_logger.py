@@ -27,7 +27,7 @@ CONF_MLFLOW_SPEC_VERSION = "rikai.spec.version"
 CONF_MLFLOW_PRE_PROCESSING = "rikai.transforms.pre"
 CONF_MLFLOW_POST_PROCESSING = "rikai.transforms.post"
 CONF_MLFLOW_MODEL_FLAVOR = "rikai.model.flavor"
-CONF_MLFLOW_MODEL_TYPE = "rikai.model.model_type"
+CONF_MLFLOW_MODEL_TYPE = "rikai.model.type"
 CONF_MLFLOW_ARTIFACT_PATH = "rikai.model.artifact_path"
 
 

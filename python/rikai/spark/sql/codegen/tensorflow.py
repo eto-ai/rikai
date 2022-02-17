@@ -21,7 +21,7 @@ from pyspark.sql.functions import pandas_udf
 from pyspark.sql.types import BinaryType
 
 from rikai.pytorch.pandas import PandasDataset
-from rikai.spark.sql.codegen.base import ModelSpec
+from rikai.spark.sql.model import ModelSpec
 from rikai.types import Image
 
 DEFAULT_BATCH_SIZE = 4
@@ -59,16 +59,17 @@ def infer_output_signature(blob, is_udf: bool):
         return tf.TensorSpec.from_tensor(row)
 
 
-def _generate(spec: ModelSpec, is_udf: bool = True):
+def _generate(payload: ModelSpec, is_udf: bool = True):
     """Construct a UDF to run Tensorflow (Karas) Model"""
 
-    batch_size = int(spec.options.get("batch_size", DEFAULT_BATCH_SIZE))
+    model = payload.model_type
+    options = payload.options
+    batch_size = int(options.get("batch_size", DEFAULT_BATCH_SIZE))
 
     def tf_inference_udf(
         iter: Iterator[pd.DataFrame],
     ) -> Iterator[pd.Series]:
-
-        model = spec.load_model()
+        model.load_model(payload)
 
         signature = None
         for df in iter:
@@ -83,15 +84,14 @@ def _generate(spec: ModelSpec, is_udf: bool = True):
                 ),
             )
 
-            if spec.pre_processing:
-                data = data.map(spec.pre_processing)
+            if model.transform():
+                data = data.map(model.transform())
             data = data.batch(batch_size)
 
-            predictions = []
+            results = []
             for batch in data:
-                raw_predictions = model(batch)
-                predictions.extend(spec.post_processing(raw_predictions))
-            results = [_pickler.dumps(p) if is_udf else p for p in predictions]
+                predictions = model(batch)
+                results.extend([_pickler.dumps(p) if is_udf else p for p in predictions])
             yield pd.Series(results)
 
     if is_udf:

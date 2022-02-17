@@ -21,7 +21,7 @@ https://arxiv.org/abs/1512.02325
 from typing import Any, Callable, Dict
 
 from rikai.tensorflow.models import TensorflowModelType
-from rikai.spark.sql.model import _identity
+from rikai.types.geometry import Box2d
 
 HUB_URL = "https://tfhub.dev/tensorflow/ssd_mobilenet_v2/2"
 
@@ -34,7 +34,7 @@ class SSDModelType(TensorflowModelType):
         )
 
     def transform(self) -> Callable:
-        return _identity
+        return None
 
     def predict(self, images, *args, **kwargs) -> Any:
         assert (

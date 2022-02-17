@@ -53,7 +53,8 @@ model:
   type: rikai.contrib.tfhub.tensorflow.ssd
 options:
   batch_size: 1
-""")
+"""
+        )
 
     spec = FileModelSpec(spec_path)
     inputs = [
@@ -91,13 +92,14 @@ def test_tf_with_mlflow(tmp_path: Path, spark: SparkSession):
 
     spark.sql("CREATE MODEL ssd USING 'mlflow:///tf_ssd'")
     spark.sql("SHOW MODELS").show()
-    df = spark.createDataFrame([
+    rows = [
         Row(image=Image(uri))
         for uri in (
             "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg",
             "http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg",
         )
-    ])
+    ]
+    df = spark.createDataFrame(rows)
     df.createOrReplaceTempView("images")
 
     df = spark.sql("SELECT ML_PREDICT(ssd, image) as det FROM images")

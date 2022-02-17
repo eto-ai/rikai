@@ -85,12 +85,12 @@ class MlflowLogger:
         self,
         model: Any,
         artifact_path: str,
-        model_type: Optional[str] = None,
         schema: Optional[str] = None,
         pre_processing: Optional[str] = None,
         post_processing: Optional[str] = None,
         registered_model_name: Optional[str] = None,
         customized_flavor: Optional[str] = None,
+        model_type: Optional[str] = None,
         **kwargs,
     ):
         """Convenience function to log the model with tags needed by rikai.

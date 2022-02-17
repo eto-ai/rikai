@@ -116,7 +116,7 @@ class MlflowModelSpec(ModelSpec):
             "model": {
                 "flavor": _get_model_prop(conf, CONF_MLFLOW_MODEL_FLAVOR),
                 "uri": uri,
-                "type": _get_model_prop(conf, CONF_MLFLOW_MODEL_TYPE),
+                "type": conf.get(CONF_MLFLOW_MODEL_TYPE, None),
             },
             "transforms": {
                 "pre": conf.get(CONF_MLFLOW_PRE_PROCESSING, None),

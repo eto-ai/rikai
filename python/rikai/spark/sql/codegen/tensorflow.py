@@ -91,7 +91,9 @@ def _generate(payload: ModelSpec, is_udf: bool = True):
             results = []
             for batch in data:
                 predictions = model(batch)
-                results.extend([_pickler.dumps(p) if is_udf else p for p in predictions])
+                results.extend(
+                    [_pickler.dumps(p) if is_udf else p for p in predictions]
+                )
             yield pd.Series(results)
 
     if is_udf:

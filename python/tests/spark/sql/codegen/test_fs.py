@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 from pandas.core.series import Series
-from python.rikai.testing.utils import apply_model_spec
 import secrets
 import uuid
 from pathlib import Path
@@ -31,6 +30,7 @@ from utils import check_ml_predict
 from rikai.pytorch.pandas import PandasDataset
 from rikai.spark.sql.codegen.fs import FileModelSpec
 from rikai.spark.sql.exceptions import SpecError
+from rikai.testing.utils import apply_model_spec
 from rikai.types import Image
 
 

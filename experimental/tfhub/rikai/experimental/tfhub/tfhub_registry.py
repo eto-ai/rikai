@@ -59,10 +59,8 @@ class TFHubRegistry(Registry):
     def __repr__(self):
         return "TFHubRegistry"
 
-    def resolve(self, raw_spec: dict):
-        name = raw_spec["name"]
+    def make_model_spec(self, raw_spec: dict):
         uri = raw_spec["uri"]
-        logger.info(f"Resolving model {name} from {uri}")
         parsed = urlparse(uri)
         if parsed.netloc:
             raise ValueError(
@@ -73,4 +71,4 @@ class TFHubRegistry(Registry):
             raise ValueError(f"Expect schema: tfhub, but got {parsed.scheme}")
         handle = f"https://tfhub.dev{parsed.path}"
         spec = TFHubModelSpec(handle, raw_spec)
-        return udf_from_spec(spec)
+        return spec

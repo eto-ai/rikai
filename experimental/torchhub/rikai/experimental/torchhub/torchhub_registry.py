@@ -27,11 +27,11 @@ class TorchHubModelSpec(ModelSpec):
     def __init__(self, repo_or_dir: str, model: str, raw_spec: "ModelSpec"):
         spec = {
             "version": "1.0",
-            "schema": raw_spec["schema"],
+            "schema": raw_spec.get("schema", None),
             "model": {
-                "flavor": raw_spec["flavor"],
+                "flavor": raw_spec.get("flavor", None),
                 "uri": raw_spec["uri"],
-                "type": raw_spec["modelType"],
+                "type": raw_spec.get("modelType", None),
             },
         }
 
@@ -63,10 +63,8 @@ class TorchHubRegistry(Registry):
     def __repr__(self):
         return "TorchHubRegistry"
 
-    def resolve(self, raw_spec: dict):
-        name = raw_spec["name"]
+    def make_model_spec(self, raw_spec: dict):
         uri = raw_spec["uri"]
-        logger.info(f"Resolving model {name} from {uri}")
         parsed = urlparse(uri)
         if parsed.netloc:
             raise ValueError(
@@ -82,5 +80,4 @@ class TorchHubRegistry(Registry):
             raise ValueError("Bad URI, expected torchhub:///<org>/<prj>/<mdl>")
         repo_or_dir = "/".join(parts[:-1])
         model = parts[-1]
-        spec = TorchHubModelSpec(repo_or_dir, model, raw_spec)
-        return udf_from_spec(spec)
+        return TorchHubModelSpec(repo_or_dir, model, raw_spec)

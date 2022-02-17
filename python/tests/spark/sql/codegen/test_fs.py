@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from pandas.core.series import Series
 import secrets
 import uuid
 from pathlib import Path
@@ -29,6 +30,7 @@ from utils import check_ml_predict
 from rikai.pytorch.pandas import PandasDataset
 from rikai.spark.sql.codegen.fs import FileModelSpec
 from rikai.spark.sql.exceptions import SpecError
+from rikai.testing.utils import apply_model_spec
 from rikai.types import Image
 
 
@@ -191,6 +193,21 @@ def test_construct_spec_with_options(tmp_path):
 def test_yaml_model(spark: SparkSession, resnet_spec: str):
     spark.sql("CREATE MODEL resnet_m USING 'file://{}'".format(resnet_spec))
     check_ml_predict(spark, "resnet_m")
+
+
+def test_yaml_model_type(resnet_spec: str):
+    spec = FileModelSpec(spec_uri=resnet_spec)
+    inputs = [
+        pd.Series(Image(uri))
+        for uri in (
+            "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg",
+            "http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg",
+        )
+    ]
+    results = apply_model_spec(spec, inputs)
+    assert len(results) == 2
+    for series in results:
+        assert len(series[0]) > 10
 
 
 @pytest.mark.timeout(120)

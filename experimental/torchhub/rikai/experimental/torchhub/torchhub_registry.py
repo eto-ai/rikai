@@ -26,7 +26,7 @@ from rikai.spark.sql.model import ModelSpec
 class TorchHubModelSpec(ModelSpec):
     def __init__(self, repo_or_dir: str, model: str, raw_spec: "ModelSpec"):
         spec = {
-            "version": "1.0",  # do not support pre/post processor
+            "version": "1.0",
             "schema": raw_spec.get("schema", None),
             "model": {
                 "flavor": raw_spec.get("flavor", None),

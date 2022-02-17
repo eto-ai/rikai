@@ -37,7 +37,7 @@ def test_ssd_model_type():
     )
     assert len(results_list) == 1
     series = results_list[0]
-    assert len(series) == 8
+    assert len(series[0]) == 100
 
 
 def test_ssd(spark: SparkSession):

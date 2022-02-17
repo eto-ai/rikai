@@ -83,11 +83,8 @@ class FileSystemRegistry(Registry):
     def __repr__(self):
         return "FileSystemRegistry"
 
-    def resolve(self, raw_spec: dict):
+    def make_model_spec(self, raw_spec: dict):
         uri = raw_spec.get("uri")
         options = raw_spec.get("options", {})
         spec = FileModelSpec(uri, options=options)
-        name = spec.name
-        uri = spec.model_uri
-        logger.info(f"Resolving model {name} from {uri}")
-        return udf_from_spec(spec)
+        return spec

@@ -64,9 +64,7 @@ class TorchHubRegistry(Registry):
         return "TorchHubRegistry"
 
     def make_model_spec(self, raw_spec: dict):
-        name = raw_spec["name"]
         uri = raw_spec["uri"]
-        logger.info(f"Resolving model {name} from {uri}")
         parsed = urlparse(uri)
         if parsed.netloc:
             raise ValueError(
@@ -83,6 +81,3 @@ class TorchHubRegistry(Registry):
         repo_or_dir = "/".join(parts[:-1])
         model = parts[-1]
         return TorchHubModelSpec(repo_or_dir, model, raw_spec)
-
-    def resolve(self, raw_spec: dict):
-        return udf_from_spec(self.make_model_spec(raw_spec))

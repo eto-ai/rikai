@@ -190,11 +190,8 @@ class MlflowRegistry(Registry):
     def mlflow_tracking_uri(self):
         return os.environ.get(CONF_MLFLOW_TRACKING_URI)
 
-    def resolve(self, raw_spec):
-        name = raw_spec["name"]
+    def make_model_spec(self, raw_spec):
         uri = raw_spec["uri"]
-        logger.info(f"Resolving model {name} from {uri}")
-        logger.info(f"Using tracking uri: {self.mlflow_tracking_uri}")
         parsed = urlparse(uri)
         if parsed.netloc:
             raise ValueError(
@@ -211,7 +208,7 @@ class MlflowRegistry(Registry):
             self.mlflow_tracking_uri,
             options=self.get_options(raw_spec, run),
         )
-        return udf_from_spec(spec)
+        return spec
 
     def get_model_conf(self, spec, run):
         """

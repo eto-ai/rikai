@@ -40,13 +40,25 @@ class Registry(ABC):
     """Base class of a Model Registry"""
 
     @abstractmethod
-    def resolve(self, spec: "ModelSpec"):
-        """Resolve a model from a model URI.
+    def make_model_spec(self, raw_spec: "ModelSpec"):
+        """Make a ModelSpec from the raw model spec
 
         Parameters
         ----------
         spec : ModelSpec
         """
+
+    def resolve(self, raw_spec: "ModelSpec"):
+        """Resolve a model from the raw model spec.
+
+        Parameters
+        ----------
+        spec : ModelSpec
+        """
+        name = raw_spec["name"]
+        uri = raw_spec["uri"]
+        logger.info(f"Resolving model {name} from {uri}")
+        return udf_from_spec(self.make_model_spec(raw_spec))
 
 
 def codegen_from_spec(spec: ModelSpec):

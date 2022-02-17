@@ -176,7 +176,12 @@ class MlflowLogger:
             CONF_MLFLOW_POST_PROCESSING: post_processing,
             CONF_MLFLOW_ARTIFACT_PATH: artifact_path,
         }
-        for k in (CONF_MLFLOW_PRE_PROCESSING, CONF_MLFLOW_POST_PROCESSING):
+        for k in (
+            CONF_MLFLOW_PRE_PROCESSING,
+            CONF_MLFLOW_POST_PROCESSING,
+            CONF_MLFLOW_MODEL_TYPE,
+            CONF_MLFLOW_OUTPUT_SCHEMA,
+        ):
             if not tags[k]:
                 del tags[k]
                 warnings.warn(

@@ -30,6 +30,7 @@ from rikai.logging import logger
 from rikai.spark.sql.codegen.base import ModelSpec, Registry, udf_from_spec
 from rikai.spark.sql.codegen.mlflow_logger import (
     CONF_MLFLOW_MODEL_FLAVOR,
+    CONF_MLFLOW_MODEL_TYPE,
     CONF_MLFLOW_OUTPUT_SCHEMA,
     CONF_MLFLOW_POST_PROCESSING,
     CONF_MLFLOW_PRE_PROCESSING,
@@ -115,6 +116,7 @@ class MlflowModelSpec(ModelSpec):
             "model": {
                 "flavor": _get_model_prop(conf, CONF_MLFLOW_MODEL_FLAVOR),
                 "uri": uri,
+                "type": _get_model_prop(conf, CONF_MLFLOW_MODEL_TYPE),
             },
             "transforms": {
                 "pre": conf.get(CONF_MLFLOW_PRE_PROCESSING, None),
@@ -122,11 +124,13 @@ class MlflowModelSpec(ModelSpec):
             },
         }
 
-        # remove none value of pre/post processing
+        # remove none value
         if not spec["transforms"]["pre"]:
             del spec["transforms"]["pre"]
         if not spec["transforms"]["post"]:
             del spec["transforms"]["post"]
+        if not spec["model"]["type"]:
+            del spec["model"]["type"]
 
         # options
         for key, value in conf.items():

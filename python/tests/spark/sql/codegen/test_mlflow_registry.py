@@ -12,15 +12,21 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from pathlib import Path
+
 import py4j
 import pytest
 from mlflow.tracking import MlflowClient
+import mlflow
 from pyspark.sql import SparkSession
 from utils import check_ml_predict
+import torch
 
+import rikai
 from rikai.contrib.torch.detections import OUTPUT_SCHEMA
 from rikai.spark.sql.codegen.mlflow_registry import MlflowModelSpec
 from rikai.spark.sql.schema import parse_schema
+from rikai.spark.sql.codegen.mlflow_registry import CONF_MLFLOW_TRACKING_URI
 
 
 def test_modelspec(mlflow_client: MlflowClient):
@@ -113,3 +119,23 @@ def test_mlflow_model_error_handling(
         match=r".*Model registry scheme 'wrong' is not supported.*",
     ):
         spark.sql("CREATE MODEL wrong_uri USING 'wrong://vanilla-mlflow/1'")
+
+
+def test_mlflow_model_type(
+    tmp_path: Path, resnet_model_uri: str, spark: SparkSession
+):
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
+    mlflow.set_tracking_uri(tracking_uri)
+    name = "resnet50_fpn_model_type"
+    with mlflow.start_run():
+        model = torch.load(resnet_model_uri)
+        rikai.mlflow.pytorch.log_model(
+            model,
+            artifact_path="model",
+            model_type="fasterrcnn_resnet50_fpn",
+            registered_model_name=name,
+        )
+        spark.conf.set(CONF_MLFLOW_TRACKING_URI, tracking_uri)
+        spark.sql(f"CREATE MODEL {name} USING 'mlflow:/{name}'")
+        check_ml_predict(spark, name)

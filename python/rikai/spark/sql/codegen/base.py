@@ -62,6 +62,17 @@ class Registry(ABC):
 
 
 def codegen_from_spec(spec: ModelSpec):
+    """Resolve the codegen module from the model spec.
+
+    Parameters
+    ----------
+    spec : ModelSpec
+
+    Returns
+    -------
+    ModuleType
+        The imported module for the specific flavor codegen
+    """
     if spec.flavor in KNOWN_FLAVORS:
         codegen_module = f"rikai.spark.sql.codegen.{spec.flavor}"
     else:

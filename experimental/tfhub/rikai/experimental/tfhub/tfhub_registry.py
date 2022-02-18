@@ -17,33 +17,38 @@ from urllib.parse import urlparse
 
 import tensorflow_hub as tfhub
 
-from rikai.internal.reflection import find_func, has_func
+from rikai.internal.reflection import has_func
 from rikai.logging import logger
-from rikai.spark.sql.codegen.base import Registry, udf_from_spec
+from rikai.spark.sql.codegen.base import Registry
 from rikai.spark.sql.model import ModelSpec
+from rikai.spark.sql.model import is_fully_qualified_name
 
 
 class TFHubModelSpec(ModelSpec):
-    def __init__(self, handle, raw_spec: ModelSpec):
+    def __init__(self, publisher, handle, raw_spec: "ModelSpec"):
         spec = {
             "version": "1.0",
-            "schema": raw_spec["schema"],
-            "model": {"flavor": raw_spec["flavor"], "uri": raw_spec["uri"]},
-            "transforms": {
-                "pre": raw_spec.get("preprocessor", None),
-                "post": raw_spec.get("postprocessor", None),
+            "schema": raw_spec.get("schema", None),
+            "model": {
+                "flavor": raw_spec.get("flavor", None),
+                "uri": raw_spec["uri"],
+                "type": raw_spec.get("modelType", None),
             },
         }
 
-        # remove none value of pre/post processing
-        if not spec["transforms"]["pre"]:
-            del spec["transforms"]["pre"]
-        if not spec["transforms"]["post"]:
-            del spec["transforms"]["post"]
-
+        # remove None value
+        if not spec["schema"]:
+            del spec["schema"]
         # defaults to the `tensorflow` flavor
         if not spec["model"]["flavor"]:
             spec["model"]["flavor"] = "tensorflow"
+
+        model_type = spec["model"]["type"]
+        if model_type and not is_fully_qualified_name(model_type):
+            model_type = f"rikai.contrib.tfhub.{publisher}.{model_type}"
+            if has_func(model_type + ".MODEL_TYPE"):
+                logger.info(f"tfhub model_type: {model_type}")
+                spec["model"]["type"] = model_type
 
         self.handle = handle
         super().__init__(spec=spec, validate=True)
@@ -70,5 +75,6 @@ class TFHubRegistry(Registry):
         if parsed.scheme != "tfhub":
             raise ValueError(f"Expect schema: tfhub, but got {parsed.scheme}")
         handle = f"https://tfhub.dev{parsed.path}"
-        spec = TFHubModelSpec(handle, raw_spec)
+        publisher = parsed.path.lstrip("/").split("/")[0]
+        spec = TFHubModelSpec(publisher, handle, raw_spec)
         return spec

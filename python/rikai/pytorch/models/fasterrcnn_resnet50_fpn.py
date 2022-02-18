@@ -19,7 +19,7 @@ __all__ = ["MODEL_TYPE"]
 
 class FasterRCNNModelType(ObjectDetectionModelType):
     def __init__(self):
-        super().__init__("faster_rcnn_resnet50_fpn")
+        super().__init__("fasterrcnn_resnet50_fpn")
 
 
 MODEL_TYPE = FasterRCNNModelType()

@@ -21,7 +21,7 @@ from pyspark.sql.functions import pandas_udf
 from pyspark.sql.types import BinaryType
 
 from rikai.pytorch.pandas import PandasDataset
-from rikai.spark.sql.codegen.base import ModelSpec
+from rikai.spark.sql.model import ModelSpec
 from rikai.types import Image
 
 DEFAULT_BATCH_SIZE = 4
@@ -32,8 +32,11 @@ __all__ = ["generate_udf", "load_model_from_uri"]
 _pickler = CloudPickleSerializer()
 
 
-def infer_output_signature(blob: bytes):
-    row = _pickler.loads(blob)
+def infer_output_signature(blob, is_udf: bool):
+    if is_udf:
+        row = _pickler.loads(blob)
+    else:
+        row = blob
 
     if isinstance(row, Image):
         image_arr = row.to_numpy()
@@ -56,23 +59,24 @@ def infer_output_signature(blob: bytes):
         return tf.TensorSpec.from_tensor(row)
 
 
-def generate_udf(spec: ModelSpec):
+def _generate(payload: ModelSpec, is_udf: bool = True):
     """Construct a UDF to run Tensorflow (Karas) Model"""
 
-    batch_size = int(spec.options.get("batch_size", DEFAULT_BATCH_SIZE))
+    model = payload.model_type
+    options = payload.options
+    batch_size = int(options.get("batch_size", DEFAULT_BATCH_SIZE))
 
     def tf_inference_udf(
         iter: Iterator[pd.DataFrame],
     ) -> Iterator[pd.Series]:
-
-        model = spec.load_model()
+        model.load_model(payload)
 
         signature = None
         for df in iter:
             if signature is None:
-                signature = infer_output_signature(df.iloc[0])
+                signature = infer_output_signature(df.iloc[0], is_udf)
 
-            ds = PandasDataset(df, unpickle=True)
+            ds = PandasDataset(df, unpickle=is_udf, use_pil=True)
             data = tf.data.Dataset.from_generator(
                 ds,
                 output_signature=tf.TensorSpec(
@@ -80,17 +84,30 @@ def generate_udf(spec: ModelSpec):
                 ),
             )
 
-            if spec.pre_processing:
-                data = data.map(spec.pre_processing)
+            if model.transform():
+                data = data.map(model.transform())
             data = data.batch(batch_size)
 
-            predictions = []
+            results = []
             for batch in data:
-                raw_predictions = model(batch)
-                predictions.extend(spec.post_processing(raw_predictions))
-            yield pd.Series([_pickler.dumps(p) for p in predictions])
+                predictions = model(batch)
+                results.extend(
+                    [_pickler.dumps(p) if is_udf else p for p in predictions]
+                )
+            yield pd.Series(results)
 
-    return pandas_udf(tf_inference_udf, returnType=BinaryType())
+    if is_udf:
+        return pandas_udf(tf_inference_udf, returnType=BinaryType())
+    else:
+        return tf_inference_udf
+
+
+def generate_inference_func(payload: ModelSpec):
+    return _generate(payload, False)
+
+
+def generate_udf(payload: ModelSpec):
+    return _generate(payload, True)
 
 
 def load_model_from_uri(uri: str):

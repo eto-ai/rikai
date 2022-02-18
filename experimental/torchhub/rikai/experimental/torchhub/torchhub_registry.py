@@ -45,7 +45,7 @@ class TorchHubModelSpec(ModelSpec):
         repo_proj = repo_or_dir.split(":")[0].replace("/", ".")
         if not spec["model"]["type"]:
             model_type = f"rikai.contrib.torchhub.{repo_proj}.{model}"
-            if has_func(model_type):
+            if has_func(model_type + ".MODEL_TYPE"):
                 spec["model"]["type"] = model_type
 
         self.repo_or_dir = repo_or_dir

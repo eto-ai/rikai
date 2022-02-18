@@ -30,12 +30,11 @@ from pyspark.sql.types import (
 )
 
 import rikai
-from rikai.contrib.tensorflow.models.ssd import HUB_URL as SSD_HUB_URL
-from rikai.contrib.tensorflow.models.ssd import OUTPUT_SCHEMA
+from rikai.contrib.tfhub.tensorflow.ssd import HUB_URL as SSD_HUB_URL
 from rikai.spark.sql.codegen.fs import FileModelSpec
-from rikai.spark.sql.codegen.tensorflow import generate_udf
 from rikai.spark.types import Box2dType
 from rikai.types import Image
+from rikai.testing.utils import apply_model_spec
 
 
 def test_tf_inference_runner(tmp_path: Path):
@@ -43,57 +42,33 @@ def test_tf_inference_runner(tmp_path: Path):
     model_path = str(tmp_path / "model")
     tf.saved_model.save(m, model_path)
 
-    pickler = CloudPickleSerializer()
-
     spec_path = str(tmp_path / "spec.yml")
     with open(spec_path, "w") as spec_yml:
         spec_yml.write(
-            """version: "1.0"
+            f"""version: "1.0"
 name: ssd
 model:
-  uri: {}
+  uri: {model_path}
   flavor: tensorflow
-schema: {}
+  type: rikai.contrib.tfhub.tensorflow.ssd
 options:
   batch_size: 1
-transforms:
-  pre: rikai.contrib.tensorflow.models.ssd.pre_processing
-  post: rikai.contrib.tensorflow.models.ssd.post_processing
-""".format(
-                model_path, OUTPUT_SCHEMA
-            )
+"""
         )
 
     spec = FileModelSpec(spec_path)
-    udf = generate_udf(spec)
-
-    df_iter = [
-        pd.Series(
-            [
-                pickler.dumps(
-                    Image(
-                        "http://farm2.staticflickr.com/1129/"
-                        "4726871278_4dd241a03a_z.jpg"
-                    )
-                ),
-                pickler.dumps(
-                    Image(
-                        "http://farm4.staticflickr.com/3726/"
-                        "9457732891_87c6512b62_z.jpg"
-                    )
-                ),
-            ]
+    inputs = [
+        pd.Series(Image(uri))
+        for uri in (
+            "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg",
+            "http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg",
         )
     ]
-    output = udf.func(df_iter)
+    results = apply_model_spec(spec, inputs)
 
-    for batch in output:
-        for detections in batch:
-            detections = pickler.loads(detections)
-            assert len(detections) > 0
-            assert set(
-                ["detection_boxes", "detection_scores", "detection_classes"]
-            ) == set(detections[0].keys())
+    for series in results:
+        assert len(series) == 1
+        assert len(series[0]) == 100
 
 
 def test_tf_with_mlflow(tmp_path: Path, spark: SparkSession):
@@ -111,34 +86,20 @@ def test_tf_with_mlflow(tmp_path: Path, spark: SparkSession):
         rikai.mlflow.tensorflow.log_model(
             m,
             "model",
-            schema=OUTPUT_SCHEMA,
+            model_type="rikai.contrib.tfhub.tensorflow.ssd",
             registered_model_name="tf_ssd",
-            pre_processing="rikai.contrib.tensorflow.models"
-            + ".ssd.pre_processing",
-            post_processing="rikai.contrib.tensorflow.models"
-            + ".ssd.post_processing",
         )
 
     spark.sql("CREATE MODEL ssd USING 'mlflow:///tf_ssd'")
     spark.sql("SHOW MODELS").show()
-    df = spark.createDataFrame(
-        [
-            # http://cocodataset.org/#explore?id=484912
-            Row(
-                image=Image(
-                    "http://farm2.staticflickr.com/1129/"
-                    "4726871278_4dd241a03a_z.jpg"
-                )
-            ),
-            # https://cocodataset.org/#explore?id=433013
-            Row(
-                image=Image(
-                    "http://farm4.staticflickr.com/3726/"
-                    "9457732891_87c6512b62_z.jpg"
-                )
-            ),
-        ],
-    )
+    rows = [
+        Row(image=Image(uri))
+        for uri in (
+            "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg",
+            "http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg",
+        )
+    ]
+    df = spark.createDataFrame(rows)
     df.createOrReplaceTempView("images")
 
     df = spark.sql("SELECT ML_PREDICT(ssd, image) as det FROM images")

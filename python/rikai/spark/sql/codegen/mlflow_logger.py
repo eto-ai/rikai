@@ -27,7 +27,7 @@ CONF_MLFLOW_SPEC_VERSION = "rikai.spec.version"
 CONF_MLFLOW_PRE_PROCESSING = "rikai.transforms.pre"
 CONF_MLFLOW_POST_PROCESSING = "rikai.transforms.post"
 CONF_MLFLOW_MODEL_FLAVOR = "rikai.model.flavor"
-CONF_MLFLOW_MODEL_TYPE = "rikai.model.model_type"
+CONF_MLFLOW_MODEL_TYPE = "rikai.model.type"
 CONF_MLFLOW_ARTIFACT_PATH = "rikai.model.artifact_path"
 
 
@@ -85,11 +85,12 @@ class MlflowLogger:
         self,
         model: Any,
         artifact_path: str,
-        schema: str,
+        schema: Optional[str] = None,
         pre_processing: Optional[str] = None,
         post_processing: Optional[str] = None,
         registered_model_name: Optional[str] = None,
         customized_flavor: Optional[str] = None,
+        model_type: Optional[str] = None,
         **kwargs,
     ):
         """Convenience function to log the model with tags needed by rikai.
@@ -169,12 +170,18 @@ class MlflowLogger:
             CONF_MLFLOW_MODEL_FLAVOR: customized_flavor
             if customized_flavor
             else self.flavor,
+            CONF_MLFLOW_MODEL_TYPE: model_type,
             CONF_MLFLOW_OUTPUT_SCHEMA: schema,
             CONF_MLFLOW_PRE_PROCESSING: pre_processing,
             CONF_MLFLOW_POST_PROCESSING: post_processing,
             CONF_MLFLOW_ARTIFACT_PATH: artifact_path,
         }
-        for k in (CONF_MLFLOW_PRE_PROCESSING, CONF_MLFLOW_POST_PROCESSING):
+        for k in (
+            CONF_MLFLOW_PRE_PROCESSING,
+            CONF_MLFLOW_POST_PROCESSING,
+            CONF_MLFLOW_MODEL_TYPE,
+            CONF_MLFLOW_OUTPUT_SCHEMA,
+        ):
             if not tags[k]:
                 del tags[k]
                 warnings.warn(

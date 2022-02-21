@@ -51,7 +51,7 @@ class PandasDataset:
         self.use_pil = use_pil
 
     def data(self):
-        data = tf.data.Dataset.from_tensors(
+        data = tf.data.Dataset.from_tensor_slices(
             tf.cast(self.df.values, tf.uint8, name="input_tensor")
         )
         # data = tf.data.Dataset.from_generator(

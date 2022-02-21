@@ -51,6 +51,7 @@ class PandasDataset:
         self.use_pil = use_pil
 
     def data(self):
+        # TODO or from generator values?
         data = tf.data.Dataset.from_tensor_slices(
             tf.cast(self.df.values, tf.uint8, name="input_tensor")
         )
@@ -63,10 +64,10 @@ class PandasDataset:
         if self.unpickle:
             data.map(unpickle_transform)
 
-        def convert_tensor_pill(row):
+        def convert_tensor_pil(row):
             return convert_tensor(row, use_pil=self.use_pil)
 
-        data.map(convert_tensor_pill)
+        data.map(convert_tensor_pil)
 
         if self.transform:
             data.map(self.transform)

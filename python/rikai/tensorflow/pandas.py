@@ -51,12 +51,15 @@ class PandasDataset:
         self.use_pil = use_pil
 
     def data(self):
-        data = tf.data.Dataset.from_generator(
-            self.df,
-            output_signature=tf.TensorSpec(
-                shape=(None, None, 3), dtype=tf.uint8, name="input_tensor"
-            ),
+        data = tf.data.Dataset.from_tensors(
+            tf.cast(self.df.values, tf.uint8, name="input_tensor")
         )
+        # data = tf.data.Dataset.from_generator(
+        #     self.df,
+        #     output_signature=tf.TensorSpec(
+        #         shape=(None, None, 3), dtype=tf.uint8, name="input_tensor"
+        #     ),
+        # )
         if self.unpickle:
             data.map(unpickle_transform)
 

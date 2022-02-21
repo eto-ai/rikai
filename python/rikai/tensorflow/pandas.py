@@ -52,15 +52,15 @@ class PandasDataset:
 
     def data(self):
         # TODO or from generator values?
-        data = tf.data.Dataset.from_tensor_slices(
-            tf.cast(self.df.values, tf.uint8, name="input_tensor")
-        )
-        # data = tf.data.Dataset.from_generator(
-        #     self.df,
-        #     output_signature=tf.TensorSpec(
-        #         shape=(None, None, 3), dtype=tf.uint8, name="input_tensor"
-        #     ),
+        # data = tf.data.Dataset.from_tensor_slices(
+        #     tf.cast(self.df.values, tf.uint8, name="input_tensor")
         # )
+        data = tf.data.Dataset.from_generator(
+            self.df.values,
+            output_signature=tf.TensorSpec(
+                shape=(None, None, 3), dtype=tf.uint8, name="input_tensor"
+            ),
+        )
         if self.unpickle:
             data.map(unpickle_transform)
 

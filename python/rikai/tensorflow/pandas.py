@@ -51,6 +51,7 @@ class PandasDataset:
         self.use_pil = use_pil
 
     def data(self):
+        print("self df ", self.df)
         data = tf.data.Dataset.from_tensor_slices(self.df.to_dict())
         if self.unpickle:
             data.map(unpickle_transform)

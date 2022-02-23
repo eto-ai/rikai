@@ -50,9 +50,9 @@ class PandasDataset:
         self.unpickle = unpickle
         self.use_pil = use_pil
 
-    def data(self):
-        print("self df ", self.df)
-        data = tf.data.Dataset.from_tensor_slices(self.df.to_dict())
+    def data(self, batch_size):
+        # self.df is a nparray of [Image]
+        data = tf.data.Dataset.from_tensors(self.df.to_numpy()[0].to_numpy())
         if self.unpickle:
             data.map(unpickle_transform)
 
@@ -63,3 +63,5 @@ class PandasDataset:
 
         if self.transform:
             data.map(self.transform)
+        data = data.batch(batch_size)
+        return data

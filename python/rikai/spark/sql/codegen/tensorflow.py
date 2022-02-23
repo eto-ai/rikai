@@ -78,7 +78,7 @@ def _generate(payload: ModelSpec, is_udf: bool = True):
 
             data = PandasDataset(
                 df, model.transform(), unpickle=is_udf, use_pil=True
-            ).data()
+            ).data(batch_size)
 
             results = []
             for batch in data:

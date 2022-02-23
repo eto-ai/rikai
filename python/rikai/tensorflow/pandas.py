@@ -25,9 +25,11 @@ from rikai.spark.sql.codegen.base import unpickle_transform
 
 __all__ = ["PandasDataset"]
 
+from rikai.types import Image
+
 
 class PandasDataset:
-    """a Map-style Pytorch dataset from a :py:class:`pandas.DataFrame` or a
+    """a Map-style Tensorflow dataset from a :py:class:`pandas.DataFrame` or a
     :py:class:`pandas.Series`.
 
     Note
@@ -51,8 +53,12 @@ class PandasDataset:
         self.use_pil = use_pil
 
     def data(self, batch_size):
-        # self.df is a nparray of [Image]
-        data = tf.data.Dataset.from_tensors(self.df.to_numpy()[0].to_numpy())
+        # if self.df is a nparray of [Image]
+        arr = self.df.to_numpy()[0]
+        if isinstance(arr, Image):
+            arr = arr.to_numpy()
+
+        data = tf.data.Dataset.from_tensors(arr)
         if self.unpickle:
             data.map(unpickle_transform)
 

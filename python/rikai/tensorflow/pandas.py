@@ -53,24 +53,14 @@ class PandasDataset:
         self.use_pil = use_pil
 
     def data(self, batch_size):
-        # if self.df is a nparray of [Image]
+
         arr = self.df[0]
-        # if isinstance(arr, Image):
-        #     arr = arr.to_numpy()
         if self.unpickle:
             arr = unpickle_transform(arr)
         arr = convert_tensor(arr, use_pil=self.use_pil)
 
         data = tf.data.Dataset.from_tensors(arr)
-        ### move to before from_tensors
-        # if self.unpickle:
-        #     data.map(unpickle_transform)
-        #
-        # def convert_tensor_pil(row):
-        #     return convert_tensor(row, use_pil=self.use_pil)
-        #
-        # data.map(convert_tensor_pil)
-        ###
+
         if self.transform:
             data.map(self.transform)
         data = data.batch(batch_size)

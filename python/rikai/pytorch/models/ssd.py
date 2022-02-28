@@ -17,7 +17,7 @@ from .torchvision import ObjectDetectionModelType
 __all__ = ["MODEL_TYPE"]
 
 
-class SSDModelType(ObjectDetectionModelType):
+class SSDClassScores(ObjectDetectionModelType):
     def __init__(self):
         super().__init__("SSD")
 

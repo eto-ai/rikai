@@ -12,13 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Inspect detail of Torchvision SSD model
-
-https://pytorch.org/vision/stable/models.html#torchvision.models.detection.ssd300_vgg16
-
-"""
-
-from typing import Callable, Dict, List, Tuple
+from typing import Dict, List, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -26,14 +20,10 @@ from torch import Tensor
 from torchvision.models.detection.ssd import SSD
 from torchvision.ops.boxes import batched_nms, clip_boxes_to_image
 
-from rikai.contrib.torch.transforms.ssd import pre_processing
-from rikai.types import Box2d
+from rikai.pytorch.models.torchvision import ObjectDetectionModelType
+from rikai.spark.sql.model import ModelSpec
 
-__all__ = [
-    "SSDClassScoresExtractor",
-    "class_scores_extractor_post_processing",
-    "class_scores_extractor_pre_processing",
-]
+__all__ = ["MODEL_TYPE"]
 
 
 class SSDClassScoresExtractor(torch.nn.Module):
@@ -51,13 +41,8 @@ class SSDClassScoresExtractor(torch.nn.Module):
     -------
     [Dict[str, Tensor]]
         With the form of
-        ``{"boxes": FloatTensor[N, 4], "labels": Int64Tensor[N, k], "scores": Tensor[N, k]}``
+    ``{"boxes": FloatTensor[N, 4], "labels": Int64Tensor[N, k], "scores": Tensor[N, k]}``
     """  # noqa: E501
-
-    # SCHEMA to be used in Rikai SQL ML
-    SCHEMA = (
-        "array<struct<box:box2d, scores:array<float>, label_ids:array<int>>>"
-    )
 
     def __init__(self, backend: SSD, topk_candidates: int = 2):
         super().__init__()
@@ -67,8 +52,8 @@ class SSDClassScoresExtractor(torch.nn.Module):
         self.topk_candidates = topk_candidates
 
     def forward(
-        self,
-        images: List[torch.Tensor],
+            self,
+            images: List[torch.Tensor],
     ):
         if self.training:
             raise ValueError("This feature extractor only supports eval mode.")
@@ -102,7 +87,7 @@ class SSDClassScoresExtractor(torch.nn.Module):
 
         detections: List[Dict[str, Tensor]] = []
         for boxes, scores, anchors, image_shape in zip(
-            bbox_regression, pred_scores, pred_anchors, images.image_sizes
+                bbox_regression, pred_scores, pred_anchors, images.image_sizes
         ):
             boxes = self.backend.box_coder.decode_single(boxes, anchors)
             boxes = clip_boxes_to_image(boxes, image_shape)
@@ -166,30 +151,23 @@ class SSDClassScoresExtractor(torch.nn.Module):
         return detections
 
 
-class_scores_extractor_pre_processing = pre_processing
+class SSDClassScoresModelType(ObjectDetectionModelType):
+    def __init__(self):
+        super().__init__("SSDClassScores")
+
+    def schema(self) -> str:
+        return "array<struct<box:box2d, scores:array<float>, label_ids:array<int>>>"
+
+    def load_model(self, spec: ModelSpec, **kwargs):
+        ssd_model = spec.load_model()
+        ssd_model.eval()
+        self.model = SSDClassScoresExtractor(ssd_model)
+
+        self.model = spec.load_model()
+        self.model.eval()
+        if "device" in kwargs:
+            self.model.to(kwargs.get("device"))
+        self.spec = spec
 
 
-def class_scores_extractor_post_processing(
-    options: Dict[str, str]
-) -> Callable:
-    def post_process_func(batch):
-        results = []
-        for predicts in batch:
-            predict_result = []
-            for box, label, score in zip(
-                predicts["boxes"].tolist(),
-                predicts["labels"].tolist(),
-                predicts["scores"].tolist(),
-            ):
-                predict_result.append(
-                    {
-                        "box": Box2d(*box),
-                        "label_ids": label,
-                        "scores": score,
-                    }
-                )
-
-            results.append(predict_result)
-        return results
-
-    return post_process_func
+MODEL_TYPE = SSDClassScoresModelType()

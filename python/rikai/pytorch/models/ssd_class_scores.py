@@ -25,6 +25,8 @@ from rikai.spark.sql.model import ModelSpec
 
 __all__ = ["MODEL_TYPE"]
 
+from rikai.types import Box2d
+
 
 class SSDClassScoresExtractor(torch.nn.Module):
     """Extracts the scores (confidences) of each class for
@@ -52,8 +54,8 @@ class SSDClassScoresExtractor(torch.nn.Module):
         self.topk_candidates = topk_candidates
 
     def forward(
-            self,
-            images: List[torch.Tensor],
+        self,
+        images: List[torch.Tensor],
     ):
         if self.training:
             raise ValueError("This feature extractor only supports eval mode.")
@@ -87,7 +89,7 @@ class SSDClassScoresExtractor(torch.nn.Module):
 
         detections: List[Dict[str, Tensor]] = []
         for boxes, scores, anchors, image_shape in zip(
-                bbox_regression, pred_scores, pred_anchors, images.image_sizes
+            bbox_regression, pred_scores, pred_anchors, images.image_sizes
         ):
             boxes = self.backend.box_coder.decode_single(boxes, anchors)
             boxes = clip_boxes_to_image(boxes, image_shape)
@@ -152,6 +154,8 @@ class SSDClassScoresExtractor(torch.nn.Module):
 
 
 class SSDClassScoresModelType(ObjectDetectionModelType):
+    DEFAULT_MIN_SCORE = 0.3
+
     def __init__(self):
         super().__init__("SSDClassScores")
 
@@ -159,15 +163,44 @@ class SSDClassScoresModelType(ObjectDetectionModelType):
         return "array<struct<box:box2d, scores:array<float>, label_ids:array<int>>>"
 
     def load_model(self, spec: ModelSpec, **kwargs):
-        ssd_model = spec.load_model()
-        ssd_model.eval()
-        self.model = SSDClassScoresExtractor(ssd_model)
-
-        self.model = spec.load_model()
-        self.model.eval()
+        model = spec.load_model()
+        if isinstance(model, SSD):
+            model = SSDClassScoresExtractor(model)
+        model.eval()
+        self.model = model
         if "device" in kwargs:
             self.model.to(kwargs.get("device"))
         self.spec = spec
+
+    def predict(self, images, *args, **kwargs) -> List:
+        assert (
+            self.model is not None
+        ), "model has not been initialized via load_model"
+        min_score = float(
+            self.spec.options.get("min_score", self.DEFAULT_MIN_SCORE)
+        )
+
+        batch = self.model(images)
+        results = []
+        for predicts in batch:
+            predict_result = []
+            for box, label, score in zip(
+                predicts["boxes"].tolist(),
+                predicts["labels"].tolist(),
+                predicts["scores"].tolist(),
+            ):
+                if score[0] < min_score:
+                    continue
+                predict_result.append(
+                    {
+                        "box": Box2d(*box),
+                        "label_id": label,
+                        "score": score,
+                    }
+                )
+
+            results.append(predict_result)
+        return results
 
 
 MODEL_TYPE = SSDClassScoresModelType()

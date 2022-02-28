@@ -17,7 +17,13 @@ from pathlib import Path
 import mlflow
 import torch
 from pyspark.sql import Row, SparkSession
-from pyspark.sql.types import ArrayType, FloatType, IntegerType, StructField, StructType
+from pyspark.sql.types import (
+    ArrayType,
+    FloatType,
+    IntegerType,
+    StructField,
+    StructType,
+)
 from torchvision.models.detection.ssd import ssd300_vgg16
 from torchvision.transforms import ToTensor
 

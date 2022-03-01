@@ -160,7 +160,10 @@ class SSDClassScoresModelType(ObjectDetectionModelType):
         super().__init__("SSDClassScores")
 
     def schema(self) -> str:
-        return "array<struct<box:box2d, scores:array<float>, label_ids:array<int>>>"
+        return (
+            "array<struct<box:box2d, scores:array<float>, "
+            "label_ids:array<int>>>"
+        )
 
     def load_model(self, spec: ModelSpec, **kwargs):
         model = spec.load_model()

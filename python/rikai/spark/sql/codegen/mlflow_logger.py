@@ -110,6 +110,8 @@ class MlflowLogger:
             Full python module path of the post-processing transforms
         registered_model_name: str, default None
             Model name in the mlflow model registry
+        model_type : str
+            Model type
         kwargs: dict
             Passed to `mlflow.<flavor>.log_model`
 
@@ -129,9 +131,7 @@ class MlflowLogger:
 
                 # Assume `model` is the trained model from the training loop
                 rikai.mlflow.pytorch.log_model(model, "model",
-                        schema=rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.OUTPUT_SCHEMA,
-                        pre_processing="rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing",
-                        post_processing="rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing",
+                        model_type="ssd",
                         registered_model_name="MyPytorchModel")
 
 

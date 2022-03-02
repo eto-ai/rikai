@@ -28,7 +28,7 @@ from torchvision.models.detection.ssd import ssd300_vgg16
 from torchvision.transforms import ToTensor
 
 import rikai
-from rikai.contrib.torch.inspect.ssd import SSDClassScoresExtractor
+from rikai.pytorch.models.ssd_class_scores import SSDClassScoresExtractor
 from rikai.spark.types import Box2dType
 from rikai.types import Image
 
@@ -88,9 +88,6 @@ def test_ssd_class_score_module_serialization(tmp_path: Path):
 
 
 def test_ssd_class_score_module_mlflow(tmp_path: Path):
-    tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
-    mlflow.set_tracking_uri(tracking_uri)
-
     with mlflow.start_run():
         mlflow.pytorch.log_model(
             class_scores_extractor, "model", registered_model_name="classes"
@@ -103,12 +100,10 @@ def test_ssd_class_score_module_mlflow(tmp_path: Path):
 def test_ssd_class_scores_module_with_spark(spark: SparkSession):
     with mlflow.start_run():
         rikai.mlflow.pytorch.log_model(
-            class_scores_extractor,
+            model,
             "models",
-            schema=SSDClassScoresExtractor.SCHEMA,
+            model_type="ssd_class_scores",
             registered_model_name="ssd_class_scores",
-            pre_processing="rikai.contrib.torch.inspect.ssd.class_scores_extractor_pre_processing",  # noqa: E501
-            post_processing="rikai.contrib.torch.inspect.ssd.class_scores_extractor_post_processing",  # noqa: E501
         )
 
     spark.sql("CREATE MODEL class_scores USING 'mlflow:/ssd_class_scores'")

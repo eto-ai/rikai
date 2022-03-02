@@ -12,13 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Inspect detail of Torchvision SSD model
-
-https://pytorch.org/vision/stable/models.html#torchvision.models.detection.ssd300_vgg16
-
-"""
-
-from typing import Callable, Dict, List, Tuple
+from typing import Dict, List, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -26,14 +20,12 @@ from torch import Tensor
 from torchvision.models.detection.ssd import SSD
 from torchvision.ops.boxes import batched_nms, clip_boxes_to_image
 
-from rikai.contrib.torch.transforms.ssd import pre_processing
-from rikai.types import Box2d
+from rikai.pytorch.models.torchvision import ObjectDetectionModelType
+from rikai.spark.sql.model import ModelSpec
 
-__all__ = [
-    "SSDClassScoresExtractor",
-    "class_scores_extractor_post_processing",
-    "class_scores_extractor_pre_processing",
-]
+__all__ = ["MODEL_TYPE"]
+
+from rikai.types import Box2d
 
 
 class SSDClassScoresExtractor(torch.nn.Module):
@@ -51,13 +43,8 @@ class SSDClassScoresExtractor(torch.nn.Module):
     -------
     [Dict[str, Tensor]]
         With the form of
-        ``{"boxes": FloatTensor[N, 4], "labels": Int64Tensor[N, k], "scores": Tensor[N, k]}``
+    ``{"boxes": FloatTensor[N, 4], "labels": Int64Tensor[N, k], "scores": Tensor[N, k]}``
     """  # noqa: E501
-
-    # SCHEMA to be used in Rikai SQL ML
-    SCHEMA = (
-        "array<struct<box:box2d, scores:array<float>, label_ids:array<int>>>"
-    )
 
     def __init__(self, backend: SSD, topk_candidates: int = 2):
         super().__init__()
@@ -166,13 +153,37 @@ class SSDClassScoresExtractor(torch.nn.Module):
         return detections
 
 
-class_scores_extractor_pre_processing = pre_processing
+class SSDClassScoresModelType(ObjectDetectionModelType):
+    DEFAULT_MIN_SCORE = 0.3
 
+    def __init__(self):
+        super().__init__("SSDClassScores")
 
-def class_scores_extractor_post_processing(
-    options: Dict[str, str]
-) -> Callable:
-    def post_process_func(batch):
+    def schema(self) -> str:
+        return (
+            "array<struct<box:box2d, scores:array<float>, "
+            "label_ids:array<int>>>"
+        )
+
+    def load_model(self, spec: ModelSpec, **kwargs):
+        model = spec.load_model()
+        if isinstance(model, SSD):
+            model = SSDClassScoresExtractor(model)
+        model.eval()
+        self.model = model
+        if "device" in kwargs:
+            self.model.to(kwargs.get("device"))
+        self.spec = spec
+
+    def predict(self, images, *args, **kwargs) -> List:
+        assert (
+            self.model is not None
+        ), "model has not been initialized via load_model"
+        min_score = float(
+            self.spec.options.get("min_score", self.DEFAULT_MIN_SCORE)
+        )
+
+        batch = self.model(images)
         results = []
         for predicts in batch:
             predict_result = []
@@ -181,15 +192,18 @@ def class_scores_extractor_post_processing(
                 predicts["labels"].tolist(),
                 predicts["scores"].tolist(),
             ):
+                if score[0] < min_score:
+                    continue
                 predict_result.append(
                     {
                         "box": Box2d(*box),
-                        "label_ids": label,
-                        "scores": score,
+                        "label_id": label,
+                        "score": score,
                     }
                 )
 
             results.append(predict_result)
         return results
 
-    return post_process_func
+
+MODEL_TYPE = SSDClassScoresModelType()

@@ -25,7 +25,7 @@ dev = [
     "wheel",
 ]
 sklearn = ["scikit-learn"]
-torch = ["torch>=1.8.1", "torchvision>=0.9.1"]
+torch = ["torch>=1.8.1", "torchvision>=0.10.0"]
 tf = ["tensorflow>=2.5.0", "tensorflow_hub"]
 jupyter = ["matplotlib", "jupyterlab"]
 aws = ["boto3", "botocore"]

@@ -19,6 +19,7 @@ package ai.eto.rikai.sql.spark.parser
 import ai.eto.rikai.SparkTestSession
 import org.apache.spark.sql.functions.{col, udf}
 import org.scalatest.funsuite.AnyFunSuite
+import org.apache.spark.sql.rikai.Image
 
 class RikaiSparkSQLParserTest extends AnyFunSuite with SparkTestSession {
 
@@ -56,5 +57,12 @@ class RikaiSparkSQLParserTest extends AnyFunSuite with SparkTestSession {
   test("Test parse explain select 1") {
     val df = spark.sql("explain select 1")
     assert(df.count() === 1)
+  }
+
+
+  test("test dot operation on UDT") {
+    val images_df = Seq((new Image("s3://foo/bar"), 1)).toDF("image", "id")
+    images_df.createOrReplaceTempView("images")
+    val df = spark.sql("SELECT image.uri FROM images")
   }
 }

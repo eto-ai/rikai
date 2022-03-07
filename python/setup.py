@@ -33,7 +33,7 @@ gcp = ["gcsfs"]
 docs = ["sphinx"]
 video = ["ffmpeg-python", "scenedetect"]
 youtube = ["pafy", "youtube_dl"]
-mlflow = ["mlflow==1.22"]
+mlflow = ["mlflow==1.24"]
 all = (
     sklearn
     + torch

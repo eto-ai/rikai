@@ -33,6 +33,7 @@ import org.apache.spark.sql.catalyst.expressions.{
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.catalyst.rules.Rule
 import org.apache.spark.sql.rikai.expressions.{Area, IOU}
+import org.apache.spark.sql.rikai.plan.ResolveUDTField
 import org.apache.spark.sql.{SparkSession, SparkSessionExtensions}
 
 private class MlPredictRule(val session: SparkSession)
@@ -137,5 +138,7 @@ class RikaiSparkSessionExtensions extends (SparkSessionExtensions => Unit) {
     extensions.injectResolutionRule(session => {
       new MlPredictRule(session)
     })
+
+    extensions.injectResolutionRule((_) => new ResolveUDTField())
   }
 }

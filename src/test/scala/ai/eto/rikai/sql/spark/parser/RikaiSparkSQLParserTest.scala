@@ -17,9 +17,16 @@
 package ai.eto.rikai.sql.spark.parser
 
 import ai.eto.rikai.SparkTestSession
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions.{col, udf}
 import org.scalatest.funsuite.AnyFunSuite
 import org.apache.spark.sql.rikai.Image
+import org.apache.spark.sql.types.{
+  BinaryType,
+  StringType,
+  StructField,
+  StructType
+}
 
 class RikaiSparkSQLParserTest extends AnyFunSuite with SparkTestSession {
 
@@ -59,9 +66,28 @@ class RikaiSparkSQLParserTest extends AnyFunSuite with SparkTestSession {
     assert(df.count() === 1)
   }
 
-  test("test dot operation on UDT") {
+  test("test dot operation on Image") {
     val images_df = Seq((new Image("s3://foo/bar"), 1)).toDF("image", "id")
     images_df.createOrReplaceTempView("images")
-    val df = spark.sql("SELECT to_json(image).uri FROM images")
+    val df = spark.sql("SELECT to_struct(image) as img FROM images")
+    df.show()
+    df.printSchema()
+    assert(
+      df.schema == StructType(
+        Seq(
+          StructField(
+            "img",
+            StructType(
+              Seq(
+                StructField("data", BinaryType),
+                StructField("uri", StringType)
+              )
+            )
+          )
+        )
+      )
+    )
+    assert(df.count() == 1)
+    assert(df.select("img.uri").collect()(0) == Row("s3://foo/bar"))
   }
 }

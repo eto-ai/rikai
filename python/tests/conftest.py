@@ -33,6 +33,7 @@ from rikai.contrib.torch.detections import OUTPUT_SCHEMA
 
 # Rikai
 from rikai.spark.utils import get_default_jar_version, init_spark_session
+from rikai.spark.sql.codegen.mlflow_registry import CONF_MLFLOW_TRACKING_URI
 
 
 @pytest.fixture(scope="session")
@@ -169,7 +170,7 @@ def spark(mlflow_tracking_uri: str) -> SparkSession:
                 ("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem"),
                 ("spark.hadoop.fs.s3a.access.key", os.environ.get("AWS")),
                 (
-                    "spark.rikai.sql.ml.registry.mlflow.tracking_uri",
+                    CONF_MLFLOW_TRACKING_URI,
                     mlflow_tracking_uri,
                 ),
                 (

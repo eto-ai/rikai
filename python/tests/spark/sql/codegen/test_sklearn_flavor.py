@@ -25,6 +25,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LinearRegression
 
 import rikai
+from rikai.spark.sql.codegen.mlflow_registry import CONF_MLFLOW_TRACKING_URI
 
 
 def test_sklearn_linear_regression(tmp_path: Path, spark: SparkSession):
@@ -48,9 +49,7 @@ def test_sklearn_linear_regression(tmp_path: Path, spark: SparkSession):
             registered_model_name=reg_model_name,
         )
 
-        spark.conf.set(
-            "spark.rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri
-        )
+        spark.conf.set(CONF_MLFLOW_TRACKING_URI, tracking_uri)
         spark.sql(
             f"""
             CREATE MODEL {model_name} USING 'mlflow:///{reg_model_name}';
@@ -97,9 +96,7 @@ def test_sklearn_random_forest(tmp_path: Path, spark: SparkSession):
             registered_model_name=reg_model_name,
         )
 
-        spark.conf.set(
-            "spark.rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri
-        )
+        spark.conf.set(CONF_MLFLOW_TRACKING_URI, tracking_uri)
         spark.sql(
             f"""
             CREATE MODEL {model_name} USING 'mlflow:///{reg_model_name}';
@@ -143,9 +140,7 @@ def test_sklearn_pca(tmp_path: Path, spark: SparkSession):
             schema="array<float>",
             registered_model_name=reg_model_name,
         )
-        spark.conf.set(
-            "spark.rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri
-        )
+        spark.conf.set(CONF_MLFLOW_TRACKING_URI, tracking_uri)
         spark.sql(
             f"""
             CREATE MODEL {model_name} USING 'mlflow:///{reg_model_name}';

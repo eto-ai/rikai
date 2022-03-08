@@ -49,7 +49,8 @@ class TestRegistry(conf: Map[String, String])
       session: SparkSession,
       spec: ModelSpec
   ): Model = {
-    val parsed = URI.create(spec.uri)
+    require(spec.uri.isDefined)
+    val parsed = URI.create(spec.uri.get)
     parsed.getScheme match {
       case this.schema => {
         val model_name: String = spec.name match {
@@ -60,10 +61,12 @@ class TestRegistry(conf: Map[String, String])
             ).getName
         }
         logger.info(s"Creating Spark UDF model: func=${model_name} ${spec}")
-        new SparkUDFModel(model_name, spec.uri, model_name, spec.flavor)
+        new SparkUDFModel(model_name, spec.uri.get, model_name, spec.flavor)
       }
       case _ =>
-        throw new ModelNotFoundException(s"Fake model ${spec.uri} not found")
+        throw new ModelNotFoundException(
+          s"Fake model ${spec.uri.get} not found"
+        )
     }
   }
 }

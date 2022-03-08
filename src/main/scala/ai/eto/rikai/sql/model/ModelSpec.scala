@@ -21,7 +21,7 @@ package ai.eto.rikai.sql.model
   */
 case class ModelSpec(
     name: Option[String],
-    uri: String,
+    uri: Option[String] = None,
     flavor: Option[String] = None,
     modelType: Option[String] = None,
     schema: Option[String] = None,

@@ -19,6 +19,7 @@ from typing import Optional
 import torch
 
 from rikai.spark.sql.model import ModelSpec, ModelType
+from rikai.spark.sql.codegen.bootstrap import BootstrapModelSpec
 
 __all__ = ["TorchModelType"]
 
@@ -31,7 +32,13 @@ class TorchModelType(ModelType, ABC):
         self.spec: Optional[ModelSpec] = None
 
     def load_model(self, spec: ModelSpec, **kwargs):
-        self.model = spec.load_model()
+        if isinstance(spec, BootstrapModelSpec):
+            if self.bootstrappable():
+                self.model = self.bootstrap()
+            else:
+                raise RuntimeError("ModelType is not bootstrappable")
+        else:
+            self.model = spec.load_model()
         self.model.eval()
         if "device" in kwargs:
             self.model.to(kwargs.get("device"))

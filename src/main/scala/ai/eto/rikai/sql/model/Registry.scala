@@ -16,6 +16,7 @@
 
 package ai.eto.rikai.sql.model
 
+import ai.eto.rikai.sql.model.bootstrap.BootstrapRegistry
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.http.client.utils.URIUtils
 import org.apache.log4j.Logger
@@ -149,15 +150,20 @@ private[rikai] object Registry {
   }
 
   @throws[ModelResolveException]
-  private[model] def getRegistry(uri: String): Registry = {
-    val parsedNormalizedUri = normalize_uri(uri)
-    val scheme: String = parsedNormalizedUri.getScheme
-    registryMap.get(scheme) match {
-      case Some(registry) => registry
+  private[model] def getRegistry(uriOption: Option[String]): Registry = {
+    uriOption match {
+      case Some(uri) =>
+        val parsedNormalizedUri = normalize_uri(uri)
+        val scheme: String = parsedNormalizedUri.getScheme
+        registryMap.get(scheme) match {
+          case Some(registry) => registry
+          case None =>
+            throw new ModelResolveException(
+              s"Model registry scheme '${scheme}' is not supported"
+            )
+        }
       case None =>
-        throw new ModelResolveException(
-          s"Model registry scheme '${scheme}' is not supported"
-        )
+        BootstrapRegistry
     }
   }
 

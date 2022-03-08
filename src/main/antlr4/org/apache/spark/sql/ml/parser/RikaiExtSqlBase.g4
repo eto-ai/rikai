@@ -27,7 +27,7 @@ statement
       (POSTPROCESSOR postprocess=processorClause)?
       (OPTIONS optionList)?
       (RETURNS datatype=dataType)?
-      (USING uri=STRING)	                        # createModel
+      (USING uri=STRING)?	                        # createModel
     | (DESC | DESCRIBE) MODEL model=qualifiedName   # describeModel
     | SHOW MODELS                                   # showModels
     | DROP MODEL model=qualifiedName                # dropModel

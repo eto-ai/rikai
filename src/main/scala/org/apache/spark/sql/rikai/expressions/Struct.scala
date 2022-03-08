@@ -16,6 +16,7 @@
 
 package org.apache.spark.sql.rikai.expressions
 
+import com.thoughtworks.enableIf
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{
@@ -53,4 +54,12 @@ case class ToStruct(child: Expression)
     case s: UserDefinedType[_] => s.sqlType
     case _                     => child.dataType
   }
+
+  @enableIf(c =>
+    c.classPath.exists(
+      _.getPath.matches(".*spark-catalyst_2\\.\\d+-3\\.2\\..*")
+    )
+  )
+  override def withNewChildInternal(newChild: Expression): Expression =
+    copy(child = newChild)
 }

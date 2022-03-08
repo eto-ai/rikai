@@ -26,6 +26,7 @@ from pyspark.sql import SparkSession
 
 import rikai
 from rikai.spark.utils import get_default_jar_version, init_spark_session
+from rikai.spark.sql.codegen.mlflow_registry import CONF_MLFLOW_TRACKING_URI
 
 
 @pytest.fixture(scope="session")
@@ -131,7 +132,7 @@ def spark_with_mlflow(mlflow_client_http) -> SparkSession:
                     "ai.eto.rikai.sql.model.mlflow.MlflowCatalog",
                 ),
                 (
-                    "spark.rikai.sql.ml.registry.mlflow.tracking_uri",
+                    CONF_MLFLOW_TRACKING_URI,
                     mlflow_tracking_uri,
                 ),
             ]

@@ -32,6 +32,7 @@ from pyspark.sql.types import (
 import rikai
 from rikai.contrib.tfhub.tensorflow.ssd import HUB_URL as SSD_HUB_URL
 from rikai.spark.sql.codegen.fs import FileModelSpec
+from rikai.spark.sql.codegen.mlflow_registry import CONF_MLFLOW_TRACKING_URI
 from rikai.spark.types import Box2dType
 from rikai.types import Image
 from rikai.testing.utils import apply_model_spec
@@ -76,9 +77,7 @@ def test_tf_with_mlflow(tmp_path: Path, spark: SparkSession):
 
     tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
     mlflow.set_tracking_uri(tracking_uri)
-    spark.conf.set(
-        "spark.rikai.sql.ml.registry.mlflow.tracking_uri", tracking_uri
-    )
+    spark.conf.set(CONF_MLFLOW_TRACKING_URI, tracking_uri)
 
     with mlflow.start_run():
         model_path = str(tmp_path / "model.pt")

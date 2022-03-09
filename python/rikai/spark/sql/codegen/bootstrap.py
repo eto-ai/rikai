@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from rikai.spark.sql.codegen.base import ModelSpec, Registry
-from rikai.spark.sql.codegen.mlflow_logger import MlflowLogger
+from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.model import BOOTSTRAPPED_SPEC_SCHEMA
 
 __all__ = ["BootstrapRegistry"]
@@ -38,7 +38,10 @@ class BootstrapModelSpec(ModelSpec):
         super().__init__(spec, validate=validate)
 
     def validate(self):
-        return super().validate(BOOTSTRAPPED_SPEC_SCHEMA)
+        super().validate(BOOTSTRAPPED_SPEC_SCHEMA)
+        if not self.model_type.bootstrappable():
+            msg = "ModelType must be bootstrappable if no URI is specified"
+            raise SpecError(msg)
 
     def load_model(self):
         raise RuntimeError("BootstrapModelSpec does not load model")

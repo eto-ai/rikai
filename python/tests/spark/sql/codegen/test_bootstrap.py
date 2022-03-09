@@ -13,6 +13,11 @@
 #  limitations under the License.
 
 from pyspark.sql import SparkSession
+import pytest
+import py4j
+
+from rikai.spark.functions import init
+
 from utils import check_ml_predict
 
 
@@ -24,3 +29,24 @@ def test_fasterrcnn_resnet50_fpn(spark: SparkSession):
             MODEL_TYPE fasterrcnn_resnet50_fpn"""
     )
     check_ml_predict(spark, name)
+
+
+def test_failure_create(spark: SparkSession):
+    with pytest.raises(
+        py4j.protocol.Py4JJavaError,
+        match=r".*ModelType must be bootstrappable if no URI is specified.*",
+    ):
+        spark.sql(
+            f"""CREATE MODEL ssd_score
+                FLAVOR pytorch
+                MODEL_TYPE ssd_class_scores"""
+        )
+
+    with pytest.raises(
+        py4j.protocol.Py4JJavaError,
+        match=r".*None is not of type 'string'.*",
+    ):
+        spark.sql(
+            f"""CREATE MODEL ssd_score
+                MODEL_TYPE ssd_class_scores"""
+        )

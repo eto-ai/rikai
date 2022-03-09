@@ -47,7 +47,7 @@ case class CreateModelCommand(
       case Some(u) =>
         ModelSpec(
           name = Some(name),
-          uri = Registry.normalize_uri(u).toString,
+          uri = Some(Registry.normalize_uri(u).toString),
           flavor = flavor,
           modelType = modelType,
           schema = returns,

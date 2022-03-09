@@ -50,7 +50,6 @@ SPEC_PAYLOAD_SCHEMA = {
                 "flavor": {"type": "string"},
                 "model_type": {"type": "string"},
             },
-            "required": ["uri"],
         },
         "transforms": {
             "type": "object",
@@ -202,6 +201,14 @@ class ModelSpec(ABC):
 
 class ModelType(ABC):
     """Declare a Rikai-compatible Model Type."""
+
+    def bootstrappable(self) -> bool:
+        """Return if it is a bootstrappable model type"""
+        return False
+
+    def bootstrap(self) -> Any:
+        """Load the model without specification"""
+        return None
 
     @abstractmethod
     def load_model(self, spec: ModelSpec, **kwargs):

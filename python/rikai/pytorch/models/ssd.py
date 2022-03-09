@@ -13,11 +13,18 @@
 #  limitations under the License.
 
 from .torchvision import ObjectDetectionModelType
+import torchvision
 
 __all__ = ["MODEL_TYPE"]
 
 
 class SSDModelType(ObjectDetectionModelType):
+    def bootstrappable(self) -> bool:
+        return True
+
+    def bootstrap(self):
+        return torchvision.models.detection.ssd.ssd300_vgg16()
+
     def __init__(self):
         super().__init__("SSD")
 

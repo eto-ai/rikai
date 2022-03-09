@@ -21,45 +21,22 @@ __all__ = ["BootstrapRegistry"]
 
 
 class BootstrapModelSpec(ModelSpec):
-    """Bootstraped Model Spec.
-
-    Parameters
-    ----------
-    options : Dict[str, Any], optional
-        Additionally options. If the same option exists in spec already,
-        it will be overridden.
-    validate : bool, default True.
-        Validate the spec during construction. Default ``True``.
-    """
-
     def __init__(
         self,
-        options: Optional[dict] = None,
+        raw_spec: "ModelSpec",
         validate: bool = True,
     ):
-        spec = self._load_spec_dict(options)
-        super().__init__(spec, validate=validate)
-
-    def _load_spec_dict(self, options: Optional[dict]) -> dict:
-        """Convert the Run into a ModelSpec
-
-        Parameters
-        ----------
-        options: dict, default None
-            Runtime options to be used by the model/transforms
-
-        Returns
-        -------
-        spec: Dict[str, Any]
-        """
         spec = {
-            "version": MlflowLogger._CURRENT_MODEL_SPEC_VERSION,
+            "version": "1.0",
+            "schema": raw_spec.get("schema", None),
+            "model": {
+                "flavor": raw_spec.get("flavor", None),
+                "type": raw_spec.get("modelType", None),
+            },
         }
-
-        if options is not None and len(options) > 0:
-            spec["options"] = options
-
-        return spec
+        if not spec["schema"]:
+            del spec["schema"]
+        super().__init__(spec, validate=validate)
 
     def load_model(self):
         raise RuntimeError("BootstrapModelSpec does not load model")
@@ -72,6 +49,5 @@ class BootstrapRegistry(Registry):
         return "BootstrapRegistry"
 
     def make_model_spec(self, raw_spec: dict):
-        options = raw_spec.get("options", {})
-        spec = BootstrapModelSpec(options=options)
+        spec = BootstrapModelSpec(raw_spec)
         return spec

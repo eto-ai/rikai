@@ -13,11 +13,18 @@
 #  limitations under the License.
 
 from .torchvision import ObjectDetectionModelType
+import torchvision
 
 __all__ = ["MODEL_TYPE"]
 
 
 class FasterRCNNModelType(ObjectDetectionModelType):
+    def bootstrappable(self) -> bool:
+        return True
+
+    def bootstrap(self):
+        return torchvision.models.detection.fasterrcnn_resnet50_fpn()
+
     def __init__(self):
         super().__init__("fasterrcnn_resnet50_fpn")
 

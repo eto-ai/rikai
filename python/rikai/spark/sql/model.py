@@ -49,7 +49,7 @@ def gen_schema_spec(required_cols):
                 "properties": {
                     "uri": {"type": "string"},
                     "flavor": {"type": "string"},
-                    "model_type": {"type": "string"},
+                    "type": {"type": "string"},
                 },
                 "required": required_cols,
             },
@@ -66,7 +66,7 @@ def gen_schema_spec(required_cols):
 
 
 SPEC_PAYLOAD_SCHEMA = gen_schema_spec(["uri"])
-BOOTSTRAPPED_SPEC_SCHEMA = gen_schema_spec(["flavor", "model_type"])
+BOOTSTRAPPED_SPEC_SCHEMA = gen_schema_spec(["flavor", "type"])
 
 
 def _identity(x):

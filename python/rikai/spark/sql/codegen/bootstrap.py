@@ -61,6 +61,9 @@ class BootstrapModelSpec(ModelSpec):
 
         return spec
 
+    def load_model(self):
+        raise RuntimeError("BootstrapModelSpec does not load model")
+
 
 class BootstrapRegistry(Registry):
     """Bootrapped Model Registry"""

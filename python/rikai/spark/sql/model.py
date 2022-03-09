@@ -33,34 +33,40 @@ M = TypeVar("M")  # Model Type
 
 # JSON schema specification for the model payload specifications
 # used to validate model spec input
-SPEC_PAYLOAD_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "version": {
-            "type": "string",
-            "description": "Model SPEC format version",
-        },
-        "name": {"type": "string", "description": "Model name"},
-        "schema": {"type": "string"},
-        "model": {
-            "type": "object",
-            "description": "model description",
-            "properties": {
-                "uri": {"type": "string"},
-                "flavor": {"type": "string"},
-                "model_type": {"type": "string"},
+def gen_schema_spec(required_cols):
+    return {
+        "type": "object",
+        "properties": {
+            "version": {
+                "type": "string",
+                "description": "Model SPEC format version",
+            },
+            "name": {"type": "string", "description": "Model name"},
+            "schema": {"type": "string"},
+            "model": {
+                "type": "object",
+                "description": "model description",
+                "properties": {
+                    "uri": {"type": "string"},
+                    "flavor": {"type": "string"},
+                    "model_type": {"type": "string"},
+                },
+                "required": required_cols,
+            },
+            "transforms": {
+                "type": "object",
+                "properties": {
+                    "pre": {"type": "string"},
+                    "post": {"type": "string"},
+                },
             },
         },
-        "transforms": {
-            "type": "object",
-            "properties": {
-                "pre": {"type": "string"},
-                "post": {"type": "string"},
-            },
-        },
-    },
-    "required": ["version", "model"],
-}
+        "required": ["version", "model"],
+    }
+
+
+SPEC_PAYLOAD_SCHEMA = gen_schema_spec(["uri"])
+BOOTSTRAPPED_SPEC_SCHEMA = gen_schema_spec(["flavor", "model_type"])
 
 
 def _identity(x):
@@ -110,7 +116,7 @@ class ModelSpec(ABC):
         if validate:
             self.validate()
 
-    def validate(self):
+    def validate(self, schema=SPEC_PAYLOAD_SCHEMA):
         """Validate model spec
 
         Raises
@@ -120,7 +126,7 @@ class ModelSpec(ABC):
         """
         logger.debug("Validating spec: %s", self._spec)
         try:
-            validate(instance=self._spec, schema=SPEC_PAYLOAD_SCHEMA)
+            validate(instance=self._spec, schema=schema)
         except ValidationError as e:
             raise SpecError(e.message) from e
 

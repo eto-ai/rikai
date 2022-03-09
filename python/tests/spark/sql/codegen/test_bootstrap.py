@@ -19,6 +19,8 @@ from utils import check_ml_predict
 def test_fasterrcnn_resnet50_fpn(spark: SparkSession):
     name = "frf_model"
     spark.sql(
-        f"CREATE MODEL {name} FLAVOR pytorch MODEL_TYPE fasterrcnn_resnet50_fpn"
+        f"""CREATE MODEL {name}
+            FLAVOR pytorch
+            MODEL_TYPE fasterrcnn_resnet50_fpn"""
     )
     check_ml_predict(spark, name)

@@ -12,10 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Optional
-
 from rikai.spark.sql.codegen.base import ModelSpec, Registry
 from rikai.spark.sql.codegen.mlflow_logger import MlflowLogger
+from rikai.spark.sql.model import BOOTSTRAPPED_SPEC_SCHEMA
 
 __all__ = ["BootstrapRegistry"]
 
@@ -37,6 +36,9 @@ class BootstrapModelSpec(ModelSpec):
         if not spec["schema"]:
             del spec["schema"]
         super().__init__(spec, validate=validate)
+
+    def validate(self):
+        return super().validate(BOOTSTRAPPED_SPEC_SCHEMA)
 
     def load_model(self):
         raise RuntimeError("BootstrapModelSpec does not load model")

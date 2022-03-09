@@ -76,6 +76,7 @@ class MlflowCatalog(session: SparkSession) extends Catalog {
           }
       }
       .collect { case Some(model) => model }
+      .toSeq
   }
 
   /** Check a model with the specified name exists.

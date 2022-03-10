@@ -16,17 +16,29 @@ from __future__ import annotations
 
 import datetime
 import os
+import uuid
 
 import mlflow
 import pytest
+import tensorflow_hub as hub
+import tensorflow as tf
 import torch
-import torchvision
 from mlflow.tracking import MlflowClient
 from pyspark.sql import SparkSession
 
 import rikai
+from rikai.contrib.tfhub.tensorflow.ssd import HUB_URL as SSD_HUB_URL
 from rikai.spark.utils import get_default_jar_version, init_spark_session
 from rikai.spark.sql.codegen.mlflow_registry import CONF_MLFLOW_TRACKING_URI
+
+
+@pytest.fixture(scope="session")
+def tfhub_ssd(tmp_path_factory):
+    m = hub.load(SSD_HUB_URL)
+    tmp_path = tmp_path_factory.mktemp(str(uuid.uuid4()))
+    model_path = str(tmp_path / "model")
+    tf.saved_model.save(m, model_path)
+    return (m, model_path)
 
 
 @pytest.fixture(scope="session")

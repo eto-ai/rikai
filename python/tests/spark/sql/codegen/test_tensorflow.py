@@ -18,7 +18,6 @@ from pathlib import Path
 import mlflow
 import pandas as pd
 import tensorflow as tf
-import tensorflow_hub as hub
 from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql import Row, SparkSession
 from pyspark.sql.types import (
@@ -30,7 +29,6 @@ from pyspark.sql.types import (
 )
 
 import rikai
-from rikai.contrib.tfhub.tensorflow.ssd import HUB_URL as SSD_HUB_URL
 from rikai.spark.sql.codegen.fs import FileModelSpec
 from rikai.spark.sql.codegen.mlflow_registry import CONF_MLFLOW_TRACKING_URI
 from rikai.spark.types import Box2dType
@@ -38,11 +36,10 @@ from rikai.types import Image
 from rikai.testing.utils import apply_model_spec
 
 
-def test_tf_inference_runner(tmp_path: Path, two_flickr_images: list):
-    m = hub.load(SSD_HUB_URL)
-    model_path = str(tmp_path / "model")
-    tf.saved_model.save(m, model_path)
-
+def test_tf_inference_runner(
+    tfhub_ssd, tmp_path: Path, two_flickr_images: list
+):
+    m, model_path = tfhub_ssd
     spec_path = str(tmp_path / "spec.yml")
     with open(spec_path, "w") as spec_yml:
         spec_yml.write(
@@ -67,9 +64,9 @@ options:
 
 
 def test_tf_with_mlflow(
-    tmp_path: Path, spark: SparkSession, two_flickr_rows: list
+    tfhub_ssd, tmp_path: Path, spark: SparkSession, two_flickr_rows: list
 ):
-    m = hub.load(SSD_HUB_URL)
+    m, model_path = tfhub_ssd
 
     tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
     mlflow.set_tracking_uri(tracking_uri)

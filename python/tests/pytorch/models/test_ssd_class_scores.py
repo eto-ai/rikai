@@ -93,7 +93,9 @@ def test_ssd_class_score_module_mlflow(tmp_path: Path):
     assert_model_equal(m, class_scores_extractor)
 
 
-def test_ssd_class_scores_module_with_spark(spark: SparkSession):
+def test_ssd_class_scores_module_with_spark(
+    spark: SparkSession, two_flickr_rows: list
+):
     with mlflow.start_run():
         rikai.mlflow.pytorch.log_model(
             model,
@@ -105,7 +107,7 @@ def test_ssd_class_scores_module_with_spark(spark: SparkSession):
     spark.sql("CREATE MODEL class_scores USING 'mlflow:/ssd_class_scores'")
     spark.sql("SHOW MODELS").show()
 
-    spark.createDataFrame([Row(image=TEST_IMAGE)]).createOrReplaceTempView(
+    spark.createDataFrame([two_flickr_rows[0]]).createOrReplaceTempView(
         "images"
     )
 

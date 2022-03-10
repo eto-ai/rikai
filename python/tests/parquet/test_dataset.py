@@ -47,9 +47,9 @@ def test_select_columns(spark: SparkSession, tmp_path: Path):
     _select_columns(spark, str(tmp_path))
 
 
-def test_select_columns_on_gcs(spark: SparkSession, gcs_tmpdir: str):
-    _select_columns(spark, gcs_tmpdir)
+def test_select_columns_on_gcs(gcs_spark: SparkSession, gcs_tmpdir: str):
+    _select_columns(gcs_spark, gcs_tmpdir)
 
 
-def test_select_over_s3(spark: SparkSession, s3_tmpdir: str):
-    _select_columns(spark, s3_tmpdir)
+def test_select_over_s3(aws_spark: SparkSession, s3_tmpdir: str):
+    _select_columns(aws_spark, s3_tmpdir)

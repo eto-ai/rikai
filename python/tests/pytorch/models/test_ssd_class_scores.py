@@ -30,11 +30,7 @@ from torchvision.transforms import ToTensor
 import rikai
 from rikai.pytorch.models.ssd_class_scores import SSDClassScoresExtractor
 from rikai.spark.types import Box2dType
-from rikai.types import Image
 
-TEST_IMAGE = Image(
-    "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"
-)
 
 model = ssd300_vgg16(pretrained=True)
 model.eval()
@@ -42,8 +38,8 @@ class_scores_extractor = SSDClassScoresExtractor(model)
 class_scores_extractor.eval()
 
 
-def test_predict_value_equal():
-    batch = [ToTensor()(TEST_IMAGE.to_pil())]
+def test_predict_value_equal(two_flickr_images: list):
+    batch = [ToTensor()(two_flickr_images[0].to_pil())]
     with torch.no_grad():
         detections = model(batch)[0]
         class_scores = class_scores_extractor(batch)[0]

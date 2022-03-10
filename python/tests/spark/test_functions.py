@@ -187,9 +187,8 @@ def test_numpy_to_image(spark: SparkSession, tmp_path: Path):
     assert (tmp_path / "1.png").exists()
 
 
-def test_crops(spark: SparkSession, tmp_path: Path):
-    uri = "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"
-    img = Image(uri)
+def test_crops(spark: SparkSession, tmp_path: Path, two_flickr_images: list):
+    img = two_flickr_images[0]
     data = img.to_numpy()
     df = spark.createDataFrame(
         [

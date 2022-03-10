@@ -195,15 +195,9 @@ def test_yaml_model(spark: SparkSession, resnet_spec: str):
     check_ml_predict(spark, "resnet_m")
 
 
-def test_yaml_model_type(resnet_spec: str):
+def test_yaml_model_type(resnet_spec: str, two_flickr_images):
     spec = FileModelSpec(spec_uri=resnet_spec)
-    inputs = [
-        pd.Series(Image(uri))
-        for uri in (
-            "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg",
-            "http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg",
-        )
-    ]
+    inputs = [pd.Series(image) for image in two_flickr_images]
     results = apply_model_spec(spec, inputs)
     assert len(results) == 2
     for series in results:
@@ -211,30 +205,15 @@ def test_yaml_model_type(resnet_spec: str):
 
 
 @pytest.mark.timeout(120)
-def test_count_objects_model(spark: SparkSession, count_objects_spec: str):
+def test_count_objects_model(
+    spark: SparkSession, count_objects_spec: str, two_flickr_rows: list
+):
     spark.sql(
         "CREATE MODEL count_objects USING 'file://{}'".format(
             count_objects_spec
         )
     )
-    df = spark.createDataFrame(
-        [
-            # http://cocodataset.org/#explore?id=484912
-            Row(
-                image=Image(
-                    "http://farm2.staticflickr.com/1129/"
-                    "4726871278_4dd241a03a_z.jpg"
-                )
-            ),
-            # https://cocodataset.org/#explore?id=433013
-            Row(
-                image=Image(
-                    "http://farm4.staticflickr.com/3726/"
-                    "9457732891_87c6512b62_z.jpg"
-                )
-            ),
-        ],
-    )
+    df = spark.createDataFrame(two_flickr_rows)
     df.createOrReplaceTempView("df")
 
     predictions = spark.sql(

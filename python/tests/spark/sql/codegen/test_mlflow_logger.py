@@ -22,10 +22,8 @@ from mlflow.tracking import MlflowClient
 import rikai
 
 
-def test_none_value_tags(tmp_path: Path, resnet_model_uri):
-    tmp_path.mkdir(parents=True, exist_ok=True)
-    tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
-    mlflow.set_tracking_uri(tracking_uri)
+def test_none_value_tags(mlflow_tracking_uri: str, resnet_model_uri):
+    mlflow.set_tracking_uri(mlflow_tracking_uri)
     with mlflow.start_run():
         model = torch.load(resnet_model_uri)
         rikai.mlflow.pytorch.log_model(
@@ -44,10 +42,8 @@ def test_none_value_tags(tmp_path: Path, resnet_model_uri):
         assert rikai.mlflow.CONF_MLFLOW_POST_PROCESSING not in tags
 
 
-def test_model_and_version_tags(tmp_path: Path, resnet_model_uri):
-    tmp_path.mkdir(parents=True, exist_ok=True)
-    tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
-    mlflow.set_tracking_uri(tracking_uri)
+def test_model_and_version_tags(mlflow_tracking_uri: str, resnet_model_uri):
+    mlflow.set_tracking_uri(mlflow_tracking_uri)
     model_name = "model_for_tags"
     c = MlflowClient()
     c.create_registered_model(model_name)

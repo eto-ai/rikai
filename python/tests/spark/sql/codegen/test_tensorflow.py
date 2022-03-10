@@ -64,17 +64,15 @@ options:
 
 
 def test_tf_with_mlflow(
-    tfhub_ssd, tmp_path: Path, spark: SparkSession, two_flickr_rows: list
+    tfhub_ssd,
+    mlflow_tracking_uri: str,
+    spark: SparkSession,
+    two_flickr_rows: list,
 ):
     m, model_path = tfhub_ssd
 
-    tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
-    mlflow.set_tracking_uri(tracking_uri)
-    spark.conf.set(CONF_MLFLOW_TRACKING_URI, tracking_uri)
-
+    mlflow.set_tracking_uri(mlflow_tracking_uri)
     with mlflow.start_run():
-        model_path = str(tmp_path / "model.pt")
-        tf.saved_model.save(m, model_path)
         rikai.mlflow.tensorflow.log_model(
             m,
             "model",
@@ -83,13 +81,12 @@ def test_tf_with_mlflow(
         )
 
     spark.sql("CREATE MODEL ssd USING 'mlflow:///tf_ssd'")
-    spark.sql("SHOW MODELS").show()
     df = spark.createDataFrame(two_flickr_rows)
     df.createOrReplaceTempView("images")
 
     df = spark.sql("SELECT ML_PREDICT(ssd, image) as det FROM images")
-    df.show()
     df.createOrReplaceTempView("detections")
+
     assert df.schema == StructType(
         [
             StructField(

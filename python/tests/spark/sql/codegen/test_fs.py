@@ -190,9 +190,11 @@ def test_construct_spec_with_options(tmp_path):
 
 
 @pytest.mark.timeout(120)
-def test_yaml_model(spark: SparkSession, resnet_spec: str):
+def test_yaml_model(
+    spark: SparkSession, resnet_spec: str, two_flickr_rows: list
+):
     spark.sql("CREATE MODEL resnet_m USING 'file://{}'".format(resnet_spec))
-    check_ml_predict(spark, "resnet_m")
+    check_ml_predict(spark, "resnet_m", two_flickr_rows)
 
 
 def test_yaml_model_type(resnet_spec: str, two_flickr_images):

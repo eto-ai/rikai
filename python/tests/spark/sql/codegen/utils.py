@@ -26,27 +26,12 @@ from rikai.spark.types import Box2dType
 from rikai.types import Image
 
 
-def check_ml_predict(spark: SparkSession, model_name: str):
+def check_ml_predict(
+    spark: SparkSession, model_name: str, two_flickr_rows: list
+):
     # TODO: Replace uri string with Image class after GH#90 is released with
     # the upstream spark
-    df = spark.createDataFrame(
-        [
-            # http://cocodataset.org/#explore?id=484912
-            Row(
-                image=Image(
-                    "http://farm2.staticflickr.com/1129/"
-                    "4726871278_4dd241a03a_z.jpg"
-                )
-            ),
-            # https://cocodataset.org/#explore?id=433013
-            Row(
-                image=Image(
-                    "http://farm4.staticflickr.com/3726/"
-                    "9457732891_87c6512b62_z.jpg"
-                )
-            ),
-        ],
-    )
+    df = spark.createDataFrame(two_flickr_rows)
     df.createOrReplaceTempView("df")
 
     predictions = spark.sql(

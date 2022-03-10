@@ -127,17 +127,15 @@ def test_crop_image():
     assert np.array_equal(cropped_data, data[10:30, 10:30])
 
 
-def test_crop_real_image():
-    uri = "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"
-    img = Image(uri)
+def test_crop_real_image(two_flickr_images: list):
+    img = two_flickr_images[0]
     data = img.to_numpy()
     patch = img.crop(Box2d(10, 10, 30, 30))
     assert np.array_equal(patch.to_numpy(), data[10:30, 10:30, :])
 
 
-def test_crop_in_batch():
-    uri = "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"
-    img = Image(uri)
+def test_crop_in_batch(two_flickr_images: list):
+    img = two_flickr_images[0]
     data = img.to_numpy()
     patches = img.crop(
         [Box2d(10, 10, 30, 30), Box2d(15, 15, 35, 35), Box2d(20, 20, 40, 40)]

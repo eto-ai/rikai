@@ -38,7 +38,7 @@ from rikai.types import Image
 from rikai.testing.utils import apply_model_spec
 
 
-def test_tf_inference_runner(tmp_path: Path):
+def test_tf_inference_runner(tmp_path: Path, two_flickr_images: list):
     m = hub.load(SSD_HUB_URL)
     model_path = str(tmp_path / "model")
     tf.saved_model.save(m, model_path)
@@ -58,13 +58,7 @@ options:
         )
 
     spec = FileModelSpec(spec_path)
-    inputs = [
-        pd.Series(Image(uri))
-        for uri in (
-            "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg",
-            "http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg",
-        )
-    ]
+    inputs = [pd.Series(image) for image in two_flickr_images]
     results = apply_model_spec(spec, inputs)
 
     for series in results:
@@ -72,7 +66,9 @@ options:
         assert len(series[0]) == 100
 
 
-def test_tf_with_mlflow(tmp_path: Path, spark: SparkSession):
+def test_tf_with_mlflow(
+    tmp_path: Path, spark: SparkSession, two_flickr_rows: list
+):
     m = hub.load(SSD_HUB_URL)
 
     tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
@@ -91,14 +87,7 @@ def test_tf_with_mlflow(tmp_path: Path, spark: SparkSession):
 
     spark.sql("CREATE MODEL ssd USING 'mlflow:///tf_ssd'")
     spark.sql("SHOW MODELS").show()
-    rows = [
-        Row(image=Image(uri))
-        for uri in (
-            "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg",
-            "http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg",
-        )
-    ]
-    df = spark.createDataFrame(rows)
+    df = spark.createDataFrame(two_flickr_rows)
     df.createOrReplaceTempView("images")
 
     df = spark.sql("SELECT ML_PREDICT(ssd, image) as det FROM images")

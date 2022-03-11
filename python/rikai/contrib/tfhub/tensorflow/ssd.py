@@ -20,6 +20,7 @@ https://arxiv.org/abs/1512.02325
 
 from typing import Any, Callable, Dict
 
+import numpy
 from tensorflow.python.framework.ops import EagerTensor
 
 from rikai.tensorflow.models import TensorflowModelType
@@ -38,33 +39,37 @@ class SSDModelType(TensorflowModelType):
     def transform(self) -> Callable:
         return None
 
-    def predict(self, images: EagerTensor, *args, **kwargs) -> Any:
+    def predict(self, images, *args, **kwargs) -> Any:
+        images = numpy.array([images[0]])
         print("images_type:", type(images))
         print("images_shape:", images.shape)
+        print("images_shape_len:", len(images.shape))
         # df shape shape (12,)
         # images_shape: (1, 5, 1028, 1024, 3)
         # images_shape: (1, 1028, 1024, 3)
         assert (
             self.model is not None
         ), "model has not been initialized via load_model"
-        batch = self.model(images)
-
         results = []
-        for boxes, classes, scores in zip(
-            batch["detection_boxes"].numpy(),
-            batch["detection_classes"].numpy(),
-            batch["detection_scores"].numpy(),
-        ):
-            predict_result = []
-            for box, label_class, score in zip(boxes, classes, scores):
-                predict_result.append(
-                    {
-                        "detection_boxes": Box2d(*box),
-                        "detection_classes": int(label_class),
-                        "detection_scores": float(score),
-                    }
-                )
-            results.append(predict_result)
+        for image in images:
+            # TODO can't explain why image should be in a fixed length array
+            batch = self.model([image])
+
+            for boxes, classes, scores in zip(
+                batch["detection_boxes"].numpy(),
+                batch["detection_classes"].numpy(),
+                batch["detection_scores"].numpy(),
+            ):
+                predict_result = []
+                for box, label_class, score in zip(boxes, classes, scores):
+                    predict_result.append(
+                        {
+                            "detection_boxes": Box2d(*box),
+                            "detection_classes": int(label_class),
+                            "detection_scores": float(score),
+                        }
+                    )
+                results.append(predict_result)
         return results
 
 

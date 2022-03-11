@@ -25,8 +25,6 @@ from rikai.spark.sql.codegen.base import unpickle_transform
 
 __all__ = ["PandasDataset"]
 
-from rikai.types import Image
-
 
 class PandasDataset:
     """a Map-style Tensorflow dataset from a :py:class:`pandas.DataFrame` or a
@@ -40,11 +38,11 @@ class PandasDataset:
     """
 
     def __init__(
-        self,
-        df: Union[pd.DataFrame, pd.Series],
-        transform: Optional[Callable] = None,
-        unpickle: bool = False,
-        use_pil: bool = False,
+            self,
+            df: Union[pd.DataFrame, pd.Series],
+            transform: Optional[Callable] = None,
+            unpickle: bool = False,
+            use_pil: bool = False,
     ) -> None:
         assert isinstance(df, (pd.DataFrame, pd.Series))
         self.df = df
@@ -53,6 +51,7 @@ class PandasDataset:
         self.use_pil = use_pil
 
     def data(self, batch_size):
+        batch_size = 2
         print("batch_size:", batch_size)
         print("df type", type(self.df))
         print("df shape shape", self.df.shape)
@@ -66,10 +65,12 @@ class PandasDataset:
         from rikai.types.vision import Image
 
         img = Image.from_pil(arr).to_numpy()
-        # data = tf.data.Dataset.from_tensors(np.array([img,img,img,img,img]))
-        data = tf.data.Dataset.from_tensors(img)
+        print("img shape", img.shape)
+        data = tf.data.Dataset.from_tensors([img, img, img, img, img, img, img, img, img, img])
+        # data = tf.data.Dataset.from_tensors(img)
 
         if self.transform:
             data.map(self.transform)
-        data = data.batch(batch_size)
+        # TODO batch seems not available yet
+        data = data.as_numpy_iterator()
         return data

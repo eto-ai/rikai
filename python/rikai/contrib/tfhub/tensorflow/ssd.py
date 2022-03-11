@@ -35,30 +35,33 @@ class SSDModelType(TensorflowModelType):
     def transform(self) -> Callable:
         return None
 
-    def predict(self, image, *args, **kwargs) -> Any:
-        print("ssd images shape", image.shape)
+    def predict(self, images, *args, **kwargs) -> Any:
+        print("images shape", images.shape)
+        # one image should have shape (height,width,3), multiple image should have shape (number,height,width,3)
+        assert len(images.shape) == 4
         assert (
                 self.model is not None
         ), "model has not been initialized via load_model"
-        # a image have the shape (x,x,3), but, input needs (1,x,x,3)
-        batch = self.model([image])
-
         results = []
-        for boxes, classes, scores in zip(
-                batch["detection_boxes"].numpy(),
-                batch["detection_classes"].numpy(),
-                batch["detection_scores"].numpy(),
-        ):
-            predict_result = []
-            for box, label_class, score in zip(boxes, classes, scores):
-                predict_result.append(
-                    {
-                        "detection_boxes": Box2d(*box),
-                        "detection_classes": int(label_class),
-                        "detection_scores": float(score),
-                    }
-                )
-            results.append(predict_result)
+        for image in images:
+            # one image have the shape (x,x,3), but, input needs (1,x,x,3)
+            batch = self.model([image])
+
+            for boxes, classes, scores in zip(
+                    batch["detection_boxes"].numpy(),
+                    batch["detection_classes"].numpy(),
+                    batch["detection_scores"].numpy(),
+            ):
+                predict_result = []
+                for box, label_class, score in zip(boxes, classes, scores):
+                    predict_result.append(
+                        {
+                            "detection_boxes": Box2d(*box),
+                            "detection_classes": int(label_class),
+                            "detection_scores": float(score),
+                        }
+                    )
+                results.append(predict_result)
         return results
 
 

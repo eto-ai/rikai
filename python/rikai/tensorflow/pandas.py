@@ -70,7 +70,7 @@ class PandasDataset:
                 ret = self.transform(ret)
             return ret
 
-        #TODO I want to use
+        # TODO I want to use
         # `tensors = self.df.map(upickle_convent_transform).to_numpy()`
         # here, but it will cause unintelligible error
         tensors = np.array([upickle_convent_transform(x) for x in self.df])
@@ -78,6 +78,5 @@ class PandasDataset:
         data = tf.data.Dataset.from_tensor_slices(tensors)
         # data = tf.data.Dataset.from_tensors(img)
 
-        # TODO batch seems not available yet
-        data = data.as_numpy_iterator()
+        data = data.batch(batch_size).as_numpy_iterator()
         return data

@@ -73,10 +73,10 @@ def test_ssd(spark: SparkSession):
 
 
 def test_multi_pics_ssd(spark: SparkSession):
-    spark.udf.register("to_image", to_image)
+    spark.udf.register("to_image2", to_image)
     spark.sql(
         f"""
-        CREATE MODEL tfssd
+        CREATE MODEL tfssd2
         MODEL_TYPE ssd
         OPTIONS (device="cpu", batch_size=32)
         USING "tfhub:///tensorflow/ssd_mobilenet_v2/2";
@@ -84,12 +84,12 @@ def test_multi_pics_ssd(spark: SparkSession):
     )
 
     spark.range(10).selectExpr(
-        "id as id", f"to_image('{image_path}') as image"
+        "id as id", f"to_image2('{image_path}') as image"
     ).createOrReplaceTempView("test_view")
 
     result = spark.sql(
         f"""
-    select id, ML_PREDICT(tfssd, image) as preds from test_view
+    select id, ML_PREDICT(tfssd2, image) as preds from test_view
     """
     )
     result.show()

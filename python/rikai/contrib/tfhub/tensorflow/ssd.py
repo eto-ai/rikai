@@ -20,6 +20,8 @@ https://arxiv.org/abs/1512.02325
 
 from typing import Any, Callable, Dict
 
+from tensorflow.python.framework.ops import EagerTensor
+
 from rikai.tensorflow.models import TensorflowModelType
 from rikai.types.geometry import Box2d
 
@@ -36,7 +38,12 @@ class SSDModelType(TensorflowModelType):
     def transform(self) -> Callable:
         return None
 
-    def predict(self, images, *args, **kwargs) -> Any:
+    def predict(self, images: EagerTensor, *args, **kwargs) -> Any:
+        print("images_type:", type(images))
+        print("images_shape:", images.shape)
+        # df shape shape (12,)
+        # images_shape: (1, 5, 1028, 1024, 3)
+        # images_shape: (1, 1028, 1024, 3)
         assert (
             self.model is not None
         ), "model has not been initialized via load_model"

@@ -14,18 +14,22 @@
 
 from pathlib import Path
 
-from pyspark.sql import SparkSession
 import pandas as pd
+from pyspark.sql import SparkSession
 
 from rikai.spark.functions import to_image
-from rikai.types.vision import Image
 from rikai.testing.utils import apply_model_spec
+from rikai.types.vision import Image
 
 work_dir = Path().absolute().parent.parent
 image_path = f"{work_dir}/python/tests/assets/test_image.jpg"
 
 
 def test_ssd_model_type():
+    # inputs_list = [pd.Series(
+    #     [Image(image_path), Image(image_path), Image(image_path), Image(image_path), Image(image_path),
+    #      Image(image_path), Image(image_path), Image(image_path), Image(image_path), Image(image_path),
+    #      Image(image_path), Image(image_path)])]
     inputs_list = [pd.Series(Image(image_path))]
     results_list = apply_model_spec(
         {
@@ -56,3 +60,27 @@ def test_ssd(spark: SparkSession):
     """
     )
     assert result.count() == 1
+
+
+def test_multi_pics_ssd(spark: SparkSession):
+    spark.udf.register("to_image", to_image)
+    spark.sql(
+        f"""
+        CREATE MODEL tfssd
+        MODEL_TYPE ssd
+        OPTIONS (device="cpu", batch_size=32)
+        USING "tfhub:///tensorflow/ssd_mobilenet_v2/2";
+        """
+    )
+
+    spark.range(10).selectExpr(
+        "id as id", f"to_image('{image_path}') as image"
+    ).createOrReplaceTempView("test_view")
+
+    result = spark.sql(
+        f"""
+    select id, ML_PREDICT(tfssd, image) as preds from test_view
+    """
+    )
+    result.show()
+    assert result.count() == 10

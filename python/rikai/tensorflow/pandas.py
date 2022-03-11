@@ -1,4 +1,4 @@
-#  Copyright 2021 Rikai Authors
+#  Copyright 2022 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -53,13 +53,21 @@ class PandasDataset:
         self.use_pil = use_pil
 
     def data(self, batch_size):
-
+        print("batch_size:", batch_size)
+        print("df type", type(self.df))
+        print("df shape shape", self.df.shape)
         arr = self.df[0]
+        print("arr type", arr)
         if self.unpickle:
             arr = unpickle_transform(arr)
         arr = convert_tensor(arr, use_pil=self.use_pil)
+        import numpy as np
 
-        data = tf.data.Dataset.from_tensors(arr)
+        from rikai.types.vision import Image
+
+        img = Image.from_pil(arr).to_numpy()
+        # data = tf.data.Dataset.from_tensors(np.array([img,img,img,img,img]))
+        data = tf.data.Dataset.from_tensors(img)
 
         if self.transform:
             data.map(self.transform)

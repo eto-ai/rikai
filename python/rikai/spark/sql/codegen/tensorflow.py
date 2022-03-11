@@ -78,14 +78,17 @@ def _generate(payload: ModelSpec, is_udf: bool = True):
 
             data = PandasDataset(
                 df, model.transform(), unpickle=is_udf, use_pil=True
-            ).data(batch_size)
+            ).batch(batch_size)
 
             results = []
             for batch in data:
+                print("one batch!!!")
+                print("batch shape", batch.shape)
                 predictions = model(batch)
                 results.extend(
                     [_pickler.dumps(p) if is_udf else p for p in predictions]
                 )
+            print("out results size", len(results))
             yield pd.Series(results)
 
     if is_udf:

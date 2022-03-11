@@ -51,13 +51,13 @@ class PandasDataset:
         self.unpickle = unpickle
         self.use_pil = use_pil
 
-    def data(self, batch_size):
+    def batch(self, batch_size):
         print("batch_size:", batch_size)
         print("df type", type(self.df))
         print("df shape shape", self.df.shape)
 
         def upickle_convent_transform(entity):
-            print("arr type", entity)
+            print("arr type", type(entity))
             if self.unpickle:
                 entity = unpickle_transform(entity)
             entity = convert_tensor(entity, use_pil=self.use_pil)
@@ -66,31 +66,18 @@ class PandasDataset:
 
             ret = Image.from_pil(entity).to_numpy()
             print("img shape", ret.shape)
-            # if self.transform:
-            #     img = self.transform(img)
+            if self.transform:
+                ret = self.transform(ret)
             return ret
 
-        tensors = self.df.map(upickle_convent_transform).to_numpy()
+        #TODO I want to use
+        # `tensors = self.df.map(upickle_convent_transform).to_numpy()`
+        # here, but it will cause unintelligible error
+        tensors = np.array([upickle_convent_transform(x) for x in self.df])
 
-        arr = self.df[0]
-        print("arr type", arr)
-        if self.unpickle:
-            arr = unpickle_transform(arr)
-        arr = convert_tensor(arr, use_pil=self.use_pil)
-
-        from rikai.types.vision import Image
-
-        img = Image.from_pil(arr).to_numpy()
-        print("img shape", img.shape)
-        tensors2 = np.array([img, img, img])
-        print("tensors shape", tensors.shape)
-        print("tensors2 shape", tensors2.shape)
-        assert np.array_equal(tensors, tensors2)
-        data = tf.data.Dataset.from_tensors(tensors)
+        data = tf.data.Dataset.from_tensor_slices(tensors)
         # data = tf.data.Dataset.from_tensors(img)
 
-        if self.transform:
-            data.map(self.transform)
         # TODO batch seems not available yet
         data = data.as_numpy_iterator()
         return data

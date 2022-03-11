@@ -26,9 +26,7 @@ image_path = f"{work_dir}/python/tests/assets/test_image.jpg"
 
 
 def test_ssd_model_type():
-    inputs_list = [pd.Series(
-        [Image(image_path), Image(image_path), Image(image_path)])]
-    # inputs_list = [pd.Series(Image(image_path))]
+    inputs_list = [pd.Series(Image(image_path))]
     results_list = apply_model_spec(
         {
             "name": "tfssd",
@@ -41,6 +39,20 @@ def test_ssd_model_type():
     series = results_list[0]
     assert len(series[0]) == 100
 
+def test_ssd_model_type2():
+    inputs_list = [pd.Series(
+        [Image(image_path), Image(image_path), Image(image_path),Image(image_path), Image(image_path), Image(image_path)])]
+    results_list = apply_model_spec(
+        {
+            "name": "tfssd",
+            "uri": f"tfhub:///tensorflow/ssd_mobilenet_v2/2",
+            "modelType": "ssd",
+        },
+        inputs_list,
+    )
+    assert len(results_list) == 1
+    series = results_list[0]
+    assert len(series[0]) == 100
 
 def test_ssd(spark: SparkSession):
     spark.udf.register("to_image", to_image)

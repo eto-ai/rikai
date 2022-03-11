@@ -31,9 +31,9 @@ jupyter = ["matplotlib", "jupyterlab"]
 aws = ["boto3", "botocore"]
 gcp = ["gcsfs"]
 docs = ["sphinx"]
-video = ["ffmpeg-python", "scenedetect"]
+video = ["ffmpeg-python", "scenedetect<0.6"]
 youtube = ["pafy", "youtube_dl"]
-mlflow = ["mlflow==1.22"]
+mlflow = ["mlflow==1.24"]
 all = (
     sklearn
     + torch

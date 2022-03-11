@@ -26,14 +26,29 @@ import pytest
 import torch
 import torchvision
 from mlflow.tracking import MlflowClient
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, Row
 
 import rikai
 from rikai.contrib.torch.detections import OUTPUT_SCHEMA
-
-# Rikai
+from rikai.types.vision import Image
 from rikai.spark.utils import get_default_jar_version, init_spark_session
 from rikai.spark.sql.codegen.mlflow_registry import CONF_MLFLOW_TRACKING_URI
+
+
+@pytest.fixture(scope="session")
+def two_flickr_images() -> list:
+    return [
+        Image.read(uri)
+        for uri in [
+            "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg",
+            "http://farm4.staticflickr.com/3726/9457732891_87c6512b62_z.jpg",
+        ]
+    ]
+
+
+@pytest.fixture(scope="session")
+def two_flickr_rows(two_flickr_images: list) -> list:
+    return [Row(image=image) for image in two_flickr_images]
 
 
 @pytest.fixture(scope="session")

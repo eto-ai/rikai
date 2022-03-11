@@ -52,23 +52,23 @@ def test_modelspec(mlflow_client: MlflowClient):
 
 @pytest.mark.timeout(200)
 def test_mlflow_model_from_model_version(
-    spark: SparkSession, mlflow_client: MlflowClient
+    spark: SparkSession, mlflow_client: MlflowClient, two_flickr_rows: list
 ):
     # peg to a particular version of a model
     spark.sql("CREATE MODEL resnet_m_fizz USING 'mlflow:/rikai-test/1'")
-    check_ml_predict(spark, "resnet_m_fizz")
+    check_ml_predict(spark, "resnet_m_fizz", two_flickr_rows)
 
     # use the latest version in a given stage (omitted means none)
     spark.sql("CREATE MODEL resnet_m_buzz USING 'mlflow:/rikai-test'")
-    check_ml_predict(spark, "resnet_m_buzz")
+    check_ml_predict(spark, "resnet_m_buzz", two_flickr_rows)
 
 
 @pytest.mark.timeout(200)
 def test_mlflow_model_without_custom_logger(
-    spark: SparkSession, mlflow_client: MlflowClient
+    spark: SparkSession, mlflow_client: MlflowClient, two_flickr_rows: list
 ):
     spark.sql("CREATE MODEL vanilla_ice USING 'mlflow:/vanilla-mlflow/1'")
-    check_ml_predict(spark, "vanilla_ice")
+    check_ml_predict(spark, "vanilla_ice", two_flickr_rows)
 
     schema = OUTPUT_SCHEMA
     pre_processing = (
@@ -89,7 +89,7 @@ def test_mlflow_model_without_custom_logger(
             "USING 'mlflow:/vanilla-mlflow-no-tags/1'"
         ).format(pre_processing, post_processing, schema)
     )
-    check_ml_predict(spark, "vanilla_fire")
+    check_ml_predict(spark, "vanilla_fire", two_flickr_rows)
 
     spark.sql(
         (
@@ -101,7 +101,7 @@ def test_mlflow_model_without_custom_logger(
             "USING 'mlflow:/vanilla-mlflow-wrong-tags/1'"
         ).format(pre_processing, post_processing, schema)
     )
-    check_ml_predict(spark, "vanilla_fixer")
+    check_ml_predict(spark, "vanilla_fixer", two_flickr_rows)
 
 
 @pytest.mark.timeout(600)
@@ -122,7 +122,10 @@ def test_mlflow_model_error_handling(
 
 
 def test_mlflow_model_type(
-    tmp_path: Path, resnet_model_uri: str, spark: SparkSession
+    tmp_path: Path,
+    resnet_model_uri: str,
+    spark: SparkSession,
+    two_flickr_rows: list,
 ):
     tmp_path.mkdir(parents=True, exist_ok=True)
     tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
@@ -138,4 +141,4 @@ def test_mlflow_model_type(
         )
         spark.conf.set(CONF_MLFLOW_TRACKING_URI, tracking_uri)
         spark.sql(f"CREATE MODEL {name} USING 'mlflow:/{name}'")
-        check_ml_predict(spark, name)
+        check_ml_predict(spark, name, two_flickr_rows)

@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from pyspark.sql import Row, SparkSession
+from pyspark.sql import SparkSession
 from pyspark.sql.types import (
     ArrayType,
     FloatType,
@@ -23,7 +23,6 @@ from pyspark.sql.types import (
 
 from rikai.spark.sql.schema import parse_schema
 from rikai.spark.types import Box2dType
-from rikai.types import Image
 
 
 def check_ml_predict(
@@ -37,7 +36,6 @@ def check_ml_predict(
     predictions = spark.sql(
         f"SELECT ML_PREDICT({model_name}, image) as predictions FROM df"
     )
-    predictions.show()
     assert predictions.schema == StructType(
         [
             StructField(
@@ -67,5 +65,4 @@ def check_ml_predict(
             )
         ]
     )
-
     assert predictions.count() == 2

@@ -134,10 +134,9 @@ def mlflow_tracking_uri(mlflow_client_with_tracking_uri):
 
 
 @pytest.fixture(scope="module")
-def spark(mlflow_tracking_uri: str) -> SparkSession:
-    print(f"ml flow tracking uri for spark: ${mlflow_tracking_uri}")
+def gcs_spark(mlflow_tracking_uri: str) -> SparkSession:
+    print(f"mlflow tracking uri for spark: ${mlflow_tracking_uri}")
     rikai_version = get_default_jar_version(use_snapshot=True)
-    hadoop_version = "3.2.0"  # TODO(lei): get hadoop version
 
     return init_spark_session(
         dict(
@@ -146,7 +145,6 @@ def spark(mlflow_tracking_uri: str) -> SparkSession:
                     "spark.jars.packages",
                     ",".join(
                         [
-                            f"org.apache.hadoop:hadoop-aws:{hadoop_version}",
                             "ai.eto:rikai_2.12:{}".format(rikai_version),
                         ]
                     ),
@@ -172,6 +170,46 @@ def spark(mlflow_tracking_uri: str) -> SparkSession:
                     "spark.hadoop.google.cloud.auth.service.account.enable",
                     "true",
                 ),
+                (
+                    CONF_MLFLOW_TRACKING_URI,
+                    mlflow_tracking_uri,
+                ),
+                (
+                    "spark.rikai.sql.ml.catalog.impl",
+                    "ai.eto.rikai.sql.model.SimpleCatalog",
+                ),
+            ]
+        )
+    )
+
+
+@pytest.fixture(scope="module")
+def aws_spark(mlflow_tracking_uri: str) -> SparkSession:
+    print(f"mlflow tracking uri for spark: ${mlflow_tracking_uri}")
+    rikai_version = get_default_jar_version(use_snapshot=True)
+    hadoop_version = "3.2.0"  # TODO(lei): get hadoop version
+
+    return init_spark_session(
+        dict(
+            [
+                (
+                    "spark.jars.packages",
+                    ",".join(
+                        [
+                            f"org.apache.hadoop:hadoop-aws:{hadoop_version}",
+                            "ai.eto:rikai_2.12:{}".format(rikai_version),
+                        ]
+                    ),
+                ),
+                ("spark.port.maxRetries", 128),
+                (
+                    "spark.rikai.sql.ml.registry.test.impl",
+                    "ai.eto.rikai.sql.model.testing.TestRegistry",
+                ),
+                (
+                    "spark.hadoop.google.cloud.auth.service.account.enable",
+                    "true",
+                ),
                 ("com.amazonaws.services.s3.enableV4", "true"),
                 (
                     "fs.s3a.aws.credentials.provider",
@@ -184,6 +222,40 @@ def spark(mlflow_tracking_uri: str) -> SparkSession:
                 ),
                 ("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem"),
                 ("spark.hadoop.fs.s3a.access.key", os.environ.get("AWS")),
+                (
+                    CONF_MLFLOW_TRACKING_URI,
+                    mlflow_tracking_uri,
+                ),
+                (
+                    "spark.rikai.sql.ml.catalog.impl",
+                    "ai.eto.rikai.sql.model.SimpleCatalog",
+                ),
+            ]
+        )
+    )
+
+
+@pytest.fixture(scope="module")
+def spark(mlflow_tracking_uri: str) -> SparkSession:
+    print(f"mlflow tracking uri for spark: ${mlflow_tracking_uri}")
+    rikai_version = get_default_jar_version(use_snapshot=True)
+
+    return init_spark_session(
+        dict(
+            [
+                (
+                    "spark.jars.packages",
+                    ",".join(
+                        [
+                            "ai.eto:rikai_2.12:{}".format(rikai_version),
+                        ]
+                    ),
+                ),
+                ("spark.port.maxRetries", 128),
+                (
+                    "spark.rikai.sql.ml.registry.test.impl",
+                    "ai.eto.rikai.sql.model.testing.TestRegistry",
+                ),
                 (
                     CONF_MLFLOW_TRACKING_URI,
                     mlflow_tracking_uri,

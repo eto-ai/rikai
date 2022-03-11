@@ -25,18 +25,17 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LinearRegression
 
 import rikai
-from rikai.spark.sql.codegen.mlflow_registry import CONF_MLFLOW_TRACKING_URI
 
 
-def test_sklearn_linear_regression(tmp_path: Path, spark: SparkSession):
+def test_sklearn_linear_regression(
+    mlflow_tracking_uri: str, spark: SparkSession
+):
     # prepare training data
     X = np.array([[1, 1], [1, 2], [2, 2], [2, 3]])
     y = np.dot(X, np.array([1, 2])) + 3
     model = LinearRegression()
 
-    tmp_path.mkdir(parents=True, exist_ok=True)
-    tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
-    mlflow.set_tracking_uri(tracking_uri)
+    mlflow.set_tracking_uri(mlflow_tracking_uri)
     with mlflow.start_run():
         model.fit(X, y)
 
@@ -49,7 +48,6 @@ def test_sklearn_linear_regression(tmp_path: Path, spark: SparkSession):
             registered_model_name=reg_model_name,
         )
 
-        spark.conf.set(CONF_MLFLOW_TRACKING_URI, tracking_uri)
         spark.sql(
             f"""
             CREATE MODEL {model_name} USING 'mlflow:///{reg_model_name}';
@@ -68,7 +66,7 @@ def test_sklearn_linear_regression(tmp_path: Path, spark: SparkSession):
         assert result.count() == 2
 
 
-def test_sklearn_random_forest(tmp_path: Path, spark: SparkSession):
+def test_sklearn_random_forest(mlflow_tracking_uri: str, spark: SparkSession):
     X, y = make_classification(
         n_samples=1000,
         n_features=4,
@@ -81,9 +79,7 @@ def test_sklearn_random_forest(tmp_path: Path, spark: SparkSession):
     # train a model
     model = RandomForestClassifier(max_depth=2, random_state=0)
 
-    tmp_path.mkdir(parents=True, exist_ok=True)
-    tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
-    mlflow.set_tracking_uri(tracking_uri)
+    mlflow.set_tracking_uri(mlflow_tracking_uri)
     with mlflow.start_run():
         model.fit(X, y)
 
@@ -96,7 +92,6 @@ def test_sklearn_random_forest(tmp_path: Path, spark: SparkSession):
             registered_model_name=reg_model_name,
         )
 
-        spark.conf.set(CONF_MLFLOW_TRACKING_URI, tracking_uri)
         spark.sql(
             f"""
             CREATE MODEL {model_name} USING 'mlflow:///{reg_model_name}';
@@ -115,7 +110,6 @@ def test_sklearn_random_forest(tmp_path: Path, spark: SparkSession):
             from tbl_X
             """
         )
-        result.show()
         assert result.schema == StructType([StructField("pred", LongType())])
         assert (
             result.collect()
@@ -123,13 +117,11 @@ def test_sklearn_random_forest(tmp_path: Path, spark: SparkSession):
         )
 
 
-def test_sklearn_pca(tmp_path: Path, spark: SparkSession):
+def test_sklearn_pca(mlflow_tracking_uri: str, spark: SparkSession):
     X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
     model = PCA(n_components=2)
 
-    tmp_path.mkdir(parents=True, exist_ok=True)
-    tracking_uri = "sqlite:///" + str(tmp_path / "tracking.db")
-    mlflow.set_tracking_uri(tracking_uri)
+    mlflow.set_tracking_uri(mlflow_tracking_uri)
     with mlflow.start_run():
         model.fit(X)
         model_name = "sklearn_pca"
@@ -140,7 +132,6 @@ def test_sklearn_pca(tmp_path: Path, spark: SparkSession):
             schema="array<float>",
             registered_model_name=reg_model_name,
         )
-        spark.conf.set(CONF_MLFLOW_TRACKING_URI, tracking_uri)
         spark.sql(
             f"""
             CREATE MODEL {model_name} USING 'mlflow:///{reg_model_name}';
@@ -151,7 +142,6 @@ def test_sklearn_pca(tmp_path: Path, spark: SparkSession):
             select ML_PREDICT({model_name}, array(3, 2)) as pred
             """
         )
-        result.show(1, vertical=False, truncate=False)
         assert (
             pytest.approx(result.head().pred) == model.transform([[3, 2]])[0]
         )

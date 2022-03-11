@@ -40,7 +40,7 @@ class SSDModelType(TensorflowModelType):
         # one image should have shape (height,width,3), multiple image should have shape (number,height,width,3)
         assert len(images.shape) == 4
         assert (
-                self.model is not None
+            self.model is not None
         ), "model has not been initialized via load_model"
         results = []
         for image in images:
@@ -48,9 +48,9 @@ class SSDModelType(TensorflowModelType):
             batch = self.model([image])
 
             for boxes, classes, scores in zip(
-                    batch["detection_boxes"].numpy(),
-                    batch["detection_classes"].numpy(),
-                    batch["detection_scores"].numpy(),
+                batch["detection_boxes"].numpy(),
+                batch["detection_classes"].numpy(),
+                batch["detection_scores"].numpy(),
             ):
                 predict_result = []
                 for box, label_class, score in zip(boxes, classes, scores):

@@ -39,11 +39,11 @@ class PandasDataset:
     """
 
     def __init__(
-            self,
-            df: pd.Series,
-            transform: Optional[Callable] = None,
-            unpickle: bool = False,
-            use_pil: bool = False,
+        self,
+        df: pd.Series,
+        transform: Optional[Callable] = None,
+        unpickle: bool = False,
+        use_pil: bool = False,
     ) -> None:
         assert isinstance(df, pd.Series)
         self.df = df

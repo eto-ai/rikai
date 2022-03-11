@@ -26,11 +26,9 @@ image_path = f"{work_dir}/python/tests/assets/test_image.jpg"
 
 
 def test_ssd_model_type():
-    # inputs_list = [pd.Series(
-    #     [Image(image_path), Image(image_path), Image(image_path), Image(image_path), Image(image_path),
-    #      Image(image_path), Image(image_path), Image(image_path), Image(image_path), Image(image_path),
-    #      Image(image_path), Image(image_path)])]
-    inputs_list = [pd.Series(Image(image_path))]
+    inputs_list = [pd.Series(
+        [Image(image_path), Image(image_path), Image(image_path)])]
+    # inputs_list = [pd.Series(Image(image_path))]
     results_list = apply_model_spec(
         {
             "name": "tfssd",

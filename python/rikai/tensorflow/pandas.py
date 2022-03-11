@@ -13,9 +13,10 @@
 #  limitations under the License.
 
 # Standard
-from typing import Callable, Optional, Union
+from typing import Callable, Optional
 
 # Third Party
+import numpy as np
 import pandas as pd
 import tensorflow as tf
 
@@ -39,34 +40,53 @@ class PandasDataset:
 
     def __init__(
             self,
-            df: Union[pd.DataFrame, pd.Series],
+            df: pd.Series,
             transform: Optional[Callable] = None,
             unpickle: bool = False,
             use_pil: bool = False,
     ) -> None:
-        assert isinstance(df, (pd.DataFrame, pd.Series))
+        assert isinstance(df, pd.Series)
         self.df = df
         self.transform = transform
         self.unpickle = unpickle
         self.use_pil = use_pil
 
     def data(self, batch_size):
-        batch_size = 2
         print("batch_size:", batch_size)
         print("df type", type(self.df))
         print("df shape shape", self.df.shape)
+
+        def upickle_convent_transform(entity):
+            print("arr type", entity)
+            if self.unpickle:
+                entity = unpickle_transform(entity)
+            entity = convert_tensor(entity, use_pil=self.use_pil)
+
+            from rikai.types.vision import Image
+
+            ret = Image.from_pil(entity).to_numpy()
+            print("img shape", ret.shape)
+            # if self.transform:
+            #     img = self.transform(img)
+            return ret
+
+        tensors = self.df.map(upickle_convent_transform).to_numpy()
+
         arr = self.df[0]
         print("arr type", arr)
         if self.unpickle:
             arr = unpickle_transform(arr)
         arr = convert_tensor(arr, use_pil=self.use_pil)
-        import numpy as np
 
         from rikai.types.vision import Image
 
         img = Image.from_pil(arr).to_numpy()
         print("img shape", img.shape)
-        data = tf.data.Dataset.from_tensors([img, img, img, img, img, img, img, img, img, img])
+        tensors2 = np.array([img, img, img])
+        print("tensors shape", tensors.shape)
+        print("tensors2 shape", tensors2.shape)
+        assert np.array_equal(tensors, tensors2)
+        data = tf.data.Dataset.from_tensors(tensors)
         # data = tf.data.Dataset.from_tensors(img)
 
         if self.transform:

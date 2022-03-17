@@ -131,6 +131,7 @@ class SparkUDFModel(
         )
       case None => sparkFunc
     }
+    // Hack the return column name as the model name
     Alias(finalFunc, name)()
   }
 }

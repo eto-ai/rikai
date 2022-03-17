@@ -21,7 +21,7 @@ import io.circe.syntax._
 import io.circe.generic.encoding.DerivedAsObjectEncoder._
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.UnresolvedFunction
-import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.catalyst.expressions.{Alias, Expression}
 
 import scala.collection.JavaConverters.mapAsJavaMap
 
@@ -122,7 +122,7 @@ class SparkUDFModel(
       innerArgs,
       isDistinct = false
     )
-    postFuncName match {
+    val finalFunc = postFuncName match {
       case Some(n: String) =>
         UnresolvedFunction(
           new FunctionIdentifier(n),
@@ -131,5 +131,6 @@ class SparkUDFModel(
         )
       case None => sparkFunc
     }
+    Alias(finalFunc, name)()
   }
 }

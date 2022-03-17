@@ -120,7 +120,7 @@ class MLPredictTest
       spark
         .createDataFrame(
           Seq(
-            (1, new Image(getClass.getResource("/000000304150.jpg").getPath)),
+            (1, new Image(getClass.getResource("/000000304150.jpg").getPath))
           )
         )
         .toDF("image_id", "image")

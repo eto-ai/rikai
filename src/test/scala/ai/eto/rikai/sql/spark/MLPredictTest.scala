@@ -108,4 +108,63 @@ class MLPredictTest
       Files.delete(specYamlPath)
     }
   }
+
+  test("Test Column name") {
+    val specYamlPath = Files.createTempFile("spec", ".yml")
+    try {
+      Files.write(specYamlPath, resnetSpecYaml.getBytes)
+      spark.sql(
+        s"CREATE MODEL resnet USING 'file://${specYamlPath}'"
+      )
+
+      spark
+        .createDataFrame(
+          Seq(
+            (1, new Image(getClass.getResource("/000000304150.jpg").getPath))
+          )
+        )
+        .toDF("image_id", "image")
+        .createOrReplaceTempView("images")
+
+      val df = spark.sql(
+        """SELECT
+          |ML_PREDICT(resnet, image), ML_PREDICT(resnet, image) AS pred
+          |FROM images""".stripMargin
+      )
+      df.printSchema()
+      df.show()
+      assert(
+        df.schema == StructType(
+          Seq(
+            StructField(
+              "resnet",
+              ArrayType(
+                StructType(
+                  Seq(
+                    StructField("box", Box2dType),
+                    StructField("score", FloatType),
+                    StructField("label_id", IntegerType)
+                  )
+                )
+              )
+            ),
+            StructField(
+              "pred",
+              ArrayType(
+                StructType(
+                  Seq(
+                    StructField("box", Box2dType),
+                    StructField("score", FloatType),
+                    StructField("label_id", IntegerType)
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    } finally {
+      Files.delete(specYamlPath)
+    }
+  }
 }

@@ -52,12 +52,8 @@ class PandasDataset:
         self.use_pil = use_pil
 
     def batch(self, batch_size):
-        print("batch_size:", batch_size)
-        print("df type", type(self.df))
-        print("df shape shape", self.df.shape)
 
         def upickle_convent_transform(entity):
-            print("arr type", type(entity))
             if self.unpickle:
                 entity = unpickle_transform(entity)
             entity = convert_tensor(entity, use_pil=self.use_pil)
@@ -65,7 +61,6 @@ class PandasDataset:
             from rikai.types.vision import Image
 
             ret = Image.from_pil(entity).to_numpy()
-            print("img shape", ret.shape)
             if self.transform:
                 ret = self.transform(ret)
             return ret

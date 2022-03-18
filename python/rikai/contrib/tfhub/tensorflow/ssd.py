@@ -37,7 +37,6 @@ class SSDModelType(TensorflowModelType):
         return None
 
     def predict(self, images, *args, **kwargs) -> Any:
-        print("images shape", images.shape)
         # one image should have shape (height,width,3),
         # multiple image should have shape (number,height,width,3)
         assert len(images.shape) == 4

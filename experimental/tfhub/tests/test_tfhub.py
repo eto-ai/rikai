@@ -53,7 +53,7 @@ def test_ssd_model_type2():
             ]
         )
     ]
-    results_list = apply_model_spec(
+    results_iter = apply_model_spec(
         {
             "name": "tfssd",
             "uri": f"tfhub:///tensorflow/ssd_mobilenet_v2/2",
@@ -61,8 +61,10 @@ def test_ssd_model_type2():
         },
         inputs_list,
     )
-    assert len(results_list) == 1
-    series = results_list[0]
+
+    assert len(results_iter) == 1
+    series = results_iter[0]
+    assert series.shape[0] == 6
     assert len(series[0]) == 100
 
 

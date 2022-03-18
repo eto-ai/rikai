@@ -23,14 +23,14 @@ from rikai.types.vision import Image
 
 work_dir = Path().absolute().parent.parent
 image_path = f"{work_dir}/python/tests/assets/test_image.jpg"
-
+from rikai.contrib.tfhub.tensorflow.ssd import TF_HUB_URL as SSD_HUB_URL
 
 def test_ssd_model_type():
     inputs_list = [pd.Series(Image(image_path))]
     results_list = apply_model_spec(
         {
             "name": "tfssd",
-            "uri": f"tfhub:///tensorflow/ssd_mobilenet_v2/2",
+            "uri": SSD_HUB_URL,
             "modelType": "ssd",
         },
         inputs_list,
@@ -56,7 +56,7 @@ def test_ssd_model_type2():
     results_iter = apply_model_spec(
         {
             "name": "tfssd",
-            "uri": f"tfhub:///tensorflow/ssd_mobilenet_v2/2",
+            "uri": SSD_HUB_URL,
             "modelType": "ssd",
         },
         inputs_list,
@@ -74,7 +74,7 @@ def test_ssd(spark: SparkSession):
         CREATE MODEL tfssd
         MODEL_TYPE ssd
         OPTIONS (device="cpu", batch_size=32)
-        USING "tfhub:///tensorflow/ssd_mobilenet_v2/2";
+        USING "{SSD_HUB_URL}";
         """
     )
     result = spark.sql(
@@ -91,7 +91,7 @@ def test_multi_pics_ssd(spark: SparkSession):
         CREATE MODEL tfssd2
         MODEL_TYPE ssd
         OPTIONS (device="cpu", batch_size=32)
-        USING "tfhub:///tensorflow/ssd_mobilenet_v2/2";
+        USING "{SSD_HUB_URL}";
         """
     )
 

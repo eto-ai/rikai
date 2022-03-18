@@ -69,7 +69,6 @@ def test_ssd_model_type2():
 
 
 def test_ssd(spark: SparkSession):
-    spark.udf.register("to_image", to_image)
     spark.sql(
         f"""
         CREATE MODEL tfssd
@@ -87,7 +86,6 @@ def test_ssd(spark: SparkSession):
 
 
 def test_multi_pics_ssd(spark: SparkSession):
-    spark.udf.register("to_image2", to_image)
     spark.sql(
         f"""
         CREATE MODEL tfssd2
@@ -98,7 +96,7 @@ def test_multi_pics_ssd(spark: SparkSession):
     )
 
     spark.range(10).selectExpr(
-        "id as id", f"to_image2('{image_path}') as image"
+        "id as id", f"to_image('{image_path}') as image"
     ).createOrReplaceTempView("test_view")
 
     result = spark.sql(

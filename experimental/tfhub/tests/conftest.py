@@ -15,14 +15,14 @@
 import pytest
 from pyspark.sql import SparkSession
 
+from rikai.spark.functions import to_image
 from rikai.spark.utils import get_default_jar_version, init_spark_session
 
 
 @pytest.fixture(scope="module")
 def spark() -> SparkSession:
     rikai_version = get_default_jar_version(use_snapshot=True)
-
-    return init_spark_session(
+    spark = init_spark_session(
         dict(
             [
                 (
@@ -40,3 +40,6 @@ def spark() -> SparkSession:
             ]
         )
     )
+    spark.udf.register("to_image", to_image)
+
+    return spark

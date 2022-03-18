@@ -25,6 +25,7 @@ work_dir = Path().absolute().parent.parent
 image_path = f"{work_dir}/python/tests/assets/test_image.jpg"
 from rikai.contrib.tfhub.tensorflow.ssd import TF_HUB_URL as SSD_HUB_URL
 
+
 def test_ssd_model_type():
     inputs_list = [pd.Series(Image(image_path))]
     results_list = apply_model_spec(

@@ -52,7 +52,6 @@ class PandasDataset:
         self.use_pil = use_pil
 
     def batch(self, batch_size):
-
         def upickle_convent_transform(entity):
             if self.unpickle:
                 entity = unpickle_transform(entity)

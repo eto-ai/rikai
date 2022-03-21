@@ -66,7 +66,7 @@ def gen_schema_spec(required_cols):
 
 
 SPEC_PAYLOAD_SCHEMA = gen_schema_spec(["uri"])
-BOOTSTRAPPED_SPEC_SCHEMA = gen_schema_spec(["flavor", "type"])
+NOURI_SPEC_SCHEMA = gen_schema_spec(["flavor", "type"])
 
 
 def _identity(x):
@@ -208,13 +208,24 @@ class ModelSpec(ABC):
 class ModelType(ABC):
     """Declare a Rikai-compatible Model Type."""
 
-    def bootstrappable(self) -> bool:
-        """Return if it is a bootstrappable model type"""
+    def pretrained(self) -> bool:
+        """Return if it is a pretrained model type
+
+        WARNING: A pretrained model type must implement the
+        load_pretrained_model method
+        """
         return False
 
-    def bootstrap(self) -> Any:
-        """Load the model without specification"""
-        return None
+    def load_pretrained_model(self) -> Any:
+        """Load the pretrained model without any extra info
+
+        WARNING: it is only used for developing purpose! The standard python
+        way provided by 3rd-party libraries is also not trustworthy. Please
+        use the model registry like MLflow for production usage.
+        """
+        raise NotImplementedError(
+            "Please implement it when pretrained is True"
+        )
 
     @abstractmethod
     def load_model(self, spec: ModelSpec, **kwargs):

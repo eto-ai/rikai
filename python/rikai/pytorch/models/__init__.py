@@ -19,7 +19,7 @@ from typing import Optional
 import torch
 
 from rikai.spark.sql.model import ModelSpec, ModelType
-from rikai.spark.sql.codegen.bootstrap import BootstrapModelSpec
+from rikai.spark.sql.codegen.nouri import NoURIModelSpec
 
 __all__ = ["TorchModelType"]
 
@@ -32,11 +32,11 @@ class TorchModelType(ModelType, ABC):
         self.spec: Optional[ModelSpec] = None
 
     def load_model(self, spec: ModelSpec, **kwargs):
-        if isinstance(spec, BootstrapModelSpec):
-            if self.bootstrappable():
-                self.model = self.bootstrap()
+        if isinstance(spec, NoURIModelSpec):
+            if self.pretrained():
+                self.model = self.load_pretrained_model()
             else:
-                raise RuntimeError("ModelType is not bootstrappable")
+                raise RuntimeError("Not a pretrained ModelType, URI required")
         else:
             self.model = spec.load_model()
         self.model.eval()

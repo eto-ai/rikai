@@ -14,12 +14,12 @@
 
 from rikai.spark.sql.codegen.base import ModelSpec, Registry
 from rikai.spark.sql.exceptions import SpecError
-from rikai.spark.sql.model import BOOTSTRAPPED_SPEC_SCHEMA
+from rikai.spark.sql.model import NOURI_SPEC_SCHEMA
 
-__all__ = ["BootstrapRegistry"]
+__all__ = ["NoURIRegistry"]
 
 
-class BootstrapModelSpec(ModelSpec):
+class NoURIModelSpec(ModelSpec):
     def __init__(
         self,
         raw_spec: "ModelSpec",
@@ -38,21 +38,21 @@ class BootstrapModelSpec(ModelSpec):
         super().__init__(spec, validate=validate)
 
     def validate(self):
-        super().validate(BOOTSTRAPPED_SPEC_SCHEMA)
-        if not self.model_type.bootstrappable():
-            msg = "ModelType must be bootstrappable if no URI is specified"
+        super().validate(NOURI_SPEC_SCHEMA)
+        if not self.model_type.pretrained():
+            msg = "ModelType must be pretrained if no URI is specified"
             raise SpecError(msg)
 
     def load_model(self):
         raise RuntimeError("BootstrapModelSpec does not load model")
 
 
-class BootstrapRegistry(Registry):
-    """Bootrapped Model Registry"""
+class NoURIRegistry(Registry):
+    """Model Registry without URI"""
 
     def __repr__(self):
-        return "BootstrapRegistry"
+        return "NoURIRegistry"
 
     def make_model_spec(self, raw_spec: dict):
-        spec = BootstrapModelSpec(raw_spec)
+        spec = NoURIModelSpec(raw_spec)
         return spec

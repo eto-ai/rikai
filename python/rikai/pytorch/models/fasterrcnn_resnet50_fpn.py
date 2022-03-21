@@ -19,10 +19,10 @@ __all__ = ["MODEL_TYPE"]
 
 
 class FasterRCNNModelType(ObjectDetectionModelType):
-    def bootstrappable(self) -> bool:
+    def pretrained(self) -> bool:
         return True
 
-    def bootstrap(self):
+    def load_pretrained_model(self):
         return torchvision.models.detection.fasterrcnn_resnet50_fpn()
 
     def __init__(self):

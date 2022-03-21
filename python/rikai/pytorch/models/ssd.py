@@ -19,10 +19,10 @@ __all__ = ["MODEL_TYPE"]
 
 
 class SSDModelType(ObjectDetectionModelType):
-    def bootstrappable(self) -> bool:
+    def pretrained(self) -> bool:
         return True
 
-    def bootstrap(self):
+    def load_pretrained_model(self):
         return torchvision.models.detection.ssd.ssd300_vgg16()
 
     def __init__(self):

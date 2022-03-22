@@ -20,8 +20,8 @@ from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql.functions import pandas_udf
 from pyspark.sql.types import BinaryType
 
-from rikai.pytorch.pandas import PandasDataset
 from rikai.spark.sql.model import ModelSpec
+from rikai.tensorflow.pandas import PandasDataset
 from rikai.types import Image
 
 DEFAULT_BATCH_SIZE = 4
@@ -76,17 +76,9 @@ def _generate(payload: ModelSpec, is_udf: bool = True):
             if signature is None:
                 signature = infer_output_signature(df.iloc[0], is_udf)
 
-            ds = PandasDataset(df, unpickle=is_udf, use_pil=True)
-            data = tf.data.Dataset.from_generator(
-                ds,
-                output_signature=tf.TensorSpec(
-                    shape=(None, None, 3), dtype=tf.uint8, name="input_tensor"
-                ),
-            )
-
-            if model.transform():
-                data = data.map(model.transform())
-            data = data.batch(batch_size)
+            data = PandasDataset(
+                df, model.transform(), unpickle=is_udf, use_pil=True
+            ).batch(batch_size)
 
             results = []
             for batch in data:

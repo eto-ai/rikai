@@ -14,15 +14,16 @@
 
 from pathlib import Path
 
-from pyspark.sql import SparkSession
 import pandas as pd
+from pyspark.sql import SparkSession
 
 from rikai.spark.functions import to_image
-from rikai.types.vision import Image
 from rikai.testing.utils import apply_model_spec
+from rikai.types.vision import Image
 
 work_dir = Path().absolute().parent.parent
 image_path = f"{work_dir}/python/tests/assets/test_image.jpg"
+from rikai.contrib.tfhub.tensorflow.ssd import TF_HUB_URL as SSD_HUB_URL
 
 
 def test_ssd_model_type():
@@ -30,7 +31,7 @@ def test_ssd_model_type():
     results_list = apply_model_spec(
         {
             "name": "tfssd",
-            "uri": f"tfhub:///tensorflow/ssd_mobilenet_v2/2",
+            "uri": SSD_HUB_URL,
             "modelType": "ssd",
         },
         inputs_list,
@@ -40,14 +41,41 @@ def test_ssd_model_type():
     assert len(series[0]) == 100
 
 
+def test_ssd_model_type2():
+    inputs_list = [
+        pd.Series(
+            [
+                Image(image_path),
+                Image(image_path),
+                Image(image_path),
+                Image(image_path),
+                Image(image_path),
+                Image(image_path),
+            ]
+        )
+    ]
+    results_iter = apply_model_spec(
+        {
+            "name": "tfssd",
+            "uri": SSD_HUB_URL,
+            "modelType": "ssd",
+        },
+        inputs_list,
+    )
+
+    assert len(results_iter) == 1
+    series = results_iter[0]
+    assert series.shape[0] == 6
+    assert len(series[0]) == 100
+
+
 def test_ssd(spark: SparkSession):
-    spark.udf.register("to_image", to_image)
     spark.sql(
         f"""
         CREATE MODEL tfssd
         MODEL_TYPE ssd
         OPTIONS (device="cpu", batch_size=32)
-        USING "tfhub:///tensorflow/ssd_mobilenet_v2/2";
+        USING "{SSD_HUB_URL}";
         """
     )
     result = spark.sql(
@@ -56,3 +84,26 @@ def test_ssd(spark: SparkSession):
     """
     )
     assert result.count() == 1
+
+
+def test_multi_pics_ssd(spark: SparkSession):
+    spark.sql(
+        f"""
+        CREATE MODEL tfssd2
+        MODEL_TYPE ssd
+        OPTIONS (device="cpu", batch_size=32)
+        USING "{SSD_HUB_URL}";
+        """
+    )
+
+    spark.range(10).selectExpr(
+        "id as id", f"to_image('{image_path}') as image"
+    ).createOrReplaceTempView("test_view")
+
+    result = spark.sql(
+        f"""
+    select id, ML_PREDICT(tfssd2, image) as preds from test_view
+    """
+    )
+    result.show()
+    assert result.count() == 10

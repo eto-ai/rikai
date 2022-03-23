@@ -12,18 +12,28 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .torchvision import ObjectDetectionModelType
 import torchvision
+
+from .torchvision import ObjectDetectionModelType
+from rikai.spark.sql.codegen.dummy import DummyModelSpec
+from rikai.spark.sql.model import ModelSpec
+from rikai.mixin import Pretrained
+
 
 __all__ = ["MODEL_TYPE"]
 
 
-class SSDModelType(ObjectDetectionModelType):
-    def pretrained(self) -> bool:
-        return True
-
+class SSDModelType(ObjectDetectionModelType, Pretrained):
     def load_pretrained_model(self):
         return torchvision.models.detection.ssd.ssd300_vgg16()
+
+    def load_model(self, spec: ModelSpec, **kwargs):
+        if isinstance(spec, DummyModelSpec):
+            self.model = self.load_pretrained_model()
+            self.model.eval()
+            self.spec = spec
+        else:
+            super().load_model(spec, kwargs)
 
     def __init__(self):
         super().__init__("SSD")

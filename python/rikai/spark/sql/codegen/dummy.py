@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from rikai.mixin import Pretrained
 from rikai.spark.sql.codegen.base import ModelSpec, Registry
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.model import NOURI_SPEC_SCHEMA
@@ -19,7 +20,7 @@ from rikai.spark.sql.model import NOURI_SPEC_SCHEMA
 __all__ = ["NoURIRegistry"]
 
 
-class NoURIModelSpec(ModelSpec):
+class DummyModelSpec(ModelSpec):
     def __init__(
         self,
         raw_spec: "ModelSpec",
@@ -39,20 +40,20 @@ class NoURIModelSpec(ModelSpec):
 
     def validate(self):
         super().validate(NOURI_SPEC_SCHEMA)
-        if not self.model_type.pretrained():
-            msg = "ModelType must be pretrained if no URI is specified"
+        if not isinstance(self.model_type, Pretrained):
+            msg = "ModelType with Pretrained mixin required if no URI is specified"
             raise SpecError(msg)
 
     def load_model(self):
         raise RuntimeError("BootstrapModelSpec does not load model")
 
 
-class NoURIRegistry(Registry):
-    """Model Registry without URI"""
+class DummyRegistry(Registry):
+    """Dummy Model Registry without URI"""
 
     def __repr__(self):
-        return "NoURIRegistry"
+        return "DummyRegistry"
 
     def make_model_spec(self, raw_spec: dict):
-        spec = NoURIModelSpec(raw_spec)
+        spec = DummyModelSpec(raw_spec)
         return spec

@@ -19,7 +19,6 @@ from typing import Optional
 import torch
 
 from rikai.spark.sql.model import ModelSpec, ModelType
-from rikai.spark.sql.codegen.nouri import NoURIModelSpec
 
 __all__ = ["TorchModelType"]
 
@@ -32,13 +31,7 @@ class TorchModelType(ModelType, ABC):
         self.spec: Optional[ModelSpec] = None
 
     def load_model(self, spec: ModelSpec, **kwargs):
-        if isinstance(spec, NoURIModelSpec):
-            if self.pretrained():
-                self.model = self.load_pretrained_model()
-            else:
-                raise RuntimeError("Not a pretrained ModelType, URI required")
-        else:
-            self.model = spec.load_model()
+        self.model = spec.load_model()
         self.model.eval()
         if "device" in kwargs:
             self.model.to(kwargs.get("device"))

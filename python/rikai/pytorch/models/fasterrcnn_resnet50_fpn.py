@@ -12,18 +12,27 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .torchvision import ObjectDetectionModelType
 import torchvision
+
+from .torchvision import ObjectDetectionModelType
+from rikai.mixin import Pretrained
+from rikai.spark.sql.model import ModelSpec
+from rikai.spark.sql.codegen.dummy import DummyModelSpec
 
 __all__ = ["MODEL_TYPE"]
 
 
-class FasterRCNNModelType(ObjectDetectionModelType):
-    def pretrained(self) -> bool:
-        return True
-
+class FasterRCNNModelType(ObjectDetectionModelType, Pretrained):
     def load_pretrained_model(self):
         return torchvision.models.detection.fasterrcnn_resnet50_fpn()
+
+    def load_model(self, spec: ModelSpec, **kwargs):
+        if isinstance(spec, DummyModelSpec):
+            self.model = self.load_pretrained_model()
+            self.model.eval()
+            self.spec = spec
+        else:
+            super().load_model(spec, kwargs)
 
     def __init__(self):
         super().__init__("fasterrcnn_resnet50_fpn")

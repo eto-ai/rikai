@@ -16,7 +16,7 @@
 
 package ai.eto.rikai.sql.model
 
-import ai.eto.rikai.sql.model.nouri.NoURIRegistry
+import ai.eto.rikai.sql.model.dummy.DummyRegistry
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.http.client.utils.URIUtils
 import org.apache.log4j.Logger
@@ -163,7 +163,7 @@ private[rikai] object Registry {
             )
         }
       case None =>
-        NoURIRegistry
+        DummyRegistry
     }
   }
 

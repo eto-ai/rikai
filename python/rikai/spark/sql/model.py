@@ -95,7 +95,7 @@ def parse_model_type(flavor: str, model_type: str):
             pass
     else:
         raise ModuleNotFoundError(
-            f"Model spec not found for model: {model_type}/{flavor}"
+            f"Model spec not found for model/flavor: {model_type}/{flavor}"
         )
 
 
@@ -207,25 +207,6 @@ class ModelSpec(ABC):
 
 class ModelType(ABC):
     """Declare a Rikai-compatible Model Type."""
-
-    def pretrained(self) -> bool:
-        """Return if it is a pretrained model type
-
-        WARNING: A pretrained model type must implement the
-        load_pretrained_model method
-        """
-        return False
-
-    def load_pretrained_model(self) -> Any:
-        """Load the pretrained model without any extra info
-
-        WARNING: it is only used for developing purpose! The standard python
-        way provided by 3rd-party libraries is also not trustworthy. Please
-        use the model registry like MLflow for production usage.
-        """
-        raise NotImplementedError(
-            "Please implement it when pretrained is True"
-        )
 
     @abstractmethod
     def load_model(self, spec: ModelSpec, **kwargs):

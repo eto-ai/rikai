@@ -34,7 +34,7 @@ def test_fasterrcnn_resnet50_fpn(spark: SparkSession, two_flickr_rows: list):
 def test_failure_create(spark: SparkSession):
     with pytest.raises(
         py4j.protocol.Py4JJavaError,
-        match=r".*ModelType must be pretrained if no URI is specified.*",
+        match=r".*ModelType with Pretrained mixin required if no URI is specified.*",  # noqa E501
     ):
         spark.sql(
             f"""CREATE MODEL ssd_score

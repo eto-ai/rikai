@@ -41,8 +41,9 @@ class DummyModelSpec(ModelSpec):
     def validate(self):
         super().validate(NOURI_SPEC_SCHEMA)
         if not isinstance(self.model_type, Pretrained):
-            msg = "ModelType with Pretrained mixin required if no URI is specified"
-            raise SpecError(msg)
+            raise SpecError(
+                "ModelType with Pretrained mixin required if no URI is specified"  # noqa E501
+            )
 
     def load_model(self):
         raise RuntimeError("BootstrapModelSpec does not load model")

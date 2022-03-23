@@ -33,7 +33,7 @@ class SSDModelType(ObjectDetectionModelType, Pretrained):
             self.model.eval()
             self.spec = spec
         else:
-            super().load_model(spec, kwargs)
+            super().load_model(spec, **kwargs)
 
     def __init__(self):
         super().__init__("SSD")

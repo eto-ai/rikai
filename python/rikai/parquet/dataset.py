@@ -188,7 +188,9 @@ class Dataset:
                 for group_idx in range(parquet.num_row_groups):
                     if offset > 0:
                         # Skipping groups
-                        row_metadata: pq.RowGroupMetaData = file_metadata.row_group(group_idx)
+                        row_metadata: pq.RowGroupMetaData = (
+                            file_metadata.row_group(group_idx)
+                        )
                         if offset > row_metadata.num_rows:
                             offset -= row_metadata.num_rows
                             continue

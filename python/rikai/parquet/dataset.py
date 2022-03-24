@@ -1,4 +1,4 @@
-#  Copyright 2020 Rikai Authors
+#  Copyright 2022 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ from rikai.io import open_input_stream
 from rikai.logging import logger
 from rikai.mixin import ToNumpy, ToPIL
 from rikai.parquet.resolver import Resolver
-from rikai.parquet.shuffler import RandomShuffler
 
 __all__ = ["Dataset"]
 
@@ -49,7 +48,6 @@ class Dataset:
     - Read Rikai encoded dataset on the supported storage medias, i.e.,
       local filesystem, AWS S3 or Google GCS.
     - Automatically deserialize data into semantic user defined types (UDT).
-    - Shuffle the dataset randomly through ``shuffle`` flag.
     - Distributed training by setting ``world_size`` and ``rank`` parameters.
       When enabled, parquet `row-group` level partition will be used to
       distribute data amount the workers.
@@ -61,18 +59,14 @@ class Dataset:
         a dataset URI, i.e., "s3://foo/bar"
     columns : List[str], optional
         To read only given columns
-    shuffle : bool, optional
-        Set to True to shuffle the results.
-    shuffler_capacity : int
-        The size of the buffer to shuffle the examples. The size of buffer
-        does not impact the distribution of possibility that an example
-        is picked.
     seed : int, optional
         Random seed for shuffling process.
     world_size : int
         Total number of distributed workers
     rank : int
         The rank of this worker in all the distributed workers
+    offset : int
+        Instruct the dataset to skip the first N records.
 
     Notes
     -----
@@ -90,18 +84,16 @@ class Dataset:
         self,
         query: Union[str, Path],
         columns: Optional[List[str]] = None,
-        shuffle: bool = False,
-        shuffler_capacity: int = 128,
         seed: Optional[int] = None,
         world_size: int = 1,
         rank: int = 0,
+        offset: int = 0,
     ):
         self.uri = str(query)
         self.columns = columns
-        self.shuffle = shuffle
-        self.shuffler_capacity = shuffler_capacity
         self.seed = seed
         self.rank = rank
+        self.offset = offset
         self.world_size = world_size
         if self.world_size > 1:
             logger.info(
@@ -118,8 +110,8 @@ class Dataset:
         self.spark_row_metadata = Resolver.get_schema(self.uri)
 
     def __repr__(self) -> str:
-        return "Dataset(uri={}, columns={}, shuffle={})".format(
-            self.uri, self.columns if self.columns else "[*]", self.shuffle
+        return "Dataset(uri={}, columns={})".format(
+            self.uri, self.columns if self.columns else "[*]"
         )
 
     @classmethod
@@ -183,14 +175,24 @@ class Dataset:
         return converted
 
     def __iter__(self):
-        shuffler = RandomShuffler(
-            self.shuffler_capacity if self.shuffle else 1, self.seed
-        )
+        offset = self.offset
         group_count = -1
         for file_uri in self.files:
             with open_input_stream(file_uri) as fobj:
                 parquet = pq.ParquetFile(fobj)
+                file_metadata: pq.FileMetaData = parquet.metadata
+                if offset > 0 and offset > file_metadata.num_rows:
+                    # Skipping files.
+                    offset -= parquet.metadata.num_rows
+                    continue
                 for group_idx in range(parquet.num_row_groups):
+                    if offset > 0:
+                        # Skipping groups
+                        row_metadata: pq.RowGroupMetaData = file_metadata.row_group(group_idx)
+                        if offset > row_metadata.num_rows:
+                            offset -= row_metadata.num_rows
+                            continue
+
                     # A simple form of row-group level bucketing without
                     # memory overhead.
                     # Pros:
@@ -211,20 +213,11 @@ class Dataset:
                     for (
                         batch
                     ) in row_group.to_batches():  # type: pyarrow.RecordBatch
-                        # TODO: read batches not using pandas
                         for _, row in batch.to_pandas().iterrows():
-                            shuffler.append(row)
-                            # Maintain the shuffler buffer around its capacity.
-
-                            while shuffler.full():
-                                yield self._convert(
-                                    shuffler.pop().to_dict(),
-                                    self.spark_row_metadata,
-                                )
-        while shuffler:
-            yield self._convert(
-                shuffler.pop().to_dict(), self.spark_row_metadata
-            )
+                            yield self._convert(
+                                row,
+                                self.spark_row_metadata,
+                            )
 
     def to_pandas(self, limit=None):
         """Create a pandas dataframe from the parquet data in this Dataset

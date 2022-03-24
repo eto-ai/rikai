@@ -186,14 +186,13 @@ class Dataset:
                     offset -= parquet.metadata.num_rows
                     continue
                 for group_idx in range(parquet.num_row_groups):
-                    if offset > 0:
-                        # Skipping groups
-                        row_metadata: pq.RowGroupMetaData = (
-                            file_metadata.row_group(group_idx)
-                        )
-                        if offset > row_metadata.num_rows:
-                            offset -= row_metadata.num_rows
-                            continue
+                    row_metadata: pq.RowGroupMetaData = (
+                        file_metadata.row_group(group_idx)
+                    )
+                    if offset > row_metadata.num_rows:
+                        # Skip row groups
+                        offset -= row_metadata.num_rows
+                        continue
 
                     # A simple form of row-group level bucketing without
                     # memory overhead.
@@ -215,7 +214,7 @@ class Dataset:
                     for (
                         batch
                     ) in row_group.to_batches():  # type: pyarrow.RecordBatch
-                        for _, row in batch.to_pandas().iterrows():
+                        for row in batch.to_pylist()[offset:]:
                             yield self._convert(
                                 row,
                                 self.spark_row_metadata,

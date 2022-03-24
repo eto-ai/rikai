@@ -1,4 +1,4 @@
-#  Copyright 2021 Rikai Authors
+#  Copyright 2022 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 from pathlib import Path
 
 # Third Party
+import pytest
 from pyspark.sql import Row, SparkSession
 
 # Rikai
@@ -47,9 +48,28 @@ def test_select_columns(spark: SparkSession, tmp_path: Path):
     _select_columns(spark, str(tmp_path))
 
 
-def test_select_columns_on_gcs(gcs_spark: SparkSession, gcs_tmpdir: str):
-    _select_columns(gcs_spark, gcs_tmpdir)
+def test_offset(spark: SparkSession, tmp_path: Path):
+    dest = str(tmp_path)
+    df = spark.createDataFrame(
+        [Row(id=i, col=f"val-{i}") for i in range(1000)]
+    )
+    df.write.format("rikai").save(dest)
+
+    data1 = Dataset(dest)
+    row = next(iter(data1))
+    assert row["id"] == 0
+
+    data2 = Dataset(dest, offset=10)
+    row = next(iter(data2))
+    assert row["id"] == 10
+
+    with pytest.raises(StopIteration):
+        next(iter(Dataset(dest, offset=2000)))  # off the edge
 
 
-def test_select_over_s3(aws_spark: SparkSession, s3_tmpdir: str):
-    _select_columns(aws_spark, s3_tmpdir)
+def test_select_columns_on_gcs(spark: SparkSession, gcs_tmpdir: str):
+    _select_columns(spark, gcs_tmpdir)
+
+
+def test_select_over_s3(spark: SparkSession, s3_tmpdir: str):
+    _select_columns(spark, s3_tmpdir)

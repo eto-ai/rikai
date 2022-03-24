@@ -94,6 +94,9 @@ class Dataset:
         self.seed = seed
         self.rank = rank
         self.offset = offset
+        if offset < 0:
+            raise ValueError("Offset must be non-negative value")
+
         self.world_size = world_size
         if self.world_size > 1:
             logger.info(
@@ -181,7 +184,7 @@ class Dataset:
             with open_input_stream(file_uri) as fobj:
                 parquet = pq.ParquetFile(fobj)
                 file_metadata: pq.FileMetaData = parquet.metadata
-                if offset > 0 and offset > file_metadata.num_rows:
+                if offset >= file_metadata.num_rows:
                     # Skipping files.
                     offset -= parquet.metadata.num_rows
                     continue
@@ -189,7 +192,7 @@ class Dataset:
                     row_metadata: pq.RowGroupMetaData = (
                         file_metadata.row_group(group_idx)
                     )
-                    if offset > row_metadata.num_rows:
+                    if offset >= row_metadata.num_rows:
                         # Skip row groups
                         offset -= row_metadata.num_rows
                         continue

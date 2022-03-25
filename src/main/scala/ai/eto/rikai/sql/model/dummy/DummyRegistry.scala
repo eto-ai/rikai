@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Rikai authors
+ * Copyright 2022 Rikai authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-package ai.eto.rikai.sql.model
+package ai.eto.rikai.sql.model.dummy
 
-/** Model Spec is used to pass the create model information to
-  * python ModelRegistry.
+import ai.eto.rikai.sql.model.PyImplRegistry
+import com.typesafe.scalalogging.LazyLogging
+
+/** DummyRegistry is used when no registry URI is specified
   */
-case class ModelSpec(
-    name: Option[String],
-    uri: Option[String] = None,
-    flavor: Option[String] = None,
-    modelType: Option[String] = None,
-    schema: Option[String] = None,
-    options: Option[Map[String, String]] = None,
-    preprocessor: Option[String] = None,
-    postprocessor: Option[String] = None
-) {
+object DummyRegistry extends PyImplRegistry with LazyLogging {
 
-  override def toString: String =
-    s"ModelSpec(name=${name}, uri=${uri}, flavor=${flavor})"
+  override def pyClass: String =
+    "rikai.spark.sql.codegen.dummy.DummyRegistry"
 }

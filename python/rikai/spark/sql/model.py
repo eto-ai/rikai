@@ -33,35 +33,40 @@ M = TypeVar("M")  # Model Type
 
 # JSON schema specification for the model payload specifications
 # used to validate model spec input
-SPEC_PAYLOAD_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "version": {
-            "type": "string",
-            "description": "Model SPEC format version",
-        },
-        "name": {"type": "string", "description": "Model name"},
-        "schema": {"type": "string"},
-        "model": {
-            "type": "object",
-            "description": "model description",
-            "properties": {
-                "uri": {"type": "string"},
-                "flavor": {"type": "string"},
-                "model_type": {"type": "string"},
+def gen_schema_spec(required_cols):
+    return {
+        "type": "object",
+        "properties": {
+            "version": {
+                "type": "string",
+                "description": "Model SPEC format version",
             },
-            "required": ["uri"],
-        },
-        "transforms": {
-            "type": "object",
-            "properties": {
-                "pre": {"type": "string"},
-                "post": {"type": "string"},
+            "name": {"type": "string", "description": "Model name"},
+            "schema": {"type": "string"},
+            "model": {
+                "type": "object",
+                "description": "model description",
+                "properties": {
+                    "uri": {"type": "string"},
+                    "flavor": {"type": "string"},
+                    "type": {"type": "string"},
+                },
+                "required": required_cols,
+            },
+            "transforms": {
+                "type": "object",
+                "properties": {
+                    "pre": {"type": "string"},
+                    "post": {"type": "string"},
+                },
             },
         },
-    },
-    "required": ["version", "model"],
-}
+        "required": ["version", "model"],
+    }
+
+
+SPEC_PAYLOAD_SCHEMA = gen_schema_spec(["uri"])
+NOURI_SPEC_SCHEMA = gen_schema_spec(["flavor", "type"])
 
 
 def _identity(x):
@@ -90,7 +95,7 @@ def parse_model_type(flavor: str, model_type: str):
             pass
     else:
         raise ModuleNotFoundError(
-            f"Model spec not found for model: {model_type}/{flavor}"
+            f"Model spec not found for model/flavor: {model_type}/{flavor}"
         )
 
 
@@ -111,7 +116,7 @@ class ModelSpec(ABC):
         if validate:
             self.validate()
 
-    def validate(self):
+    def validate(self, schema=SPEC_PAYLOAD_SCHEMA):
         """Validate model spec
 
         Raises
@@ -121,7 +126,7 @@ class ModelSpec(ABC):
         """
         logger.debug("Validating spec: %s", self._spec)
         try:
-            validate(instance=self._spec, schema=SPEC_PAYLOAD_SCHEMA)
+            validate(instance=self._spec, schema=schema)
         except ValidationError as e:
             raise SpecError(e.message) from e
 

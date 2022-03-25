@@ -107,7 +107,7 @@ class MlflowCatalog(session: SparkSession) extends Catalog {
         // TODO: cache the SparkUDFModel in the process. It might have multiple
         // SparkSessions exist.
         val uri = s"mlflow:/$name"
-        val spec = ModelSpec(name = Some(name), uri = uri)
+        val spec = ModelSpec(name = Some(name), uri = Some(uri))
         val model = Registry.resolve(session, spec)
         model
       }

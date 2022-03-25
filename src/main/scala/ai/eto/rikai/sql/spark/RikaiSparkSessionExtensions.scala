@@ -59,7 +59,7 @@ private class MlPredictRule(val session: SparkSession)
         val model =
           Registry.resolve(
             session,
-            ModelSpec(name = None, uri = arg.toString)
+            ModelSpec(name = None, uri = Some(arg.toString))
           )
         Some(model)
       }

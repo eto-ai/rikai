@@ -135,7 +135,7 @@ object ModelResolver {
 
       new SparkUDFModel(
         spec.name.get,
-        spec.uri,
+        spec.uri.getOrElse(""),
         udfName,
         flavor = spec.flavor,
         preFuncName = Some(preUdfName),

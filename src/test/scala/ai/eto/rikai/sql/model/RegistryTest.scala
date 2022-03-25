@@ -36,7 +36,7 @@ class RegistryTest extends AnyFunSuite with BeforeAndAfter {
   }
 
   test("Resolve default uri") {
-    val registry = Registry.getRegistry("/tmp/foo/bar")
+    val registry = Registry.getRegistry(Some("/tmp/foo/bar"))
     assert(registry.isInstanceOf[TestRegistry])
     val uri = Registry.normalize_uri("/tmp/foo/bar")
     val expected = "test:/tmp/foo/bar"

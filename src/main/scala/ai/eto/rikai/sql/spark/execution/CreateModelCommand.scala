@@ -43,23 +43,16 @@ case class CreateModelCommand(
 
   @throws[ModelResolveException]
   private[spark] def asSpec: ModelSpec =
-    uri match {
-      case Some(u) =>
-        ModelSpec(
-          name = Some(name),
-          uri = Registry.normalize_uri(u).toString,
-          flavor = flavor,
-          modelType = modelType,
-          schema = returns,
-          preprocessor = preprocessor,
-          postprocessor = postprocessor,
-          options = Some(options)
-        )
-      case None =>
-        throw new ModelResolveException(
-          "Must provide URI to CREATE MODEL (for now)"
-        )
-    }
+    ModelSpec(
+      name = Some(name),
+      uri = uri.map(Registry.normalize_uri).map(_.toString),
+      flavor = flavor,
+      modelType = modelType,
+      schema = returns,
+      preprocessor = preprocessor,
+      postprocessor = postprocessor,
+      options = Some(options)
+    )
 
   @throws[ModelResolveException]
   override def run(spark: SparkSession): Seq[Row] = {

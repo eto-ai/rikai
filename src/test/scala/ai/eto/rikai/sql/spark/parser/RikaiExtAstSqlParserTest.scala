@@ -112,4 +112,13 @@ class RikaiExtAstSqlParserTest extends AnyFunSuite {
 
     assert(cmd == null)
   }
+
+  test("no uri") {
+    val cmd = parser
+      .parsePlan("""
+        |CREATE MODEL resnet18 MODEL_TYPE resnet""".stripMargin)
+      .asInstanceOf[CreateModelCommand]
+    assert(cmd.name === "resnet18")
+    assert(cmd.uri === None)
+  }
 }

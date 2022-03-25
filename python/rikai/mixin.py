@@ -28,7 +28,14 @@ import numpy as np
 from rikai.internal.uri_utils import uri_equal
 from rikai.io import open_uri
 
-__all__ = ["ToNumpy", "Asset", "Displayable", "Drawable", "ToDict"]
+__all__ = [
+    "ToNumpy",
+    "Asset",
+    "Displayable",
+    "Drawable",
+    "ToDict",
+    "Pretrained",
+]
 
 
 class ToNumpy(ABC):
@@ -126,3 +133,11 @@ class Asset(ABC):
         if self.is_embedded:
             return BytesIO(self.data)
         return open_uri(self.uri, mode=mode)
+
+
+class Pretrained(ABC):
+    """Mixin for pretrained model"""
+
+    @abstractmethod
+    def pretrained_model(self) -> Any:
+        pass

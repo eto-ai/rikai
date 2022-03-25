@@ -31,7 +31,7 @@ class SSDModelType(ObjectDetectionModelType, Pretrained):
         if isinstance(self.spec, DummyModelSpec):
             return self.pretrained_model()
         else:
-            return self.find_model()
+            return super().find_model()
 
     def __init__(self):
         super().__init__("SSD")

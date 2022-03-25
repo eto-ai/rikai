@@ -30,7 +30,7 @@ class FasterRCNNModelType(ObjectDetectionModelType, Pretrained):
         if isinstance(self.spec, DummyModelSpec):
             return self.pretrained_model()
         else:
-            super().find_model()
+            return super().find_model()
 
     def __init__(self):
         super().__init__("fasterrcnn_resnet50_fpn")

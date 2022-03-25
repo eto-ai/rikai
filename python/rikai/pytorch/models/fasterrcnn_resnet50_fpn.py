@@ -23,16 +23,14 @@ __all__ = ["MODEL_TYPE"]
 
 
 class FasterRCNNModelType(ObjectDetectionModelType, Pretrained):
-    def load_pretrained_model(self):
+    def pretrained_model(self):
         return torchvision.models.detection.fasterrcnn_resnet50_fpn()
 
-    def load_model(self, spec: ModelSpec, **kwargs):
-        if isinstance(spec, DummyModelSpec):
-            self.model = self.load_pretrained_model()
-            self.model.eval()
-            self.spec = spec
+    def find_model(self):
+        if isinstance(self.spec, DummyModelSpec):
+            return self.pretrained_model()
         else:
-            super().load_model(spec, **kwargs)
+            super().find_model()
 
     def __init__(self):
         super().__init__("fasterrcnn_resnet50_fpn")

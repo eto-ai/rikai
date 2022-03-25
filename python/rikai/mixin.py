@@ -139,5 +139,5 @@ class Pretrained(ABC):
     """Mixin for pretrained model"""
 
     @abstractmethod
-    def load_pretrained_model(self) -> Any:
+    def pretrained_model(self) -> Any:
         pass

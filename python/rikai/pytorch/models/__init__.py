@@ -30,12 +30,15 @@ class TorchModelType(ModelType, ABC):
         self.model: Optional[torch.nn.Module] = None
         self.spec: Optional[ModelSpec] = None
 
+    def find_model(self):
+        return self.spec.load_model()
+
     def load_model(self, spec: ModelSpec, **kwargs):
-        self.model = spec.load_model()
+        self.spec = spec
+        self.model = self.find_model()
         self.model.eval()
         if "device" in kwargs:
             self.model.to(kwargs.get("device"))
-        self.spec = spec
 
     # Release GPU memory
     # https://blog.paperspace.com/pytorch-memory-multi-gpu-debugging/?ref=tfrecipes

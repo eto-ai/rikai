@@ -1,9 +1,20 @@
 import java.io.File
 import scala.reflect.io.Directory
 
+name := "rikai"
 crossScalaVersions := List("2.12.10", "2.13.7")
 scalaVersion := "2.12.10"
-name := "rikai"
+scalaBinaryVersion := scalaVersion.value.split('.').slice(0, 2).mkString(".")
+
+val sparkVersion = settingKey[String]("Apache Spark version")
+val sparkVerStr = settingKey[String]("Apache Spark version string like spark312")
+sparkVersion := {sys.env.get("SPARK_VERSION") match {
+  case Some(sparkVersion) => sparkVersion
+  case None =>
+    if (scalaVersion.value.compareTo("2.12.15") >= 0) "3.2.1" else "3.1.2"
+}}
+sparkVerStr := s"spark${sparkVersion.value.replace(".", "")}"
+
 
 def versionFmt(out: sbtdynver.GitDescribeOutput): String = {
   val parts = out.ref.dropPrefix.split('.').toList
@@ -52,15 +63,8 @@ scmInfo := Some(
 )
 
 libraryDependencies ++= {
-  val sparkVersion = {
-    sys.env.get("SPARK_VERSION") match {
-      case Some(sparkVersion) => sparkVersion
-      case None =>
-        if (scalaVersion.value.compareTo("2.12.15") >= 0) "3.2.1" else "3.1.2"
-    }
-  }
   val log = sLog.value
-  log.warn(s"Compiling Rikai with Spark version ${sparkVersion}")
+  log.warn(s"Compiling Rikai with Spark version ${sparkVersion.value}")
 
   val awsVersion = "2.15.69"
   val log4jVersion = "2.17.1"
@@ -76,10 +80,10 @@ libraryDependencies ++= {
     "com.thoughtworks.enableIf" %% "enableif" % enableifVersion exclude (
       "org.scala-lang", "scala-reflect"
     ),
-    "org.apache.spark" %% "spark-sql" % sparkVersion % Provided,
-    "org.apache.spark" %% "spark-core" % sparkVersion % Test classifier "tests",
-    "org.apache.spark" %% "spark-hive-thriftserver" % sparkVersion % Test,
-    "org.apache.spark" %% "spark-hive-thriftserver" % sparkVersion % Test classifier "tests",
+    "org.apache.spark" %% "spark-sql" % sparkVersion.value % Provided,
+    "org.apache.spark" %% "spark-core" % sparkVersion.value % Test classifier "tests",
+    "org.apache.spark" %% "spark-hive-thriftserver" % sparkVersion.value % Test,
+    "org.apache.spark" %% "spark-hive-thriftserver" % sparkVersion.value % Test classifier "tests",
     "software.amazon.awssdk" % "s3" % awsVersion % Provided,
     "org.xerial.snappy" % "snappy-java" % snappyVersion,
     "org.apache.logging.log4j" % "log4j-core" % log4jVersion % Runtime,
@@ -144,6 +148,8 @@ Compile / doc / scalacOptions ++= Seq(
   "-skip-packages",
   "ai.eto.rikai.sql.spark.parser"
 )
+
+assembly / assemblyJarName := s"${name.value}-assembly-${sparkVerStr.value}_${scalaBinaryVersion.value}-${version.value}.jar"
 
 publishLocal := {
   val ivyHome = ivyPaths.value.ivyHome.get.getCanonicalPath

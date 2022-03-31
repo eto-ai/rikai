@@ -17,7 +17,7 @@ from rikai.spark.sql.codegen.base import ModelSpec, Registry
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.model import NOURI_SPEC_SCHEMA
 
-__all__ = ["NoURIRegistry"]
+__all__ = ["DummyModelSpec", "DummyRegistry"]
 
 
 class DummyModelSpec(ModelSpec):

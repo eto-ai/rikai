@@ -22,4 +22,4 @@ def test_ssd(spark: SparkSession):
     spark.sql(f"CREATE MODEL {name} FLAVOR pytorch MODEL_TYPE ssd")
     uri = "https://i.scdn.co/image/ab67616d0000b273466def3ce70d94dcacb13c8d"
     df = spark.sql(f"select explode(ML_PREDICT(ssd_model, to_image('{uri}')))")
-    assert df.count() > 10
+    assert df.count() >= 3

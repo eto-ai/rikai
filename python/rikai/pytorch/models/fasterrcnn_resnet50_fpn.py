@@ -16,7 +16,6 @@ import torchvision
 
 from .torchvision import ObjectDetectionModelType
 from rikai.mixin import Pretrained
-from rikai.spark.sql.model import ModelSpec
 from rikai.spark.sql.codegen.dummy import DummyModelSpec
 
 __all__ = ["MODEL_TYPE"]
@@ -24,7 +23,7 @@ __all__ = ["MODEL_TYPE"]
 
 class FasterRCNNModelType(ObjectDetectionModelType, Pretrained):
     def pretrained_model(self):
-        return torchvision.models.detection.fasterrcnn_resnet50_fpn()
+        return torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
 
     def find_model(self):
         if isinstance(self.spec, DummyModelSpec):

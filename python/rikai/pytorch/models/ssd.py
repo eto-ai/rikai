@@ -14,18 +14,17 @@
 
 import torchvision
 
-from .torchvision import ObjectDetectionModelType
+from rikai.mixin import Pretrained
+from rikai.pytorch.models.torchvision import ObjectDetectionModelType
 from rikai.spark.sql.codegen.dummy import DummyModelSpec
 from rikai.spark.sql.model import ModelSpec
-from rikai.mixin import Pretrained
-
 
 __all__ = ["MODEL_TYPE"]
 
 
 class SSDModelType(ObjectDetectionModelType, Pretrained):
     def pretrained_model(self):
-        return torchvision.models.detection.ssd.ssd300_vgg16()
+        return torchvision.models.detection.ssd.ssd300_vgg16(pretrained=True)
 
     def find_model(self):
         if isinstance(self.spec, DummyModelSpec):

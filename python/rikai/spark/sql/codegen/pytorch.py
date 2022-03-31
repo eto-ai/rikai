@@ -41,10 +41,6 @@ def move_tensor_to_device(data, device):
     return data
 
 
-def collate_fn(batch):
-    return batch
-
-
 def _generate(payload: ModelSpec, is_udf: bool = True):
     """Construct a UDF to run pytorch model.
 
@@ -92,7 +88,6 @@ def _generate(payload: ModelSpec, is_udf: bool = True):
                         dataset,
                         batch_size=batch_size,
                         num_workers=num_workers,
-                        collate_fn=collate_fn,
                     ):
                         batch = move_tensor_to_device(batch, device)
                         predictions = model(batch)

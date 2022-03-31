@@ -22,10 +22,9 @@ from torchvision.ops.boxes import batched_nms, clip_boxes_to_image
 
 from rikai.pytorch.models.torchvision import ObjectDetectionModelType
 from rikai.spark.sql.model import ModelSpec
+from rikai.types import Box2d
 
 __all__ = ["MODEL_TYPE"]
-
-from rikai.types import Box2d
 
 
 class SSDClassScoresExtractor(torch.nn.Module):

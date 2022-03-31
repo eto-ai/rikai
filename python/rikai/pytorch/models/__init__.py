@@ -18,7 +18,9 @@ from typing import Optional
 
 import torch
 
+from rikai.mixin import Pretrained
 from rikai.spark.sql.model import ModelSpec, ModelType
+from rikai.spark.sql.codegen.dummy import DummyModelSpec
 
 __all__ = ["TorchModelType"]
 
@@ -30,12 +32,15 @@ class TorchModelType(ModelType, ABC):
         self.model: Optional[torch.nn.Module] = None
         self.spec: Optional[ModelSpec] = None
 
-    def find_model(self):
-        return self.spec.load_model()
-
     def load_model(self, spec: ModelSpec, **kwargs):
         self.spec = spec
-        self.model = self.find_model()
+        if isinstance(spec, DummyModelSpec):
+            if isinstance(self, Pretrained):
+                self.model = self.pretrained_model()
+            else:
+                raise ValueError("Missing model URI")
+        else:
+            self.model = self.spec.load_model()
         self.model.eval()
         if "device" in kwargs:
             self.model.to(kwargs.get("device"))

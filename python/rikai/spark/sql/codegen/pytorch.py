@@ -42,7 +42,6 @@ def move_tensor_to_device(data, device):
 
 
 def collate_fn(batch):
-    # print(batch)
     return batch
 
 

@@ -73,8 +73,6 @@ libraryDependencies ++= {
   val scalaLoggingVersion = "3.9.4"
   val snappyVersion = "1.1.8.4" // Support Apple Silicon
   val scalatestVersion = "3.2.0"
-  val hadoopVersion = "3.2.3"
-  val circeVersion = "0.12.3"
   val mlflowVersion = "1.21.0"
   val enableifVersion = "1.1.8"
 
@@ -95,9 +93,6 @@ libraryDependencies ++= {
       "org.scala-lang", "scala-reflect"
     ),
     "org.scalatest" %% "scalatest-funsuite" % scalatestVersion % Test,
-    "io.circe" %% "circe-core" % circeVersion,
-    "io.circe" %% "circe-generic" % circeVersion,
-    "io.circe" %% "circe-parser" % circeVersion,
     "org.mlflow" % "mlflow-client" % mlflowVersion
   )
 }
@@ -154,6 +149,7 @@ Compile / doc / scalacOptions ++= Seq(
 )
 
 assembly / assemblyJarName := s"${name.value}-assembly-${sparkVerStr.value}_${scalaBinaryVersion.value}-${version.value}.jar"
+assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false)
 
 publishLocal := {
   val ivyHome = ivyPaths.value.ivyHome.get.getCanonicalPath

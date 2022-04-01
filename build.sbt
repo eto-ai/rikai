@@ -139,7 +139,10 @@ Test / fork := true
 
 Antlr4 / antlr4PackageName := Some("ai.eto.rikai.sql.spark.parser")
 Antlr4 / antlr4GenVisitor := true
-Antlr4 / antlr4Version := "4.8-1"
+Antlr4 / antlr4Version := {
+  if ("3.1.2".equals(sparkVersion.value)) "4.8-1"
+  else "4.8"
+}
 
 enablePlugins(Antlr4Plugin)
 
@@ -149,7 +152,14 @@ Compile / doc / scalacOptions ++= Seq(
 )
 
 assembly / assemblyJarName := s"${name.value}-assembly-${sparkVerStr.value}_${scalaBinaryVersion.value}-${version.value}.jar"
-assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false)
+assemblyPackageScala / assembleArtifact := false
+assembly / assemblyExcludedJars := {
+  val cp = (assembly / fullClasspath).value
+  cp filter { x =>
+    x.data.getName.contains("antlr4-runtime") ||
+      x.data.getName.contains("enableif")
+  }
+}
 
 publishLocal := {
   val ivyHome = ivyPaths.value.ivyHome.get.getCanonicalPath

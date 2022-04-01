@@ -296,7 +296,7 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
     def ious(
         boxes1: Union[Sequence[Box2d], np.ndarray],
         boxes2: Union[Sequence[Box2d], np.ndarray],
-    ) -> np.ndarray:
+    ) -> Optional[np.ndarray]:
         """Compute intersection over union(IOU).
 
         Parameters
@@ -305,11 +305,14 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
             a list of Box2d with length of N
         boxes2 : :py:class:`numpy.ndarray`
             a list of Box2d with length of M
+
         Return
         ------
-        :py:class:`numpy.ndarray`
-             For two lists of box2ds, which have the length of N, and M respectively, this function should return a N*M matrix,
-              each element is the iou value (float,[0, 1]).
+        :py:class:`numpy.ndarray`, optional
+            For two lists of box2ds, which have the length of N, and M respectively,
+            this function should return a N*M matrix, each element is the iou value
+            `(float,[0, 1])`.
+            Returns None if one of the input is empty.
 
         Example
         -------
@@ -332,6 +335,9 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
 
         assert isinstance(boxes1, (Sequence, np.ndarray))
         assert isinstance(boxes2, (Sequence, np.ndarray))
+
+        if not boxes1 or not boxes2:
+            return None
 
         if not isinstance(boxes1, np.ndarray):
             boxes1 = np.array(boxes1)

@@ -17,12 +17,10 @@
 
 from typing import Any, Callable
 
-import torch.nn
 from torchvision.transforms import ToTensor
 
+from rikai.pytorch.models import TorchModelType
 from rikai.types import Box2d
-
-from . import TorchModelType
 
 __all__ = ["ObjectDetectionModelType"]
 

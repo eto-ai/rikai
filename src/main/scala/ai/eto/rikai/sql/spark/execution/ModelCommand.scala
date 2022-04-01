@@ -18,6 +18,7 @@ package ai.eto.rikai.sql.spark.execution
 
 import ai.eto.rikai.sql.model.Catalog
 import com.thoughtworks.enableIf
+import com.thoughtworks.enableIf.classpathMatches
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.expressions.AttributeReference
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
@@ -27,19 +28,11 @@ import org.apache.spark.sql.types.StringType
 trait ModelCommand extends RunnableCommand {
   override final def children: Seq[LogicalPlan] = Nil
 
-  @enableIf(c =>
-    c.classPath.exists(
-      _.getPath.matches(".*spark-catalyst_2\\.\\d+-3\\.2\\..*")
-    )
-  )
+  @enableIf(classpathMatches(".*spark-catalyst_2\\.\\d+-3\\.2\\..*".r))
   override final def mapChildren(f: LogicalPlan => LogicalPlan): LogicalPlan =
     this.asInstanceOf[LogicalPlan]
 
-  @enableIf(c =>
-    c.classPath.exists(
-      _.getPath.matches(".*spark-catalyst_2\\.\\d+-3\\.2\\..*")
-    )
-  )
+  @enableIf(classpathMatches(".*spark-catalyst_2\\.\\d+-3\\.2\\..*".r))
   override final def withNewChildrenInternal(
       newChildren: IndexedSeq[LogicalPlan]
   ): LogicalPlan = this.asInstanceOf[LogicalPlan]

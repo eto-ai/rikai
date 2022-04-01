@@ -20,6 +20,7 @@ import ai.eto.rikai.sql.model.{Catalog, ModelSpec, Registry}
 import ai.eto.rikai.sql.spark.expressions.Predict
 import ai.eto.rikai.sql.spark.parser.{RikaiExtSqlParser, RikaiSparkSQLParser}
 import com.thoughtworks.enableIf
+import com.thoughtworks.enableIf.classpathMatches
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.{
   UnresolvedAttribute,
@@ -73,21 +74,13 @@ private class MlPredictRule(val session: SparkSession)
     }
   }
 
-  @enableIf(c =>
-    c.classPath.exists(
-      _.getPath.matches(".*spark-catalyst_2\\.\\d+-3\\.2\\..*")
-    )
-  )
+  @enableIf(classpathMatches(".*spark-catalyst_2\\.\\d+-3\\.2\\..*".r))
   private def getFuncName(f: UnresolvedFunction): String = {
     // After Spark 3.2
     f.nameParts.last
   }
 
-  @enableIf(c =>
-    c.classPath.exists(
-      _.getPath.matches(".*spark-catalyst_2\\.\\d+-3\\.1\\..*")
-    )
-  )
+  @enableIf(classpathMatches(".*spark-catalyst_2\\.\\d+-3\\.1\\..*".r))
   private def getFuncName(f: UnresolvedFunction): String = {
     f.name.funcName
   }

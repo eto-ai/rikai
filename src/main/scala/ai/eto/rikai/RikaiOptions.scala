@@ -22,7 +22,9 @@ private[rikai] class RikaiOptions(parameters: Map[String, String]) {
     */
   val path: String = parameters.getOrElse("path", "")
 
+  val defaultBlockSize: Int = 32 * 1024 * 1024
+
   /** Parquet block size. */
   val blockSize: Int =
-    parameters.getOrElse("rikai.block.size", s"${32 * 1024 * 1024}").toInt
+    parameters.getOrElse("rikai.block.size", s"${blockSize}").toInt
 }

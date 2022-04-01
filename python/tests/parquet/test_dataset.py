@@ -15,12 +15,15 @@
 from pathlib import Path
 
 # Third Party
+import numpy as np
+import pyarrow.parquet as pq
 import pytest
 from pyspark.sql import Row, SparkSession
 
 # Rikai
 from rikai.parquet import Dataset
 from rikai.testing.asserters import assert_count_equal
+from rikai.types import Image
 
 
 def _select_columns(spark: SparkSession, tmpdir: str):
@@ -65,6 +68,47 @@ def test_offset(spark: SparkSession, tmp_path: Path):
 
     with pytest.raises(StopIteration):
         next(iter(Dataset(dest, offset=2000)))  # off the edge
+
+
+def _verify_group_size(dest: Path, group_size: int):
+    parquet_files = list(dest.glob("*.parquet"))
+    total_size = 0
+    for filepath in parquet_files:
+        pqfile = pq.ParquetFile(filepath)
+        file_metadata: pq.FileMetaData = pqfile.metadata
+        for row_id in range(file_metadata.num_row_groups):
+            row_group: pq.RowGroupMetaData = file_metadata.row_group(row_id)
+            assert row_group.total_byte_size <= group_size
+            total_size += row_group.total_byte_size
+    assert total_size >= group_size * len(parquet_files)
+
+
+def test_group_size(spark: SparkSession, tmp_path: Path):
+    dest = str(tmp_path)
+    df = spark.createDataFrame(
+        [
+            Row(
+                id=i,
+                label=f"label-{i}",
+                image=Image.from_array(
+                    np.random.randint(
+                        0, 128, size=(64, 64, 3), dtype=np.uint8
+                    ),
+                ),
+            )
+            for i in range(10000)
+        ]
+    )
+    df.write.format("rikai").save(dest)
+    _verify_group_size(tmp_path, 32 * 1024 * 1024)  # Default group size
+
+    (
+        df.write.format("rikai")
+        .option("rikai.block.size", 8 * 1024 * 1024)
+        .mode("overwrite")
+        .save(dest)
+    )
+    _verify_group_size(tmp_path, 8 * 1024 * 1024)
 
 
 def test_select_columns_on_gcs(spark: SparkSession, gcs_tmpdir: str):

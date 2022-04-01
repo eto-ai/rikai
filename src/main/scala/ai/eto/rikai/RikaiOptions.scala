@@ -21,4 +21,8 @@ private[rikai] class RikaiOptions(parameters: Map[String, String]) {
   /** Base path for the feature dataset
     */
   val path: String = parameters.getOrElse("path", "")
+
+  /** Parquet block size. */
+  val blockSize: Int =
+    parameters.getOrElse("rikai.block.size", s"${32 * 1024 * 1024}").toInt
 }

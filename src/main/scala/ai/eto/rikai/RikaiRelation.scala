@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Rikai authors
+ * Copyright 2022 Rikai authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class RikaiRelation(val options: RikaiOptions)(
 
   /** Pruned and filtered scan
     *
-    * @param requiredColumns
+    * @param requiredColumns the required columns to be loaded.
     * @param filters
     *
     * @return
@@ -68,7 +68,7 @@ class RikaiRelation(val options: RikaiOptions)(
     for (filter <- filters) {
       df = FilterUtils.apply(df, filter)
     }
-    return df.rdd
+    df.rdd
   }
 
   /** Write data
@@ -80,7 +80,6 @@ class RikaiRelation(val options: RikaiOptions)(
       data: org.apache.spark.sql.DataFrame,
       overwrite: Boolean
   ): Unit = {
-    // println(s"Rikai writing to ${options.path}")
     var writer = data.write.format("parquet")
     if (overwrite) {
       writer = writer.mode(SaveMode.Overwrite)

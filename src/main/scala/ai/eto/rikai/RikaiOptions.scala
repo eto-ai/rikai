@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Rikai authors
+ * Copyright 2022 Rikai authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,4 +21,14 @@ private[rikai] class RikaiOptions(parameters: Map[String, String]) {
   /** Base path for the feature dataset
     */
   val path: String = parameters.getOrElse("path", "")
+
+  /** Parquet block size. */
+  val blockSize: Int =
+    parameters
+      .getOrElse("rikai.block.size", s"${RikaiOptions.defaultBlockSize}")
+      .toInt
+}
+
+private[rikai] object RikaiOptions {
+  val defaultBlockSize: Int = 32 * 1024 * 1024
 }

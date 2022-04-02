@@ -50,11 +50,16 @@ class RikaiRelationTest extends AnyFunSuite with SparkTestSession {
     import ai.eto.rikai._
     examples.write.rikai(testDir.toString)
 
-    val numParquetFileds =
+    val numParquetFiles =
       testDir.list().count(_.endsWith(".parquet"))
-    assert(numParquetFileds > 0)
+    assert(numParquetFiles > 0)
 
     val df = spark.read.rikai(testDir.toString)
     assert(df.intersectAll(examples).count == 3)
+  }
+
+  test("test default block size") {
+    val options = new RikaiOptions(Map.empty)
+    assert(options.blockSize == RikaiOptions.defaultBlockSize)
   }
 }

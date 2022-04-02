@@ -73,7 +73,7 @@ libraryDependencies ++= {
   val scalatestVersion = "3.2.0"
   val circeVersion = "0.12.3"
   val mlflowVersion = "1.21.0"
-  val enableifVersion = "1.1.7+82-56fd8fb0"
+  val enableifVersion = "1.1.8"
 
   Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided,

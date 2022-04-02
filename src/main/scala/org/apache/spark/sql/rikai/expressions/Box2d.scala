@@ -15,7 +15,7 @@
 package org.apache.spark.sql.rikai.expressions
 
 import com.thoughtworks.enableIf
-
+import com.thoughtworks.enableIf._
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{
   BinaryExpression,
@@ -45,11 +45,7 @@ case class Area(child: Expression)
 
   override def prettyName: String = "area"
 
-  @enableIf(c =>
-    c.classPath.exists(
-      _.getPath.matches(".*spark-catalyst_2\\.\\d+-3\\.2\\..*")
-    )
-  )
+  @enableIf(classpathMatches(".*spark-catalyst_2\\.\\d+-3\\.[^01]\\..*".r))
   override def withNewChildInternal(newChild: Expression): Expression =
     copy(child = newChild)
 }
@@ -74,11 +70,7 @@ case class IOU(leftBox: Expression, rightBox: Expression)
 
   override def prettyName: String = "iou"
 
-  @enableIf(c =>
-    c.classPath.exists(
-      _.getPath.matches(".*spark-catalyst_2\\.\\d+-3\\.2\\..*")
-    )
-  )
+  @enableIf(classpathMatches(".*spark-catalyst_2\\.\\d+-3\\.[^01]\\..*".r))
   override def withNewChildrenInternal(
       newLeft: Expression,
       newRight: Expression

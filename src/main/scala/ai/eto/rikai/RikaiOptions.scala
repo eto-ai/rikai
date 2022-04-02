@@ -26,5 +26,5 @@ private[rikai] class RikaiOptions(parameters: Map[String, String]) {
 
   /** Parquet block size. */
   val blockSize: Int =
-    parameters.getOrElse("rikai.block.size", s"${blockSize}").toInt
+    parameters.getOrElse("rikai.block.size", s"${defaultBlockSize}").toInt
 }

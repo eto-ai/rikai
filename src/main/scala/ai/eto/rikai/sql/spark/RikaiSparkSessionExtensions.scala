@@ -74,7 +74,7 @@ private class MlPredictRule(val session: SparkSession)
     }
   }
 
-  @enableIf(classpathMatches(".*spark-catalyst_2\\.\\d+-3\\.2\\..*".r))
+  @enableIf(classpathMatches(".*spark-catalyst_2\\.\\d+-3\\.[^01]\\..*".r))
   private def getFuncName(f: UnresolvedFunction): String = {
     // After Spark 3.2
     f.nameParts.last

@@ -28,11 +28,11 @@ import org.apache.spark.sql.types.StringType
 trait ModelCommand extends RunnableCommand {
   override final def children: Seq[LogicalPlan] = Nil
 
-  @enableIf(classpathMatches(".*spark-catalyst_2\\.\\d+-3\\.2\\..*".r))
+  @enableIf(classpathMatches(".*spark-catalyst_2\\.\\d+-3\\.[^01]\\..*".r))
   override final def mapChildren(f: LogicalPlan => LogicalPlan): LogicalPlan =
     this.asInstanceOf[LogicalPlan]
 
-  @enableIf(classpathMatches(".*spark-catalyst_2\\.\\d+-3\\.2\\..*".r))
+  @enableIf(classpathMatches(".*spark-catalyst_2\\.\\d+-3\\.[^01]\\..*".r))
   override final def withNewChildrenInternal(
       newChildren: IndexedSeq[LogicalPlan]
   ): LogicalPlan = this.asInstanceOf[LogicalPlan]

@@ -56,7 +56,7 @@ case class ToStruct(child: Expression)
     case _                     => child.dataType
   }
 
-  @enableIf(classpathMatches(".*spark-catalyst_2\\.\\d+-3\\.2\\..*".r))
+  @enableIf(classpathMatches(".*spark-catalyst_2\\.\\d+-3\\.[^01]\\..*".r))
   override def withNewChildInternal(newChild: Expression): Expression =
     copy(child = newChild)
 }

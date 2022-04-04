@@ -82,7 +82,7 @@ class RikaiRelation(val options: RikaiOptions)(
     df.rdd
   }
 
-  /** Write Rikai metadata to a file */
+  /** Write Rikai metadata to a file. */
   private def writeMetadataFile(): Unit = {
     val fs = metadataFile.getFileSystem(
       sqlContext.sparkContext.hadoopConfiguration
@@ -90,11 +90,10 @@ class RikaiRelation(val options: RikaiOptions)(
 
     val outStream = fs.create(metadataFile, true)
     try {
-      Serialization.write(Map("a" -> 25), outStream)
+      Serialization.write(Map("options" -> options.options), outStream)
     } finally {
       outStream.close()
     }
-    println("OPEN METADATA: ", metadataFile, " on GC: ", fs)
   }
 
   /** Write data

@@ -113,7 +113,7 @@ def test_save_as_table_metadata(spark: SparkSession):
         "col_name = 'Location'"
     )
     table_path.show()
-    dirpath = Path(table_path.first().data_type[len("file:") :])
+    dirpath = Path(table_path.first().data_type[len("file:"):])
 
     assert (dirpath / "_rikai" / "metadata.json").exists()
     data = Dataset(dirpath)

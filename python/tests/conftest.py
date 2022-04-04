@@ -21,7 +21,7 @@ import warnings
 from pathlib import Path
 from urllib.parse import urlparse
 
-warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=DeprecationWarning)  # noqa
 
 # Third Party
 import mlflow

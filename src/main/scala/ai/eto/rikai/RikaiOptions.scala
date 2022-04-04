@@ -18,8 +18,6 @@ package ai.eto.rikai
 
 private[rikai] class RikaiOptions(parameters: Map[String, String]) {
 
-  println("Parameters; ", parameters)
-
   /** Base path for the feature dataset
     */
   val path: String = parameters.getOrElse("path", "")
@@ -30,14 +28,16 @@ private[rikai] class RikaiOptions(parameters: Map[String, String]) {
       .getOrElse("rikai.block.size", s"${RikaiOptions.defaultBlockSize}")
       .toInt
 
+  /** Extract options */
   val options: Map[String, String] =
     parameters
-      .filterKeys(k => !RikaiOptions.excludedOptionKeys(k))
+      .filterKeys(k => !RikaiOptions.excludedKeys(k))
+      .toMap
 }
 
 private[rikai] object RikaiOptions {
   val defaultBlockSize: Int = 32 * 1024 * 1024
 
   /** The keys that do not write to metadata file. */
-  private val excludedOptionKeys: Set[String] = Set("path")
+  private val excludedKeys: Set[String] = Set("path")
 }

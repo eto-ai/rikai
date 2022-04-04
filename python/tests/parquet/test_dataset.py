@@ -83,9 +83,7 @@ def test_select_no_existed_columns(spark: SparkSession, tmp_path: Path):
 
 def test_read_metadata(spark: SparkSession, tmp_path: Path):
     dest = str(tmp_path)
-    df = spark.createDataFrame(
-        [Row(id=i, col=f"val-{i}") for i in range(1000)]
-    )
+    df = spark.createDataFrame([Row(id=i, col=f"val-{i}") for i in range(50)])
     df.write.format("rikai").option("metadata1", 1).option(
         "metadata2", "value-2"
     ).save(dest)
@@ -100,6 +98,25 @@ def test_read_metadata(spark: SparkSession, tmp_path: Path):
     assert len(list(tmp_path.glob("**/*.json"))) > 0
 
     data = Dataset(tmp_path)
+    assert data.metadata == {
+        "options": {"metadata1": "1", "metadata2": "value-2"}
+    }
+
+
+def test_save_as_table_metadata(spark: SparkSession):
+    df = spark.createDataFrame([Row(id=i, col=f"val-{i}") for i in range(50)])
+    spark.sql("DROP TABLE IF EXISTS test_table_metadata")
+    df.write.option("metadata1", 1).option("metadata2", "value-2").saveAsTable(
+        "test_table_metadata", format="rikai"
+    )
+    table_path = spark.sql("DESC FORMATTED test_table_metadata").filter(
+        "col_name = 'Location'"
+    )
+    table_path.show()
+    dirpath = Path(table_path.first().data_type[len("file:") :])
+
+    assert (dirpath / "_rikai" / "metadata.json").exists()
+    data = Dataset(dirpath)
     assert data.metadata == {
         "options": {"metadata1": "1", "metadata2": "value-2"}
     }

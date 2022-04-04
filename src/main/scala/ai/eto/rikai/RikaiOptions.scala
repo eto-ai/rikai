@@ -18,6 +18,8 @@ package ai.eto.rikai
 
 private[rikai] class RikaiOptions(parameters: Map[String, String]) {
 
+  println("Parameters; ", parameters)
+
   /** Base path for the feature dataset
     */
   val path: String = parameters.getOrElse("path", "")
@@ -27,6 +29,8 @@ private[rikai] class RikaiOptions(parameters: Map[String, String]) {
     parameters
       .getOrElse("rikai.block.size", s"${RikaiOptions.defaultBlockSize}")
       .toInt
+
+  val metadata: Map[String, String] = parameters.filterKeys()
 }
 
 private[rikai] object RikaiOptions {

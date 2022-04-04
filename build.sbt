@@ -7,14 +7,16 @@ scalaVersion := "2.12.10"
 scalaBinaryVersion := scalaVersion.value.split('.').slice(0, 2).mkString(".")
 
 val sparkVersion = settingKey[String]("Apache Spark version")
-val sparkVerStr = settingKey[String]("Apache Spark version string like spark312")
-sparkVersion := {sys.env.get("SPARK_VERSION") match {
-  case Some(sparkVersion) => sparkVersion
-  case None =>
-    if (scalaVersion.value.compareTo("2.12.15") >= 0) "3.2.1" else "3.1.2"
-}}
+val sparkVerStr =
+  settingKey[String]("Apache Spark version string like spark312")
+sparkVersion := {
+  sys.env.get("SPARK_VERSION") match {
+    case Some(sparkVersion) => sparkVersion
+    case None =>
+      if (scalaVersion.value.compareTo("2.12.15") >= 0) "3.2.1" else "3.1.2"
+  }
+}
 sparkVerStr := s"spark${sparkVersion.value.replace(".", "")}"
-
 
 def versionFmt(out: sbtdynver.GitDescribeOutput): String = {
   val parts = out.ref.dropPrefix.split('.').toList
@@ -71,6 +73,7 @@ libraryDependencies ++= {
   val scalaLoggingVersion = "3.9.4"
   val snappyVersion = "1.1.8.4" // Support Apple Silicon
   val scalatestVersion = "3.2.0"
+  val hadoopVersion = "3.1.4"
   val circeVersion = "0.12.3"
   val mlflowVersion = "1.21.0"
   val enableifVersion = "1.1.8"
@@ -84,6 +87,7 @@ libraryDependencies ++= {
     "org.apache.spark" %% "spark-core" % sparkVersion.value % Test classifier "tests",
     "org.apache.spark" %% "spark-hive-thriftserver" % sparkVersion.value % Test,
     "org.apache.spark" %% "spark-hive-thriftserver" % sparkVersion.value % Test classifier "tests",
+    "org.apache.hadoop" % "hadoop-common" % hadoopVersion,
     "software.amazon.awssdk" % "s3" % awsVersion % Provided,
     "org.xerial.snappy" % "snappy-java" % snappyVersion,
     "org.apache.logging.log4j" % "log4j-core" % log4jVersion % Runtime,

@@ -14,14 +14,14 @@
 
 import base64
 from io import BytesIO
+from pathlib import Path
 
 import numpy as np
 import PIL
 import requests
 import requests_mock
 
-from rikai.conf import CONF_RIKAI_IO_HTTP_AGENT, get_option
-from rikai.io import open_uri
+from rikai.io import exists, open_uri
 from rikai.types.vision import Image
 
 WIKIPEDIA = (
@@ -65,3 +65,10 @@ def test_no_http_credentials():
         requests.get("http://test.com")
         req = mock.request_history[0]
         assert "Authorization" not in req.headers
+
+
+def test_exists(tmp_path: Path):
+    assert exists(str(tmp_path / "a.json")) is False
+    with (tmp_path / "a.txt").open(mode="w") as fobj:
+        fobj.write("blabla")
+    assert exists(str(tmp_path / "a.txt"))

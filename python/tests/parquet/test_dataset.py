@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import json
 from pathlib import Path
 
 # Third Party
@@ -78,6 +79,30 @@ def test_select_no_existed_columns(spark: SparkSession, tmp_path: Path):
 
     with pytest.raises(ColumnNotFoundError):
         Dataset(dest, columns=["id", "image"])
+
+
+def test_read_metadata(spark: SparkSession, tmp_path: Path):
+    dest = str(tmp_path)
+    df = spark.createDataFrame(
+        [Row(id=i, col=f"val-{i}") for i in range(1000)]
+    )
+    df.write.format("rikai").option("metadata1", 1).option(
+        "metadata2", "value-2"
+    ).save(dest)
+
+    metadata_path = tmp_path / "_rikai" / "metadata.json"
+    assert metadata_path.exists()
+    with metadata_path.open() as fobj:
+        metadata = json.load(fobj)
+        assert metadata == {
+            "options": {"metadata1": "1", "metadata2": "value-2"}
+        }
+    assert len(list(tmp_path.glob("**/*.json"))) > 0
+
+    data = Dataset(tmp_path)
+    assert data.metadata == {
+        "options": {"metadata1": "1", "metadata2": "value-2"}
+    }
 
 
 def _verify_group_size(dest: Path, group_size: int):

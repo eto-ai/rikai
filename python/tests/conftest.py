@@ -17,8 +17,11 @@ import os
 import random
 import string
 import uuid
+import warnings
 from pathlib import Path
 from urllib.parse import urlparse
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)  # noqa
 
 # Third Party
 import mlflow
@@ -236,8 +239,9 @@ def aws_spark(mlflow_tracking_uri: str) -> SparkSession:
 
 
 @pytest.fixture(scope="module")
-def spark(mlflow_tracking_uri: str) -> SparkSession:
+def spark(mlflow_tracking_uri: str, tmp_path_factory) -> SparkSession:
     print(f"mlflow tracking uri for spark: ${mlflow_tracking_uri}")
+    warehouse_path = tmp_path_factory.mktemp("warehouse")
     rikai_version = get_default_jar_version(use_snapshot=True)
 
     return init_spark_session(
@@ -252,6 +256,7 @@ def spark(mlflow_tracking_uri: str) -> SparkSession:
                     ),
                 ),
                 ("spark.port.maxRetries", 128),
+                ("spark.sql.warehouse.dir", str(warehouse_path)),
                 (
                     "spark.rikai.sql.ml.registry.test.impl",
                     "ai.eto.rikai.sql.model.testing.TestRegistry",

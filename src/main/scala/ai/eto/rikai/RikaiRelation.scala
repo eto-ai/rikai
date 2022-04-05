@@ -16,12 +16,15 @@
 
 package ai.eto.rikai
 
+import org.apache.hadoop.fs.Path
 import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.{Row, SQLContext, SaveMode}
 import org.apache.spark.sql.sources._
 import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.{Row, SQLContext, SaveMode}
+import org.json4s.jackson.Serialization
+import org.json4s._
 
 class RikaiRelation(val options: RikaiOptions)(
     @transient val sqlContext: SQLContext
@@ -31,6 +34,14 @@ class RikaiRelation(val options: RikaiOptions)(
     with PrunedScan
     with TableScan
     with Logging {
+
+  /** Rikai metadata directory. */
+  val rikaiDir = new Path(options.path, "_rikai")
+
+  /** Metadata file name */
+  val metadataFile = new Path(rikaiDir, "metadata.json")
+
+  implicit val formats: Formats = Serialization.formats(NoTypeHints)
 
   override def schema: StructType =
     sqlContext.read.parquet(options.path).schema
@@ -71,6 +82,20 @@ class RikaiRelation(val options: RikaiOptions)(
     df.rdd
   }
 
+  /** Write Rikai metadata to a file. */
+  private def writeMetadataFile(): Unit = {
+    val fs = metadataFile.getFileSystem(
+      sqlContext.sparkContext.hadoopConfiguration
+    )
+
+    val outStream = fs.create(metadataFile, true)
+    try {
+      Serialization.write(Map("options" -> options.options), outStream)
+    } finally {
+      outStream.close()
+    }
+  }
+
   /** Write data
     *
     * @param data
@@ -86,6 +111,7 @@ class RikaiRelation(val options: RikaiOptions)(
     }
     val total = writer.save(options.path)
 
+    writeMetadataFile()
     // TODO: create schema that is usable for pytorch / tf reader
     // TODO: build index
     total

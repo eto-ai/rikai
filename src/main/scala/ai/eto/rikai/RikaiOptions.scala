@@ -27,8 +27,17 @@ private[rikai] class RikaiOptions(parameters: Map[String, String]) {
     parameters
       .getOrElse("rikai.block.size", s"${RikaiOptions.defaultBlockSize}")
       .toInt
+
+  /** Extract options */
+  val options: Map[String, String] =
+    parameters
+      .filterKeys(k => !RikaiOptions.excludedKeys(k))
+      .toMap
 }
 
 private[rikai] object RikaiOptions {
   val defaultBlockSize: Int = 32 * 1024 * 1024
+
+  /** The keys that do not write to metadata file. */
+  private val excludedKeys: Set[String] = Set("path")
 }

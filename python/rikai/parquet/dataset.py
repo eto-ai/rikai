@@ -17,6 +17,8 @@
 
 # Standard Library
 import importlib
+import json
+import os
 from functools import partial
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Union
@@ -33,7 +35,7 @@ from pyspark.sql.types import UserDefinedType
 
 # Rikai
 from rikai.exceptions import ColumnNotFoundError
-from rikai.io import open_input_stream
+from rikai.io import exists, open_input_stream, open_uri
 from rikai.logging import logger
 from rikai.mixin import ToNumpy, ToPIL
 from rikai.parquet.resolver import Resolver
@@ -130,6 +132,16 @@ class Dataset:
                 break
         else:
             raise ColumnNotFoundError(f"Column not found: {column}")
+
+    @property
+    def metadata(self) -> dict:
+        """Rikai metadata"""
+        metadata_path = os.path.join(self.uri, "_rikai", "metadata.json")
+
+        if not exists(metadata_path):
+            return {}
+        with open_uri(metadata_path) as fobj:
+            return json.load(fobj)
 
     @classmethod
     def _find_udt(cls, pyclass: str) -> UserDefinedType:

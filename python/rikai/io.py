@@ -29,7 +29,7 @@ from pyarrow import fs
 import rikai.conf
 from rikai.logging import logger
 
-__all__ = ["copy", "open_uri", "open_output_stream"]
+__all__ = ["copy", "open_uri", "open_output_stream", "exists"]
 
 
 def _normalize_uri(uri: str) -> str:
@@ -178,3 +178,29 @@ def open_uri(
     else:
         filesystem, path = fs.FileSystem.from_uri(uri)
         return filesystem.open_input_file(path)
+
+
+def exists(
+    uri: Union[str, Path],
+    http_auth: Optional[Union[requests.auth.AuthBase, Tuple[str, str]]] = None,
+    http_headers: Optional[Dict] = None,
+) -> bool:
+    """Returns True if the URI/file exists."""
+    if isinstance(uri, Path):
+        return uri.exists()
+    parsed_uri = urlparse(uri)
+    if parsed_uri.scheme in ("http", "https"):
+        if http_headers is None:
+            http_headers = {}
+        if "User-Agent" not in http_headers:
+            http_headers["User-Agent"] = rikai.conf.get_option(
+                rikai.conf.CONF_RIKAI_IO_HTTP_AGENT
+            )
+        resp = requests.head(uri, auth=http_auth, headers=http_headers)
+        return resp.status_code == 200
+    elif parsed_uri.scheme == "gs":
+        return _gcsfs().open(uri)
+    else:
+        filesystem, path = fs.FileSystem.from_uri(uri)
+        file_info: fs.FileInfo = filesystem.get_file_info(path)
+        return file_info.type != fs.FileType.NotFound

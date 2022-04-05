@@ -90,7 +90,7 @@ class Drawable(ABC):
         return style(self)
 
 
-class ComposableDrawable(Drawable):
+class ComposableDrawable:
     """Mixin for a drawable that can be composed with others"""
 
     @abstractmethod

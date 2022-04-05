@@ -21,6 +21,7 @@ import pytest
 from pyspark.sql import Row, SparkSession
 
 # Rikai
+from rikai.exceptions import ColumnNotFoundError
 from rikai.parquet import Dataset
 from rikai.testing.asserters import assert_count_equal
 from rikai.types import Image
@@ -68,6 +69,15 @@ def test_offset(spark: SparkSession, tmp_path: Path):
 
     with pytest.raises(StopIteration):
         next(iter(Dataset(dest, offset=2000)))  # off the edge
+
+
+def test_select_no_existed_columns(spark: SparkSession, tmp_path: Path):
+    dest = str(tmp_path)
+    df = spark.createDataFrame([Row(id=i, val=f"val-{i}") for i in range(20)])
+    df.write.format("rikai").save(dest)
+
+    with pytest.raises(ColumnNotFoundError):
+        Dataset(dest, columns=["id", "image"])
 
 
 def _verify_group_size(dest: Path, group_size: int):

@@ -24,7 +24,7 @@ from typing import Optional, Sequence, Tuple, Union
 import numpy as np
 from PIL import Image, ImageDraw
 
-from rikai.mixin import Drawable, ToDict, ToNumpy
+from rikai.mixin import Drawable, ToDict, ToNumpy, ComposableDrawable, ComposedDrawable
 from rikai.spark.types.geometry import (
     Box2dType,
     Box3dType,
@@ -32,8 +32,11 @@ from rikai.spark.types.geometry import (
     PointType,
 )
 from rikai.types import rle
+from rikai.conf import CONF_RIKAI_VIZ_COLOR, get_option
 
 __all__ = ["Point", "Box3d", "Box2d", "Mask"]
+
+from rikai.viz import Text
 
 
 class Point(ToNumpy, ToDict):
@@ -75,7 +78,7 @@ class Point(ToNumpy, ToDict):
         return {"x": self.x, "y": self.y, "z": self.z}
 
 
-class Box2d(ToNumpy, Sequence, ToDict, Drawable):
+class Box2d(ToNumpy, Sequence, ToDict, Drawable, ComposableDrawable):
     """2-D Bounding Box, defined by ``(xmin, ymin, xmax, ymax)``
 
     Attributes
@@ -101,6 +104,21 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
     >>> draw = PIL.ImageDraw.Draw(img)
     >>> draw.rectangle(box, fill="green", width=2)
     """
+
+    def xy_min(self):
+        return self.xmin, self.ymin
+
+    def aligned(self, base_drawable: ComposableDrawable, algorithm: str = "left-top"):
+        (new_xmin, new_ymin) = base_drawable.xy_min
+        return Box2d(new_xmin, new_ymin, self.xmax - self.xmin + new_xmin, self.ymax - self.ymin + new_ymin)
+
+    def with_label(self, text: str, color: str = get_option(CONF_RIKAI_VIZ_COLOR)):
+        """return a ComposedDrawable with label on the box"""
+
+        composed = ComposedDrawable()
+        composed.add_drawable(self)
+        composed.add_drawable(Text(text, (self.xmin, self.ymin), color))
+        return composed
 
     __UDT__ = Box2dType()
 

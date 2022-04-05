@@ -22,7 +22,7 @@ from PIL import Image as PILImage
 from PIL import ImageDraw
 
 from rikai.conf import CONF_RIKAI_VIZ_COLOR, get_option
-from rikai.mixin import Displayable, Drawable
+from rikai.mixin import Displayable, Drawable, ComposableDrawable
 
 __all__ = ["Style", "Text"]
 
@@ -174,7 +174,7 @@ class PILRenderer(Renderer):
         self.draw = ImageDraw.Draw(self.img)
 
 
-class Text(Drawable):
+class Text(Drawable, ComposableDrawable):
     """Render a Text
 
     Parameters
@@ -186,6 +186,12 @@ class Text(Drawable):
     color : str, optional
         The RGB color string to render the text
     """
+
+    def xy_min(self):
+        return self.xy
+
+    def aligned(self, base_drawable: ComposableDrawable, algorithm: str = "left-top"):
+        return Text(self.text, base_drawable.xy_min, self.color)
 
     def __init__(
         self,

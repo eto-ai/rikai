@@ -32,6 +32,7 @@ from pyspark.sql import Row
 from pyspark.sql.types import UserDefinedType
 
 # Rikai
+from rikai.exceptions import ColumnNotFoundError
 from rikai.io import open_input_stream
 from rikai.logging import logger
 from rikai.mixin import ToNumpy, ToPIL
@@ -112,10 +113,23 @@ class Dataset:
 
         self.spark_row_metadata = Resolver.get_schema(self.uri)
 
+        if columns:
+            # TODO: check nested columns
+            for col in columns:
+                self._check_column(col, self.spark_row_metadata)
+
     def __repr__(self) -> str:
         return "Dataset(uri={}, columns={})".format(
             self.uri, self.columns if self.columns else "[*]"
         )
+
+    @staticmethod
+    def _check_column(column: str, schema: dict):
+        for field in schema["fields"]:
+            if field["name"] == column:
+                break
+        else:
+            raise ColumnNotFoundError(f"Column not found: {column}")
 
     @classmethod
     def _find_udt(cls, pyclass: str) -> UserDefinedType:

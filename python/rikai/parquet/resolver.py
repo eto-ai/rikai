@@ -1,4 +1,4 @@
-#  Copyright 2020 Rikai Authors
+#  Copyright 2022 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ from typing import Dict, Iterable, Union
 from urllib.parse import urlparse
 
 import pyarrow.parquet as pq
-from pyarrow.fs import FileSelector, FileSystem
+from pyarrow.fs import FileSelector, FileSystem, FileType, FileInfo
 
 from rikai.internal.uri_utils import normalize_uri
 from rikai.io import _gcsfs, open_input_stream
@@ -75,15 +75,19 @@ class DefaultResolver(BaseResolver):
         parsed = urlparse(uri)
         scheme = parsed.scheme
 
-        paths = None
         if scheme == "gs":
             fs = _gcsfs()
+            if not fs.exists(uri):
+                raise FileNotFoundError
             glob_uri = os.path.join(uri, "*.parquet")
             logger.debug("Scan GCS directory: %s", glob_uri)
             paths = fs.glob(glob_uri)
         else:
             logger.debug("Scan pyarrow supported directory: %s", uri)
             fs, base_dir = FileSystem.from_uri(uri)
+            file_info: FileInfo = fs.get_file_info(base_dir)
+            if file_info.type == FileType.NotFound:
+                raise FileNotFoundError
             # base_dir = parsed.netloc + parsed.path
             selector = FileSelector(
                 base_dir, allow_not_found=True, recursive=True

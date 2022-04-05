@@ -24,7 +24,13 @@ from typing import Optional, Sequence, Tuple, Union
 import numpy as np
 from PIL import Image, ImageDraw
 
-from rikai.mixin import Drawable, ToDict, ToNumpy, ComposableDrawable, ComposedDrawable
+from rikai.mixin import (
+    Drawable,
+    ToDict,
+    ToNumpy,
+    ComposableDrawable,
+    ComposedDrawable,
+)
 from rikai.spark.types.geometry import (
     Box2dType,
     Box3dType,
@@ -108,17 +114,29 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable, ComposableDrawable):
     def xy_min(self):
         return self.xmin, self.ymin
 
-    def aligned(self, base_drawable: ComposableDrawable, algorithm: str = "left-top"):
+    def aligned(
+        self, base_drawable: ComposableDrawable, algorithm: str = "left-top"
+    ):
         (new_xmin, new_ymin) = base_drawable.xy_min
-        return Box2d(new_xmin, new_ymin, self.xmax - self.xmin + new_xmin, self.ymax - self.ymin + new_ymin)
+        return Box2d(
+            new_xmin,
+            new_ymin,
+            self.xmax - self.xmin + new_xmin,
+            self.ymax - self.ymin + new_ymin,
+        )
 
-    def with_label(self, text: str, color: str = get_option(CONF_RIKAI_VIZ_COLOR)):
+    def with_label(
+        self, text: str, color: str = get_option(CONF_RIKAI_VIZ_COLOR)
+    ):
         """return a ComposedDrawable with label on the box"""
 
         composed = ComposedDrawable()
         composed.add_drawable(self)
         composed.add_drawable(Text(text, (self.xmin, self.ymin), color))
         return composed
+
+    def __add__(self, other: str):
+        return self.with_label(other)
 
     __UDT__ = Box2dType()
 

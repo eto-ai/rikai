@@ -23,6 +23,7 @@ from typing import BinaryIO, Mapping, Optional, Union
 
 # Third Party
 import numpy as np
+
 # Rikai
 from rikai.internal.uri_utils import uri_equal
 from rikai.io import open_uri
@@ -97,7 +98,9 @@ class ComposableDrawable(Drawable):
         """return a tuple of the left top axis (xmin, ymin)"""
 
     @abstractmethod
-    def aligned(self, base_drawable: ComposableDrawable, algorithm: str = "left-top"):
+    def aligned(
+        self, base_drawable: ComposableDrawable, algorithm: str = "left-top"
+    ):
         """return a new instance that is aligned with the base drawable, currently it has only `left-top` align, will
         add more if we need them"""
 
@@ -108,8 +111,10 @@ class ComposedDrawable(Drawable):
     def align(self):
         if len(self.inner_drawables) <= 1:
             return
-        self.inner_drawables = self.inner_drawables[:1] + [inner.aligned(self.inner_drawables[0]) for inner in
-                                                           self.inner_drawables]
+        self.inner_drawables = self.inner_drawables[:1] + [
+            inner.aligned(self.inner_drawables[0])
+            for inner in self.inner_drawables
+        ]
 
     def _render(self, render: "rikai.viz.Renderer", **kwargs) -> None:
         self.align()
@@ -117,7 +122,9 @@ class ComposedDrawable(Drawable):
             inner._render(render, **kwargs)
 
     def __matmul__(self, style: Union[dict, "rikai.viz.Style"]) -> Drawable:
-        self.inner_drawables = [inner.__matmul__(style) for inner in self.inner_drawables]
+        self.inner_drawables = [
+            inner.__matmul__(style) for inner in self.inner_drawables
+        ]
 
     def __init__(self):
         self.inner_drawables = []
@@ -144,7 +151,7 @@ class Asset(ABC):
     """
 
     def __init__(
-            self, data: Optional[bytes] = None, uri: Union[str, Path] = None
+        self, data: Optional[bytes] = None, uri: Union[str, Path] = None
     ) -> None:
         assert (data is None) ^ (uri is None)
         assert data is None or isinstance(

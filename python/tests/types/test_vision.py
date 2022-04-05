@@ -264,6 +264,25 @@ def test_draw_texts():
     assert np.array_equal(pil_image.to_numpy(), expected)
 
 
+def test_draw_box_with_label():
+    data = np.random.randint(0, 255, size=(100, 100, 3), dtype=np.uint8)
+    img = Image.from_array(data)
+
+    box1 = Box2d(1, 2, 10, 12)
+    box2 = Box2d(20, 20, 40, 40)
+    draw_boxes = img | (box1 + "label1") | box2.with_label("label2")
+    pil_image = draw_boxes.to_image()
+
+    expected = Image.from_array(data).to_pil()
+    draw = PILImageDraw.Draw(expected)
+    draw.rectangle((1.0, 2.0, 10.0, 12.0), outline="red")
+    draw.rectangle((20, 20, 40, 40), outline="red")
+    draw.text((1, 2), "label1", fill="red")
+    draw.text((10, 2), "label2", fill="red")
+    print(pil_image.to_numpy().shape, data.shape)
+    assert np.array_equal(pil_image.to_numpy(), expected)
+
+
 def test_wrong_draw_order():
     """A draw pipeline must start with an image"""
     data = np.random.randint(0, 255, size=(100, 100), dtype=np.uint8)

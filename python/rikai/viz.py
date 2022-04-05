@@ -190,7 +190,9 @@ class Text(Drawable, ComposableDrawable):
     def xy_min(self):
         return self.xy
 
-    def aligned(self, base_drawable: ComposableDrawable, algorithm: str = "left-top"):
+    def aligned(
+        self, base_drawable: ComposableDrawable, algorithm: str = "left-top"
+    ):
         return Text(self.text, base_drawable.xy_min, self.color)
 
     def __init__(

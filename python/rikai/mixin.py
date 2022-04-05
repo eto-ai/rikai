@@ -101,12 +101,14 @@ class ComposableDrawable:
     def aligned(
         self, base_drawable: ComposableDrawable, algorithm: str = "left-top"
     ):
-        """return a new instance that is aligned with the base drawable, currently it has only `left-top` align, will
+        """return a new instance that is aligned with the base drawable,
+         currently it has only `left-top` align, will
         add more if we need them"""
 
 
 class ComposedDrawable(Drawable):
-    """A drawable that includes multi sub composable drawables, will align them in rendering"""
+    """A drawable that includes multi sub composable drawables,
+     will align them in rendering"""
 
     def align(self):
         if len(self.inner_drawables) <= 1:

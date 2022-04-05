@@ -11,9 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+from pathlib import Path
 from typing import Iterable
 
-from rikai.parquet.resolver import BaseResolver, register, Resolver
+import pytest
+
+from rikai.io import open_output_stream
+from rikai.parquet.resolver import BaseResolver, Resolver
 from rikai.testing import assert_count_equal
 
 
@@ -43,6 +48,22 @@ def test_resolve_local_fs(tmp_path):
 
 def test_resolve_empty_dir(tmp_path):
     assert [] == list(Resolver.resolve(tmp_path))
+
+
+def test_resolve_not_existed_dir(tmp_path: Path):
+    with pytest.raises(FileNotFoundError):
+        Resolver.resolve(tmp_path / "nothere")
+
+
+def test_resolve_not_existed_s3_dir(s3_tmpdir):
+    with pytest.raises(FileNotFoundError):
+        Resolver.resolve(s3_tmpdir)
+
+    with open_output_stream(s3_tmpdir + "/dummy.txt") as fobj:
+        fobj.write("DUMMY DATA\n".encode("utf-8"))
+
+    Resolver.resolve(s3_tmpdir)
+    Resolver.resolve(s3_tmpdir + "/")
 
 
 def test_default_scheme(tmp_path):

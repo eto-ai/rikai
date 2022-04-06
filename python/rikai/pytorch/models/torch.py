@@ -32,7 +32,6 @@ __all__ = [
     "TorchModelType",
     "ClassificationModelType",
     "MODEL_TYPES",
-    "model_type",
 ]
 
 
@@ -160,21 +159,3 @@ class ObjectDetectionModelType(TorchModelType):
 
 # Registered model types
 MODEL_TYPES = {}
-
-
-def model_type(
-    cls: Union[Type[TorchModelType], TorchModelType]
-) -> Type[TorchModelType]:
-    """Decorator for registering a model type."""
-    if not isinstance(cls, TorchModelType):
-        model = cls()
-    else:
-        model = cls
-    if model.name in MODEL_TYPES:
-        if not isinstance(MODEL_TYPES[model.name], model.__class__):
-            raise ValueError(f"Model {model.name} already registered to {model.__class__}")
-        else:
-            return cls
-    MODEL_TYPES[model.name] = model
-    logging.debug("Model type %s registered", model)
-    return cls

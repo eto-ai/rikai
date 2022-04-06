@@ -17,21 +17,21 @@ import torchvision
 from rikai.pytorch.models.torch import ClassificationModelType
 
 resnet18 = ClassificationModelType(
-    name="resnet18", pretrained_fn=torchvision.models.resnet18, register=True
+    name="resnet18", pretrained_fn=torchvision.models.resnet18
 )
 resnet34 = ClassificationModelType(
-    name="resnet34", pretrained_fn=torchvision.models.resnet34, register=True
+    name="resnet34", pretrained_fn=torchvision.models.resnet34
 )
 resnet50 = ClassificationModelType(
-    name="resnet50", pretrained_fn=torchvision.models.resnet50, register=True
+    name="resnet50", pretrained_fn=torchvision.models.resnet50
 )
 resnet101 = ClassificationModelType(
-    name="resnet101", pretrained_fn=torchvision.models.resnet101, register=True
+    name="resnet101", pretrained_fn=torchvision.models.resnet101
 )
 resnet152 = ClassificationModelType(
-    name="resnet152", pretrained_fn=torchvision.models.resnet152, register=True
+    name="resnet152", pretrained_fn=torchvision.models.resnet152
 )
 # Make default resnet to be ResNet-50
 resnet = ClassificationModelType(
-    name="resnet50", pretrained_fn=torchvision.models.resnet50, register=True
+    name="resnet50", pretrained_fn=torchvision.models.resnet50
 )

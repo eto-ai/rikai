@@ -154,7 +154,7 @@ class SSDClassScoresModelType(ObjectDetectionModelType):
     DEFAULT_MIN_SCORE = 0.3
 
     def __init__(self):
-        super().__init__("ssd_class_scores", register=True)
+        super().__init__("ssd_class_scores")
 
     def schema(self) -> str:
         return (

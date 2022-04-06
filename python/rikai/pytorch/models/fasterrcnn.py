@@ -14,7 +14,7 @@
 
 import torchvision
 
-from rikai.pytorch.models.torch import model_type, ObjectDetectionModelType
+from rikai.pytorch.models.torch import ObjectDetectionModelType
 
 
 fasterrcnn = ObjectDetectionModelType(

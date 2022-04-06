@@ -153,9 +153,6 @@ class SSDClassScoresExtractor(torch.nn.Module):
 class SSDClassScoresModelType(ObjectDetectionModelType):
     DEFAULT_MIN_SCORE = 0.3
 
-    def __init__(self):
-        super().__init__("ssd_class_scores")
-
     def schema(self) -> str:
         return (
             "array<struct<box:box2d, scores:array<float>, "
@@ -201,3 +198,6 @@ class SSDClassScoresModelType(ObjectDetectionModelType):
 
             results.append(predict_result)
         return results
+
+
+ssd_class_scores = SSDClassScoresModelType("ssd_class_scores")

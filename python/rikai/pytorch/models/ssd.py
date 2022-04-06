@@ -12,20 +12,27 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import torchvision
-
 from rikai.mixin import Pretrained
-from rikai.pytorch.models.torchvision import ObjectDetectionModelType
-
-__all__ = ["MODEL_TYPE"]
+from rikai.pytorch.models.torch import ObjectDetectionModelType, model_type
 
 
+@model_type
 class SSDModelType(ObjectDetectionModelType, Pretrained):
     def __init__(self):
         super().__init__("SSD")
 
     def pretrained_model(self):
+        import torchvision
         return torchvision.models.detection.ssd.ssd300_vgg16(pretrained=True)
 
 
-MODEL_TYPE = SSDModelType()
+@model_type
+class SSDLiteModelType(ObjectDetectionModelType, Pretrained):
+    def __init__(self):
+        super().__init__("ssdlite320_mobilenet_v3_large")
+
+    def pretrained_model(self):
+        import torchvision
+        return torchvision.models.detection.ssdlite320_mobilenet_v3_large(
+            pretrained=True
+        )

@@ -15,7 +15,7 @@
 import torchvision
 
 from rikai.mixin import Pretrained
-from rikai.pytorch.models.torchvision import ObjectDetectionModelType
+from rikai.pytorch.models.torch import ObjectDetectionModelType
 
 __all__ = ["MODEL_TYPE"]
 

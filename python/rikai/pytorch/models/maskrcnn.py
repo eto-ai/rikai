@@ -15,11 +15,10 @@
 import torchvision
 
 from rikai.mixin import Pretrained
-from rikai.pytorch.models.torchvision import ObjectDetectionModelType
-
-__all__ = ["MODEL_TYPE"]
+from rikai.pytorch.models.torch import ObjectDetectionModelType, model_type
 
 
+@model_type
 class MaskRCNNModelType(ObjectDetectionModelType, Pretrained):
     def __init__(self):
         super().__init__("maskrcnn_resnet50_fpn")
@@ -29,5 +28,3 @@ class MaskRCNNModelType(ObjectDetectionModelType, Pretrained):
             pretrained=True
         )
 
-
-MODEL_TYPE = MaskRCNNModelType()

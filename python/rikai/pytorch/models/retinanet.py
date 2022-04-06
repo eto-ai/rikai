@@ -15,11 +15,12 @@
 import torchvision
 
 from rikai.mixin import Pretrained
-from rikai.pytorch.models.torchvision import ObjectDetectionModelType
+from rikai.pytorch.models.torch import ObjectDetectionModelType, model_type
 
 __all__ = ["MODEL_TYPE"]
 
 
+@model_type
 class RetinaNetModelType(ObjectDetectionModelType, Pretrained):
     def __init__(self):
         super().__init__("retinanet_resnet50_fpn")

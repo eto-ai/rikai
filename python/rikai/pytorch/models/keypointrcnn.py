@@ -20,16 +20,14 @@ from rikai.pytorch.models.torchvision import ObjectDetectionModelType
 __all__ = ["MODEL_TYPE"]
 
 
-class FasterRCNNMobileNetV3LargeModelType(ObjectDetectionModelType, Pretrained):
+class KeyPointRCNNModelType(ObjectDetectionModelType, Pretrained):
     def __init__(self):
-        super().__init__("fasterrcnn_mobilenet_v3_large_320_fpn")
+        super().__init__("keypointrcnn_resnet50_fpn")
 
     def pretrained_model(self):
-        return (
-            torchvision.models.detection.fasterrcnn_mobilenet_v3_large_320_fpn(
-                pretrained=True
-            )
+        return torchvision.models.detection.keypointrcnn_resnet50_fpn(
+            pretrained=True
         )
 
 
-MODEL_TYPE = FasterRCNNMobileNetV3LargeModelType()
+MODEL_TYPE = KeyPointRCNNModelType()

@@ -14,10 +14,9 @@
 
 from typing import Any, Callable
 
-import torch
 from torchvision import transforms as T
 
-from rikai.pytorch.models import TorchModelType
+from rikai.pytorch.models.torch import TorchModelType
 
 """
 Adapted from https://github.com/pytorch/pytorch.github.io/blob/site/assets/hub/pytorch_vision_resnet.ipynb

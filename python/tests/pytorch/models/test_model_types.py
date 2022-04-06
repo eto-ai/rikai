@@ -48,7 +48,7 @@ def test_resnet(spark: SparkSession, asset_path: Path):
     for layers in [18, 34, 50, 101, 152]:
         model_name = f"resnet{layers}"
         spark.sql(
-            f"""CREATE MODEL OR REPLACE {model_name}
+            f"""CREATE OR REPLACE MODEL {model_name}
             FLAVOR pytorch MODEL_TYPE {model_name}"""
         )
         df = spark.sql(f"SELECT ML_PREDICT({model_name}, to_image('{uri}'))")

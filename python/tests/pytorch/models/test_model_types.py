@@ -22,15 +22,23 @@ from rikai.spark.functions import init
 
 def test_fasterrcnn_models(spark: SparkSession):
     init(spark)
-    name = "fasterrcnn"
-    spark.sql(
-        f"CREATE MODEL {name} FLAVOR pytorch MODEL_TYPE fasterrcnn_mobilenet_v3_large_fpn"
-    )
     uri = "https://i.scdn.co/image/ab67616d0000b273466def3ce70d94dcacb13c8d"
-    df = spark.sql(
-        f"select explode(ML_PREDICT(fasterrcnn, to_image('{uri}')))"
-    )
-    assert df.count() >= 3
+    for name in [
+        "fasterrcnn",
+        "fasterrcnn_resnet50_fpn",
+        "fasterrcnn_mobilenet_v3_large_fpn",
+        "fasterrcnn_mobilenet_v3_large_320_fpn",
+    ]:
+        spark.sql(
+            f"""CREATE OR REPLACE MODEL {name}
+            FLAVOR pytorch
+            MODEL_TYPE fasterrcnn_mobilenet_v3_large_fpn
+            """
+        )
+        df = spark.sql(
+            f"select explode(ML_PREDICT({name}, to_image('{uri}')))"
+        )
+        assert df.count() >= 3
 
 
 def test_resnet(spark: SparkSession, asset_path: Path):
@@ -40,7 +48,8 @@ def test_resnet(spark: SparkSession, asset_path: Path):
     for layers in [18, 34, 50, 101, 152]:
         model_name = f"resnet{layers}"
         spark.sql(
-            f"CREATE MODEL {model_name} FLAVOR pytorch MODEL_TYPE {model_name}"
+            f"""CREATE MODEL OR REPLACE {model_name}
+            FLAVOR pytorch MODEL_TYPE {model_name}"""
         )
         df = spark.sql(f"SELECT ML_PREDICT({model_name}, to_image('{uri}'))")
         assert df.count() > 0

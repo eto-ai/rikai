@@ -14,17 +14,14 @@
 
 import base64
 import filecmp
-from binascii import b2a_base64
-from io import BytesIO
-from pathlib import Path
-from typing import Union
-
 import numpy as np
 import pytest
 from PIL import Image as PILImage
 from PIL import ImageDraw as PILImageDraw
+from io import BytesIO
+from pathlib import Path
+from typing import Union
 
-from rikai.io import open_uri
 from rikai.types.geometry import Box2d
 from rikai.types.vision import Image, ImageDraw
 from rikai.viz import Style, Text
@@ -174,7 +171,7 @@ def test_to_dict():
     data = np.random.randint(0, 255, size=(100, 100, 3), dtype=np.uint8)
     img = Image.from_array(data)
     assert (
-        base64.decodebytes(img.to_dict()["data"].encode("utf-8")) == img.data
+            base64.decodebytes(img.to_dict()["data"].encode("utf-8")) == img.data
     )
     img = Image("foo")
     assert img.to_dict() == {"uri": "foo"}
@@ -214,9 +211,9 @@ def test_draw_styled_images():
 
     # Sugar!
     sugar_boxes = (
-        img
-        | box1 @ {"color": "green", "width": 10}
-        | box2 @ {"color": "green", "width": 10}
+            img
+            | box1 @ {"color": "green", "width": 10}
+            | box2 @ {"color": "green", "width": 10}
     )
 
     sugar_expected = Image.from_array(data).to_pil()
@@ -278,8 +275,10 @@ def test_draw_box_with_label():
     draw.rectangle((1.0, 2.0, 10.0, 12.0), outline="red")
     draw.rectangle((20, 20, 40, 40), outline="red")
     draw.text((1, 2), "label1", fill="red")
-    draw.text((10, 2), "label2", fill="red")
-    print(pil_image.to_numpy().shape, data.shape)
+    draw.text((20, 20), "label2", fill="red")
+    # If you need to see the pics in your local computer.
+    # pil_image.to_pil().show()
+    # expected.show()
     assert np.array_equal(pil_image.to_numpy(), expected)
 
 

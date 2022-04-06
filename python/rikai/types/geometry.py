@@ -127,7 +127,7 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable, ComposableDrawable):
 
     def with_label(
         self, text: str, color: str = get_option(CONF_RIKAI_VIZ_COLOR)
-    ):
+    ) -> Drawable:
         """return a ComposedDrawable with label on the box"""
 
         composed = ComposedDrawable()
@@ -135,7 +135,7 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable, ComposableDrawable):
         composed.add_drawable(Text(text, (self.xmin, self.ymin), color))
         return composed
 
-    def __add__(self, other: str):
+    def __add__(self, other: str) -> Drawable:
         return self.with_label(other)
 
     __UDT__ = Box2dType()

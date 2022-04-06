@@ -14,21 +14,9 @@
 
 import torchvision
 
-from rikai.mixin import Pretrained
-from rikai.pytorch.models.torch import model_type, ObjectDetectionModelType
+from rikai.pytorch.models.torch import ObjectDetectionModelType
 
-__all__ = ["MODEL_TYPE"]
-
-
-@model_type
-class KeyPointRCNNModelType(ObjectDetectionModelType, Pretrained):
-    def __init__(self):
-        super().__init__("keypointrcnn_resnet50_fpn")
-
-    def pretrained_model(self):
-        return torchvision.models.detection.keypointrcnn_resnet50_fpn(
-            pretrained=True
-        )
-
-
-MODEL_TYPE = KeyPointRCNNModelType()
+keypointrcnn = ObjectDetectionModelType(
+    "keypointrcnn",
+    pretrained_fn=torchvision.models.detection.keypointrcnn_resnet50_fpn,
+)

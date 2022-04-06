@@ -14,41 +14,22 @@
 
 import torchvision
 
-from rikai.mixin import Pretrained
 from rikai.pytorch.models.torch import model_type, ObjectDetectionModelType
 
 
-@model_type
-class FasterRCNNModelType(ObjectDetectionModelType, Pretrained):
-    def __init__(self):
-        super().__init__("fasterrcnn_resnet50_fpn")
-
-    def pretrained_model(self):
-        return torchvision.models.detection.fasterrcnn_resnet50_fpn(
-            pretrained=True
-        )
-
-@model_type
-class FasterRCNNMobileNetV3ModelType(ObjectDetectionModelType, Pretrained):
-    def __init__(self):
-        super().__init__("fasterrcnn_mobilenet_v3_large_fpn")
-
-    def pretrained_model(self):
-        return torchvision.models.detection.fasterrcnn_mobilenet_v3_large_fpn(
-            pretrained=True
-        )
+fasterrcnn = ObjectDetectionModelType(
+    "fasterrcnn_resnet50_fpn",
+    pretrained_fn=torchvision.models.detection.fasterrcnn_resnet50_fpn,
+)
 
 
-@model_type
-class FasterRCNNMobileNetV3LargeModelType(
-    ObjectDetectionModelType, Pretrained
-):
-    def __init__(self):
-        super().__init__("fasterrcnn_mobilenet_v3_large_320_fpn")
+fasterrcnn_mobilenet_v3_large_fpn = ObjectDetectionModelType(
+    "fasterrcnn_mobilenet_v3_large_fpn",
+    pretrained_fn=torchvision.models.detection.fasterrcnn_mobilenet_v3_large_fpn,
+)
 
-    def pretrained_model(self):
-        return (
-            torchvision.models.detection.fasterrcnn_mobilenet_v3_large_320_fpn(
-                pretrained=True
-            )
-        )
+
+fasterrcnn_mobilenet_large_320_fpn = ObjectDetectionModelType(
+    "fasterrcnn_mobilenet_v3_large_320_fpn",
+    pretrained_fn=torchvision.models.detection.fasterrcnn_mobilenet_v3_large_320_fpn,
+)

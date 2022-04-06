@@ -15,8 +15,9 @@
 """:py:class:`ModelType` for official torchvision models
 """
 
+import logging
 from abc import ABC
-from typing import Any, Callable, Optional, Type
+from typing import Any, Callable, Optional, Type, Union
 
 import torch
 from torchvision.transforms import ToTensor
@@ -31,32 +32,56 @@ __all__ = [
     "TorchModelType",
     "ClassificationModelType",
     "MODEL_TYPES",
-    "model_type"
+    "model_type",
 ]
 
 
 DEFAULT_MIN_SCORE = 0.5
 
 
-class TorchModelType(ModelType, ABC):
+class TorchModelType(ModelType, Pretrained, ABC):
     """Base ModelType for PyTorch models."""
 
-    def __init__(self, name: str):
+    def __init__(
+        self,
+        name: str,
+        pretrained_fn: Optional[Callable] = None,
+        register: bool = True,
+    ):
+        """Initialize a TorchModelType
+
+        Parameters
+        ----------
+        name : str
+            The name of the model type
+        pretrained_fn : Callable, optional
+            The callable to be called if loading pretrained models.
+        register : bool
+            Register the model to be discoverable via SQL
+        """
         self.model: Optional[torch.nn.Module] = None
         self.spec: Optional[ModelSpec] = None
         # TODO: make this a class member?
         self.name = name
+        self.pretrained_fn = pretrained_fn
+
+        if register:
+            MODEL_TYPES[name] = self
 
     def __repr__(self):
         return f"ModelType({self.name})"
 
+    def pretrained_model(self) -> Any:
+        if self.pretrained_fn is None:
+            raise ValueError(
+                "Missing model URI. Not able to get pretrained model"
+            )
+        return self.pretrained_fn(pretrained=True)
+
     def load_model(self, spec: ModelSpec, **kwargs):
         self.spec = spec
         if isinstance(spec, DummyModelSpec):
-            if isinstance(self, Pretrained):
-                self.model = self.pretrained_model()
-            else:
-                raise ValueError("Missing model URI")
+            self.model = self.pretrained_model()
         else:
             self.model = self.spec.load_model()
         self.model.eval()
@@ -137,10 +162,19 @@ class ObjectDetectionModelType(TorchModelType):
 MODEL_TYPES = {}
 
 
-def model_type(cls: Type[TorchModelType]) -> Type[TorchModelType]:
-    """Decorator for registering a model type"""
-    model = cls()
+def model_type(
+    cls: Union[Type[TorchModelType], TorchModelType]
+) -> Type[TorchModelType]:
+    """Decorator for registering a model type."""
+    if not isinstance(cls, TorchModelType):
+        model = cls()
+    else:
+        model = cls
     if model.name in MODEL_TYPES:
-        raise ValueError(f"Model {model.name} already registered")
+        if not isinstance(MODEL_TYPES[model.name], model.__class__):
+            raise ValueError(f"Model {model.name} already registered to {model.__class__}")
+        else:
+            return cls
     MODEL_TYPES[model.name] = model
+    logging.debug("Model type %s registered", model)
     return cls

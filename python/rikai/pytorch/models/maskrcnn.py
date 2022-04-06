@@ -12,19 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import torchvision
 
-from rikai.mixin import Pretrained
-from rikai.pytorch.models.torch import model_type, ObjectDetectionModelType
+from rikai.pytorch.models.torch import ObjectDetectionModelType
 
-
-@model_type
-class MaskRCNNModelType(ObjectDetectionModelType, Pretrained):
-    def __init__(self):
-        super().__init__("maskrcnn_resnet50_fpn")
-
-    def pretrained_model(self):
-        import torchvision
-
-        return torchvision.models.detection.maskrcnn_resnet50_fpn(
-            pretrained=True
-        )
+maskrcnn = ObjectDetectionModelType(
+    "maskrcnn",
+    pretrained_fn=torchvision.models.detection.maskrcnn_resnet50_fpn,
+)

@@ -12,19 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-
-from rikai.mixin import Pretrained
-from rikai.pytorch.models.torch import model_type, ObjectDetectionModelType
+import torchvision
 
 
-@model_type
-class RetinaNetModelType(ObjectDetectionModelType, Pretrained):
-    def __init__(self):
-        super().__init__("retinanet_resnet50_fpn")
+from rikai.pytorch.models.torch import ObjectDetectionModelType
 
-    def pretrained_model(self):
-        import torchvision
 
-        return torchvision.models.detection.retinanet_resnet50_fpn(
-            pretrained=True
-        )
+resnet = ObjectDetectionModelType(
+    "retinanet",
+    pretrained_fn=torchvision.models.detection.retinanet_resnet50_fpn,
+)

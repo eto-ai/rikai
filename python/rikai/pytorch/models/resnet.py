@@ -12,6 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+"""
+ResNet: Deep Residual Learning for Image Recognition
+https://arxiv.org/pdf/1512.03385.pdf
+"""
+
 import torchvision
 
 from rikai.pytorch.models.torch import ClassificationModelType

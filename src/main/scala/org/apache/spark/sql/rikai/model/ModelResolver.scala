@@ -79,7 +79,8 @@ object ModelResolver {
     val path = Files.createTempFile("model-code", ".cpt")
     val dataTypePath = Files.createTempFile("model-type", ".json")
     try {
-      Files.write(specPath, write(spec)(DefaultFormats).getBytes)
+      implicit val writeFormat = DefaultFormats.preservingEmptyValues
+      Files.write(specPath, write(spec).getBytes)
       Python.execute(
         s"""from pyspark.serializers import CloudPickleSerializer;
            |import json
@@ -100,7 +101,7 @@ object ModelResolver {
         session
       )
       val cmdJson = Files.readAllLines(path).asScala.mkString("\n")
-      implicit val formats = Serialization.formats(NoTypeHints)
+      implicit val extractFormat = Serialization.formats(NoTypeHints)
       val cmdMap = parse(cmdJson).extract[FuncDesc]
       val dataTypeJson = Files.readAllLines(dataTypePath).asScala.mkString("\n")
       val returnType = DataType.fromJson(dataTypeJson)

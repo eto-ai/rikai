@@ -73,6 +73,7 @@ libraryDependencies ++= {
   val scalaLoggingVersion = "3.9.4"
   val snappyVersion = "1.1.8.4" // Support Apple Silicon
   val scalatestVersion = "3.2.0"
+  val hadoopVersion = "3.2.3"
   val mlflowVersion = "1.21.0"
   val enableifVersion = "1.1.8"
 
@@ -85,7 +86,7 @@ libraryDependencies ++= {
     "org.apache.spark" %% "spark-core" % sparkVersion.value % Test classifier "tests",
     "org.apache.spark" %% "spark-hive-thriftserver" % sparkVersion.value % Test,
     "org.apache.spark" %% "spark-hive-thriftserver" % sparkVersion.value % Test classifier "tests",
-    "org.apache.hadoop" % "hadoop-common" % hadoopVersion,
+    "org.apache.hadoop" % "hadoop-common" % hadoopVersion % Provided,
     "software.amazon.awssdk" % "s3" % awsVersion % Provided,
     "org.xerial.snappy" % "snappy-java" % snappyVersion,
     "org.apache.logging.log4j" % "log4j-core" % log4jVersion % Runtime,

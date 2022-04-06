@@ -60,4 +60,4 @@ class ResnetModelType(TorchModelType):
         return results
 
 
-MODEL_TYPE = ResnetModelType()
+MODEL_TYPE = ResnetModelType(name="resnet")

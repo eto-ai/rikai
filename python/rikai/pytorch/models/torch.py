@@ -15,12 +15,11 @@
 """:py:class:`ModelType` for official torchvision models
 """
 
-import logging
 from abc import ABC
-from typing import Any, Callable, Optional, Type, Union
+from typing import Any, Callable, Optional
 
 import torch
-from torchvision.transforms import ToTensor
+import torchvision.transforms as T
 
 from rikai.mixin import Pretrained
 from rikai.spark.sql.codegen.dummy import DummyModelSpec
@@ -33,7 +32,6 @@ __all__ = [
     "ClassificationModelType",
     "MODEL_TYPES",
 ]
-
 
 DEFAULT_MIN_SCORE = 0.5
 
@@ -102,13 +100,26 @@ class ClassificationModelType(TorchModelType):
         return "array<float>"
 
     def transform(self) -> Callable:
-        return ToTensor()
+        return T.Compose(
+            [
+                T.Resize(256),
+                T.CenterCrop(224),
+                T.ToTensor(),
+                T.Normalize(
+                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                ),
+            ]
+        )
 
     def predict(self, images, *args, **kwargs) -> Any:
         assert (
             self.model is not None
         ), "model has not been initialized via load_model"
-        return self.model(images)
+        batch = self.model(images)
+        results = []
+        for result in batch:
+            results.append(result.cpu().tolist())
+        return results
 
 
 class ObjectDetectionModelType(TorchModelType):
@@ -124,7 +135,7 @@ class ObjectDetectionModelType(TorchModelType):
         return "array<struct<box:box2d, score:float, label_id:int>>"
 
     def transform(self) -> Callable:
-        return ToTensor()
+        return T.ToTensor()
 
     def predict(self, images, *args, **kwargs) -> Any:
         assert (

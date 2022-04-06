@@ -24,5 +24,7 @@ def test_fasterrcnn_models(spark: SparkSession):
         f"CREATE MODEL {name} FLAVOR pytorch MODEL_TYPE fasterrcnn_mobilenet_v3_large_fpn"
     )
     uri = "https://i.scdn.co/image/ab67616d0000b273466def3ce70d94dcacb13c8d"
-    df = spark.sql(f"select explode(ML_PREDICT(fasterrcnn, to_image('{uri}')))")
+    df = spark.sql(
+        f"select explode(ML_PREDICT(fasterrcnn, to_image('{uri}')))"
+    )
     assert df.count() >= 3

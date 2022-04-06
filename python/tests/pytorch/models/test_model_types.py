@@ -13,35 +13,62 @@
 #  limitations under the License.
 
 from pathlib import Path
+from typing import List
 
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, IntegerType, FloatType
 
 
-def test_fasterrcnn_models(spark: SparkSession):
+def _check_object_detection_models(spark: SparkSession, models: List[str]):
     uri = "https://i.scdn.co/image/ab67616d0000b273466def3ce70d94dcacb13c8d"
-    for name in [
+    for model in models:
+        spark.sql(
+            f"""CREATE OR REPLACE MODEL {model}
+            FLAVOR pytorch
+            MODEL_TYPE {model}
+            """
+        )
+        df = spark.sql(
+            f"select explode(ML_PREDICT({model}, to_image('{uri}')))"
+        )
+        assert df.count() >= 2
+
+
+def test_ssd_models(spark: SparkSession):
+    ssd_models = ["ssd", "ssdlite"]
+    _check_object_detection_models(spark, ssd_models)
+
+
+def test_fasterrcnn_models(spark: SparkSession):
+    fasterrcnn_models = [
         "fasterrcnn",
         "fasterrcnn_resnet50_fpn",
         "fasterrcnn_mobilenet_v3_large_fpn",
         "fasterrcnn_mobilenet_v3_large_320_fpn",
-    ]:
-        spark.sql(
-            f"""CREATE OR REPLACE MODEL {name}
-            FLAVOR pytorch
-            MODEL_TYPE fasterrcnn_mobilenet_v3_large_fpn
-            """
-        )
-        df = spark.sql(
-            f"select explode(ML_PREDICT({name}, to_image('{uri}')))"
-        )
-        assert df.count() >= 3
+    ]
+    _check_object_detection_models(spark, fasterrcnn_models)
 
 
-def test_resnet(spark: SparkSession, asset_path: Path):
+def test_maskrcnn_models(spark: SparkSession):
+    maskrcnn_models = ["maskrcnn"]
+    _check_object_detection_models(spark, maskrcnn_models)
+
+
+def test_retinanet_models(spark: SparkSession):
+    retinanet_models = ["retinanet"]
+    _check_object_detection_models(spark, retinanet_models)
+
+
+def test_keypointrcnn_models(spark: SparkSession):
+    keypointrcnn_models = ["keypointrcnn"]
+    _check_object_detection_models(spark, keypointrcnn_models)
+
+
+def _check_classification_models(
+    spark: SparkSession, asset_path: Path, models: List[str]
+):
     uri = str(asset_path / "cat.jpg")
-    for layers in [18, 34, 50, 101, 152]:
-        model_name = f"resnet{layers}"
+    for model_name in models:
         spark.sql(
             f"""CREATE OR REPLACE MODEL {model_name}
             FLAVOR pytorch MODEL_TYPE {model_name}"""
@@ -61,36 +88,17 @@ def test_resnet(spark: SparkSession, asset_path: Path):
                 )
             ]
         )
-        # Label(282) == "tiger cat"
-        # https://gist.github.com/yrevar/942d3a0ac09ec9e5eb3a
-        assert df.first().asDict()[model_name].label_id == 282
-
-
-def test_efficientnet(spark: SparkSession, asset_path: Path):
-    uri = str(asset_path / "cat.jpg")
-    for scale in range(8):
-        model_name = f"efficientnet_b{scale}"
-        spark.sql(
-            f"""CREATE OR REPLACE MODEL {model_name}
-            FLAVOR pytorch MODEL_TYPE {model_name}"""
-        )
-        df = spark.sql(f"SELECT ML_PREDICT({model_name}, to_image('{uri}'))")
-        assert df.count() > 0
-        assert df.schema == StructType(
-            [
-                StructField(
-                    model_name,
-                    StructType(
-                        [
-                            StructField("label_id", IntegerType()),
-                            StructField("score", FloatType()),
-                        ]
-                    ),
-                )
-            ]
-        )
-        df.show()
         # Label(281) == "tabby, tabby cat"
         # Label(282) == "tiger cat"
         # https://gist.github.com/yrevar/942d3a0ac09ec9e5eb3a
         assert df.first().asDict()[model_name].label_id in [281, 282]
+
+
+def test_resnet(spark: SparkSession, asset_path: Path):
+    models = [f"resnet{layers}" for layers in [18, 34, 50, 101, 152]]
+    _check_classification_models(spark, asset_path, models)
+
+
+def test_efficientnet(spark: SparkSession, asset_path: Path):
+    models = [f"efficientnet_b{scale}" for scale in range(8)]
+    _check_classification_models(spark, asset_path, models)

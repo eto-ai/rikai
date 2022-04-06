@@ -17,11 +17,8 @@ from pathlib import Path
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, IntegerType, FloatType
 
-from rikai.spark.functions import init
-
 
 def test_fasterrcnn_models(spark: SparkSession):
-    init(spark)
     uri = "https://i.scdn.co/image/ab67616d0000b273466def3ce70d94dcacb13c8d"
     for name in [
         "fasterrcnn",
@@ -42,8 +39,6 @@ def test_fasterrcnn_models(spark: SparkSession):
 
 
 def test_resnet(spark: SparkSession, asset_path: Path):
-    init(spark)
-
     uri = str(asset_path / "cat.jpg")
     for layers in [18, 34, 50, 101, 152]:
         model_name = f"resnet{layers}"
@@ -69,3 +64,33 @@ def test_resnet(spark: SparkSession, asset_path: Path):
         # Label(282) == "tiger cat"
         # https://gist.github.com/yrevar/942d3a0ac09ec9e5eb3a
         assert df.first().asDict()[model_name].label_id == 282
+
+
+def test_efficientnet(spark: SparkSession, asset_path: Path):
+    uri = str(asset_path / "cat.jpg")
+    for scale in range(8):
+        model_name = f"efficientnet_b{scale}"
+        spark.sql(
+            f"""CREATE OR REPLACE MODEL {model_name}
+            FLAVOR pytorch MODEL_TYPE {model_name}"""
+        )
+        df = spark.sql(f"SELECT ML_PREDICT({model_name}, to_image('{uri}'))")
+        assert df.count() > 0
+        assert df.schema == StructType(
+            [
+                StructField(
+                    model_name,
+                    StructType(
+                        [
+                            StructField("label_id", IntegerType()),
+                            StructField("score", FloatType()),
+                        ]
+                    ),
+                )
+            ]
+        )
+        df.show()
+        # Label(281) == "tabby, tabby cat"
+        # Label(282) == "tiger cat"
+        # https://gist.github.com/yrevar/942d3a0ac09ec9e5eb3a
+        assert df.first().asDict()[model_name].label_id in [281, 282]

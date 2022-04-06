@@ -117,7 +117,7 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable, ComposableDrawable):
     def aligned(
         self, base_drawable: ComposableDrawable, algorithm: str = "left-top"
     ):
-        (new_xmin, new_ymin) = base_drawable.xy_min
+        (new_xmin, new_ymin) = base_drawable.xy_min()
         return Box2d(
             new_xmin,
             new_ymin,

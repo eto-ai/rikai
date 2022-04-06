@@ -19,6 +19,7 @@ from abc import ABC
 from typing import Any, Callable, Optional
 
 import torch
+import torch.nn.functional as F
 import torchvision.transforms as T
 
 from rikai.mixin import Pretrained
@@ -97,13 +98,11 @@ class ClassificationModelType(TorchModelType):
     """Shared ModelType for image classification"""
 
     def schema(self) -> str:
-        return "array<float>"
+        return "struct<label_id: int, score: float>"
 
     def transform(self) -> Callable:
         return T.Compose(
             [
-                T.Resize(256),
-                T.CenterCrop(224),
                 T.ToTensor(),
                 T.Normalize(
                     mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
@@ -118,7 +117,10 @@ class ClassificationModelType(TorchModelType):
         batch = self.model(images)
         results = []
         for result in batch:
-            results.append(result.cpu().tolist())
+            scores = F.softmax(result, dim=0)
+            label = torch.argmax(F.softmax(result, dim=0)).item()
+            score = scores[label].item()
+            results.append({"label_id": label, "score": score})
         return results
 
 

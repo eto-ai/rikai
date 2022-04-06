@@ -18,6 +18,7 @@ import rikai.pytorch.models.efficientnet
 import rikai.pytorch.models.fasterrcnn
 import rikai.pytorch.models.keypointrcnn
 import rikai.pytorch.models.maskrcnn
+import rikai.pytorch.models.resnet
 import rikai.pytorch.models.retinanet
 import rikai.pytorch.models.ssd
 import rikai.pytorch.models.ssd_class_scores

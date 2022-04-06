@@ -12,7 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from pathlib import Path
+
 from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType, StructField, IntegerType, FloatType
 
 from rikai.spark.functions import init
 
@@ -28,3 +31,32 @@ def test_fasterrcnn_models(spark: SparkSession):
         f"select explode(ML_PREDICT(fasterrcnn, to_image('{uri}')))"
     )
     assert df.count() >= 3
+
+
+def test_resnet(spark: SparkSession, asset_path: Path):
+    init(spark)
+
+    uri = str(asset_path / "cat.jpg")
+    for layers in [18, 34, 50, 101, 152]:
+        model_name = f"resnet{layers}"
+        spark.sql(
+            f"CREATE MODEL {model_name} FLAVOR pytorch MODEL_TYPE {model_name}"
+        )
+        df = spark.sql(f"SELECT ML_PREDICT({model_name}, to_image('{uri}'))")
+        assert df.count() > 0
+        assert df.schema == StructType(
+            [
+                StructField(
+                    model_name,
+                    StructType(
+                        [
+                            StructField("label_id", IntegerType()),
+                            StructField("score", FloatType()),
+                        ]
+                    ),
+                )
+            ]
+        )
+        # Label(282) == "tiger cat"
+        # https://gist.github.com/yrevar/942d3a0ac09ec9e5eb3a
+        assert df.first().asDict()[model_name].label_id == 282

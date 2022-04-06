@@ -19,7 +19,7 @@ from rikai.pytorch.models.torch import ObjectDetectionModelType, model_type
 @model_type
 class SSDModelType(ObjectDetectionModelType, Pretrained):
     def __init__(self):
-        super().__init__("SSD")
+        super().__init__("ssd")
 
     def pretrained_model(self):
         import torchvision

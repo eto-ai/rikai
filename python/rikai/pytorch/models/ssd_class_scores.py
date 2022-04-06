@@ -20,11 +20,9 @@ from torch import Tensor
 from torchvision.models.detection.ssd import SSD
 from torchvision.ops.boxes import batched_nms, clip_boxes_to_image
 
-from rikai.pytorch.models.torch import ObjectDetectionModelType
+from rikai.pytorch.models.torch import model_type, ObjectDetectionModelType
 from rikai.spark.sql.model import ModelSpec
 from rikai.types import Box2d
-
-__all__ = ["MODEL_TYPE"]
 
 
 class SSDClassScoresExtractor(torch.nn.Module):
@@ -152,11 +150,12 @@ class SSDClassScoresExtractor(torch.nn.Module):
         return detections
 
 
+@model_type
 class SSDClassScoresModelType(ObjectDetectionModelType):
     DEFAULT_MIN_SCORE = 0.3
 
     def __init__(self):
-        super().__init__("SSDClassScores")
+        super().__init__("ssd_class_scores")
 
     def schema(self) -> str:
         return (
@@ -203,6 +202,3 @@ class SSDClassScoresModelType(ObjectDetectionModelType):
 
             results.append(predict_result)
         return results
-
-
-MODEL_TYPE = SSDClassScoresModelType()

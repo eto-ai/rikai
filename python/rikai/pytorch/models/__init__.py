@@ -15,8 +15,9 @@
 """Rikai-implemented PyTorch models and executors."""
 
 import rikai.pytorch.models.fasterrcnn
-import rikai.pytorch.models.ssd
 import rikai.pytorch.models.retinanet
+import rikai.pytorch.models.ssd
+import rikai.pytorch.models.ssd_class_scores
 from rikai.pytorch.models.torch import MODEL_TYPES
 
 __all__ = ["MODEL_TYPES"]

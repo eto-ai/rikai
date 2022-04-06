@@ -15,6 +15,8 @@
 """Rikai-implemented PyTorch models and executors."""
 
 import rikai.pytorch.models.fasterrcnn
+import rikai.pytorch.models.keypointrcnn
+import rikai.pytorch.models.maskrcnn
 import rikai.pytorch.models.retinanet
 import rikai.pytorch.models.ssd
 import rikai.pytorch.models.ssd_class_scores

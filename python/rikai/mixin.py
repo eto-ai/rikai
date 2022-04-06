@@ -108,7 +108,7 @@ class ComposableDrawable:
 
 class ComposedDrawable(Drawable):
     """A drawable that includes multi sub composable drawables,
-     will align them in rendering"""
+    will align them in rendering"""
 
     def align(self):
         if len(self.inner_drawables) <= 1:

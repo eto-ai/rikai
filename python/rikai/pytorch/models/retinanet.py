@@ -14,20 +14,11 @@
 
 import torchvision
 
-from rikai.mixin import Pretrained
-from rikai.pytorch.models.torchvision import ObjectDetectionModelType
 
-__all__ = ["MODEL_TYPE"]
+from rikai.pytorch.models.torch import ObjectDetectionModelType
 
 
-class FasterRCNNModelType(ObjectDetectionModelType, Pretrained):
-    def __init__(self):
-        super().__init__("fasterrcnn_resnet50_fpn")
-
-    def pretrained_model(self):
-        return torchvision.models.detection.fasterrcnn_resnet50_fpn(
-            pretrained=True
-        )
-
-
-MODEL_TYPE = FasterRCNNModelType()
+resnet = ObjectDetectionModelType(
+    "retinanet",
+    pretrained_fn=torchvision.models.detection.retinanet_resnet50_fpn,
+)

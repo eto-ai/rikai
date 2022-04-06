@@ -79,9 +79,17 @@ def is_fully_qualified_name(name: str) -> bool:
 
 def parse_model_type(flavor: str, model_type: str):
     model_modules_candidates = []
+
     if is_fully_qualified_name(model_type):
         model_modules_candidates.append(model_type)
     else:
+        # Try registered models first
+        try:
+            registered_models = find_func(f"rikai.{flavor}.models.MODEL_TYPES")
+            if registered_models:
+                return registered_models[model_type]
+        except (ModuleNotFoundError, KeyError):
+            pass
         model_modules_candidates.extend(
             [
                 f"rikai.{flavor}.models.{model_type}",
@@ -95,7 +103,7 @@ def parse_model_type(flavor: str, model_type: str):
             pass
     else:
         raise ModuleNotFoundError(
-            f"Model spec not found for model/flavor: {model_type}/{flavor}"
+            f"Model type not found for model/flavor: {model_type}/{flavor}"
         )
 
 

@@ -13,41 +13,15 @@
 #  limitations under the License.
 
 """Rikai-implemented PyTorch models and executors."""
-from abc import ABC
-from typing import Optional
 
-import torch
+import rikai.pytorch.models.efficientnet
+import rikai.pytorch.models.fasterrcnn
+import rikai.pytorch.models.keypointrcnn
+import rikai.pytorch.models.maskrcnn
+import rikai.pytorch.models.resnet
+import rikai.pytorch.models.retinanet
+import rikai.pytorch.models.ssd
+import rikai.pytorch.models.ssd_class_scores
+from rikai.pytorch.models.torch import MODEL_TYPES
 
-from rikai.mixin import Pretrained
-from rikai.spark.sql.model import ModelSpec, ModelType
-from rikai.spark.sql.codegen.dummy import DummyModelSpec
-
-__all__ = ["TorchModelType"]
-
-
-class TorchModelType(ModelType, ABC):
-    """Base ModelType for PyTorch models."""
-
-    def __init__(self):
-        self.model: Optional[torch.nn.Module] = None
-        self.spec: Optional[ModelSpec] = None
-
-    def load_model(self, spec: ModelSpec, **kwargs):
-        self.spec = spec
-        if isinstance(spec, DummyModelSpec):
-            if isinstance(self, Pretrained):
-                self.model = self.pretrained_model()
-            else:
-                raise ValueError("Missing model URI")
-        else:
-            self.model = self.spec.load_model()
-        self.model.eval()
-        if "device" in kwargs:
-            self.model.to(kwargs.get("device"))
-
-    # Release GPU memory
-    # https://blog.paperspace.com/pytorch-memory-multi-gpu-debugging/?ref=tfrecipes
-    def release(self):
-        model = self.model.cpu()
-        del model
-        torch.cuda.empty_cache()
+__all__ = ["MODEL_TYPES"]

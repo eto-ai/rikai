@@ -16,6 +16,7 @@ import re
 import rikai
 from rikai.__version__ import version
 from rikai.conf import CONF_PARQUET_BLOCK_SIZE
+from rikai.spark.functions import init
 
 
 def df_to_rikai(df: "pyspark.sql.DataFrame", uri: str):
@@ -92,4 +93,5 @@ def init_spark_session(
     for k, v in conf.items():
         builder = builder.config(k, v)
     session = builder.master("local[2]").getOrCreate()
+    init(session)
     return session

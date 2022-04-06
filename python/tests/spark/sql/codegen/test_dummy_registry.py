@@ -29,24 +29,3 @@ def test_fasterrcnn_resnet50_fpn(spark: SparkSession, two_flickr_rows: list):
             MODEL_TYPE fasterrcnn_resnet50_fpn"""
     )
     check_ml_predict(spark, name, two_flickr_rows)
-
-
-def test_failure_create(spark: SparkSession):
-    with pytest.raises(
-        py4j.protocol.Py4JJavaError,
-        match=r".*ModelType with Pretrained mixin required if no URI is specified.*",  # noqa E501
-    ):
-        spark.sql(
-            f"""CREATE MODEL ssd_score
-                FLAVOR pytorch
-                MODEL_TYPE ssd_class_scores"""
-        )
-
-    with pytest.raises(
-        py4j.protocol.Py4JJavaError,
-        match=r".*None is not of type 'string'.*",
-    ):
-        spark.sql(
-            f"""CREATE MODEL ssd_score
-                MODEL_TYPE ssd_class_scores"""
-        )

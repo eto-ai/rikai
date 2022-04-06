@@ -16,12 +16,7 @@ import torchvision
 
 from rikai.pytorch.models.torch import ObjectDetectionModelType
 
-ssd = ObjectDetectionModelType(
-    "ssd",
-    pretrained_fn=torchvision.models.detection.ssd.ssd300_vgg16,
-)
-
-ssdlite = ObjectDetectionModelType(
-    "ssdlite",
-    pretrained_fn=torchvision.models.detection.ssdlite320_mobilenet_v3_large,
+keypointrcnn = ObjectDetectionModelType(
+    "keypointrcnn",
+    pretrained_fn=torchvision.models.detection.keypointrcnn_resnet50_fpn,
 )

@@ -153,6 +153,7 @@ Compile / doc / scalacOptions ++= Seq(
 )
 
 assembly / assemblyJarName := s"${name.value}-assembly-${sparkVerStr.value}_${scalaBinaryVersion.value}-${version.value}.jar"
+// Excluding Scala library jars, see https://github.com/sbt/sbt-assembly/tree/v1.2.0#excluding-scala-library-jars
 assemblyPackageScala / assembleArtifact := false
 assembly / assemblyExcludedJars := {
   val cp = (assembly / fullClasspath).value

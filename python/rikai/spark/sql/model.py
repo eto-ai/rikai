@@ -156,7 +156,6 @@ class ModelSpec(ABC):
     def load_model(self) -> Any:
         """Load the model artifact specified in this spec"""
 
-    @abstractmethod
     def load_id_to_label_fn(self) -> Optional[Callable]:
         """Load the function that maps label id to human-readable string labels"""
         if 'labels' in self._spec:

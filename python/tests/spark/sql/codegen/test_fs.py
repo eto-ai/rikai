@@ -232,3 +232,28 @@ def test_relative_model_uri(tmp_path):
         )
     )
     assert Path(spec.model_uri) == tmp_path / "model.pt"
+
+
+def test_spec_with_labels(tmp_path):
+    spec = FileModelSpec(
+        spec_file(
+            {
+                "version": "1.2",
+                "name": "test_yaml_model",
+                "schema": "long",
+                "model": {
+                    "uri": "s3://bucket/to/model.pt",
+                    "unspecified_field": True,
+                },
+                "labels": {
+                    "func": "rikai.pytorch.models.torch.default_id_to_label"
+                },
+                "options": {"gpu": "true", "batch_size": 123},
+            },
+            tmp_path,
+        )
+    )
+
+    assert spec.name == "test_yaml_model"
+    assert spec.model_uri == "s3://bucket/to/model.pt"
+    assert spec.load_id_to_label_fn()(1) == 'person'

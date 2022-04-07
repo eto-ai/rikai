@@ -14,14 +14,16 @@
 
 import torchvision
 
-from rikai.pytorch.models.torch import ObjectDetectionModelType
+from rikai.pytorch.models.torch import ObjectDetectionModelType, default_id_to_label
 
 ssd = ObjectDetectionModelType(
     "ssd",
     pretrained_fn=torchvision.models.detection.ssd.ssd300_vgg16,
+    id_to_label_fn=default_id_to_label
 )
 
 ssdlite = ObjectDetectionModelType(
     "ssdlite",
     pretrained_fn=torchvision.models.detection.ssdlite320_mobilenet_v3_large,
+    id_to_label_fn=default_id_to_label
 )

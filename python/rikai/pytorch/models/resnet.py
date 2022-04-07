@@ -16,27 +16,32 @@
 ResNet: Deep Residual Learning for Image Recognition
 https://arxiv.org/pdf/1512.03385.pdf
 """
-
 import torchvision
 
-from rikai.pytorch.models.torch import ClassificationModelType
+from rikai.pytorch.models.torch import ClassificationModelType, classification_id_to_label_fn
 
 resnet18 = ClassificationModelType(
-    name="resnet18", pretrained_fn=torchvision.models.resnet18
+    name="resnet18", pretrained_fn=torchvision.models.resnet18,
+    id_to_label_fn=classification_id_to_label_fn
 )
 resnet34 = ClassificationModelType(
-    name="resnet34", pretrained_fn=torchvision.models.resnet34
+    name="resnet34", pretrained_fn=torchvision.models.resnet34,
+    id_to_label_fn=classification_id_to_label_fn
 )
 resnet50 = ClassificationModelType(
-    name="resnet50", pretrained_fn=torchvision.models.resnet50
+    name="resnet50", pretrained_fn=torchvision.models.resnet50,
+    id_to_label_fn=classification_id_to_label_fn
 )
 resnet101 = ClassificationModelType(
-    name="resnet101", pretrained_fn=torchvision.models.resnet101
+    name="resnet101", pretrained_fn=torchvision.models.resnet101,
+    id_to_label_fn=classification_id_to_label_fn
 )
 resnet152 = ClassificationModelType(
-    name="resnet152", pretrained_fn=torchvision.models.resnet152
+    name="resnet152", pretrained_fn=torchvision.models.resnet152,
+    id_to_label_fn=classification_id_to_label_fn
 )
 # Make default resnet to be ResNet-50
 resnet = ClassificationModelType(
-    name="resnet", pretrained_fn=torchvision.models.resnet50
+    name="resnet", pretrained_fn=torchvision.models.resnet50,
+    id_to_label_fn=classification_id_to_label_fn
 )

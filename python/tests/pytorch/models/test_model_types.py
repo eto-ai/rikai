@@ -11,12 +11,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 from pathlib import Path
 from typing import List
 
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StructField, IntegerType, FloatType
+from pyspark.sql.types import StringType, StructType, StructField, IntegerType, FloatType
 
 
 def _check_object_detection_models(spark: SparkSession, models: List[str]):
@@ -83,6 +82,7 @@ def _check_classification_models(
                         [
                             StructField("label_id", IntegerType()),
                             StructField("score", FloatType()),
+                            StructField("label", StringType()),
                         ]
                     ),
                 )
@@ -91,7 +91,9 @@ def _check_classification_models(
         # Label(281) == "tabby, tabby cat"
         # Label(282) == "tiger cat"
         # https://gist.github.com/yrevar/942d3a0ac09ec9e5eb3a
-        assert df.first().asDict()[model_name].label_id in [281, 282]
+        result = df.first().asDict()[model_name]
+        assert result.label_id in [281, 282]
+        assert result.label in ["tabby", "tiger cat"]
 
 
 def test_resnet(spark: SparkSession, asset_path: Path):

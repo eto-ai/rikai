@@ -25,7 +25,7 @@ case class ModelSpec(
     flavor: Option[String] = None,
     modelType: Option[String] = None,
     schema: Option[String] = None,
-    options: Option[Map[String, String]] = None
+    options: Option[Map[String, String]] = None,
 ) {
 
   override def toString: String =

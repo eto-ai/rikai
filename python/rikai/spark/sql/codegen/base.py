@@ -104,7 +104,7 @@ def udf_from_spec(spec: ModelSpec):
             f"Only spec version 1.0 is supported, got {spec.version}"
         )
 
-    schema = spec.model_type.dataType()
+    schema = spec.schema
 
     @udf(returnType=schema)
     def deserialize_return(data: bytes):

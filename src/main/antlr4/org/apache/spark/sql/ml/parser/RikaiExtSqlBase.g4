@@ -24,6 +24,7 @@ statement
       (FLAVOR flavor=identifier)?
       (MODEL_TYPE modeltype=qualifiedName)?
       (OPTIONS optionList)?
+      (RETURNS datatype=dataType)?
       (USING uri=STRING)?	                        # createModel
     | (DESC | DESCRIBE) MODEL model=qualifiedName   # describeModel
     | SHOW MODELS                                   # showModels
@@ -65,6 +66,7 @@ NOT: 'NOT';
 OPTIONS: 'OPTIONS';
 OR: 'OR';
 REPLACE: 'REPLACE';
+RETURNS: 'RETURNS';
 SHOW: 'SHOW';
 STRUCT: 'STRUCT';
 TRUE: 'TRUE';

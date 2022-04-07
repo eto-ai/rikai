@@ -58,6 +58,19 @@ private[parser] class RikaiExtAstBuilder
     val ifNotExists: Boolean = List(ctx.IF(), ctx.NOT(), ctx.EXISTS())
       .map(x => x != null)
       .forall(identity)
+    val returns: Option[String] = ctx.RETURNS() match {
+      case null => None
+      case _ =>
+        visit(ctx.datatype) match {
+          case r: String => Some(r)
+          case _ =>
+            throw new ParseException(
+              s"Expect string type for RETURNS, got ${visit(ctx.datatype)}",
+              ctx
+            )
+        }
+    }
+
     val replace = ctx.REPLACE() != null
 
     if (ifNotExists && replace) {
@@ -72,6 +85,7 @@ private[parser] class RikaiExtAstBuilder
       flavor = flavor,
       modelType = modelType,
       ifNotExists = ifNotExists,
+      returns = returns,
       uri = Option(ctx.uri).map(string),
       table = None,
       replace = ctx.REPLACE() != null,

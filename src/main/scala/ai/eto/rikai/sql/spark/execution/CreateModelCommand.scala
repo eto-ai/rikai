@@ -31,6 +31,7 @@ case class CreateModelCommand(
     ifNotExists: Boolean,
     flavor: Option[String],
     modelType: Option[String],
+    returns: Option[String],
     uri: Option[String],
     table: Option[TableIdentifier],
     replace: Boolean,
@@ -45,6 +46,7 @@ case class CreateModelCommand(
       uri = uri.map(Registry.normalize_uri).map(_.toString),
       flavor = flavor,
       modelType = modelType,
+      schema = returns,
       options = Some(options)
     )
 

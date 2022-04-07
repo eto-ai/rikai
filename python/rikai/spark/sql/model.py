@@ -39,6 +39,7 @@ def gen_schema_spec(required_cols):
                 "type": "string",
                 "description": "Model SPEC format version",
             },
+            "schema": {"type": "string"},
             "name": {"type": "string", "description": "Model name"},
             "model": {
                 "type": "object",

@@ -193,7 +193,7 @@ class Text(Drawable, ComposableDrawable):
     def aligned(
         self, base_drawable: ComposableDrawable, algorithm: str = "left-top"
     ):
-        return Text(self.text, base_drawable.xy_min(), self.color)
+        return Text(self.text, base_drawable.left_top(), self.color)
 
     def __init__(
         self,

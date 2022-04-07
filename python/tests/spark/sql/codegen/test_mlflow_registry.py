@@ -57,8 +57,21 @@ def test_mlflow_model_from_model_version(
 
 @pytest.mark.timeout(200)
 def test_mlflow_model_without_custom_logger(
-    spark: SparkSession, mlflow_client: MlflowClient, two_flickr_rows: list
+    spark: SparkSession,
+    mlflow_client: MlflowClient,
+    two_flickr_rows: list,
+    resnet_model_uri: str,
 ):
+    artifact_path = "models"
+    model = torch.load(resnet_model_uri)
+    # vanilla mlflow no tags
+    with mlflow.start_run():
+        mlflow.pytorch.log_model(
+            model,
+            artifact_path,
+            registered_model_name="vanilla-mlflow-no-tags",
+        )
+
     spark.sql("CREATE MODEL vanilla_ice USING 'mlflow:/vanilla-mlflow/1'")
     check_ml_predict(spark, "vanilla_ice", two_flickr_rows)
 
@@ -66,14 +79,30 @@ def test_mlflow_model_without_custom_logger(
     spark.sql(
         "CREATE MODEL vanilla_fire "
         "FLAVOR pytorch "
+        f"RETURNS {schema}"
         "USING 'mlflow:/vanilla-mlflow-no-tags/1'"
     )
     check_ml_predict(spark, "vanilla_fire", two_flickr_rows)
+
+    # vanilla mlflow wrong tags
+    with mlflow.start_run():
+        mlflow.pytorch.log_model(
+            model,
+            artifact_path,
+            registered_model_name="vanilla-mlflow-wrong-tags",
+        )
+        mlflow.set_tags(
+            {
+                "rikai.model.flavor": "pytorch",
+                "rikai.output.schema": OUTPUT_SCHEMA,
+            }
+        )
 
     spark.sql(
         (
             "CREATE MODEL vanilla_fixer "
             "FLAVOR pytorch "
+            f"RETURNS {schema}"
             "USING 'mlflow:/vanilla-mlflow-wrong-tags/1'"
         )
     )

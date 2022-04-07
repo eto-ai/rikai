@@ -89,27 +89,7 @@ def mlflow_client_with_tracking_uri(
             }
         )
 
-    # vanilla mlflow no tags
-    with mlflow.start_run():
-        mlflow.pytorch.log_model(
-            model,
-            artifact_path,
-            registered_model_name="vanilla-mlflow-no-tags",
-        )
 
-    # vanilla mlflow wrong tags
-    with mlflow.start_run():
-        mlflow.pytorch.log_model(
-            model,
-            artifact_path,
-            registered_model_name="vanilla-mlflow-wrong-tags",
-        )
-        mlflow.set_tags(
-            {
-                "rikai.model.flavor": "pytorch",
-                "rikai.output.schema": OUTPUT_SCHEMA,
-            }
-        )
     return mlflow.tracking.MlflowClient(tracking_uri), tracking_uri
 
 

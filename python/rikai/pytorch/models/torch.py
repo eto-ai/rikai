@@ -44,6 +44,7 @@ class TorchModelType(ModelType, Pretrained, ABC):
         self,
         name: str,
         pretrained_fn: Optional[Callable] = None,
+        id_to_label_fn: Optional[Callable] = None,
         register: bool = True,
     ):
         """Initialize a TorchModelType
@@ -54,6 +55,8 @@ class TorchModelType(ModelType, Pretrained, ABC):
             The name of the model type
         pretrained_fn : Callable, optional
             The callable to be called if loading pretrained models.
+        id_to_label_fn: Callable, optional
+            Maps label_id to human readable string label
         register : bool
             Register the model to be discoverable via SQL
         """
@@ -62,6 +65,7 @@ class TorchModelType(ModelType, Pretrained, ABC):
         # TODO: make this a class member?
         self.name = name
         self.pretrained_fn = pretrained_fn
+        self.id_to_label_fn = id_to_label_fn
 
         if register:
             MODEL_TYPES[name] = self
@@ -82,6 +86,7 @@ class TorchModelType(ModelType, Pretrained, ABC):
             self.model = self.pretrained_model()
         else:
             self.model = self.spec.load_model()
+            self.id_to_label_fn = self.spec.get_id_to_label_fn()
         self.model.eval()
         if "device" in kwargs:
             self.model.to(kwargs.get("device"))
@@ -120,7 +125,10 @@ class ClassificationModelType(TorchModelType):
             scores = F.softmax(result, dim=0)
             label = torch.argmax(F.softmax(result, dim=0)).item()
             score = scores[label].item()
-            results.append({"label_id": label, "score": score})
+            r = {"label_id": label, "score": score}
+            if self.id_to_label:
+                r['label'] = self.id_to_label_fn(label)
+            results.append(r)
         return results
 
 
@@ -158,14 +166,14 @@ class ObjectDetectionModelType(TorchModelType):
             ):
                 if score < min_score:
                     continue
-                predict_result.append(
-                    {
+                r = {
                         "box": Box2d(*box),
                         "label_id": label,
                         "score": score,
                     }
-                )
-
+                if self.id_to_label:
+                    r['label'] = self.id_to_label_fn(label)
+                predict_result.append(r)
             results.append(predict_result)
         return results
 

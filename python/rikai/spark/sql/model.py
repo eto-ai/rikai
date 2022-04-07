@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from abc import ABC, abstractmethod
+import json
 from typing import Any, Callable, Dict, Optional, TypeVar
 
 from jsonschema.exceptions import ValidationError
@@ -154,6 +155,20 @@ class ModelSpec(ABC):
     @abstractmethod
     def load_model(self) -> Any:
         """Load the model artifact specified in this spec"""
+
+    @abstractmethod
+    def load_id_to_label_fn(self) -> Optional[Callable]:
+        """Load the function that maps label id to human-readable string labels"""
+        if 'labels' in self._spec:
+            uri = self._spec['labels'].get('uri')
+            if uri:
+                with open(uri) as fh:
+                    dd = json.load(fh)
+                return lambda label_id: dd[label_id]
+            func = self._spec['labels'].get('func')
+            if func:
+                return find_func(func)
+        return None
 
     @property
     def flavor(self) -> str:

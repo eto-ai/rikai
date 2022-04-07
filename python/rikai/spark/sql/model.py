@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import warnings
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Optional, TypeVar
 
@@ -24,7 +23,7 @@ from rikai.logging import logger
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
 
-__all__ = ["ModelSpec", "ModelType", "AnonymousModelType"]
+__all__ = ["ModelSpec", "ModelType"]
 
 
 M = TypeVar("M")  # Model Type

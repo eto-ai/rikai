@@ -75,10 +75,7 @@ name: resnet
 model:
   uri: {}
   flavor: pytorch
-schema: int
-transforms:
-  pre: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing
-  post: rikai.testing.predicts.fasterrcnn_resnet_object_counts
+  type: resnet
     """.format(  # noqa: E501
         resnet_model_uri
     )
@@ -121,10 +118,6 @@ def test_validate_yaml_spec(tmp_path):
 
     assert spec.name == "test_yaml_model"
     assert spec.model_uri == "s3://bucket/to/model.pt"
-    assert spec.pre_processing is not None
-    assert spec.post_processing is not None
-    assert_dataloader_transform(spec.pre_processing)
-    assert_dataloader_transform(spec.post_processing)
 
 
 def test_validate_misformed_spec(tmp_path):

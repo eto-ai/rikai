@@ -89,7 +89,6 @@ def mlflow_client_with_tracking_uri(
             }
         )
 
-
     return mlflow.tracking.MlflowClient(tracking_uri), tracking_uri
 
 

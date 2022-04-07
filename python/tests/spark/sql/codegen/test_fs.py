@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from pandas.core.series import Series
 import secrets
 import uuid
 from pathlib import Path
@@ -23,7 +22,7 @@ import pytest
 import torch
 import yaml
 from pyspark.sql import Row, SparkSession
-from pyspark.sql.types import IntegerType, StructField, StructType
+from pyspark.sql.types import IntegerType, StructField, StructType, LongType
 from torch.utils.data import DataLoader
 from utils import check_ml_predict
 
@@ -31,7 +30,6 @@ from rikai.pytorch.pandas import PandasDataset
 from rikai.spark.sql.codegen.fs import FileModelSpec
 from rikai.spark.sql.exceptions import SpecError
 from rikai.testing.utils import apply_model_spec
-from rikai.types import Image
 
 
 def spec_file(content: Dict[str, Any], tmp_path: Path) -> Path:
@@ -71,11 +69,11 @@ def count_objects_spec(tmp_path_factory, resnet_model_uri):
     tmp_path = tmp_path_factory.mktemp(str(uuid.uuid4()))
     spec_yaml = """
 version: "1.0"
-name: resnet
+name: fasterrcnn
 model:
   uri: {}
   flavor: pytorch
-  type: resnet
+  type: fasterrcnn
     """.format(  # noqa: E501
         resnet_model_uri
     )
@@ -212,10 +210,10 @@ def test_count_objects_model(
     df.createOrReplaceTempView("df")
 
     predictions = spark.sql(
-        "SELECT ML_PREDICT(count_objects, image) as objects FROM df"
+        "SELECT size(ML_PREDICT(count_objects, image)) as objects FROM df"
     )
     assert predictions.schema == StructType(
-        [StructField("objects", IntegerType())]
+        [StructField("objects", IntegerType(), False)]
     )
     assert predictions.count() == 2
     assert predictions.where("objects > 0").count() == 2

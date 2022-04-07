@@ -39,14 +39,6 @@ def test_modelspec(mlflow_client: MlflowClient):
     )
     assert spec.flavor == "pytorch"
     assert spec.schema == parse_schema(OUTPUT_SCHEMA)
-    assert spec._spec["transforms"]["pre"] == (
-        "rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn"
-        ".pre_processing"
-    )
-    assert spec._spec["transforms"]["post"] == (
-        "rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn."
-        "post_processing"
-    )
     assert spec.model_uri == "models:/rikai-test/{}".format(mv.version)
 
 
@@ -71,23 +63,10 @@ def test_mlflow_model_without_custom_logger(
     check_ml_predict(spark, "vanilla_ice", two_flickr_rows)
 
     schema = OUTPUT_SCHEMA
-    pre_processing = (
-        "rikai.contrib.torch.transforms."
-        "fasterrcnn_resnet50_fpn.pre_processing"
-    )
-    post_processing = (
-        "rikai.contrib.torch.transforms."
-        "fasterrcnn_resnet50_fpn.post_processing"
-    )
     spark.sql(
-        (
-            "CREATE MODEL vanilla_fire "
-            "FLAVOR pytorch "
-            "PREPROCESSOR '{}' "
-            "POSTPROCESSOR '{}' "
-            "RETURNS {} "
-            "USING 'mlflow:/vanilla-mlflow-no-tags/1'"
-        ).format(pre_processing, post_processing, schema)
+        "CREATE MODEL vanilla_fire "
+        "FLAVOR pytorch "
+        "USING 'mlflow:/vanilla-mlflow-no-tags/1'"
     )
     check_ml_predict(spark, "vanilla_fire", two_flickr_rows)
 
@@ -95,11 +74,8 @@ def test_mlflow_model_without_custom_logger(
         (
             "CREATE MODEL vanilla_fixer "
             "FLAVOR pytorch "
-            "PREPROCESSOR '{}' "
-            "POSTPROCESSOR '{}' "
-            "RETURNS {} "
             "USING 'mlflow:/vanilla-mlflow-wrong-tags/1'"
-        ).format(pre_processing, post_processing, schema)
+        )
     )
     check_ml_predict(spark, "vanilla_fixer", two_flickr_rows)
 

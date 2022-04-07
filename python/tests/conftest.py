@@ -69,20 +69,11 @@ def mlflow_client_with_tracking_uri(
         # Fake training loop
         model = torch.load(resnet_model_uri)
         artifact_path = "model"
-        pre_processing = (
-            "rikai.contrib.torch.transforms."
-            "fasterrcnn_resnet50_fpn.pre_processing"
-        )
-        post_processing = (
-            "rikai.contrib.torch.transforms."
-            "fasterrcnn_resnet50_fpn.post_processing"
-        )
         rikai.mlflow.pytorch.log_model(
             model,  # same as vanilla mlflow
             artifact_path,  # same as vanilla mlflow
             OUTPUT_SCHEMA,
-            pre_processing,
-            post_processing,
+            model_type="resnet",
             registered_model_name="rikai-test",  # same as vanilla mlflow
         )
 
@@ -95,8 +86,6 @@ def mlflow_client_with_tracking_uri(
             {
                 "rikai.model.flavor": "pytorch",
                 "rikai.output.schema": OUTPUT_SCHEMA,
-                "rikai.transforms.pre": pre_processing,
-                "rikai.transforms.post": post_processing,
             }
         )
 
@@ -119,8 +108,6 @@ def mlflow_client_with_tracking_uri(
             {
                 "rikai.model.flavor": "pytorch",
                 "rikai.output.schema": OUTPUT_SCHEMA,
-                "rikai.transforms.pre": "wrong_pre",
-                "rikai.transforms.post": "wrong_post",
             }
         )
     return mlflow.tracking.MlflowClient(tracking_uri), tracking_uri

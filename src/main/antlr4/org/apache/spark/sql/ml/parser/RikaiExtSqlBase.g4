@@ -23,10 +23,7 @@ statement
     : CREATE (OR REPLACE)? MODEL (IF NOT EXISTS)? model=qualifiedName
       (FLAVOR flavor=identifier)?
       (MODEL_TYPE modeltype=qualifiedName)?
-      (PREPROCESSOR preprocess=processorClause)?
-      (POSTPROCESSOR postprocess=processorClause)?
       (OPTIONS optionList)?
-      (RETURNS datatype=dataType)?
       (USING uri=STRING)?	                        # createModel
     | (DESC | DESCRIBE) MODEL model=qualifiedName   # describeModel
     | SHOW MODELS                                   # showModels
@@ -67,10 +64,7 @@ MODELS: 'MODELS';
 NOT: 'NOT';
 OPTIONS: 'OPTIONS';
 OR: 'OR';
-POSTPROCESSOR: 'POSTPROCESSOR';
-PREPROCESSOR: 'PREPROCESSOR';
 REPLACE: 'REPLACE';
-RETURNS: 'RETURNS';
 SHOW: 'SHOW';
 STRUCT: 'STRUCT';
 TRUE: 'TRUE';
@@ -106,10 +100,6 @@ optionValue
     | FLOATING_VALUE
     | booleanValue
     | STRING
-    ;
-
-processorClause
-    : className=STRING
     ;
 
 struct

@@ -42,17 +42,6 @@ class RikaiExtAstSqlParserTest extends AnyFunSuite {
     }
   }
 
-  test("parse returns datatype") {
-    val cmd = parser.parsePlan(
-      "CREATE MODEL foo RETURNS STRUCT<foo:int, bar:ARRAY<STRING>> USING 'abc'"
-    )
-    assert(cmd.isInstanceOf[CreateModelCommand])
-    val create = cmd.asInstanceOf[CreateModelCommand]
-    assert(create.name == "foo")
-    assert(create.uri.contains("abc"))
-    assert(create.returns.contains("STRUCT<foo:int, bar:ARRAY<STRING>>"))
-  }
-
   test("parse model type") {
     val cmd = parser.parsePlan(
       "CREATE MODEL foo FLAVOR pytorch MODEL_TYPE ssd USING 'abc'"
@@ -60,57 +49,6 @@ class RikaiExtAstSqlParserTest extends AnyFunSuite {
     assert(cmd.isInstanceOf[CreateModelCommand])
     val create = cmd.asInstanceOf[CreateModelCommand]
     assert(create.modelType.contains("ssd"))
-  }
-
-  test("parse returns UDTs") {
-    val cmd = parser.parsePlan(
-      "CREATE MODEL udts RETURNS STRUCT<foo:int, bar:ARRAY<Box2d>> USING 'gs://udt/bucket'"
-    )
-    assert(cmd.isInstanceOf[CreateModelCommand])
-    val create = cmd.asInstanceOf[CreateModelCommand]
-    assert(create.name == "udts")
-    assert(create.uri.contains("gs://udt/bucket"))
-    assert(create.returns.contains("STRUCT<foo:int, bar:ARRAY<Box2d>>"))
-  }
-
-  test("parse processors") {
-    val cmd = parser
-      .parsePlan(
-        "CREATE MODEL proc PREPROCESSOR 'rikai.models.yolo.preprocessor' " +
-          "USING '/tmp/model'"
-      )
-      .asInstanceOf[CreateModelCommand]
-    val spec = cmd.asSpec
-    assert(spec.preprocessor.isDefined)
-    assert(spec.preprocessor.contains("rikai.models.yolo.preprocessor"))
-    assert(spec.postprocessor.isEmpty)
-  }
-
-  test("parse pre&post processors") {
-    val cmd = parser
-      .parsePlan(
-        "CREATE MODEL proc " +
-          "PREPROCESSOR 'rikai.models.yolo.preprocessor' " +
-          "POSTPROCESSOR \"rikai.models.yolo.postprocessor\"" +
-          "USING '/tmp/model'"
-      )
-      .asInstanceOf[CreateModelCommand]
-    val spec = cmd.asSpec
-    assert(spec.preprocessor.isDefined)
-    assert(spec.preprocessor.contains("rikai.models.yolo.preprocessor"))
-    assert(spec.postprocessor.isDefined)
-    assert(spec.postprocessor.contains("rikai.models.yolo.postprocessor"))
-
-  }
-
-  test("bad preprocessor") {
-    val cmd = parser
-      .parsePlan(
-        "CREATE MODEL proc PREPROCESSOR ('rikai.models.yolo.preprocessor') " +
-          "USING '/tmp/model'"
-      )
-
-    assert(cmd == null)
   }
 
   test("no uri") {

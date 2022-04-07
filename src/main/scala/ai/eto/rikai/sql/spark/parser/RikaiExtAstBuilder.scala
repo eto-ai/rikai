@@ -58,28 +58,6 @@ private[parser] class RikaiExtAstBuilder
     val ifNotExists: Boolean = List(ctx.IF(), ctx.NOT(), ctx.EXISTS())
       .map(x => x != null)
       .forall(identity)
-    val returns: Option[String] = ctx.RETURNS() match {
-      case null => None
-      case _ =>
-        visit(ctx.datatype) match {
-          case r: String => Some(r)
-          case _ =>
-            throw new ParseException(
-              s"Expect string type for RETURNS, got ${visit(ctx.datatype)}",
-              ctx
-            )
-        }
-    }
-    val preprocessor: Option[String] =
-      Option(ctx.preprocess).map(visitProcessorClause) match {
-        case Some(p: String) => Some(p)
-        case _               => None
-      }
-    val postprocessor: Option[String] =
-      Option(ctx.postprocess).map(visitProcessorClause) match {
-        case Some(p: String) => Some(p)
-        case _               => None
-      }
     val replace = ctx.REPLACE() != null
 
     if (ifNotExists && replace) {
@@ -94,10 +72,7 @@ private[parser] class RikaiExtAstBuilder
       flavor = flavor,
       modelType = modelType,
       ifNotExists = ifNotExists,
-      returns = returns,
       uri = Option(ctx.uri).map(string),
-      preprocessor = preprocessor,
-      postprocessor = postprocessor,
       table = None,
       replace = ctx.REPLACE() != null,
       options = visitOptionList(ctx.optionList())
@@ -172,9 +147,6 @@ private[parser] class RikaiExtAstBuilder
 
   override def visitPlainFieldType(ctx: PlainFieldTypeContext): String =
     ctx.getText
-
-  override def visitProcessorClause(ctx: ProcessorClauseContext): String =
-    ctx.className.getText.replaceAll("^[\"']+|[\"']+$", "")
 
   protected def visitTableIdentfier(
       ctx: QualifiedNameContext

@@ -21,6 +21,7 @@ from pyspark.sql.types import (
     ArrayType,
     FloatType,
     IntegerType,
+    StringType,
     StructField,
     StructType,
 )
@@ -127,6 +128,7 @@ def test_ssd_class_scores_module_with_spark(
                             StructField("box", Box2dType()),
                             StructField("scores", ArrayType(FloatType())),
                             StructField("label_ids", ArrayType(IntegerType())),
+                            StructField("labels", ArrayType(StringType())),
                         ]
                     )
                 ),
@@ -136,3 +138,4 @@ def test_ssd_class_scores_module_with_spark(
 
     assert df.count() == 1
     assert df.selectExpr("explode(confidence)").count() > 1
+    assert 1 == 0

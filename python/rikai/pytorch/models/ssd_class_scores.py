@@ -156,7 +156,7 @@ class SSDClassScoresModelType(ObjectDetectionModelType):
     def schema(self) -> str:
         return (
             "array<struct<box:box2d, scores:array<float>, "
-            "label_ids:array<int>>>"
+            "label_ids:array<int>, labels:array<string>>>"
         )
 
     def load_model(self, spec: ModelSpec, **kwargs):
@@ -168,6 +168,7 @@ class SSDClassScoresModelType(ObjectDetectionModelType):
         if "device" in kwargs:
             self.model.to(kwargs.get("device"))
         self.spec = spec
+        self.id_to_label_fn = self.spec.load_id_to_label_fn()
 
     def predict(self, images, *args, **kwargs) -> List:
         assert (
@@ -188,14 +189,14 @@ class SSDClassScoresModelType(ObjectDetectionModelType):
             ):
                 if score[0] < min_score:
                     continue
-                predict_result.append(
-                    {
-                        "box": Box2d(*box),
-                        "label_id": label,
-                        "score": score,
-                    }
-                )
-
+                r = {
+                    "box": Box2d(*box),
+                    "label_id": label,
+                    "score": score,
+                }
+                if self.id_to_label_fn:
+                    r['label'] = self.id_to_label_fn(label)
+                predict_result.append(r)
             results.append(predict_result)
         return results
 

@@ -38,21 +38,13 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     A Spark Pandas UDF.
     """
 
-    def predict(model, X):
-        if hasattr(model, "predict"):
-            return model.predict(X)
-        elif hasattr(model, "transform"):
-            return model.transform(X)
-        else:
-            raise RuntimeError("predict or transform is not available")
-
     def sklearn_inference_udf(
         iter: Iterator[pd.Series],
     ) -> Iterator[pd.Series]:
         model = spec.load_model()
         for series in list(iter):
             X = np.vstack(series.apply(_pickler.loads).to_numpy())
-            y = [_pickler.dumps(pred.tolist()) for pred in predict(model, X)]
+            y = [_pickler.dumps(pred.tolist()) for pred in model.predict(X)]
             yield pd.Series(y)
 
     return pandas_udf(sklearn_inference_udf, returnType=BinaryType())

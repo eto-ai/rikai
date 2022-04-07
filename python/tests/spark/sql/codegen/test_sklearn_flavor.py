@@ -44,8 +44,8 @@ def test_sklearn_linear_regression(
         rikai.mlflow.sklearn.log_model(
             model,
             artifact_path="model",
-            schema="double",
             registered_model_name=reg_model_name,
+            model_type="linear_regression"
         )
 
         spark.sql(

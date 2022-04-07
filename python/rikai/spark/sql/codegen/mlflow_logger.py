@@ -83,8 +83,6 @@ class MlflowLogger:
         model: Any,
         artifact_path: str,
         schema: Optional[str] = None,
-        pre_processing: Optional[str] = None,
-        post_processing: Optional[str] = None,
         registered_model_name: Optional[str] = None,
         customized_flavor: Optional[str] = None,
         model_type: Optional[str] = None,

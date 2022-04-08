@@ -115,7 +115,7 @@ class ComposedDrawable(Drawable):
             return
         self.inner_drawables = self.inner_drawables[:1] + [
             inner.aligned(self.inner_drawables[0])
-            for inner in self.inner_drawables
+            for inner in self.inner_drawables[1:]
         ]
 
     def _render(self, render: "rikai.viz.Renderer", **kwargs) -> None:

@@ -21,6 +21,7 @@ import pandas as pd
 import pytest
 import torch
 import yaml
+from pandas.core.series import Series
 from pyspark.sql import Row, SparkSession
 from pyspark.sql.types import IntegerType, StructField, StructType, LongType
 from torch.utils.data import DataLoader
@@ -235,6 +236,13 @@ def test_relative_model_uri(tmp_path):
 
 
 def test_spec_with_labels(tmp_path):
+    import json
+
+    from rikai.pytorch.models.torch import COCO_INSTANCE_CATEGORY_NAMES
+
+    with open(tmp_path / "labels.json", "w") as fh:
+        json.dump(COCO_INSTANCE_CATEGORY_NAMES, fh)
+
     spec = FileModelSpec(
         spec_file(
             {
@@ -245,9 +253,7 @@ def test_spec_with_labels(tmp_path):
                     "uri": "s3://bucket/to/model.pt",
                     "unspecified_field": True,
                 },
-                "labels": {
-                    "func": "rikai.pytorch.models.torch.default_id_to_label"
-                },
+                "labels": {"uri": str(tmp_path / "labels.json")},
                 "options": {"gpu": "true", "batch_size": 123},
             },
             tmp_path,
@@ -256,4 +262,4 @@ def test_spec_with_labels(tmp_path):
 
     assert spec.name == "test_yaml_model"
     assert spec.model_uri == "s3://bucket/to/model.pt"
-    assert spec.load_id_to_label_fn()(1) == 'person'
+    assert spec.load_id_to_label_fn()(1) == "person"

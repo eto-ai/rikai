@@ -13,31 +13,33 @@
 #  limitations under the License.
 
 from torchvision.models.detection import (
-    fasterrcnn_resnet50_fpn,
-    fasterrcnn_mobilenet_v3_large_fpn,
     fasterrcnn_mobilenet_v3_large_320_fpn,
+    fasterrcnn_mobilenet_v3_large_fpn,
+    fasterrcnn_resnet50_fpn,
 )
 
-from rikai.pytorch.models.torch import ObjectDetectionModelType, default_id_to_label
+from rikai.pytorch.models.torch import detection_id_to_label, ObjectDetectionModelType
 
 fasterrcnn = ObjectDetectionModelType(
-    "fasterrcnn", pretrained_fn=fasterrcnn_resnet50_fpn,
-    id_to_label_fn=default_id_to_label
+    "fasterrcnn",
+    pretrained_fn=fasterrcnn_resnet50_fpn,
+    id_to_label_fn=detection_id_to_label,
 )
 
 fasterrcnn_resnet50_fpn = ObjectDetectionModelType(
-    "fasterrcnn_resnet50_fpn", pretrained_fn=fasterrcnn_resnet50_fpn,
-    id_to_label_fn=default_id_to_label
+    "fasterrcnn_resnet50_fpn",
+    pretrained_fn=fasterrcnn_resnet50_fpn,
+    id_to_label_fn=detection_id_to_label,
 )
 
 fasterrcnn_mobilenet_v3_large_fpn = ObjectDetectionModelType(
     "fasterrcnn_mobilenet_v3_large_fpn",
     pretrained_fn=fasterrcnn_mobilenet_v3_large_fpn,
-    id_to_label_fn=default_id_to_label
+    id_to_label_fn=detection_id_to_label,
 )
 
 fasterrcnn_mobilenet_large_320_fpn = ObjectDetectionModelType(
     "fasterrcnn_mobilenet_v3_large_320_fpn",
     pretrained_fn=fasterrcnn_mobilenet_v3_large_320_fpn,
-    id_to_label_fn=default_id_to_label
+    id_to_label_fn=detection_id_to_label,
 )

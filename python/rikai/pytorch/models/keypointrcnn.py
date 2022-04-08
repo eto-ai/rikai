@@ -20,23 +20,23 @@ from rikai.pytorch.models.torch import ObjectDetectionModelType
 def id_to_label_fn(label_id):
     # https://pytorch.org/vision/stable/models.html
     COCO_PERSON_KEYPOINT_NAMES = [
-        'nose',
-        'left_eye',
-        'right_eye',
-        'left_ear',
-        'right_ear',
-        'left_shoulder',
-        'right_shoulder',
-        'left_elbow',
-        'right_elbow',
-        'left_wrist',
-        'right_wrist',
-        'left_hip',
-        'right_hip',
-        'left_knee',
-        'right_knee',
-        'left_ankle',
-        'right_ankle'
+        "nose",
+        "left_eye",
+        "right_eye",
+        "left_ear",
+        "right_ear",
+        "left_shoulder",
+        "right_shoulder",
+        "left_elbow",
+        "right_elbow",
+        "left_wrist",
+        "right_wrist",
+        "left_hip",
+        "right_hip",
+        "left_knee",
+        "right_knee",
+        "left_ankle",
+        "right_ankle",
     ]
     return COCO_PERSON_KEYPOINT_NAMES[label_id]
 
@@ -44,5 +44,5 @@ def id_to_label_fn(label_id):
 keypointrcnn = ObjectDetectionModelType(
     "keypointrcnn",
     pretrained_fn=torchvision.models.detection.keypointrcnn_resnet50_fpn,
-    id_to_label_fn=id_to_label_fn
+    id_to_label_fn=id_to_label_fn,
 )

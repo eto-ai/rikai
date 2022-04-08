@@ -13,13 +13,7 @@
 #  limitations under the License.
 
 from pyspark.sql import SparkSession
-from pyspark.sql.types import (
-    ArrayType,
-    FloatType,
-    IntegerType,
-    StructField,
-    StructType,
-)
+from pyspark.sql.types import ArrayType, FloatType, IntegerType, StructField, StructType
 
 from rikai.spark.sql.schema import parse_schema
 from rikai.spark.types import Box2dType

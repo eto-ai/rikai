@@ -22,7 +22,7 @@ from typing import Dict, Iterable, Union
 from urllib.parse import urlparse
 
 import pyarrow.parquet as pq
-from pyarrow.fs import FileSelector, FileSystem, FileType, FileInfo
+from pyarrow.fs import FileInfo, FileSelector, FileSystem, FileType
 
 from rikai.internal.uri_utils import normalize_uri
 from rikai.io import _gcsfs, open_input_stream

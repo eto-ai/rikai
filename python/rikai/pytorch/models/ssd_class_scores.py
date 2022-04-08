@@ -20,7 +20,7 @@ from torch import Tensor
 from torchvision.models.detection.ssd import SSD
 from torchvision.ops.boxes import batched_nms, clip_boxes_to_image
 
-from rikai.pytorch.models.torch import ObjectDetectionModelType, default_id_to_label
+from rikai.pytorch.models.torch import detection_id_to_label, ObjectDetectionModelType
 from rikai.spark.sql.model import ModelSpec
 from rikai.types import Box2d
 
@@ -182,20 +182,22 @@ class SSDClassScoresModelType(ObjectDetectionModelType):
         results = []
         for predicts in batch:
             predict_result = []
-            for box, label, score in zip(
+            for box, candidate_labels, candidate_scores in zip(
                 predicts["boxes"].tolist(),
                 predicts["labels"].tolist(),
                 predicts["scores"].tolist(),
             ):
-                if score[0] < min_score:
+                if candidate_scores[0] < min_score:
                     continue
                 r = {
                     "box": Box2d(*box),
-                    "label_id": label,
-                    "score": score,
+                    "label_ids": candidate_labels,
+                    "scores": candidate_scores,
                 }
                 if self.id_to_label_fn:
-                    r['label'] = self.id_to_label_fn(label)
+                    r["labels"] = [
+                        self.id_to_label_fn(elm) for elm in candidate_labels
+                    ]
                 predict_result.append(r)
             results.append(predict_result)
         return results

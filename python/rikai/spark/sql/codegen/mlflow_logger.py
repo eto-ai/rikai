@@ -26,6 +26,8 @@ CONF_MLFLOW_SPEC_VERSION = "rikai.spec.version"
 CONF_MLFLOW_MODEL_FLAVOR = "rikai.model.flavor"
 CONF_MLFLOW_MODEL_TYPE = "rikai.model.type"
 CONF_MLFLOW_ARTIFACT_PATH = "rikai.model.artifact_path"
+CONF_MLFLOW_LABEL_FUNC = "rikai.model.label_func"
+CONF_MLFLOW_LABEL_URI = "rikai.model.label_uri"
 
 
 class MlflowLogger:
@@ -86,6 +88,7 @@ class MlflowLogger:
         registered_model_name: Optional[str] = None,
         customized_flavor: Optional[str] = None,
         model_type: Optional[str] = None,
+        labels: Optional[dict] = None,
         **kwargs,
     ):
         """Convenience function to log the model with tags needed by rikai.
@@ -165,6 +168,12 @@ class MlflowLogger:
             CONF_MLFLOW_OUTPUT_SCHEMA: schema,
             CONF_MLFLOW_ARTIFACT_PATH: artifact_path,
         }
+        if labels:
+            if labels.get("uri"):
+                tags[CONF_MLFLOW_LABEL_URI] = labels.get("uri")
+            elif labels.get("func"):
+                tags[CONF_MLFLOW_LABEL_FUNC] = labels.get("func")
+
         for k in (
             CONF_MLFLOW_MODEL_TYPE,
             CONF_MLFLOW_OUTPUT_SCHEMA,

@@ -128,7 +128,7 @@ class ClassificationModelType(TorchModelType):
             score = scores[label].item()
             r = {"label_id": label, "score": score}
             if self.id_to_label_fn:
-                r['label'] = self.id_to_label_fn(label)
+                r["label"] = self.id_to_label_fn(label)
             results.append(r)
         return results
 
@@ -143,7 +143,9 @@ class ObjectDetectionModelType(TorchModelType):
         return f"ModelType({self.name})"
 
     def schema(self) -> str:
-        return "array<struct<box:box2d, score:float, label_id:int, label:string>>"
+        return (
+            "array<struct<box:box2d, score:float, label_id:int, label:string>>"
+        )
 
     def transform(self) -> Callable:
         return T.ToTensor()
@@ -168,12 +170,12 @@ class ObjectDetectionModelType(TorchModelType):
                 if score < min_score:
                     continue
                 r = {
-                        "box": Box2d(*box),
-                        "label_id": label,
-                        "score": score,
-                    }
+                    "box": Box2d(*box),
+                    "label_id": label,
+                    "score": score,
+                }
                 if self.id_to_label_fn:
-                    r['label'] = self.id_to_label_fn(label)
+                    r["label"] = self.id_to_label_fn(label)
                 predict_result.append(r)
             results.append(predict_result)
         return results
@@ -182,33 +184,115 @@ class ObjectDetectionModelType(TorchModelType):
 # Registered model types
 MODEL_TYPES = {}
 
+# https://pytorch.org/vision/stable/models.html
+COCO_INSTANCE_CATEGORY_NAMES = [
+    "__background__",
+    "person",
+    "bicycle",
+    "car",
+    "motorcycle",
+    "airplane",
+    "bus",
+    "train",
+    "truck",
+    "boat",
+    "traffic light",
+    "fire hydrant",
+    "N/A",
+    "stop sign",
+    "parking meter",
+    "bench",
+    "bird",
+    "cat",
+    "dog",
+    "horse",
+    "sheep",
+    "cow",
+    "elephant",
+    "bear",
+    "zebra",
+    "giraffe",
+    "N/A",
+    "backpack",
+    "umbrella",
+    "N/A",
+    "N/A",
+    "handbag",
+    "tie",
+    "suitcase",
+    "frisbee",
+    "skis",
+    "snowboard",
+    "sports ball",
+    "kite",
+    "baseball bat",
+    "baseball glove",
+    "skateboard",
+    "surfboard",
+    "tennis racket",
+    "bottle",
+    "N/A",
+    "wine glass",
+    "cup",
+    "fork",
+    "knife",
+    "spoon",
+    "bowl",
+    "banana",
+    "apple",
+    "sandwich",
+    "orange",
+    "broccoli",
+    "carrot",
+    "hot dog",
+    "pizza",
+    "donut",
+    "cake",
+    "chair",
+    "couch",
+    "potted plant",
+    "bed",
+    "N/A",
+    "dining table",
+    "N/A",
+    "N/A",
+    "toilet",
+    "N/A",
+    "tv",
+    "laptop",
+    "mouse",
+    "remote",
+    "keyboard",
+    "cell phone",
+    "microwave",
+    "oven",
+    "toaster",
+    "sink",
+    "refrigerator",
+    "N/A",
+    "book",
+    "clock",
+    "vase",
+    "scissors",
+    "teddy bear",
+    "hair drier",
+    "toothbrush",
+]
 
-def default_id_to_label(label_id: int) -> str:
+
+def detection_id_to_label(label_id: int) -> str:
     """Most pre-trained models are from Coco"""
-    # https://pytorch.org/vision/stable/models.html
-    COCO_INSTANCE_CATEGORY_NAMES = [
-        '__background__', 'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
-        'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'N/A', 'stop sign',
-        'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
-        'elephant', 'bear', 'zebra', 'giraffe', 'N/A', 'backpack', 'umbrella', 'N/A', 'N/A',
-        'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball',
-        'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket',
-        'bottle', 'N/A', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl',
-        'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza',
-        'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'N/A', 'dining table',
-        'N/A', 'N/A', 'toilet', 'N/A', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone',
-        'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'N/A', 'book',
-        'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush'
-    ]
     return COCO_INSTANCE_CATEGORY_NAMES[label_id]
-
 
 
 _IMAGE_NET_CLASSES = []
 
+
 def classification_id_to_label_fn(label_id):
     if not _IMAGE_NET_CLASSES:
-        response = requests.get('https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt')
+        response = requests.get(
+            "https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt"
+        )
         data = response.text
         _IMAGE_NET_CLASSES.extend(data.splitlines())
     return _IMAGE_NET_CLASSES[label_id]

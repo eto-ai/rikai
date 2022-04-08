@@ -12,17 +12,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from abc import ABC, abstractmethod
 import json
-from typing import Any, Callable, Dict, Optional, TypeVar
-
+from abc import ABC, abstractmethod
 from jsonschema.exceptions import ValidationError
 from jsonschema.validators import validate
-
 from rikai.internal.reflection import find_func
 from rikai.logging import logger
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
+from typing import Any, Callable, Dict, Optional, TypeVar
 
 __all__ = ["ModelSpec", "ModelType"]
 
@@ -158,13 +156,13 @@ class ModelSpec(ABC):
 
     def load_id_to_label_fn(self) -> Optional[Callable]:
         """Load the function that maps label id to human-readable string labels"""
-        if 'labels' in self._spec:
-            uri = self._spec['labels'].get('uri')
+        if "labels" in self._spec:
+            uri = self._spec["labels"].get("uri")
             if uri:
                 with open(uri) as fh:
                     dd = json.load(fh)
                 return lambda label_id: dd[label_id]
-            func = self._spec['labels'].get('func')
+            func = self._spec["labels"].get("func")
             if func:
                 return find_func(func)
         return None

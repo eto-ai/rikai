@@ -12,13 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from pyspark.sql import SparkSession
-import pytest
 import py4j
+import pytest
+from pyspark.sql import SparkSession
+from utils import check_ml_predict
 
 from rikai.spark.functions import init
-
-from utils import check_ml_predict
 
 
 def test_fasterrcnn_resnet50_fpn(spark: SparkSession, two_flickr_rows: list):

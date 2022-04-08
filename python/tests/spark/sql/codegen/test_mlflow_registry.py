@@ -14,19 +14,21 @@
 
 from pathlib import Path
 
+import mlflow
 import py4j
 import pytest
+import torch
 from mlflow.tracking import MlflowClient
-import mlflow
 from pyspark.sql import SparkSession
 from utils import check_ml_predict
-import torch
 
 import rikai
 from rikai.contrib.torch.detections import OUTPUT_SCHEMA
-from rikai.spark.sql.codegen.mlflow_registry import MlflowModelSpec
+from rikai.spark.sql.codegen.mlflow_registry import (
+    CONF_MLFLOW_TRACKING_URI,
+    MlflowModelSpec,
+)
 from rikai.spark.sql.schema import parse_schema
-from rikai.spark.sql.codegen.mlflow_registry import CONF_MLFLOW_TRACKING_URI
 
 
 def test_modelspec(mlflow_client: MlflowClient):

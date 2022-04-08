@@ -15,7 +15,13 @@ from pathlib import Path
 from typing import List
 
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StringType, StructType, StructField, IntegerType, FloatType
+from pyspark.sql.types import (
+    FloatType,
+    IntegerType,
+    StringType,
+    StructField,
+    StructType,
+)
 
 
 def _check_object_detection_models(spark: SparkSession, models: List[str]):

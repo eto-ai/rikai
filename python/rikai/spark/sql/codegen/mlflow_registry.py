@@ -29,6 +29,8 @@ from mlflow.tracking import MlflowClient
 from rikai.logging import logger
 from rikai.spark.sql.codegen.base import ModelSpec, Registry
 from rikai.spark.sql.codegen.mlflow_logger import (
+    CONF_MLFLOW_LABEL_FUNC,
+    CONF_MLFLOW_LABEL_URI,
     CONF_MLFLOW_MODEL_FLAVOR,
     CONF_MLFLOW_MODEL_TYPE,
     CONF_MLFLOW_OUTPUT_SCHEMA,
@@ -116,6 +118,10 @@ class MlflowModelSpec(ModelSpec):
                 "uri": uri,
                 "type": conf.get(CONF_MLFLOW_MODEL_TYPE, None),
             },
+            "labels": {
+                "func": conf.get(CONF_MLFLOW_LABEL_FUNC, None),
+                "uri": conf.get(CONF_MLFLOW_LABEL_URI, None),
+            }
         }
 
         # remove none value

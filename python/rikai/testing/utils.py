@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Union, Iterator
+from typing import Iterator, Union
 from urllib.parse import urlparse
 
 import pandas as pd
@@ -33,9 +33,7 @@ def _make_model_spec(raw_spec: "ModelSpec") -> ModelSpec:
 
         reg = MlflowRegistry()
     elif scheme == "torchhub":
-        from rikai.experimental.torchhub.torchhub_registry import (
-            TorchHubRegistry,
-        )
+        from rikai.experimental.torchhub.torchhub_registry import TorchHubRegistry
 
         reg = TorchHubRegistry()
     elif scheme == "tfhub":

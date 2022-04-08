@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from enum import Enum
 from numbers import Real
-from typing import Optional, Sequence, Tuple, Union
+from typing import List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from PIL import Image, ImageDraw
@@ -294,8 +294,8 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
 
     @staticmethod
     def ious(
-        boxes1: Union[Sequence[Box2d], np.ndarray],
-        boxes2: Union[Sequence[Box2d], np.ndarray],
+        boxes1: Union[List[Box2d], np.ndarray],
+        boxes2: Union[List[Box2d], np.ndarray],
     ) -> Optional[np.ndarray]:
         """Compute intersection over union(IOU).
 
@@ -312,7 +312,7 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
             For two lists of box2ds, which have the length of N, and M respectively,
             this function should return a N*M matrix, each element is the iou value
             `(float,[0, 1])`.
-            Returns None if one of the input is empty.
+            Returns None if one of the inputs is empty.
 
         Example
         -------
@@ -333,16 +333,18 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
         >>> Box2d.ious(list1, list2)
         """  # noqa: E501
 
-        assert isinstance(boxes1, (Sequence, np.ndarray))
-        assert isinstance(boxes2, (Sequence, np.ndarray))
-
-        if not boxes1 or not boxes2:
-            return None
+        if not isinstance(boxes1, (list, np.ndarray)) or not isinstance(
+            boxes2, (list, np.ndarray)
+        ):
+            raise ValueError("Input must be a list/np.array fo box2d objects")
 
         if not isinstance(boxes1, np.ndarray):
             boxes1 = np.array(boxes1)
         if not isinstance(boxes2, np.ndarray):
             boxes2 = np.array(boxes2)
+        if np.size(boxes1) == 0 or np.size(boxes2) == 0:
+            return None
+
         row_count = boxes1.shape[0]
         area1 = Box2d._area(boxes1).reshape(row_count, -1)
         area2 = Box2d._area(boxes2)
@@ -359,11 +361,11 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
         return iou_mat
 
     def iou(
-        self, other: Union[Box2d, Sequence[Box2d], np.ndarray]
+        self, other: Union[Box2d, List[Box2d], np.ndarray]
     ) -> Union[float, np.ndarray]:
         """Compute intersection over union(IOU)."""
         assert isinstance(
-            other, (Box2d, Sequence, np.ndarray)
+            other, (Box2d, list, np.ndarray)
         ), f"Can only compute iou between Box2d, got {type(other)}"
         if isinstance(other, Box2d):
             other_arr = np.array([other])

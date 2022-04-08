@@ -15,6 +15,7 @@
 from typing import Sequence
 
 import numpy as np
+import pytest
 from PIL import Image, ImageDraw
 
 from rikai.types import Box2d, Box3d, Mask, Point
@@ -68,6 +69,21 @@ def test_box2d_matrix_iou():
     vec1 = [Box2d(0, 0, 10, 10), Box2d(0, 0, 20, 20)]
     vec2 = [Box2d(5, 5, 10, 10), Box2d(10, 10, 20, 20)]
     assert np.allclose([[0.25, 0.0], [0.0625, 0.25]], Box2d.ious(vec1, vec2))
+
+
+def test_box2d_empty_ious():
+    boxes = [Box2d(0, 0, 10, 10), Box2d(0, 0, 20, 20)]
+    assert Box2d.ious([], boxes) is None
+    assert Box2d.ious(np.array([]), boxes) is None
+
+
+def test_box2d_ious_bad_inputs():
+    with pytest.raises(ValueError):
+        Box2d.ious(None, None)
+
+    boxes = [Box2d(0, 0, 10, 10), Box2d(0, 0, 20, 20)]
+    with pytest.raises(ValueError):
+        Box2d.ious(Box2d(1, 2, 3, 4), boxes)
 
 
 def test_box2d_empty_iou():

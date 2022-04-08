@@ -12,13 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from pathlib import Path
-
 import mlflow
 import numpy as np
 import pytest
 from pyspark.sql import Row, SparkSession
-from pyspark.sql.types import DoubleType, LongType, StructField, StructType
+from pyspark.sql.types import FloatType, IntegerType, StructField, StructType
 from sklearn.datasets import make_classification
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
@@ -45,7 +43,7 @@ def test_sklearn_linear_regression(
             model,
             artifact_path="model",
             registered_model_name=reg_model_name,
-            model_type="linear_regression"
+            model_type="linear_regression",
         )
 
         spark.sql(
@@ -62,7 +60,7 @@ def test_sklearn_linear_regression(
             select ML_PREDICT({model_name}, array(x0, x1)) as pred from tbl_X
             """
         )
-        assert result.schema == StructType([StructField("pred", DoubleType())])
+        assert result.schema == StructType([StructField("pred", FloatType())])
         assert result.count() == 2
 
 
@@ -88,7 +86,7 @@ def test_sklearn_random_forest(mlflow_tracking_uri: str, spark: SparkSession):
         rikai.mlflow.sklearn.log_model(
             model,
             artifact_path="model",
-            schema="long",
+            model_type="random_forest_classification",
             registered_model_name=reg_model_name,
         )
 
@@ -110,7 +108,7 @@ def test_sklearn_random_forest(mlflow_tracking_uri: str, spark: SparkSession):
             from tbl_X
             """
         )
-        assert result.schema == StructType([StructField("pred", LongType())])
+        assert result.schema == StructType([StructField("pred", IntegerType())])
         assert (
             result.collect()
             == spark.createDataFrame([Row(pred=1), Row(pred=1)]).collect()
@@ -129,7 +127,7 @@ def test_sklearn_pca(mlflow_tracking_uri: str, spark: SparkSession):
         rikai.mlflow.sklearn.log_model(
             model,
             "model",
-            schema="array<float>",
+            model_type="pca",
             registered_model_name=reg_model_name,
         )
         spark.sql(

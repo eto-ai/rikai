@@ -20,12 +20,14 @@ from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql.functions import pandas_udf
 from pyspark.sql.types import BinaryType
 
+from rikai.spark.sql.codegen.base import ModelSpec
+
 __all__ = ["generate_udf"]
 
 _pickler = CloudPickleSerializer()
 
 
-def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
+def generate_udf(spec: ModelSpec):
     """Construct a UDF to run sklearn model.
 
     Parameters
@@ -41,10 +43,12 @@ def generate_udf(spec: "rikai.spark.sql.codegen.base.ModelSpec"):
     def sklearn_inference_udf(
         iter: Iterator[pd.Series],
     ) -> Iterator[pd.Series]:
-        model = spec.load_model()
+        model = spec.model_type
+        model.load_model(spec)
         for series in list(iter):
             X = np.vstack(series.apply(_pickler.loads).to_numpy())
-            y = [_pickler.dumps(pred.tolist()) for pred in model.predict(X)]
+            print("Actual predict:", model.predict(X))
+            y = [_pickler.dumps(pred) for pred in model.predict(X)]
             yield pd.Series(y)
 
     return pandas_udf(sklearn_inference_udf, returnType=BinaryType())

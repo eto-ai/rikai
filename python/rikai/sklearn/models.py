@@ -29,15 +29,14 @@
 from __future__ import annotations
 
 from abc import ABC
-from typing import Callable
+from typing import Callable, List
 
-import numpy as np
-
-from rikai.numpy import view
-from rikai.spark.sql.model import ModelType, ModelSpec
+from rikai.spark.sql.model import ModelSpec, ModelType
 
 
 class SklearnModelType(ModelType, ABC):
+    """Base :py:class:`ModelType` for Sklearn"""
+
     def __init__(self):
         self.model = None
 
@@ -53,11 +52,11 @@ class Classification(SklearnModelType):
     """Classification model type"""
 
     def schema(self) -> str:
-        return "struct<label_id: int>"
+        return "int"
 
     def predict(self, x, *args, **kwargs) -> dict:
         assert self.model is not None
-        return {"label_id": self.model.predict(x)[0]}
+        return self.model.predict(x).tolist()
 
 
 class Regression(SklearnModelType):
@@ -70,11 +69,16 @@ class Regression(SklearnModelType):
 
 
 class DimensionalityReduction(SklearnModelType):
-    def schema(self) -> str:
-        return "ndarray"
+    """Dimensionality reduction models.
 
-    def predict(self, x, *args, **kwargs) -> np.ndarray:
-        return view(self.model.predict(x))
+    - PCA
+    """
+
+    def schema(self) -> str:
+        return "array<float>"
+
+    def predict(self, x, *args, **kwargs) -> List[float]:
+        return self.model.transform(x).tolist()
 
 
 MODEL_TYPES = {

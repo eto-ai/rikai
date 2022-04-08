@@ -65,7 +65,7 @@ class Regression(SklearnModelType):
 
     def predict(self, x, *args, **kwargs) -> float:
         assert self.model is not None
-        return self.model.predict(x)[0]
+        return self.model.predict(x).tolist()
 
 
 class DimensionalityReduction(SklearnModelType):

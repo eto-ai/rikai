@@ -46,7 +46,7 @@ class DummyModelSpec(ModelSpec):
             )
 
     def load_model(self):
-        raise RuntimeError("BootstrapModelSpec does not load model")
+        raise RuntimeError("DummyModelSpec does not load model")
 
 
 class DummyRegistry(Registry):

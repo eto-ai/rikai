@@ -74,20 +74,19 @@ libraryDependencies ++= {
   val snappyVersion = "1.1.8.4" // Support Apple Silicon
   val scalatestVersion = "3.2.0"
   val hadoopVersion = "3.2.3"
-  val circeVersion = "0.12.3"
   val mlflowVersion = "1.21.0"
   val enableifVersion = "1.1.8"
 
   Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided,
-    "com.thoughtworks.enableIf" %% "enableif" % enableifVersion exclude (
+    "com.thoughtworks.enableIf" %% "enableif" % enableifVersion % "compile-internal" exclude (
       "org.scala-lang", "scala-reflect"
     ),
     "org.apache.spark" %% "spark-sql" % sparkVersion.value % Provided,
     "org.apache.spark" %% "spark-core" % sparkVersion.value % Test classifier "tests",
     "org.apache.spark" %% "spark-hive-thriftserver" % sparkVersion.value % Test,
     "org.apache.spark" %% "spark-hive-thriftserver" % sparkVersion.value % Test classifier "tests",
-    "org.apache.hadoop" % "hadoop-common" % hadoopVersion,
+    "org.apache.hadoop" % "hadoop-common" % hadoopVersion % Provided,
     "software.amazon.awssdk" % "s3" % awsVersion % Provided,
     "org.xerial.snappy" % "snappy-java" % snappyVersion,
     "org.apache.logging.log4j" % "log4j-core" % log4jVersion % Runtime,
@@ -95,9 +94,6 @@ libraryDependencies ++= {
       "org.scala-lang", "scala-reflect"
     ),
     "org.scalatest" %% "scalatest-funsuite" % scalatestVersion % Test,
-    "io.circe" %% "circe-core" % circeVersion,
-    "io.circe" %% "circe-generic" % circeVersion,
-    "io.circe" %% "circe-parser" % circeVersion,
     "org.mlflow" % "mlflow-client" % mlflowVersion
   )
 }
@@ -144,8 +140,11 @@ Test / fork := true
 
 Antlr4 / antlr4PackageName := Some("ai.eto.rikai.sql.spark.parser")
 Antlr4 / antlr4GenVisitor := true
-Antlr4 / antlr4Version := "4.8-1"
-
+Antlr4 / antlr4Version := {
+  if ("3.1.2".equals(sparkVersion.value)) "4.8-1"
+  else "4.8"
+}
+Antlr4 / antlr4RuntimeDependency := "org.antlr" % "antlr4-runtime" % (Antlr4 / antlr4Version).value % Provided
 enablePlugins(Antlr4Plugin)
 
 Compile / doc / scalacOptions ++= Seq(
@@ -154,6 +153,8 @@ Compile / doc / scalacOptions ++= Seq(
 )
 
 assembly / assemblyJarName := s"${name.value}-assembly-${sparkVerStr.value}_${scalaBinaryVersion.value}-${version.value}.jar"
+// Excluding Scala library jars, see https://github.com/sbt/sbt-assembly/tree/v1.2.0#excluding-scala-library-jars
+assemblyPackageScala / assembleArtifact := false
 
 publishLocal := {
   val ivyHome = ivyPaths.value.ivyHome.get.getCanonicalPath

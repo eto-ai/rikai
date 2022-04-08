@@ -18,13 +18,14 @@ package org.apache.spark.sql.rikai.model
 
 import ai.eto.rikai.sql.model.{ModelSpec, SparkUDFModel}
 import ai.eto.rikai.sql.spark.Python
-import io.circe.generic.auto._
-import io.circe.parser.decode
-import io.circe.syntax._
 import org.apache.spark.api.python.{PythonEvalType, PythonFunction}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.execution.python.UserDefinedPythonFunction
 import org.apache.spark.sql.types.{BinaryType, DataType}
+import org.json4s.{DefaultFormats, NoTypeHints}
+import org.json4s.jackson.Serialization.write
+import org.json4s.jackson.JsonMethods.parse
+import org.json4s.jackson.Serialization
 
 import java.nio.file.Files
 import java.util.Base64
@@ -78,7 +79,8 @@ object ModelResolver {
     val path = Files.createTempFile("model-code", ".cpt")
     val dataTypePath = Files.createTempFile("model-type", ".json")
     try {
-      Files.write(specPath, spec.asJson.toString.getBytes)
+      implicit val writeFormat = DefaultFormats.preservingEmptyValues
+      Files.write(specPath, write(spec).getBytes)
       Python.execute(
         s"""from pyspark.serializers import CloudPickleSerializer;
            |import json
@@ -99,11 +101,8 @@ object ModelResolver {
         session
       )
       val cmdJson = Files.readAllLines(path).asScala.mkString("\n")
-      val cmdMap = decode[FuncDesc](cmdJson) match {
-        case Left(failure) => throw failure
-        case Right(json)   => json
-      }
-
+      implicit val extractFormat = Serialization.formats(NoTypeHints)
+      val cmdMap = parse(cmdJson).extract[FuncDesc]
       val dataTypeJson = Files.readAllLines(dataTypePath).asScala.mkString("\n")
       val returnType = DataType.fromJson(dataTypeJson)
       val suffix: String = Random.alphanumeric.take(6).mkString.toLowerCase

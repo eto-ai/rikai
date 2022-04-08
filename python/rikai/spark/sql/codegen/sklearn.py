@@ -45,9 +45,8 @@ def generate_udf(spec: ModelSpec):
     ) -> Iterator[pd.Series]:
         model = spec.model_type
         model.load_model(spec)
-        for series in list(iter):
+        for series in iter:
             X = np.vstack(series.apply(_pickler.loads).to_numpy())
-            print("Actual predict:", model.predict(X))
             y = [_pickler.dumps(pred) for pred in model.predict(X)]
             yield pd.Series(y)
 

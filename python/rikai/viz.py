@@ -187,7 +187,7 @@ class Text(Drawable, ComposableDrawable):
         The RGB color string to render the text
     """
 
-    def xy_min(self):
+    def left_top(self):
         return self.xy
 
     def aligned(

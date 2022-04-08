@@ -94,7 +94,7 @@ class ComposableDrawable:
     """Mixin for a drawable that can be composed with others"""
 
     @abstractmethod
-    def xy_min(self):
+    def left_top(self):
         """return a tuple of the left top axis (xmin, ymin)"""
 
     @abstractmethod

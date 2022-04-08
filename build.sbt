@@ -79,7 +79,7 @@ libraryDependencies ++= {
 
   Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided,
-    "com.thoughtworks.enableIf" %% "enableif" % enableifVersion exclude (
+    "com.thoughtworks.enableIf" %% "enableif" % enableifVersion % "compile-internal" exclude (
       "org.scala-lang", "scala-reflect"
     ),
     "org.apache.spark" %% "spark-sql" % sparkVersion.value % Provided,
@@ -144,7 +144,7 @@ Antlr4 / antlr4Version := {
   if ("3.1.2".equals(sparkVersion.value)) "4.8-1"
   else "4.8"
 }
-
+Antlr4 / antlr4RuntimeDependency := "org.antlr" % "antlr4-runtime" % (Antlr4 / antlr4Version).value % Provided
 enablePlugins(Antlr4Plugin)
 
 Compile / doc / scalacOptions ++= Seq(
@@ -155,13 +155,6 @@ Compile / doc / scalacOptions ++= Seq(
 assembly / assemblyJarName := s"${name.value}-assembly-${sparkVerStr.value}_${scalaBinaryVersion.value}-${version.value}.jar"
 // Excluding Scala library jars, see https://github.com/sbt/sbt-assembly/tree/v1.2.0#excluding-scala-library-jars
 assemblyPackageScala / assembleArtifact := false
-assembly / assemblyExcludedJars := {
-  val cp = (assembly / fullClasspath).value
-  cp filter { x =>
-    x.data.getName.contains("antlr4-runtime") ||
-      x.data.getName.contains("enableif")
-  }
-}
 
 publishLocal := {
   val ivyHome = ivyPaths.value.ivyHome.get.getCanonicalPath

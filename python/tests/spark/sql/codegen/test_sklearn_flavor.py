@@ -108,7 +108,9 @@ def test_sklearn_random_forest(mlflow_tracking_uri: str, spark: SparkSession):
             from tbl_X
             """
         )
-        assert result.schema == StructType([StructField("pred", IntegerType())])
+        assert result.schema == StructType(
+            [StructField("pred", IntegerType())]
+        )
         assert (
             result.collect()
             == spark.createDataFrame([Row(pred=1), Row(pred=1)]).collect()

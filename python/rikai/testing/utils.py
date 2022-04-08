@@ -33,7 +33,9 @@ def _make_model_spec(raw_spec: "ModelSpec") -> ModelSpec:
 
         reg = MlflowRegistry()
     elif scheme == "torchhub":
-        from rikai.experimental.torchhub.torchhub_registry import TorchHubRegistry
+        from rikai.experimental.torchhub.torchhub_registry import (
+            TorchHubRegistry,
+        )
 
         reg = TorchHubRegistry()
     elif scheme == "tfhub":

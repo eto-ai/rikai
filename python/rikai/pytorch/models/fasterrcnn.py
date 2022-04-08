@@ -18,7 +18,10 @@ from torchvision.models.detection import (
     fasterrcnn_resnet50_fpn,
 )
 
-from rikai.pytorch.models.torch import detection_id_to_label, ObjectDetectionModelType
+from rikai.pytorch.models.torch import (
+    detection_id_to_label,
+    ObjectDetectionModelType,
+)
 
 fasterrcnn = ObjectDetectionModelType(
     "fasterrcnn",

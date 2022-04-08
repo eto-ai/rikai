@@ -20,7 +20,10 @@ from torch import Tensor
 from torchvision.models.detection.ssd import SSD
 from torchvision.ops.boxes import batched_nms, clip_boxes_to_image
 
-from rikai.pytorch.models.torch import detection_id_to_label, ObjectDetectionModelType
+from rikai.pytorch.models.torch import (
+    detection_id_to_label,
+    ObjectDetectionModelType,
+)
 from rikai.spark.sql.model import ModelSpec
 from rikai.types import Box2d
 

@@ -38,7 +38,12 @@ from rikai.logging import logger
 from rikai.numpy import ndarray
 from rikai.spark.types.vision import ImageType
 from rikai.types.geometry import Box2d
-from rikai.types.video import Segment, SingleFrameSampler, VideoStream, YouTubeVideo
+from rikai.types.video import (
+    Segment,
+    SingleFrameSampler,
+    VideoStream,
+    YouTubeVideo,
+)
 from rikai.types.vision import Image
 
 __all__ = [

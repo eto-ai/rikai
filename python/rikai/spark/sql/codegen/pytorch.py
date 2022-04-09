@@ -41,21 +41,23 @@ def move_tensor_to_device(data, device):
     return data
 
 
-def _generate(payload: ModelSpec, is_udf: bool = True):
+def _generate(spec: ModelSpec, is_udf: bool = True):
     """Construct a UDF to run pytorch model.
 
     Parameters
     ----------
-    payload : ModelSpec
+    spec : ModelSpec
         the model specifications object
 
     Returns
     -------
     A Spark Pandas UDF.
     """
-    model = payload.model_type
+    model = spec.model_type
+    if model is None:
+        raise ValueError(f"Model not found with spec: {spec}")
     default_device = "gpu" if torch.cuda.is_available() else "cpu"
-    options = payload.options
+    options = spec.options
     use_gpu = options.get("device", default_device) == "gpu"
     num_workers = int(
         options.get("num_workers", min(os.cpu_count(), DEFAULT_NUM_WORKERS))
@@ -68,7 +70,7 @@ def _generate(payload: ModelSpec, is_udf: bool = True):
         iter: Iterator[pd.DataFrame],
     ) -> return_type:
         device = torch.device("cuda" if use_gpu else "cpu")
-        model.load_model(payload, device=device)
+        model.load_model(spec, device=device)
 
         try:
             with torch.no_grad():

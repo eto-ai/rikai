@@ -23,25 +23,14 @@ import torch
 import torchvision
 
 import rikai
-from rikai.contrib.torch.detections import OUTPUT_SCHEMA
 
 
 def register_torch_model(model: torch.nn.Module, name: str):
     artifact_path = "model"
-    pre_processing = (
-        "rikai.contrib.torch.transforms."
-        "fasterrcnn_resnet50_fpn.pre_processing"
-    )
-    post_processing = (
-        "rikai.contrib.torch.transforms."
-        "fasterrcnn_resnet50_fpn.post_processing"
-    )
     rikai.mlflow.pytorch.log_model(
         model,
         artifact_path,
-        OUTPUT_SCHEMA,
-        pre_processing,
-        post_processing,
+        model_type="resnet",
         registered_model_name=name,
     )
 

@@ -77,7 +77,6 @@ def parse_model_type(flavor: str, model_type: str):
         # Try registered models first
         try:
             registered_models = find_func(f"rikai.{flavor}.models.MODEL_TYPES")
-            print(registered_models)
             if registered_models:
                 return registered_models[model_type]
         except (ModuleNotFoundError, KeyError):

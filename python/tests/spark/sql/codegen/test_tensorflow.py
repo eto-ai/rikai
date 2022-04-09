@@ -20,7 +20,13 @@ import pandas as pd
 import tensorflow as tf
 from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql import Row, SparkSession
-from pyspark.sql.types import ArrayType, FloatType, IntegerType, StructField, StructType
+from pyspark.sql.types import (
+    ArrayType,
+    FloatType,
+    IntegerType,
+    StructField,
+    StructType,
+)
 
 import rikai
 from rikai.spark.sql.codegen.fs import FileModelSpec

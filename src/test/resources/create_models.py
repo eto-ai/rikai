@@ -30,7 +30,7 @@ def register_torch_model(model: torch.nn.Module, name: str):
     rikai.mlflow.pytorch.log_model(
         model,
         artifact_path,
-        model_type="resnet",
+        model_type="fasterrcnn",
         registered_model_name=name,
     )
 
@@ -43,11 +43,11 @@ def main():
 
     mlflow.set_tracking_uri(args.mlflow_uri)
     with mlflow.start_run(run_id=args.run_id):
-        resnet = torchvision.models.detection.fasterrcnn_resnet50_fpn(
+        fasterrcnn = torchvision.models.detection.fasterrcnn_resnet50_fpn(
             pretrained=True,
             progress=False,
         )
-        register_torch_model(resnet, "resnet")
+        register_torch_model(fasterrcnn, "fasterrcnn")
         ssd = torchvision.models.detection.ssd300_vgg16(
             pretrained=True,
             progress=False,

@@ -55,7 +55,7 @@ def test_mlflow_model_from_model_version(
     check_ml_predict(spark, "resnet_m_buzz", two_flickr_rows)
 
 
-@pytest.skip
+@pytest.mark.skip
 @pytest.mark.timeout(200)
 def test_mlflow_model_without_custom_logger(
     spark: SparkSession,

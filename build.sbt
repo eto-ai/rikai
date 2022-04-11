@@ -178,3 +178,5 @@ assembly / artifact := {
 }
 
 addArtifact(assembly / artifact, assembly)
+
+test in assembly := {}

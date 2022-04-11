@@ -135,7 +135,7 @@ class ThriftServerTest
 
     withJdbcStatement(stmt => {
       val rs = stmt.executeQuery(
-        s"SELECT ML_PREDICT(resnet, image) FROM images"
+        s"SELECT ML_PREDICT(fasterrcnn, image) FROM images"
       )
       assert(rs.next())
     })

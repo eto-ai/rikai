@@ -70,16 +70,7 @@ private[parser] class RikaiExtAstBuilder
             )
         }
     }
-    val preprocessor: Option[String] =
-      Option(ctx.preprocess).map(visitProcessorClause) match {
-        case Some(p: String) => Some(p)
-        case _               => None
-      }
-    val postprocessor: Option[String] =
-      Option(ctx.postprocess).map(visitProcessorClause) match {
-        case Some(p: String) => Some(p)
-        case _               => None
-      }
+
     val replace = ctx.REPLACE() != null
 
     if (ifNotExists && replace) {
@@ -96,8 +87,6 @@ private[parser] class RikaiExtAstBuilder
       ifNotExists = ifNotExists,
       returns = returns,
       uri = Option(ctx.uri).map(string),
-      preprocessor = preprocessor,
-      postprocessor = postprocessor,
       table = None,
       replace = ctx.REPLACE() != null,
       options = visitOptionList(ctx.optionList())
@@ -172,9 +161,6 @@ private[parser] class RikaiExtAstBuilder
 
   override def visitPlainFieldType(ctx: PlainFieldTypeContext): String =
     ctx.getText
-
-  override def visitProcessorClause(ctx: ProcessorClauseContext): String =
-    ctx.className.getText.replaceAll("^[\"']+|[\"']+$", "")
 
   protected def visitTableIdentfier(
       ctx: QualifiedNameContext

@@ -12,8 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from pathlib import Path
-
 import mlflow
 import torch
 from mlflow.entities.model_registry import ModelVersion
@@ -30,16 +28,12 @@ def test_none_value_tags(mlflow_tracking_uri: str, resnet_model_uri):
             model,
             "artifact_path",
             "output_schema",
-            pre_processing=None,
-            post_processing=None,
         )
         run_id = mlflow.active_run().info.run_id
         run = mlflow.get_run(run_id)
         tags = run.data.tags
         assert tags[rikai.mlflow.CONF_MLFLOW_ARTIFACT_PATH] == "artifact_path"
         assert tags[rikai.mlflow.CONF_MLFLOW_OUTPUT_SCHEMA] == "output_schema"
-        assert rikai.mlflow.CONF_MLFLOW_PRE_PROCESSING not in tags
-        assert rikai.mlflow.CONF_MLFLOW_POST_PROCESSING not in tags
 
 
 def test_model_and_version_tags(mlflow_tracking_uri: str, resnet_model_uri):
@@ -54,8 +48,6 @@ def test_model_and_version_tags(mlflow_tracking_uri: str, resnet_model_uri):
             rikai.mlflow.pytorch.log_model(
                 model,
                 registered_model_name=model_name,
-                pre_processing=None,
-                post_processing=None,
                 **expected_tags,
             )
             run_id = mlflow.active_run().info.run_id

@@ -16,7 +16,6 @@
 Rikai SQL ML
 """
 
-import os
 import tempfile
 import warnings
 from typing import Any, Optional
@@ -24,8 +23,6 @@ from typing import Any, Optional
 CONF_MLFLOW_TRACKING_URI = "spark.rikai.sql.ml.registry.mlflow.tracking_uri"
 CONF_MLFLOW_OUTPUT_SCHEMA = "rikai.output.schema"
 CONF_MLFLOW_SPEC_VERSION = "rikai.spec.version"
-CONF_MLFLOW_PRE_PROCESSING = "rikai.transforms.pre"
-CONF_MLFLOW_POST_PROCESSING = "rikai.transforms.post"
 CONF_MLFLOW_MODEL_FLAVOR = "rikai.model.flavor"
 CONF_MLFLOW_MODEL_TYPE = "rikai.model.type"
 CONF_MLFLOW_ARTIFACT_PATH = "rikai.model.artifact_path"
@@ -86,8 +83,6 @@ class MlflowLogger:
         model: Any,
         artifact_path: str,
         schema: Optional[str] = None,
-        pre_processing: Optional[str] = None,
-        post_processing: Optional[str] = None,
         registered_model_name: Optional[str] = None,
         customized_flavor: Optional[str] = None,
         model_type: Optional[str] = None,
@@ -104,10 +99,6 @@ class MlflowLogger:
             The relative (to the run) artifact path
         schema: str
             Output schema (pyspark DataType)
-        pre_processing: str, default None
-            Full python module path of the pre-processing transforms
-        post_processing: str, default None
-            Full python module path of the post-processing transforms
         registered_model_name: str, default None
             Model name in the mlflow model registry
         model_type : str
@@ -172,13 +163,9 @@ class MlflowLogger:
             else self.flavor,
             CONF_MLFLOW_MODEL_TYPE: model_type,
             CONF_MLFLOW_OUTPUT_SCHEMA: schema,
-            CONF_MLFLOW_PRE_PROCESSING: pre_processing,
-            CONF_MLFLOW_POST_PROCESSING: post_processing,
             CONF_MLFLOW_ARTIFACT_PATH: artifact_path,
         }
         for k in (
-            CONF_MLFLOW_PRE_PROCESSING,
-            CONF_MLFLOW_POST_PROCESSING,
             CONF_MLFLOW_MODEL_TYPE,
             CONF_MLFLOW_OUTPUT_SCHEMA,
         ):

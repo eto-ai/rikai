@@ -38,5 +38,5 @@ resnet152 = ClassificationModelType(
 )
 # Make default resnet to be ResNet-50
 resnet = ClassificationModelType(
-    name="resnet50", pretrained_fn=torchvision.models.resnet50
+    name="resnet", pretrained_fn=torchvision.models.resnet50
 )

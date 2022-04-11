@@ -82,7 +82,7 @@ class MlflowCatalogTest
       modelsDf
         .exceptAll(
           Seq(
-            ("resnet", "pytorch", "mlflow:/resnet", ""),
+            ("fasterrcnn", "pytorch", "mlflow:/fasterrcnn", ""),
             ("ssd", "pytorch", "mlflow:/ssd", "")
           ).toDF("name", "flavor", "uri", "options")
         )

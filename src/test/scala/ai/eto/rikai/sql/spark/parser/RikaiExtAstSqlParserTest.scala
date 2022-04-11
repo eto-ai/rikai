@@ -73,46 +73,6 @@ class RikaiExtAstSqlParserTest extends AnyFunSuite {
     assert(create.returns.contains("STRUCT<foo:int, bar:ARRAY<Box2d>>"))
   }
 
-  test("parse processors") {
-    val cmd = parser
-      .parsePlan(
-        "CREATE MODEL proc PREPROCESSOR 'rikai.models.yolo.preprocessor' " +
-          "USING '/tmp/model'"
-      )
-      .asInstanceOf[CreateModelCommand]
-    val spec = cmd.asSpec
-    assert(spec.preprocessor.isDefined)
-    assert(spec.preprocessor.contains("rikai.models.yolo.preprocessor"))
-    assert(spec.postprocessor.isEmpty)
-  }
-
-  test("parse pre&post processors") {
-    val cmd = parser
-      .parsePlan(
-        "CREATE MODEL proc " +
-          "PREPROCESSOR 'rikai.models.yolo.preprocessor' " +
-          "POSTPROCESSOR \"rikai.models.yolo.postprocessor\"" +
-          "USING '/tmp/model'"
-      )
-      .asInstanceOf[CreateModelCommand]
-    val spec = cmd.asSpec
-    assert(spec.preprocessor.isDefined)
-    assert(spec.preprocessor.contains("rikai.models.yolo.preprocessor"))
-    assert(spec.postprocessor.isDefined)
-    assert(spec.postprocessor.contains("rikai.models.yolo.postprocessor"))
-
-  }
-
-  test("bad preprocessor") {
-    val cmd = parser
-      .parsePlan(
-        "CREATE MODEL proc PREPROCESSOR ('rikai.models.yolo.preprocessor') " +
-          "USING '/tmp/model'"
-      )
-
-    assert(cmd == null)
-  }
-
   test("no uri") {
     val cmd = parser
       .parsePlan("""

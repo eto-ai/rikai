@@ -12,8 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import importlib
-import warnings
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Optional, TypeVar
 
@@ -25,7 +23,7 @@ from rikai.logging import logger
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
 
-__all__ = ["ModelSpec", "ModelType", "AnonymousModelType"]
+__all__ = ["ModelSpec", "ModelType"]
 
 
 M = TypeVar("M")  # Model Type
@@ -41,8 +39,8 @@ def gen_schema_spec(required_cols):
                 "type": "string",
                 "description": "Model SPEC format version",
             },
-            "name": {"type": "string", "description": "Model name"},
             "schema": {"type": "string"},
+            "name": {"type": "string", "description": "Model name"},
             "model": {
                 "type": "object",
                 "description": "model description",
@@ -52,13 +50,6 @@ def gen_schema_spec(required_cols):
                     "type": {"type": "string"},
                 },
                 "required": required_cols,
-            },
-            "transforms": {
-                "type": "object",
-                "properties": {
-                    "pre": {"type": "string"},
-                    "post": {"type": "string"},
-                },
             },
         },
         "required": ["version", "model"],
@@ -159,11 +150,6 @@ class ModelSpec(ABC):
         mtype = self._spec["model"].get("type", None)
         if mtype:
             return parse_model_type(self.flavor, mtype)
-        return AnonymousModelType(
-            self._spec.get("schema", None),
-            self.pre_processing,
-            self.post_processing,
-        )
 
     @abstractmethod
     def load_model(self) -> Any:
@@ -179,38 +165,12 @@ class ModelSpec(ABC):
         """Return the output schema of the model."""
         if "schema" in self._spec:
             return parse_schema(self._spec["schema"])
-        return self.model_type.schema
+        return parse_schema(self.model_type.schema())
 
     @property
     def options(self) -> Dict[str, Any]:
         """Model options"""
         return self._spec["options"]
-
-    @property
-    def pre_processing(self) -> Optional[Callable]:
-        """Return pre-processing transform if exists"""
-        if (
-            "transforms" not in self._spec
-            or "pre" not in self._spec["transforms"]
-            or self._spec["transforms"]["pre"] is None
-        ):
-            # Passthrough
-            return _identity
-        f = find_func(self._spec["transforms"]["pre"])
-        return f(self.options)
-
-    @property
-    def post_processing(self) -> Optional[Callable]:
-        """Return post-processing transform if exists"""
-        if (
-            "transforms" not in self._spec
-            or "post" not in self._spec["transforms"]
-            or self._spec["transforms"]["post"] is None
-        ):
-            # Passthrough
-            return _identity
-        f = find_func(self._spec["transforms"]["post"])
-        return f(self.options)
 
 
 class ModelType(ABC):
@@ -264,44 +224,3 @@ class ModelType(ABC):
         """
         # Noop by default
         pass
-
-
-class AnonymousModelType(ModelType):
-    def __init__(
-        self,
-        schema: str,
-        pre_processing: Optional[Callable],
-        post_processing: Optional[Callable],
-    ):
-        self._schema = schema
-        self.pre_processing = pre_processing
-        self.post_processing = post_processing
-        self.model: Optional[M] = None
-        self.spec: Optional[ModelSpec] = None
-
-        warnings.warn(
-            "Using schema and pre_processing/post_processing explicitly"
-            "is deprecated and will be removed in Rikai 0.2. "
-            "Please migrate to a concrete ModelType."
-        )
-
-    def schema(self) -> str:
-        return self._schema
-
-    def load_model(self, spec: ModelSpec, **kwargs):
-        self.model = spec.load_model()
-        self.spec = spec
-
-    def transform(self) -> Callable:
-        """Adaptor for the pre-processing."""
-        return self.pre_processing
-
-    def predict(self, *args, **kwargs) -> Any:
-        """Predict combines model inference and post-processing that
-        converts inference outputs into Rikai types.
-
-        """
-        batch = self.model(*args, **kwargs)
-        if self.post_processing:
-            batch = self.post_processing(batch)
-        return batch

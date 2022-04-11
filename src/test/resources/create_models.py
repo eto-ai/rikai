@@ -23,25 +23,14 @@ import torch
 import torchvision
 
 import rikai
-from rikai.contrib.torch.detections import OUTPUT_SCHEMA
 
 
 def register_torch_model(model: torch.nn.Module, name: str):
     artifact_path = "model"
-    pre_processing = (
-        "rikai.contrib.torch.transforms."
-        "fasterrcnn_resnet50_fpn.pre_processing"
-    )
-    post_processing = (
-        "rikai.contrib.torch.transforms."
-        "fasterrcnn_resnet50_fpn.post_processing"
-    )
     rikai.mlflow.pytorch.log_model(
         model,
         artifact_path,
-        OUTPUT_SCHEMA,
-        pre_processing,
-        post_processing,
+        model_type="fasterrcnn",
         registered_model_name=name,
     )
 
@@ -54,11 +43,11 @@ def main():
 
     mlflow.set_tracking_uri(args.mlflow_uri)
     with mlflow.start_run(run_id=args.run_id):
-        resnet = torchvision.models.detection.fasterrcnn_resnet50_fpn(
+        fasterrcnn = torchvision.models.detection.fasterrcnn_resnet50_fpn(
             pretrained=True,
             progress=False,
         )
-        register_torch_model(resnet, "resnet")
+        register_torch_model(fasterrcnn, "fasterrcnn")
         ssd = torchvision.models.detection.ssd300_vgg16(
             pretrained=True,
             progress=False,

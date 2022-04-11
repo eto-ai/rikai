@@ -27,13 +27,11 @@ except ImportError:
 from mlflow.tracking import MlflowClient
 
 from rikai.logging import logger
-from rikai.spark.sql.codegen.base import ModelSpec, Registry, udf_from_spec
+from rikai.spark.sql.codegen.base import ModelSpec, Registry
 from rikai.spark.sql.codegen.mlflow_logger import (
     CONF_MLFLOW_MODEL_FLAVOR,
     CONF_MLFLOW_MODEL_TYPE,
     CONF_MLFLOW_OUTPUT_SCHEMA,
-    CONF_MLFLOW_POST_PROCESSING,
-    CONF_MLFLOW_PRE_PROCESSING,
     CONF_MLFLOW_SPEC_VERSION,
     CONF_MLFLOW_TRACKING_URI,
     MlflowLogger,
@@ -118,17 +116,9 @@ class MlflowModelSpec(ModelSpec):
                 "uri": uri,
                 "type": conf.get(CONF_MLFLOW_MODEL_TYPE, None),
             },
-            "transforms": {
-                "pre": conf.get(CONF_MLFLOW_PRE_PROCESSING, None),
-                "post": conf.get(CONF_MLFLOW_POST_PROCESSING, None),
-            },
         }
 
         # remove none value
-        if not spec["transforms"]["pre"]:
-            del spec["transforms"]["pre"]
-        if not spec["transforms"]["post"]:
-            del spec["transforms"]["post"]
         if not spec["model"]["type"]:
             del spec["model"]["type"]
         if not spec["schema"]:
@@ -222,8 +212,6 @@ class MlflowRegistry(Registry):
         """
         from_spec = [
             (CONF_MLFLOW_MODEL_FLAVOR, spec["flavor"]),
-            (CONF_MLFLOW_PRE_PROCESSING, spec.get("preprocessor", None)),
-            (CONF_MLFLOW_POST_PROCESSING, spec.get("postprocessor", None)),
             (CONF_MLFLOW_OUTPUT_SCHEMA, spec["schema"]),
         ]
         tags = {k: v for k, v in from_spec if v}

@@ -56,7 +56,6 @@ def mlflow_client_http(
     with mlflow.start_run(experiment_id=experiment_id):
         mlflow.log_param("optimizer", "Adam")
         # Fake training loop
-        print("resnet model uri", resnet_model_uri)
         model = torch.load(resnet_model_uri)
         artifact_path = "model"
 
@@ -64,20 +63,10 @@ def mlflow_client_http(
             "STRUCT<boxes:ARRAY<ARRAY<float>>,"
             "scores:ARRAY<float>,label_ids:ARRAY<int>>"
         )
-        pre_processing = (
-            "rikai.contrib.torch.transforms."
-            "fasterrcnn_resnet50_fpn.pre_processing"
-        )
-        post_processing = (
-            "rikai.contrib.torch.transforms."
-            "fasterrcnn_resnet50_fpn.post_processing"
-        )
         rikai.mlflow.pytorch.log_model(
             model,  # same as vanilla mlflow
             artifact_path,  # same as vanilla mlflow
             schema,
-            pre_processing,
-            post_processing,
             registered_model_name="rikai-test",  # same as vanilla mlflow
         )
 
@@ -90,8 +79,6 @@ def mlflow_client_http(
             {
                 "rikai.model.flavor": "pytorch",
                 "rikai.output.schema": schema,
-                "rikai.transforms.pre": pre_processing,
-                "rikai.transforms.post": post_processing,
             }
         )
 

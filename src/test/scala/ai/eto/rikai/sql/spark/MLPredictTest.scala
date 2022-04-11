@@ -34,9 +34,9 @@ class MLPredictTest
   private def downloadResnet(): Unit = {
     Python.execute(f"""import torch;
         |import torchvision;
-        |resnet = torchvision.models.detection.fasterrcnn_resnet50_fpn(
+        |fasterrcnn = torchvision.models.detection.fasterrcnn_resnet50_fpn(
         |    pretrained=True, progress=False);
-        |torch.save(resnet, "${resnetPath}")""".stripMargin)
+        |torch.save(fasterrcnn, "${resnetPath}")""".stripMargin)
   }
 
   private val resnetSpecYaml: String = s"""
@@ -45,10 +45,8 @@ class MLPredictTest
       |model:
       |  uri: ${resnetPath}
       |  flavor: pytorch
-      |schema: ARRAY<STRUCT<box:box2d, score:float, label_id:int>>
-      |transforms:
-      |  pre: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing
-      |  post: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing""".stripMargin
+      |  type: fasterrcnn
+      """.stripMargin
 
   override def beforeAll(): Unit = {
     super.beforeAll()

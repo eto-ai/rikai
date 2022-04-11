@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from pandas.core.series import Series
 import secrets
 import uuid
 from pathlib import Path
@@ -23,7 +22,7 @@ import pytest
 import torch
 import yaml
 from pyspark.sql import Row, SparkSession
-from pyspark.sql.types import IntegerType, StructField, StructType
+from pyspark.sql.types import IntegerType, StructField, StructType, LongType
 from torch.utils.data import DataLoader
 from utils import check_ml_predict
 
@@ -31,7 +30,6 @@ from rikai.pytorch.pandas import PandasDataset
 from rikai.spark.sql.codegen.fs import FileModelSpec
 from rikai.spark.sql.exceptions import SpecError
 from rikai.testing.utils import apply_model_spec
-from rikai.types import Image
 
 
 def spec_file(content: Dict[str, Any], tmp_path: Path) -> Path:
@@ -71,14 +69,11 @@ def count_objects_spec(tmp_path_factory, resnet_model_uri):
     tmp_path = tmp_path_factory.mktemp(str(uuid.uuid4()))
     spec_yaml = """
 version: "1.0"
-name: resnet
+name: fasterrcnn
 model:
   uri: {}
   flavor: pytorch
-schema: int
-transforms:
-  pre: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing
-  post: rikai.testing.predicts.fasterrcnn_resnet_object_counts
+  type: fasterrcnn
     """.format(  # noqa: E501
         resnet_model_uri
     )
@@ -121,10 +116,6 @@ def test_validate_yaml_spec(tmp_path):
 
     assert spec.name == "test_yaml_model"
     assert spec.model_uri == "s3://bucket/to/model.pt"
-    assert spec.pre_processing is not None
-    assert spec.post_processing is not None
-    assert_dataloader_transform(spec.pre_processing)
-    assert_dataloader_transform(spec.post_processing)
 
 
 def test_validate_misformed_spec(tmp_path):
@@ -219,10 +210,10 @@ def test_count_objects_model(
     df.createOrReplaceTempView("df")
 
     predictions = spark.sql(
-        "SELECT ML_PREDICT(count_objects, image) as objects FROM df"
+        "SELECT size(ML_PREDICT(count_objects, image)) as objects FROM df"
     )
     assert predictions.schema == StructType(
-        [StructField("objects", IntegerType())]
+        [StructField("objects", IntegerType(), False)]
     )
     assert predictions.count() == 2
     assert predictions.where("objects > 0").count() == 2

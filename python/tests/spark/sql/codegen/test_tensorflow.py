@@ -80,7 +80,7 @@ def test_tf_with_mlflow(
             registered_model_name="tf_ssd",
         )
 
-    spark.sql("CREATE MODEL ssd USING 'mlflow:///tf_ssd'")
+    spark.sql("CREATE OR REPLACE MODEL ssd USING 'mlflow:///tf_ssd'")
     df = spark.createDataFrame(two_flickr_rows)
     df.createOrReplaceTempView("images")
 

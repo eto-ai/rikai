@@ -39,7 +39,7 @@ jobs:
       with:
         path: |
           ~/.cache/torch/hub/checkpoints
-        key: ${{ runner.os }}-torch-${{ hashFiles('**/setup.py') }}
+        key: ${{ runner.os }}-pt-${{ hashFiles('**/setup.py') }}
     - name: sbt install
       run: |
         echo "SPARK_VERSION=${{matrix.spark-version}}" >> $GITHUB_ENV

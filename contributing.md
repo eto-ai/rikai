@@ -13,7 +13,7 @@ discussions, bug reports, and feature requests.
 3. Use [numpy docstring format](https://numpydoc.readthedocs.io/en/latest/format.html)
 4. Use [pytest](https://docs.pytest.org/) style for test code
 
-Use of python linter to ensure PEP8 compliance is strongly recommended.
+Use python linters to ensure PEP8 compliance is strongly recommended.
 
 ### Scala
 

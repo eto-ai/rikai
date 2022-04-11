@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.8, 3.9]
         spark-version: [3.1.2, 3.2.1]
     timeout-minutes: 30
     steps:
@@ -34,6 +34,12 @@ jobs:
           ~/.ivy2/cache
           ~/.sbt
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+    - name: cache official pretrained Torch models
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cache/torch/hub/checkpoints
+        key: ${{ runner.os }}-pt-${{ hashFiles('**/setup.py') }}
     - name: sbt install
       run: |
         echo "SPARK_VERSION=${{matrix.spark-version}}" >> $GITHUB_ENV

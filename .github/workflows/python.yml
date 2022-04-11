@@ -34,6 +34,12 @@ jobs:
           ~/.ivy2/cache
           ~/.sbt
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+    - name: cache official pretrained Torch models
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cache/torch/hub/checkpoints
+        key: ${{ runner.os }}-pt-${{ hashFiles('**/setup.py') }}
     - name: sbt install
       run: |
         echo "SPARK_VERSION=${{matrix.spark-version}}" >> $GITHUB_ENV

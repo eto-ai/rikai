@@ -152,7 +152,7 @@ Compile / doc / scalacOptions ++= Seq(
   "ai.eto.rikai.sql.spark.parser"
 )
 
-assembly / assemblyJarName := s"${name.value}-assembly-${sparkVerStr.value}_${scalaBinaryVersion.value}-${version.value}.jar"
+assembly / assemblyJarName := s"${name.value}_${scalaBinaryVersion.value}-assembly-${sparkVerStr.value}-${version.value}.jar"
 // Excluding Scala library jars, see https://github.com/sbt/sbt-assembly/tree/v1.2.0#excluding-scala-library-jars
 assemblyPackageScala / assembleArtifact := false
 
@@ -171,3 +171,10 @@ publishLocal := {
   }
   publishLocal.value
 }
+
+assembly / artifact := {
+  val art = (assembly / artifact).value
+  art.withClassifier(Some(s"assembly-${sparkVerStr.value}"))
+}
+
+addArtifact(assembly / artifact, assembly)

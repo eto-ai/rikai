@@ -198,7 +198,7 @@ To build from source you'll need python as well as Scala with sbt installed:
 # Clone the repo
 git clone git@github.com:eto-ai/rikai rikai
 # Build the jar
-sbt publishLocal
+sbt 'set test in assembly := {}' publishLocal
 # Install python package
 cd python
 pip install -e . # pip install -e .[all] to install all optional extras (see "Install from pypi")

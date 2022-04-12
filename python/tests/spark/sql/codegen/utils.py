@@ -17,6 +17,7 @@ from pyspark.sql.types import (
     ArrayType,
     FloatType,
     IntegerType,
+    StringType,
     StructField,
     StructType,
 )
@@ -49,6 +50,7 @@ def check_ml_predict(
                             ),
                             StructField("score", FloatType()),
                             StructField("label_id", IntegerType()),
+                            StructField("label", StringType())
                         ]
                     )
                 ),
@@ -60,7 +62,7 @@ def check_ml_predict(
             StructField(
                 "predictions",
                 parse_schema(
-                    "array<struct<box:box2d, score:float, label_id:int>>"
+                    "array<struct<box:box2d, score:float, label_id:int, label:string>>"
                 ),
             )
         ]

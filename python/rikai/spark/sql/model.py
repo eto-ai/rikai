@@ -157,7 +157,7 @@ class ModelSpec(ABC):
         """Load the model artifact specified in this spec"""
 
     def load_id_to_label_fn(self) -> Optional[Callable]:
-        """Load the function that maps label id to human-readable string labels"""
+        """Load the function that maps label id to human-readable string"""
         if "labels" in self._spec:
             uri = self._spec["labels"].get("uri")
             if uri:

@@ -291,7 +291,8 @@ _IMAGE_NET_CLASSES = []
 def classification_id_to_label_fn(label_id):
     if not _IMAGE_NET_CLASSES:
         response = requests.get(
-            "https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt"
+            "https://raw.githubusercontent.com/"
+            "pytorch/hub/master/imagenet_classes.txt"
         )
         data = response.text
         _IMAGE_NET_CLASSES.extend(data.splitlines())

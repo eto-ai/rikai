@@ -27,7 +27,7 @@ from rikai.spark.types import Box2dType
 
 
 def check_ml_predict(
-    spark: SparkSession, model_name: str, two_flickr_rows: list
+    spark: SparkSession, model_name: str, two_flickr_rows: list, has_label: bool = True
 ):
     # TODO: Replace uri string with Image class after GH#90 is released with
     # the upstream spark
@@ -37,32 +37,26 @@ def check_ml_predict(
     predictions = spark.sql(
         f"SELECT ML_PREDICT({model_name}, image) as predictions FROM df"
     )
-    assert predictions.schema == StructType(
-        [
-            StructField(
-                "predictions",
-                ArrayType(
-                    StructType(
-                        [
-                            StructField(
-                                "box",
-                                Box2dType(),
-                            ),
-                            StructField("score", FloatType()),
-                            StructField("label_id", IntegerType()),
-                            StructField("label", StringType())
-                        ]
-                    )
-                ),
+    fields = [StructField("box", Box2dType()),
+              StructField("score", FloatType()),
+              StructField("label_id", IntegerType())]
+    if has_label:
+        fields.append(StructField("label", StringType()))
+    assert predictions.schema == StructType([
+        StructField(
+            "predictions",
+            ArrayType(StructType(fields))
             ),
-        ]
-    )
+        ])
+    fields = ["box:box2d", "score:float", "label_id:int"]
+    if has_label:
+        fields.append("label:string")
     assert predictions.schema == StructType(
         [
             StructField(
                 "predictions",
                 parse_schema(
-                    "array<struct<box:box2d, score:float, label_id:int, label:string>>"
+                    f"array<struct<{','.join(fields)}>>"
                 ),
             )
         ]

@@ -50,11 +50,11 @@ def test_mlflow_model_from_model_version(
 ):
     # peg to a particular version of a model
     spark.sql("CREATE MODEL resnet_m_fizz USING 'mlflow:/rikai-test/1'")
-    check_ml_predict(spark, "resnet_m_fizz", two_flickr_rows)
+    check_ml_predict(spark, "resnet_m_fizz", two_flickr_rows, has_label=False)
 
     # use the latest version in a given stage (omitted means none)
     spark.sql("CREATE MODEL resnet_m_buzz USING 'mlflow:/rikai-test'")
-    check_ml_predict(spark, "resnet_m_buzz", two_flickr_rows)
+    check_ml_predict(spark, "resnet_m_buzz", two_flickr_rows, has_label=False)
 
 
 @pytest.mark.skip

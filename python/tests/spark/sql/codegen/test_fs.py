@@ -23,7 +23,7 @@ import torch
 import yaml
 from pandas.core.series import Series
 from pyspark.sql import Row, SparkSession
-from pyspark.sql.types import IntegerType, StructField, StructType, LongType
+from pyspark.sql.types import IntegerType, LongType, StructField, StructType
 from torch.utils.data import DataLoader
 from utils import check_ml_predict
 

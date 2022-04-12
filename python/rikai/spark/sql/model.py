@@ -14,13 +14,15 @@
 
 import json
 from abc import ABC, abstractmethod
+from typing import Any, Callable, Dict, Optional, TypeVar
+
 from jsonschema.exceptions import ValidationError
 from jsonschema.validators import validate
+
 from rikai.internal.reflection import find_func
 from rikai.logging import logger
 from rikai.spark.sql.exceptions import SpecError
 from rikai.spark.sql.schema import parse_schema
-from typing import Any, Callable, Dict, Optional, TypeVar
 
 __all__ = ["ModelSpec", "ModelType"]
 

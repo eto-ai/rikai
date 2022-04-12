@@ -121,7 +121,7 @@ class MlflowModelSpec(ModelSpec):
             "labels": {
                 "func": conf.get(CONF_MLFLOW_LABEL_FUNC, None),
                 "uri": conf.get(CONF_MLFLOW_LABEL_URI, None),
-            }
+            },
         }
 
         # remove none value

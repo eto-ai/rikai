@@ -197,9 +197,9 @@ class SSDClassScoresModelType(ObjectDetectionModelType):
                     "label_ids": candidate_labels,
                     "scores": candidate_scores,
                 }
-                if self.id_to_label_fn:
+                if self.label_fn:
                     r["labels"] = [
-                        self.id_to_label_fn(elm) for elm in candidate_labels
+                        self.label_fn(elm) for elm in candidate_labels
                     ]
                 predict_result.append(r)
             results.append(predict_result)

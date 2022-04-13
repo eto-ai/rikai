@@ -476,10 +476,10 @@ class Mask(ToNumpy, ToDict, Drawable):
     ----------
     data: list or :py:class:`np.ndarray`
         The mask data. Can be a numpy array or a list.
-    height: int, optional
-        The height of the image this mask applies to.
     width: int, optional
         The width of the image this mask applies to.
+    height: int, optional
+        The height of the image this mask applies to.
     mask_type: :py:class:`Mask.Type`
         The type of the mask.
 
@@ -497,14 +497,14 @@ class Mask(ToNumpy, ToDict, Drawable):
         if ann["iscrowed"] == 0:
             mask = Mask.from_polygon(
                 ann["segmentation"],
-                height=image["height"],
                 width=image["width],
+                height=image["height"],
             )
         else:
             mask = Mask.from_coco_rle(
                 ann["segmentation"]["counts"],
-                height=image["height"],
                 width=image["width],
+                height=image["height"],
             )
 
     """
@@ -521,8 +521,8 @@ class Mask(ToNumpy, ToDict, Drawable):
     def __init__(
         self,
         data: Union[list, np.ndarray],
-        height: Optional[int] = None,
         width: Optional[int] = None,
+        height: Optional[int] = None,
         mask_type: Mask.Type = Type.POLYGON,
     ):
         if mask_type != Mask.Type.POLYGON and (
@@ -533,27 +533,27 @@ class Mask(ToNumpy, ToDict, Drawable):
         self.type = mask_type
         self.data = data
 
-        self.height = height
         self.width = width
+        self.height = height
 
     @staticmethod
-    def from_rle(data: list[int], height: int, width: int) -> Mask:
+    def from_rle(data: list[int], width: int, height: int) -> Mask:
         """Convert a (row-based) RLE mask (segmentation) into Mask
 
         Parameters
         ----------
         data: list[int]
             the RLE data
-        height: int
-            The height of the image which the mask applies to.
         width: int
             The width of the image which the mask applies to.
+        height: int
+            The height of the image which the mask applies to.
         """
 
-        return Mask(data, height=height, width=width, mask_type=Mask.Type.RLE)
+        return Mask(data, width=width, height=height, mask_type=Mask.Type.RLE)
 
     @staticmethod
-    def from_coco_rle(data: list[int], height: int, width: int) -> Mask:
+    def from_coco_rle(data: list[int], width: int, height: int) -> Mask:
         """Convert a COCO RLE mask (segmentation) into Mask
 
         Parameters
@@ -566,11 +566,11 @@ class Mask(ToNumpy, ToDict, Drawable):
             The width of the image which the mask applies to.
         """
         return Mask(
-            data, height=height, width=width, mask_type=Mask.Type.COCO_RLE
+            data, width=width, height=height, mask_type=Mask.Type.COCO_RLE
         )
 
     @staticmethod
-    def from_polygon(data: list[list[float]], height: int, width: int) -> Mask:
+    def from_polygon(data: list[list[float]], width: int, height: int) -> Mask:
         """Build mask from a Polygon
 
         Parameters
@@ -578,13 +578,13 @@ class Mask(ToNumpy, ToDict, Drawable):
         data: list[list[float]]
             Multiple Polygon segmentation data. i.e.,
             ``[[x0, y0, x1, y1, ...], [x0, y0, x1, y1, ...]])``
-        height: int
-            The height of the image which the mask applies to.
         width: int
             The width of the image which the mask applies to.
+        height: int
+            The height of the image which the mask applies to.
         """
         return Mask(
-            data, height=height, width=width, mask_type=Mask.Type.POLYGON
+            data, width=width, height=height, mask_type=Mask.Type.POLYGON
         )
 
     @staticmethod

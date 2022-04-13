@@ -60,7 +60,7 @@ def main():
         image_id = ann["image_id"]
         ann_id = ann["id"]
         img = coco.imgs[image_id]
-        height, width = img["height"], img["width"]  # type: int, int
+        width, height = img["width"], img["height"]  # type: int, int
         is_rle = ann["iscrowd"] == 1
         # Mask from pycocotools directly
         original_mask = Mask.from_mask(coco.annToMask(ann))

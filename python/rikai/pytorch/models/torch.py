@@ -118,13 +118,15 @@ class ClassificationModelType(TorchModelType):
     """Shared ModelType for image classification"""
 
     def __init__(
-            self,
-            name: str,
-            pretrained_fn: Optional[Callable] = None,
-            label_fn: Optional[Callable[[int], str]] = classification_label_fn,
-            register: bool = True,
+        self,
+        name: str,
+        pretrained_fn: Optional[Callable] = None,
+        label_fn: Optional[Callable[[int], str]] = classification_label_fn,
+        register: bool = True,
     ):
-        super(ClassificationModelType, self).__init__(name, pretrained_fn, label_fn, register)
+        super(ClassificationModelType, self).__init__(
+            name, pretrained_fn, label_fn, register
+        )
 
     def schema(self) -> str:
         return "struct<label_id:int, score:float, label:string>"
@@ -262,14 +264,17 @@ class ObjectDetectionModelType(TorchModelType):
 
     https://pytorch.org/vision/stable/models.html
     """
+
     def __init__(
-            self,
-            name: str,
-            pretrained_fn: Optional[Callable] = None,
-            label_fn: Optional[Callable[[int], str]] = detection_label_fn,
-            register: bool = True,
+        self,
+        name: str,
+        pretrained_fn: Optional[Callable] = None,
+        label_fn: Optional[Callable[[int], str]] = detection_label_fn,
+        register: bool = True,
     ):
-        super(ObjectDetectionModelType, self).__init__(name, pretrained_fn, label_fn, register)
+        super(ObjectDetectionModelType, self).__init__(
+            name, pretrained_fn, label_fn, register
+        )
 
     def __repr__(self):
         return f"ModelType({self.name})"
@@ -315,5 +320,3 @@ class ObjectDetectionModelType(TorchModelType):
 
 # Registered model types
 MODEL_TYPES = {}
-
-

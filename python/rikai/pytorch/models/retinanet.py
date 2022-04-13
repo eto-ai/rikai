@@ -21,5 +21,5 @@ from rikai.pytorch.models.torch import (
 
 resnet = ObjectDetectionModelType(
     "retinanet",
-    pretrained_fn=torchvision.models.detection.retinanet_resnet50_fpn
+    pretrained_fn=torchvision.models.detection.retinanet_resnet50_fpn,
 )

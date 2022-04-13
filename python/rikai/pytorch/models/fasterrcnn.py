@@ -24,21 +24,19 @@ from rikai.pytorch.models.torch import (
 )
 
 fasterrcnn = ObjectDetectionModelType(
-    "fasterrcnn",
-    pretrained_fn=fasterrcnn_resnet50_fpn
+    "fasterrcnn", pretrained_fn=fasterrcnn_resnet50_fpn
 )
 
 fasterrcnn_resnet50_fpn = ObjectDetectionModelType(
-    "fasterrcnn_resnet50_fpn",
-    pretrained_fn=fasterrcnn_resnet50_fpn
+    "fasterrcnn_resnet50_fpn", pretrained_fn=fasterrcnn_resnet50_fpn
 )
 
 fasterrcnn_mobilenet_v3_large_fpn = ObjectDetectionModelType(
     "fasterrcnn_mobilenet_v3_large_fpn",
-    pretrained_fn=fasterrcnn_mobilenet_v3_large_fpn
+    pretrained_fn=fasterrcnn_mobilenet_v3_large_fpn,
 )
 
 fasterrcnn_mobilenet_large_320_fpn = ObjectDetectionModelType(
     "fasterrcnn_mobilenet_v3_large_320_fpn",
-    pretrained_fn=fasterrcnn_mobilenet_v3_large_320_fpn
+    pretrained_fn=fasterrcnn_mobilenet_v3_large_320_fpn,
 )

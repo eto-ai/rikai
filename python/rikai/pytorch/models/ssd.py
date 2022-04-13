@@ -20,11 +20,10 @@ from rikai.pytorch.models.torch import (
 )
 
 ssd = ObjectDetectionModelType(
-    "ssd",
-    pretrained_fn=torchvision.models.detection.ssd.ssd300_vgg16
+    "ssd", pretrained_fn=torchvision.models.detection.ssd.ssd300_vgg16
 )
 
 ssdlite = ObjectDetectionModelType(
     "ssdlite",
-    pretrained_fn=torchvision.models.detection.ssdlite320_mobilenet_v3_large
+    pretrained_fn=torchvision.models.detection.ssdlite320_mobilenet_v3_large,
 )

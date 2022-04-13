@@ -32,8 +32,8 @@ import rikai
 from rikai.spark.sql.codegen.fs import FileModelSpec
 from rikai.spark.sql.codegen.mlflow_registry import CONF_MLFLOW_TRACKING_URI
 from rikai.spark.types import Box2dType
-from rikai.types import Image
 from rikai.testing.utils import apply_model_spec
+from rikai.types import Image
 
 
 def test_tf_inference_runner(

@@ -18,6 +18,7 @@
 from abc import ABC
 from typing import Any, Callable, Optional
 
+import requests
 import torch
 import torch.nn.functional as F
 import torchvision.transforms as T
@@ -44,6 +45,7 @@ class TorchModelType(ModelType, Pretrained, ABC):
         self,
         name: str,
         pretrained_fn: Optional[Callable] = None,
+        label_fn: Optional[Callable[[int], str]] = None,
         register: bool = True,
     ):
         """Initialize a TorchModelType
@@ -54,6 +56,8 @@ class TorchModelType(ModelType, Pretrained, ABC):
             The name of the model type
         pretrained_fn : Callable, optional
             The callable to be called if loading pretrained models.
+        label_fn: Callable, optional
+            Maps label_id to human readable string label
         register : bool
             Register the model to be discoverable via SQL
         """
@@ -62,6 +66,7 @@ class TorchModelType(ModelType, Pretrained, ABC):
         # TODO: make this a class member?
         self.name = name
         self.pretrained_fn = pretrained_fn
+        self.label_fn = label_fn
 
         if register:
             MODEL_TYPES[name] = self
@@ -82,6 +87,7 @@ class TorchModelType(ModelType, Pretrained, ABC):
             self.model = self.pretrained_model()
         else:
             self.model = self.spec.load_model()
+            self.label_fn = self.spec.load_label_fn()
         self.model.eval()
         if "device" in kwargs:
             self.model.to(kwargs.get("device"))
@@ -94,11 +100,36 @@ class TorchModelType(ModelType, Pretrained, ABC):
         torch.cuda.empty_cache()
 
 
+_IMAGE_NET_CLASSES = []
+
+
+def classification_label_fn(label_id):
+    if not _IMAGE_NET_CLASSES:
+        response = requests.get(
+            "https://raw.githubusercontent.com/"
+            "pytorch/hub/master/imagenet_classes.txt"
+        )
+        data = response.text
+        _IMAGE_NET_CLASSES.extend(data.splitlines())
+    return _IMAGE_NET_CLASSES[label_id]
+
+
 class ClassificationModelType(TorchModelType):
     """Shared ModelType for image classification"""
 
+    def __init__(
+        self,
+        name: str,
+        pretrained_fn: Optional[Callable] = None,
+        label_fn: Optional[Callable[[int], str]] = classification_label_fn,
+        register: bool = True,
+    ):
+        super(ClassificationModelType, self).__init__(
+            name, pretrained_fn, label_fn, register
+        )
+
     def schema(self) -> str:
-        return "struct<label_id: int, score: float>"
+        return "struct<label_id:int, score:float, label:string>"
 
     def transform(self) -> Callable:
         return T.Compose(
@@ -120,8 +151,112 @@ class ClassificationModelType(TorchModelType):
             scores = F.softmax(result, dim=0)
             label = torch.argmax(F.softmax(result, dim=0)).item()
             score = scores[label].item()
-            results.append({"label_id": label, "score": score})
+            r = {"label_id": label, "score": score}
+            if self.label_fn:
+                r["label"] = self.label_fn(label)
+            results.append(r)
         return results
+
+
+# https://pytorch.org/vision/stable/models.html
+COCO_INSTANCE_CATEGORY_NAMES = [
+    "__background__",
+    "person",
+    "bicycle",
+    "car",
+    "motorcycle",
+    "airplane",
+    "bus",
+    "train",
+    "truck",
+    "boat",
+    "traffic light",
+    "fire hydrant",
+    "N/A",
+    "stop sign",
+    "parking meter",
+    "bench",
+    "bird",
+    "cat",
+    "dog",
+    "horse",
+    "sheep",
+    "cow",
+    "elephant",
+    "bear",
+    "zebra",
+    "giraffe",
+    "N/A",
+    "backpack",
+    "umbrella",
+    "N/A",
+    "N/A",
+    "handbag",
+    "tie",
+    "suitcase",
+    "frisbee",
+    "skis",
+    "snowboard",
+    "sports ball",
+    "kite",
+    "baseball bat",
+    "baseball glove",
+    "skateboard",
+    "surfboard",
+    "tennis racket",
+    "bottle",
+    "N/A",
+    "wine glass",
+    "cup",
+    "fork",
+    "knife",
+    "spoon",
+    "bowl",
+    "banana",
+    "apple",
+    "sandwich",
+    "orange",
+    "broccoli",
+    "carrot",
+    "hot dog",
+    "pizza",
+    "donut",
+    "cake",
+    "chair",
+    "couch",
+    "potted plant",
+    "bed",
+    "N/A",
+    "dining table",
+    "N/A",
+    "N/A",
+    "toilet",
+    "N/A",
+    "tv",
+    "laptop",
+    "mouse",
+    "remote",
+    "keyboard",
+    "cell phone",
+    "microwave",
+    "oven",
+    "toaster",
+    "sink",
+    "refrigerator",
+    "N/A",
+    "book",
+    "clock",
+    "vase",
+    "scissors",
+    "teddy bear",
+    "hair drier",
+    "toothbrush",
+]
+
+
+def detection_label_fn(label_id: int) -> str:
+    """Most pre-trained models are from Coco"""
+    return COCO_INSTANCE_CATEGORY_NAMES[label_id]
 
 
 class ObjectDetectionModelType(TorchModelType):
@@ -130,11 +265,24 @@ class ObjectDetectionModelType(TorchModelType):
     https://pytorch.org/vision/stable/models.html
     """
 
+    def __init__(
+        self,
+        name: str,
+        pretrained_fn: Optional[Callable] = None,
+        label_fn: Optional[Callable[[int], str]] = detection_label_fn,
+        register: bool = True,
+    ):
+        super(ObjectDetectionModelType, self).__init__(
+            name, pretrained_fn, label_fn, register
+        )
+
     def __repr__(self):
         return f"ModelType({self.name})"
 
     def schema(self) -> str:
-        return "array<struct<box:box2d, score:float, label_id:int>>"
+        return (
+            "array<struct<box:box2d, score:float, label_id:int, label:string>>"
+        )
 
     def transform(self) -> Callable:
         return T.ToTensor()
@@ -158,14 +306,14 @@ class ObjectDetectionModelType(TorchModelType):
             ):
                 if score < min_score:
                     continue
-                predict_result.append(
-                    {
-                        "box": Box2d(*box),
-                        "label_id": label,
-                        "score": score,
-                    }
-                )
-
+                r = {
+                    "box": Box2d(*box),
+                    "label_id": label,
+                    "score": score,
+                }
+                if self.label_fn:
+                    r["label"] = self.label_fn(label)
+                predict_result.append(r)
             results.append(predict_result)
         return results
 

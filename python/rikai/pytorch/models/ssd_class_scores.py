@@ -156,7 +156,7 @@ class SSDClassScoresModelType(ObjectDetectionModelType):
     def schema(self) -> str:
         return (
             "array<struct<box:box2d, scores:array<float>, "
-            "label_ids:array<int>>>"
+            "label_ids:array<int>, labels:array<string>>>"
         )
 
     def load_model(self, spec: ModelSpec, **kwargs):
@@ -168,6 +168,7 @@ class SSDClassScoresModelType(ObjectDetectionModelType):
         if "device" in kwargs:
             self.model.to(kwargs.get("device"))
         self.spec = spec
+        self.label_fn = self.spec.load_label_fn()
 
     def predict(self, images, *args, **kwargs) -> List:
         assert (
@@ -181,21 +182,23 @@ class SSDClassScoresModelType(ObjectDetectionModelType):
         results = []
         for predicts in batch:
             predict_result = []
-            for box, label, score in zip(
+            for box, candidate_labels, candidate_scores in zip(
                 predicts["boxes"].tolist(),
                 predicts["labels"].tolist(),
                 predicts["scores"].tolist(),
             ):
-                if score[0] < min_score:
+                if candidate_scores[0] < min_score:
                     continue
-                predict_result.append(
-                    {
-                        "box": Box2d(*box),
-                        "label_id": label,
-                        "score": score,
-                    }
-                )
-
+                r = {
+                    "box": Box2d(*box),
+                    "label_ids": candidate_labels,
+                    "scores": candidate_scores,
+                }
+                if self.label_fn:
+                    r["labels"] = [
+                        self.label_fn(elm) for elm in candidate_labels
+                    ]
+                predict_result.append(r)
             results.append(predict_result)
         return results
 

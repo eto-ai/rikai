@@ -16,10 +16,12 @@
 ResNet: Deep Residual Learning for Image Recognition
 https://arxiv.org/pdf/1512.03385.pdf
 """
-
 import torchvision
 
-from rikai.pytorch.models.torch import ClassificationModelType
+from rikai.pytorch.models.torch import (
+    classification_label_fn,
+    ClassificationModelType,
+)
 
 resnet18 = ClassificationModelType(
     name="resnet18", pretrained_fn=torchvision.models.resnet18

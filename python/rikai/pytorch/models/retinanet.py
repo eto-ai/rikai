@@ -14,9 +14,10 @@
 
 import torchvision
 
-
-from rikai.pytorch.models.torch import ObjectDetectionModelType
-
+from rikai.pytorch.models.torch import (
+    detection_label_fn,
+    ObjectDetectionModelType,
+)
 
 resnet = ObjectDetectionModelType(
     "retinanet",

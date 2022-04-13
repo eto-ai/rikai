@@ -14,11 +14,13 @@
 
 import torchvision
 
-from rikai.pytorch.models.torch import ObjectDetectionModelType
+from rikai.pytorch.models.torch import (
+    detection_label_fn,
+    ObjectDetectionModelType,
+)
 
 ssd = ObjectDetectionModelType(
-    "ssd",
-    pretrained_fn=torchvision.models.detection.ssd.ssd300_vgg16,
+    "ssd", pretrained_fn=torchvision.models.detection.ssd.ssd300_vgg16
 )
 
 ssdlite = ObjectDetectionModelType(

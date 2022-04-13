@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import json
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Optional, TypeVar
 
@@ -154,6 +155,19 @@ class ModelSpec(ABC):
     @abstractmethod
     def load_model(self) -> Any:
         """Load the model artifact specified in this spec"""
+
+    def load_label_fn(self) -> Optional[Callable]:
+        """Load the function that maps label id to human-readable string"""
+        if "labels" in self._spec:
+            uri = self._spec["labels"].get("uri")
+            if uri:
+                with open(uri) as fh:
+                    dd = json.load(fh)
+                return lambda label_id: dd[label_id]
+            func = self._spec["labels"].get("func")
+            if func:
+                return find_func(func)
+        return None
 
     @property
     def flavor(self) -> str:

@@ -14,9 +14,13 @@
 
 import torchvision
 
-from rikai.pytorch.models.torch import ObjectDetectionModelType
+from rikai.pytorch.models.torch import (
+    detection_label_fn,
+    ObjectDetectionModelType,
+)
 
 maskrcnn = ObjectDetectionModelType(
     "maskrcnn",
     pretrained_fn=torchvision.models.detection.maskrcnn_resnet50_fpn,
+    label_fn=detection_label_fn,
 )

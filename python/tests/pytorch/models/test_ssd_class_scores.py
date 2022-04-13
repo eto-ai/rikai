@@ -21,6 +21,7 @@ from pyspark.sql.types import (
     ArrayType,
     FloatType,
     IntegerType,
+    StringType,
     StructField,
     StructType,
 )
@@ -30,7 +31,6 @@ from torchvision.transforms import ToTensor
 import rikai
 from rikai.pytorch.models.ssd_class_scores import SSDClassScoresExtractor
 from rikai.spark.types import Box2dType
-
 
 model = ssd300_vgg16(pretrained=True)
 model.eval()
@@ -102,6 +102,7 @@ def test_ssd_class_scores_module_with_spark(
             "models",
             model_type="ssd_class_scores",
             registered_model_name="ssd_class_scores",
+            labels={"func": "rikai.pytorch.models.torch.detection_label_fn"},
         )
 
     spark.sql("CREATE MODEL class_scores USING 'mlflow:/ssd_class_scores'")
@@ -127,6 +128,7 @@ def test_ssd_class_scores_module_with_spark(
                             StructField("box", Box2dType()),
                             StructField("scores", ArrayType(FloatType())),
                             StructField("label_ids", ArrayType(IntegerType())),
+                            StructField("labels", ArrayType(StringType())),
                         ]
                     )
                 ),
@@ -136,3 +138,6 @@ def test_ssd_class_scores_module_with_spark(
 
     assert df.count() == 1
     assert df.selectExpr("explode(confidence)").count() > 1
+    dd = df.selectExpr("explode(confidence)").collect()[0]["col"]
+    assert dd["label_ids"] == [1, 31]
+    assert dd["labels"] == ["person", "handbag"]

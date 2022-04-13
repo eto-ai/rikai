@@ -19,7 +19,10 @@ https://arxiv.org/abs/1905.11946
 
 import torchvision
 
-from rikai.pytorch.models.torch import ClassificationModelType
+from rikai.pytorch.models.torch import (
+    classification_label_fn,
+    ClassificationModelType,
+)
 
 efficientnet_b0 = ClassificationModelType(
     "efficientnet_b0", pretrained_fn=torchvision.models.efficientnet_b0

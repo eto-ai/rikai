@@ -94,7 +94,8 @@ class MLPredictTest
                   Seq(
                     StructField("box", Box2dType),
                     StructField("score", FloatType),
-                    StructField("label_id", IntegerType)
+                    StructField("label_id", IntegerType),
+                    StructField("label", StringType)
                   )
                 )
               )
@@ -141,7 +142,8 @@ class MLPredictTest
                   Seq(
                     StructField("box", Box2dType),
                     StructField("score", FloatType),
-                    StructField("label_id", IntegerType)
+                    StructField("label_id", IntegerType),
+                    StructField("label", StringType)
                   )
                 )
               )
@@ -153,7 +155,8 @@ class MLPredictTest
                   Seq(
                     StructField("box", Box2dType),
                     StructField("score", FloatType),
-                    StructField("label_id", IntegerType)
+                    StructField("label_id", IntegerType),
+                    StructField("label", StringType)
                   )
                 )
               )

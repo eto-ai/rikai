@@ -17,7 +17,7 @@ import torchvision
 from rikai.pytorch.models.torch import ObjectDetectionModelType
 
 
-def id_to_label_fn(label_id):
+def label_fn(label_id):
     # https://pytorch.org/vision/stable/models.html
     COCO_PERSON_KEYPOINT_NAMES = [
         "nose",
@@ -44,5 +44,5 @@ def id_to_label_fn(label_id):
 keypointrcnn = ObjectDetectionModelType(
     "keypointrcnn",
     pretrained_fn=torchvision.models.detection.keypointrcnn_resnet50_fpn,
-    id_to_label_fn=id_to_label_fn,
+    label_fn=label_fn,
 )

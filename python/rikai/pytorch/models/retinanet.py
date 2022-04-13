@@ -15,12 +15,11 @@
 import torchvision
 
 from rikai.pytorch.models.torch import (
-    detection_id_to_label,
+    detection_label_fn,
     ObjectDetectionModelType,
 )
 
 resnet = ObjectDetectionModelType(
     "retinanet",
-    pretrained_fn=torchvision.models.detection.retinanet_resnet50_fpn,
-    id_to_label_fn=detection_id_to_label,
+    pretrained_fn=torchvision.models.detection.retinanet_resnet50_fpn
 )

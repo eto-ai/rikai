@@ -262,4 +262,4 @@ def test_spec_with_labels(tmp_path):
 
     assert spec.name == "test_yaml_model"
     assert spec.model_uri == "s3://bucket/to/model.pt"
-    assert spec.load_id_to_label_fn()(1) == "person"
+    assert spec.load_label_fn()(1) == "person"

@@ -19,38 +19,32 @@ https://arxiv.org/pdf/1512.03385.pdf
 import torchvision
 
 from rikai.pytorch.models.torch import (
-    classification_id_to_label_fn,
+    classification_label_fn,
     ClassificationModelType,
 )
 
 resnet18 = ClassificationModelType(
     name="resnet18",
-    pretrained_fn=torchvision.models.resnet18,
-    id_to_label_fn=classification_id_to_label_fn,
+    pretrained_fn=torchvision.models.resnet18
 )
 resnet34 = ClassificationModelType(
     name="resnet34",
-    pretrained_fn=torchvision.models.resnet34,
-    id_to_label_fn=classification_id_to_label_fn,
+    pretrained_fn=torchvision.models.resnet34
 )
 resnet50 = ClassificationModelType(
     name="resnet50",
-    pretrained_fn=torchvision.models.resnet50,
-    id_to_label_fn=classification_id_to_label_fn,
+    pretrained_fn=torchvision.models.resnet50
 )
 resnet101 = ClassificationModelType(
     name="resnet101",
-    pretrained_fn=torchvision.models.resnet101,
-    id_to_label_fn=classification_id_to_label_fn,
+    pretrained_fn=torchvision.models.resnet101
 )
 resnet152 = ClassificationModelType(
     name="resnet152",
-    pretrained_fn=torchvision.models.resnet152,
-    id_to_label_fn=classification_id_to_label_fn,
+    pretrained_fn=torchvision.models.resnet152
 )
 # Make default resnet to be ResNet-50
 resnet = ClassificationModelType(
     name="resnet",
-    pretrained_fn=torchvision.models.resnet50,
-    id_to_label_fn=classification_id_to_label_fn,
+    pretrained_fn=torchvision.models.resnet50
 )

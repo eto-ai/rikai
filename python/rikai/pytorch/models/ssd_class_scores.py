@@ -21,7 +21,7 @@ from torchvision.models.detection.ssd import SSD
 from torchvision.ops.boxes import batched_nms, clip_boxes_to_image
 
 from rikai.pytorch.models.torch import (
-    detection_id_to_label,
+    detection_label_fn,
     ObjectDetectionModelType,
 )
 from rikai.spark.sql.model import ModelSpec
@@ -171,7 +171,7 @@ class SSDClassScoresModelType(ObjectDetectionModelType):
         if "device" in kwargs:
             self.model.to(kwargs.get("device"))
         self.spec = spec
-        self.id_to_label_fn = self.spec.load_id_to_label_fn()
+        self.label_fn = self.spec.load_label_fn()
 
     def predict(self, images, *args, **kwargs) -> List:
         assert (

@@ -45,7 +45,7 @@ class TorchModelType(ModelType, Pretrained, ABC):
         self,
         name: str,
         pretrained_fn: Optional[Callable] = None,
-        id_to_label_fn: Optional[Callable] = None,
+        label_fn: Optional[Callable[[int], str]] = None,
         register: bool = True,
     ):
         """Initialize a TorchModelType
@@ -56,7 +56,7 @@ class TorchModelType(ModelType, Pretrained, ABC):
             The name of the model type
         pretrained_fn : Callable, optional
             The callable to be called if loading pretrained models.
-        id_to_label_fn: Callable, optional
+        label_fn: Callable, optional
             Maps label_id to human readable string label
         register : bool
             Register the model to be discoverable via SQL
@@ -66,7 +66,7 @@ class TorchModelType(ModelType, Pretrained, ABC):
         # TODO: make this a class member?
         self.name = name
         self.pretrained_fn = pretrained_fn
-        self.id_to_label_fn = id_to_label_fn
+        self.label_fn = label_fn
 
         if register:
             MODEL_TYPES[name] = self
@@ -87,7 +87,7 @@ class TorchModelType(ModelType, Pretrained, ABC):
             self.model = self.pretrained_model()
         else:
             self.model = self.spec.load_model()
-            self.id_to_label_fn = self.spec.load_id_to_label_fn()
+            self.label_fn = self.spec.load_label_fn()
         self.model.eval()
         if "device" in kwargs:
             self.model.to(kwargs.get("device"))
@@ -100,8 +100,31 @@ class TorchModelType(ModelType, Pretrained, ABC):
         torch.cuda.empty_cache()
 
 
+_IMAGE_NET_CLASSES = []
+
+
+def classification_label_fn(label_id):
+    if not _IMAGE_NET_CLASSES:
+        response = requests.get(
+            "https://raw.githubusercontent.com/"
+            "pytorch/hub/master/imagenet_classes.txt"
+        )
+        data = response.text
+        _IMAGE_NET_CLASSES.extend(data.splitlines())
+    return _IMAGE_NET_CLASSES[label_id]
+
+
 class ClassificationModelType(TorchModelType):
     """Shared ModelType for image classification"""
+
+    def __init__(
+            self,
+            name: str,
+            pretrained_fn: Optional[Callable] = None,
+            label_fn: Optional[Callable[[int], str]] = classification_label_fn,
+            register: bool = True,
+    ):
+        super(ClassificationModelType, self).__init__(name, pretrained_fn, label_fn, register)
 
     def schema(self) -> str:
         return "struct<label_id:int, score:float, label:string>"
@@ -127,62 +150,11 @@ class ClassificationModelType(TorchModelType):
             label = torch.argmax(F.softmax(result, dim=0)).item()
             score = scores[label].item()
             r = {"label_id": label, "score": score}
-            if self.id_to_label_fn:
-                r["label"] = self.id_to_label_fn(label)
+            if self.label_fn:
+                r["label"] = self.label_fn(label)
             results.append(r)
         return results
 
-
-class ObjectDetectionModelType(TorchModelType):
-    """Shared ModelType for object detections in Torchvision
-
-    https://pytorch.org/vision/stable/models.html
-    """
-
-    def __repr__(self):
-        return f"ModelType({self.name})"
-
-    def schema(self) -> str:
-        return (
-            "array<struct<box:box2d, score:float, label_id:int, label:string>>"
-        )
-
-    def transform(self) -> Callable:
-        return T.ToTensor()
-
-    def predict(self, images, *args, **kwargs) -> Any:
-        assert (
-            self.model is not None
-        ), "model has not been initialized via load_model"
-        min_score = float(
-            self.spec.options.get("min_score", DEFAULT_MIN_SCORE)
-        )
-
-        batch = self.model(images)
-        results = []
-        for predicts in batch:
-            predict_result = []
-            for box, label, score in zip(
-                predicts["boxes"].tolist(),
-                predicts["labels"].tolist(),
-                predicts["scores"].tolist(),
-            ):
-                if score < min_score:
-                    continue
-                r = {
-                    "box": Box2d(*box),
-                    "label_id": label,
-                    "score": score,
-                }
-                if self.id_to_label_fn:
-                    r["label"] = self.id_to_label_fn(label)
-                predict_result.append(r)
-            results.append(predict_result)
-        return results
-
-
-# Registered model types
-MODEL_TYPES = {}
 
 # https://pytorch.org/vision/stable/models.html
 COCO_INSTANCE_CATEGORY_NAMES = [
@@ -280,20 +252,68 @@ COCO_INSTANCE_CATEGORY_NAMES = [
 ]
 
 
-def detection_id_to_label(label_id: int) -> str:
+def detection_label_fn(label_id: int) -> str:
     """Most pre-trained models are from Coco"""
     return COCO_INSTANCE_CATEGORY_NAMES[label_id]
 
 
-_IMAGE_NET_CLASSES = []
+class ObjectDetectionModelType(TorchModelType):
+    """Shared ModelType for object detections in Torchvision
 
+    https://pytorch.org/vision/stable/models.html
+    """
+    def __init__(
+            self,
+            name: str,
+            pretrained_fn: Optional[Callable] = None,
+            label_fn: Optional[Callable[[int], str]] = detection_label_fn,
+            register: bool = True,
+    ):
+        super(ObjectDetectionModelType, self).__init__(name, pretrained_fn, label_fn, register)
 
-def classification_id_to_label_fn(label_id):
-    if not _IMAGE_NET_CLASSES:
-        response = requests.get(
-            "https://raw.githubusercontent.com/"
-            "pytorch/hub/master/imagenet_classes.txt"
+    def __repr__(self):
+        return f"ModelType({self.name})"
+
+    def schema(self) -> str:
+        return (
+            "array<struct<box:box2d, score:float, label_id:int, label:string>>"
         )
-        data = response.text
-        _IMAGE_NET_CLASSES.extend(data.splitlines())
-    return _IMAGE_NET_CLASSES[label_id]
+
+    def transform(self) -> Callable:
+        return T.ToTensor()
+
+    def predict(self, images, *args, **kwargs) -> Any:
+        assert (
+            self.model is not None
+        ), "model has not been initialized via load_model"
+        min_score = float(
+            self.spec.options.get("min_score", DEFAULT_MIN_SCORE)
+        )
+
+        batch = self.model(images)
+        results = []
+        for predicts in batch:
+            predict_result = []
+            for box, label, score in zip(
+                predicts["boxes"].tolist(),
+                predicts["labels"].tolist(),
+                predicts["scores"].tolist(),
+            ):
+                if score < min_score:
+                    continue
+                r = {
+                    "box": Box2d(*box),
+                    "label_id": label,
+                    "score": score,
+                }
+                if self.label_fn:
+                    r["label"] = self.label_fn(label)
+                predict_result.append(r)
+            results.append(predict_result)
+        return results
+
+
+# Registered model types
+MODEL_TYPES = {}
+
+

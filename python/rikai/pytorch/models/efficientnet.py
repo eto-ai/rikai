@@ -20,47 +20,39 @@ https://arxiv.org/abs/1905.11946
 import torchvision
 
 from rikai.pytorch.models.torch import (
-    classification_id_to_label_fn,
+    classification_label_fn,
     ClassificationModelType,
 )
 
 efficientnet_b0 = ClassificationModelType(
     "efficientnet_b0",
-    pretrained_fn=torchvision.models.efficientnet_b0,
-    id_to_label_fn=classification_id_to_label_fn,
+    pretrained_fn=torchvision.models.efficientnet_b0
 )
 efficientnet_b1 = ClassificationModelType(
     "efficientnet_b1",
-    pretrained_fn=torchvision.models.efficientnet_b1,
-    id_to_label_fn=classification_id_to_label_fn,
+    pretrained_fn=torchvision.models.efficientnet_b1
 )
 efficientnet_b2 = ClassificationModelType(
     "efficientnet_b2",
-    pretrained_fn=torchvision.models.efficientnet_b2,
-    id_to_label_fn=classification_id_to_label_fn,
+    pretrained_fn=torchvision.models.efficientnet_b2
 )
 efficientnet_b3 = ClassificationModelType(
     "efficientnet_b3",
-    pretrained_fn=torchvision.models.efficientnet_b3,
-    id_to_label_fn=classification_id_to_label_fn,
+    pretrained_fn=torchvision.models.efficientnet_b3
 )
 efficientnet_b4 = ClassificationModelType(
     "efficientnet_b4",
-    pretrained_fn=torchvision.models.efficientnet_b4,
-    id_to_label_fn=classification_id_to_label_fn,
+    pretrained_fn=torchvision.models.efficientnet_b4
 )
 efficientnet_b5 = ClassificationModelType(
     "efficientnet_b5",
-    pretrained_fn=torchvision.models.efficientnet_b5,
-    id_to_label_fn=classification_id_to_label_fn,
+    pretrained_fn=torchvision.models.efficientnet_b5
 )
 efficientnet_b6 = ClassificationModelType(
     "efficientnet_b6",
-    pretrained_fn=torchvision.models.efficientnet_b6,
-    id_to_label_fn=classification_id_to_label_fn,
+    pretrained_fn=torchvision.models.efficientnet_b6
 )
 efficientnet_b7 = ClassificationModelType(
     "efficientnet_b7",
-    pretrained_fn=torchvision.models.efficientnet_b7,
-    id_to_label_fn=classification_id_to_label_fn,
+    pretrained_fn=torchvision.models.efficientnet_b7
 )

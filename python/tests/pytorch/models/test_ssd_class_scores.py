@@ -103,7 +103,7 @@ def test_ssd_class_scores_module_with_spark(
             model_type="ssd_class_scores",
             registered_model_name="ssd_class_scores",
             labels={
-                "func": "rikai.pytorch.models.torch.detection_id_to_label"
+                "func": "rikai.pytorch.models.torch.detection_label_fn"
             },
         )
 

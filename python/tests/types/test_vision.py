@@ -174,7 +174,7 @@ def test_to_dict():
     data = np.random.randint(0, 255, size=(100, 100, 3), dtype=np.uint8)
     img = Image.from_array(data)
     assert (
-        base64.decodebytes(img.to_dict()["data"].encode("utf-8")) == img.data
+            base64.decodebytes(img.to_dict()["data"].encode("utf-8")) == img.data
     )
     img = Image("foo")
     assert img.to_dict() == {"uri": "foo"}
@@ -214,9 +214,9 @@ def test_draw_styled_images():
 
     # Sugar!
     sugar_boxes = (
-        img
-        | box1 @ {"color": "green", "width": 10}
-        | box2 @ {"color": "green", "width": 10}
+            img
+            | box1 @ {"color": "green", "width": 10}
+            | box2 @ {"color": "green", "width": 10}
     )
 
     sugar_expected = Image.from_array(data).to_pil()
@@ -276,3 +276,9 @@ def test_wrong_draw_order():
 
     with pytest.raises(TypeError):
         rendered = img | {"color": "white"} @ box1
+
+
+def test_draw_without_annotations(test_image):
+    img = Image.from_pil(test_image)
+    rendered = (img | []).to_image()
+    assert np.array_equal(rendered.to_numpy(), np.array(test_image))

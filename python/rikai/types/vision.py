@@ -292,9 +292,6 @@ class ImageDraw(Draw):
         self.img = img.to_pil()
 
     def to_image(self) -> Image:
-        if not self.layers:
-            raise ValueError("Can not render empty displayable draw")
-
         render = PILRenderer(self.img)
         for layer in self.layers:
             layer._render(render)

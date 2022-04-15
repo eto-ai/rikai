@@ -288,7 +288,17 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
 
 class ImageDraw(Draw):
     def __init__(self, img: Image):
+        """Construct an ImageDraw
+
+        Parameters
+        ----------
+        img : Image
+        """
         super().__init__()
+
+        if img is None:
+            raise ValueError("Missing input image")
+
         self.img = img.to_pil()
 
     def to_image(self) -> Image:

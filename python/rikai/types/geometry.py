@@ -395,7 +395,9 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
             return iou_arr[0]
         return iou_arr
 
-    def with_label(self, text: str, color: str = get_option(CONF_RIKAI_VIZ_COLOR)):
+    def with_label(
+        self, text: str, color: str = get_option(CONF_RIKAI_VIZ_COLOR)
+    ):
         """Spawn a list with current box and a `python.rikai.viz.Text`
 
         Parameters
@@ -411,7 +413,6 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
             [self, the_label]
         """
         return [self, Text(text, (self.xmin, self.ymin), color)]
-
 
 
 class Box3d(ToNumpy, ToDict):

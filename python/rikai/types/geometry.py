@@ -23,6 +23,7 @@ from typing import List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from PIL import Image, ImageDraw
+from rikai.conf import CONF_RIKAI_VIZ_COLOR, get_option
 
 from rikai.mixin import Drawable, ToDict, ToNumpy
 from rikai.spark.types.geometry import (
@@ -34,6 +35,8 @@ from rikai.spark.types.geometry import (
 from rikai.types import rle
 
 __all__ = ["Point", "Box3d", "Box2d", "Mask"]
+
+from rikai.viz import Text
 
 
 class Point(ToNumpy, ToDict):
@@ -391,6 +394,24 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
         if isinstance(other, Box2d):
             return iou_arr[0]
         return iou_arr
+
+    def with_label(self, text: str, color: str = get_option(CONF_RIKAI_VIZ_COLOR)):
+        """Spawn a list with current box and a `python.rikai.viz.Text`
+
+        Parameters
+        ----------
+        text: str
+            The text content of that label
+        color: str
+            The color of the text, will have a default value if not given.
+
+        Returns
+        -------
+        list
+            [self, the_label]
+        """
+        return [self, Text(text, (self.xmin, self.ymin), color)]
+
 
 
 class Box3d(ToNumpy, ToDict):

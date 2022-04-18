@@ -276,3 +276,9 @@ def test_wrong_draw_order():
 
     with pytest.raises(TypeError):
         rendered = img | {"color": "white"} @ box1
+
+
+def test_draw_without_annotations(test_image):
+    img = Image.from_pil(test_image)
+    rendered = (img | []).to_image()
+    assert np.array_equal(rendered.to_numpy(), np.array(test_image))

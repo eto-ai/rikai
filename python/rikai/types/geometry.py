@@ -398,7 +398,8 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
     def with_label(
         self, text: str, color: str = get_option(CONF_RIKAI_VIZ_COLOR)
     ):
-        """Spawn a list with current box and a `python.rikai.viz.Text`
+        """Spawn a list with current box and a `python.rikai.viz.Text`, the later one would be aligned with
+        current box on left-top, used as a convenient tool to give a box a label in visualization.
 
         Parameters
         ----------

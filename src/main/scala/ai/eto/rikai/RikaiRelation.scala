@@ -109,6 +109,10 @@ class RikaiRelation(val options: RikaiOptions)(
     if (overwrite) {
       writer = writer.mode(SaveMode.Overwrite)
     }
+    writer = options.partitionColumns match {
+      case Some(cols) => writer.partitionBy(cols: _*)
+      case None       => writer
+    }
     val total = writer.save(options.path)
 
     writeMetadataFile()

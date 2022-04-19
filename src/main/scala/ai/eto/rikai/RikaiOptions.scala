@@ -33,6 +33,19 @@ private[rikai] class RikaiOptions(parameters: Map[String, String]) {
     parameters
       .filterKeys(k => !RikaiOptions.excludedKeys(k))
       .toMap
+
+  /** Columns specified via df.partitionBy() */
+  val partitionColumns: Option[Seq[String]] =
+    parameters.get("__partition_columns") match {
+      case Some(cols) =>
+        Some(
+          cols
+            .substring(1, cols.length - 1)
+            .split(",")
+            .map(_.stripPrefix("\"").stripSuffix("\""))
+        )
+      case None => None
+    }
 }
 
 private[rikai] object RikaiOptions {

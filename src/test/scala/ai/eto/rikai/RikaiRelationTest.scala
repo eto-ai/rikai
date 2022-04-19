@@ -58,6 +58,15 @@ class RikaiRelationTest extends AnyFunSuite with SparkTestSession {
     assert(df.intersectAll(examples).count == 3)
   }
 
+  test("Use partitions") {
+    examples.write.partitionBy("label").rikai(testDir.toString)
+
+    val partitions =
+      Set(testDir.list().toSeq.filter(_.startsWith("label=")): _*)
+
+    assert(partitions == Set("label=car", "label=people", "label=tree"))
+  }
+
   test("test default block size") {
     val options = new RikaiOptions(Map.empty)
     assert(options.blockSize == RikaiOptions.defaultBlockSize)

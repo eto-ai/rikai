@@ -24,10 +24,16 @@ import ai.eto.rikai.sql.spark.execution.{
   ShowModelsCommand
 }
 import ai.eto.rikai.sql.spark.parser.RikaiExtSqlBaseParser._
+import org.antlr.v4.runtime.ParserRuleContext
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.catalyst.parser.{ParseException, ParserUtils}
-import org.apache.spark.sql.catalyst.parser.ParserUtils.{string, withOrigin}
+import org.apache.spark.sql.catalyst.parser.ParserUtils.{
+  position,
+  string,
+  withOrigin
+}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
+import org.apache.spark.sql.catalyst.trees.CurrentOrigin
 
 import scala.collection.JavaConverters.asScalaBufferConverter
 
@@ -35,6 +41,16 @@ import scala.collection.JavaConverters.asScalaBufferConverter
   */
 private[parser] class RikaiExtAstBuilder
     extends RikaiExtSqlBaseBaseVisitor[AnyRef] {
+
+  private def withOrigin[T](ctx: ParserRuleContext)(f: => T): T = {
+    val current = CurrentOrigin.get
+    CurrentOrigin.set(position(ctx.getStart))
+    try {
+      f
+    } finally {
+      CurrentOrigin.set(current)
+    }
+  }
 
   override def visitSingleStatement(ctx: SingleStatementContext): LogicalPlan =
     withOrigin(ctx) {

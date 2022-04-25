@@ -54,7 +54,7 @@ options:
 """
         )
 
-    spec = FileModelSpec(spec_path)
+    spec = FileModelSpec({"uri": spec_path})
     inputs = [pd.Series(image) for image in two_flickr_images]
     results = apply_model_spec(spec, inputs)
 

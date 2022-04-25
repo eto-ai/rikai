@@ -243,7 +243,7 @@ def test_directly_load_pth_file(
     spark: SparkSession, resnet_model_uri: str, two_flickr_rows: list
 ):
     spark.sql(
-        """CREATE MODEL fasterrcnn
+        """CREATE OR REPLACE MODEL fasterrcnn
         FLAVOR pytorch
         MODEL_TYPE fasterrcnn
         USING 'file://{}'

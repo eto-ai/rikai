@@ -22,8 +22,9 @@ import pytest
 import torch
 import yaml
 from pandas.core.series import Series
-from pyspark.sql import Row, SparkSession
-from pyspark.sql.types import IntegerType, LongType, StructField, StructType
+from py4j.protocol import Py4JJavaError
+from pyspark.sql import SparkSession
+from pyspark.sql.types import IntegerType, StructField, StructType
 from torch.utils.data import DataLoader
 from utils import check_ml_predict
 
@@ -100,19 +101,21 @@ def assert_dataloader_transform(transform):
 
 def test_validate_yaml_spec(tmp_path):
     spec = FileModelSpec(
-        spec_file(
-            {
-                "version": "1.2",
-                "name": "test_yaml_model",
-                "schema": "long",
-                "model": {
-                    "uri": "s3://bucket/to/model.pt",
-                    "unspecified_field": True,
+        {
+            "uri": spec_file(
+                {
+                    "version": "1.2",
+                    "name": "test_yaml_model",
+                    "schema": "long",
+                    "model": {
+                        "uri": "s3://bucket/to/model.pt",
+                        "unspecified_field": True,
+                    },
+                    "options": {"gpu": "true", "batch_size": 123},
                 },
-                "options": {"gpu": "true", "batch_size": 123},
-            },
-            tmp_path,
-        )
+                tmp_path,
+            )
+        }
     )
 
     assert spec.name == "test_yaml_model"
@@ -121,61 +124,69 @@ def test_validate_yaml_spec(tmp_path):
 
 def test_validate_misformed_spec(tmp_path):
     with pytest.raises(SpecError):
-        FileModelSpec(spec_file({}, tmp_path))
+        FileModelSpec({})
 
     with pytest.raises(SpecError, match=".*version' is a required property.*"):
         FileModelSpec(
-            spec_file(
-                {
-                    "name": "test_yaml_model",
-                    "schema": "long",
-                    "model": {"uri": "s3://foo/bar"},
-                },
-                tmp_path,
-            )
+            {
+                "uri": spec_file(
+                    {
+                        "name": "test_yaml_model",
+                        "schema": "long",
+                        "model": {"uri": "s3://foo/bar"},
+                    },
+                    tmp_path,
+                )
+            }
         )
 
     with pytest.raises(SpecError, match=".*'model' is a required property.*"):
         FileModelSpec(
-            spec_file(
-                {
-                    "version": "1.0",
-                    "name": "test_yaml_model",
-                    "schema": "long",
-                },
-                tmp_path,
-            )
+            {
+                "uri": spec_file(
+                    {
+                        "version": "1.0",
+                        "name": "test_yaml_model",
+                        "schema": "long",
+                    },
+                    tmp_path,
+                )
+            }
         )
 
     with pytest.raises(SpecError, match=".*'uri' is a required property.*"):
         FileModelSpec(
-            spec_file(
-                {
-                    "version": "1.0",
-                    "name": "test_yaml_model",
-                    "schema": "long",
-                    "model": {},
-                },
-                tmp_path,
-            )
+            {
+                "uri": spec_file(
+                    {
+                        "version": "1.0",
+                        "name": "test_yaml_model",
+                        "schema": "long",
+                        "model": {},
+                    },
+                    tmp_path,
+                )
+            }
         )
 
 
 def test_construct_spec_with_options(tmp_path):
     spec = FileModelSpec(
-        spec_file(
-            {
-                "version": "1.0",
-                "name": "with_options",
-                "schema": "int",
-                "model": {
-                    "uri": "s3://bucket/to/model.pt",
-                    "unspecified_field": True,
+        {
+            "uri": spec_file(
+                {
+                    "version": "1.0",
+                    "name": "with_options",
+                    "schema": "int",
+                    "model": {
+                        "uri": "s3://bucket/to/model.pt",
+                        "unspecified_field": True,
+                    },
+                    "options": {"foo": 1, "bar": "2.3"},
                 },
-            },
-            tmp_path,
-        ),
-        options={"foo": 1, "bar": "2.3"},
+                tmp_path,
+            )
+        }
     )
     assert {"foo": 1, "bar": "2.3"} == spec.options
     assert "s3://bucket/to/model.pt" == spec.model_uri
@@ -190,7 +201,7 @@ def test_yaml_model(
 
 
 def test_yaml_model_type(resnet_spec: str, two_flickr_images):
-    spec = FileModelSpec(spec_uri=resnet_spec)
+    spec = FileModelSpec({"uri": resnet_spec})
     inputs = [pd.Series(image) for image in two_flickr_images]
     results = apply_model_spec(spec, inputs)
     assert len(results) == 2
@@ -220,17 +231,56 @@ def test_count_objects_model(
     assert predictions.where("objects > 0").count() == 2
 
 
+def test_directly_load_pth_file(
+    spark: SparkSession, resnet_model_uri: str, two_flickr_rows: list
+):
+    spark.sql(
+        """CREATE MODEL fasterrcnn
+        FLAVOR pytorch
+        MODEL_TYPE fasterrcnn
+        USING 'file://{}'
+        """.format(
+            resnet_model_uri
+        )
+    )
+    df = spark.createDataFrame(two_flickr_rows)
+    df.createOrReplaceTempView("df")
+    predictions = spark.sql(
+        "SELECT size(ML_PREDICT(fasterrcnn, image)) as objects FROM df"
+    )
+    assert predictions.schema == StructType(
+        [StructField("objects", IntegerType(), False)]
+    )
+    assert predictions.count() == 2
+    assert predictions.where("objects > 0").count() == 2
+
+
+def test_load_pth_file_without_model_type(
+    spark: SparkSession, resnet_model_uri: str
+):
+    with pytest.raises(Py4JJavaError, match=".*Missing model flavor or model type"):
+        spark.sql(
+            """CREATE MODEL fasterrcnn
+            USING 'file://{}'
+            """.format(
+                resnet_model_uri
+            )
+        )
+
+
 def test_relative_model_uri(tmp_path):
     spec = FileModelSpec(
-        spec_file(
-            {
-                "version": "1.2",
-                "name": "test_yaml_model",
-                "schema": "long",
-                "model": {"uri": "model.pt"},
-            },
-            tmp_path,
-        )
+        {
+            "uri": spec_file(
+                {
+                    "version": "1.2",
+                    "name": "test_yaml_model",
+                    "schema": "long",
+                    "model": {"uri": "model.pt"},
+                },
+                tmp_path,
+            )
+        }
     )
     assert Path(spec.model_uri) == tmp_path / "model.pt"
 
@@ -244,20 +294,22 @@ def test_spec_with_labels(tmp_path):
         json.dump(COCO_INSTANCE_CATEGORY_NAMES, fh)
 
     spec = FileModelSpec(
-        spec_file(
-            {
-                "version": "1.2",
-                "name": "test_yaml_model",
-                "schema": "long",
-                "model": {
-                    "uri": "s3://bucket/to/model.pt",
-                    "unspecified_field": True,
+        {
+            "uri": spec_file(
+                {
+                    "version": "1.2",
+                    "name": "test_yaml_model",
+                    "schema": "long",
+                    "model": {
+                        "uri": "s3://bucket/to/model.pt",
+                        "unspecified_field": True,
+                    },
+                    "labels": {"uri": str(tmp_path / "labels.json")},
+                    "options": {"gpu": "true", "batch_size": 123},
                 },
-                "labels": {"uri": str(tmp_path / "labels.json")},
-                "options": {"gpu": "true", "batch_size": 123},
-            },
-            tmp_path,
-        )
+                tmp_path,
+            )
+        }
     )
 
     assert spec.name == "test_yaml_model"

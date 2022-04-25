@@ -14,7 +14,6 @@
 
 import os
 from pathlib import Path
-from typing import Optional, Union
 from urllib.parse import urlparse
 
 import yaml
@@ -27,31 +26,41 @@ __all__ = ["FileSystemRegistry"]
 
 
 class FileModelSpec(ModelSpec):
-    """Model Spec.
+    """File-based Model Spec.
 
     Parameters
     ----------
-    spec_uri : str or Path
-        Spec file URI
-    options : Dict[str, Any], optional
-        Additionally options. If the same option exists in spec already,
-        it will be overridden.
+    raw_spec : dict
+        The RAW dict passed from SparkSession
     validate : bool, default True.
         Validate the spec during construction. Default ``True``.
+
+    Raises
+    ------
+    SpecError
+        If the spec is not correct.
     """
 
     def __init__(
         self,
-        spec_uri: Union[str, Path],
-        options: Optional[dict] = None,
+        raw_spec: dict,
         validate: bool = True,
     ):
-        with open_uri(spec_uri) as fobj:
-            spec = yaml.load(fobj, Loader=yaml.FullLoader)
-        self.base_dir = os.path.dirname(spec_uri)
-        spec.setdefault("options", {})
-        if options:
-            spec["options"].update(options)
+        spec = {
+            "version": "1.0",
+            "name": raw_spec["name"],
+            "options": raw_spec.get("options", {}),
+            "model": {
+                "flavor": raw_spec.get("flavor"),
+                "type": raw_spec.get("modelType"),
+                "uri": raw_spec.get("uri")
+            }
+        }
+        uri = spec["model"]["uri"]
+        if Path(uri).suffix in [".yml", ".yaml"]:
+            with open_uri(uri) as fobj:
+                spec = yaml.load(fobj, Loader=yaml.FullLoader)
+            self.base_dir = os.path.dirname(uri)
         super().__init__(spec, validate=validate)
 
     def load_model(self):
@@ -83,7 +92,4 @@ class FileSystemRegistry(Registry):
         return "FileSystemRegistry"
 
     def make_model_spec(self, raw_spec: dict):
-        uri = raw_spec.get("uri")
-        options = raw_spec.get("options", {})
-        spec = FileModelSpec(uri, options=options)
-        return spec
+        return FileModelSpec(raw_spec)

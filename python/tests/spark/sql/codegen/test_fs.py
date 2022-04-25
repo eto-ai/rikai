@@ -284,7 +284,11 @@ def test_relative_model_uri(tmp_path):
                     "version": "1.2",
                     "name": "test_yaml_model",
                     "schema": "long",
-                    "model": {"uri": "model.pt", "type": "ssd", "flavor": "pytorch"},
+                    "model": {
+                        "uri": "model.pt",
+                        "type": "ssd",
+                        "flavor": "pytorch",
+                    },
                 },
                 tmp_path,
             )

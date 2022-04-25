@@ -109,6 +109,8 @@ def test_validate_yaml_spec(tmp_path):
                     "schema": "long",
                     "model": {
                         "uri": "s3://bucket/to/model.pt",
+                        "flavor": "pytorch",
+                        "type": "resnet",
                         "unspecified_field": True,
                     },
                     "options": {"gpu": "true", "batch_size": 123},
@@ -133,7 +135,11 @@ def test_validate_misformed_spec(tmp_path):
                     {
                         "name": "test_yaml_model",
                         "schema": "long",
-                        "model": {"uri": "s3://foo/bar"},
+                        "model": {
+                            "uri": "s3://foo/bar",
+                            "flavor": "pytorch",
+                            "type": "resnet",
+                        },
                     },
                     tmp_path,
                 )
@@ -180,6 +186,8 @@ def test_construct_spec_with_options(tmp_path):
                     "schema": "int",
                     "model": {
                         "uri": "s3://bucket/to/model.pt",
+                        "flavor": "pytorch",
+                        "type": "ssd",
                         "unspecified_field": True,
                     },
                     "options": {"foo": 1, "bar": "2.3"},
@@ -258,11 +266,9 @@ def test_directly_load_pth_file(
 def test_load_pth_file_without_model_type(
     spark: SparkSession, resnet_model_uri: str
 ):
-    with pytest.raises(
-        Py4JJavaError, match=".*Missing model flavor or model type"
-    ):
+    with pytest.raises(Py4JJavaError):
         spark.sql(
-            """CREATE MODEL fasterrcnn
+            """CREATE OR REPLACE MODEL fasterrcnn
             USING 'file://{}'
             """.format(
                 resnet_model_uri
@@ -278,7 +284,7 @@ def test_relative_model_uri(tmp_path):
                     "version": "1.2",
                     "name": "test_yaml_model",
                     "schema": "long",
-                    "model": {"uri": "model.pt"},
+                    "model": {"uri": "model.pt", "type": "ssd", "flavor": "pytorch"},
                 },
                 tmp_path,
             )
@@ -304,6 +310,8 @@ def test_spec_with_labels(tmp_path):
                     "schema": "long",
                     "model": {
                         "uri": "s3://bucket/to/model.pt",
+                        "flavor": "pytorch",
+                        "type": "resnet50",
                         "unspecified_field": True,
                     },
                     "labels": {"uri": str(tmp_path / "labels.json")},

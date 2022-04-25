@@ -48,7 +48,7 @@ class FileModelSpec(ModelSpec):
     ):
         spec = {
             "version": "1.0",
-            "name": raw_spec["name"],
+            "name": raw_spec.get("name"),
             "options": raw_spec.get("options", {}),
             "model": {
                 "flavor": raw_spec.get("flavor"),
@@ -57,6 +57,8 @@ class FileModelSpec(ModelSpec):
             },
         }
         uri = spec["model"]["uri"]
+        if not uri:
+            raise SpecError("Model URI is missing")
         if Path(uri).suffix in [".yml", ".yaml"]:
             with open_uri(uri) as fobj:
                 spec = yaml.load(fobj, Loader=yaml.FullLoader)

@@ -125,12 +125,12 @@ class ModelSpec(ABC):
             If the spec is not well-formatted.
         """
         logger.debug("Validating spec: %s", self._spec)
-        if not self.flavor or not self.model_type:
-            raise SpecError("Missing model flavor or model type")
         try:
             validate(instance=self._spec, schema=schema)
         except ValidationError as e:
             raise SpecError(e.message) from e
+        if not self.flavor or not self.model_type:
+            raise SpecError("Missing model flavor or model type")
 
     @property
     def version(self) -> str:

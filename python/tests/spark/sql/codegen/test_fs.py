@@ -258,7 +258,9 @@ def test_directly_load_pth_file(
 def test_load_pth_file_without_model_type(
     spark: SparkSession, resnet_model_uri: str
 ):
-    with pytest.raises(Py4JJavaError, match=".*Missing model flavor or model type"):
+    with pytest.raises(
+        Py4JJavaError, match=".*Missing model flavor or model type"
+    ):
         spark.sql(
             """CREATE MODEL fasterrcnn
             USING 'file://{}'

@@ -53,8 +53,8 @@ class FileModelSpec(ModelSpec):
             "model": {
                 "flavor": raw_spec.get("flavor"),
                 "type": raw_spec.get("modelType"),
-                "uri": raw_spec.get("uri")
-            }
+                "uri": raw_spec.get("uri"),
+            },
         }
         uri = spec["model"]["uri"]
         if Path(uri).suffix in [".yml", ".yaml"]:

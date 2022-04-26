@@ -14,6 +14,7 @@
 
 import os
 from pathlib import Path
+from typing import Dict, Any, Union
 from urllib.parse import urlparse
 
 import yaml
@@ -41,13 +42,14 @@ class FileModelSpec(ModelSpec):
         If the spec is not correct.
     """
 
+    VERSION = "1.0"
+
     def __init__(
         self,
-        raw_spec: dict,
+        raw_spec: Dict,
         validate: bool = True,
     ):
         spec = {
-            "version": "1.0",
             "name": raw_spec.get("name"),
             "options": raw_spec.get("options", {}),
             "model": {
@@ -61,9 +63,42 @@ class FileModelSpec(ModelSpec):
             raise SpecError("Model URI is missing")
         if Path(uri).suffix in [".yml", ".yaml"]:
             with open_uri(uri) as fobj:
-                spec = yaml.load(fobj, Loader=yaml.FullLoader)
+                yaml_spec = yaml.load(fobj, Loader=yaml.FullLoader)
+                spec = self._merge_spec(yaml_spec, spec)
+                model_uri_from_yaml = yaml_spec.get("model", {}).get("uri")
+                if model_uri_from_yaml is not None:
+                    spec["model"]["uri"] = model_uri_from_yaml
             self.base_dir = os.path.dirname(uri)
+        else:
+            spec["version"] = self.VERSION
+
+        print("Final spec: ", spec)
         super().__init__(spec, validate=validate)
+
+    @staticmethod
+    def _merge_spec(
+        base_spec: Dict[str, Any], overwrite: Dict[str, Any]
+    ) -> dict:
+        """Merge `overwrite` spec into `base_spec`.
+
+        All the values presented in `overwrite` will change the value in `base_spec`.
+
+        Parameters
+        ----------
+        base_spec : dict
+            The base spec to be overwrite
+        overwrite : dict
+            The spec used to overwrite the base values
+        """
+        base_spec = base_spec.copy()
+        for key, value in overwrite.items():
+            if isinstance(value, dict):
+                base_spec[key] = FileModelSpec._merge_spec(
+                    base_spec.get(key, {}), value
+                )
+            elif value is not None:
+                base_spec[key] = value
+        return base_spec
 
     def load_model(self):
         if self.flavor == "pytorch":

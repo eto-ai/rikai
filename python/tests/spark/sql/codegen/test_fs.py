@@ -34,12 +34,12 @@ from rikai.spark.sql.exceptions import SpecError
 from rikai.testing.utils import apply_model_spec
 
 
-def spec_file(content: Dict[str, Any], tmp_path: Path) -> Path:
+def spec_file(content: Dict[str, Any], tmp_path: Path) -> str:
     filename = f"{secrets.token_urlsafe(6)}.yml"
     spec_filepath = tmp_path / filename
     with spec_filepath.open(mode="w") as fobj:
         yaml.dump(content, fobj)
-    return spec_filepath
+    return str(spec_filepath)
 
 
 @pytest.fixture(scope="module")
@@ -146,7 +146,9 @@ def test_validate_misformed_spec(tmp_path):
             }
         )
 
-    with pytest.raises(SpecError, match=".*'model' is a required property.*"):
+    with pytest.raises(
+        SpecError, match=".*Missing model flavor or model type"
+    ):
         FileModelSpec(
             {
                 "uri": spec_file(
@@ -160,7 +162,9 @@ def test_validate_misformed_spec(tmp_path):
             }
         )
 
-    with pytest.raises(SpecError, match=".*'uri' is a required property.*"):
+    with pytest.raises(
+        SpecError, match=".*Missing model flavor or model type"
+    ):
         FileModelSpec(
             {
                 "uri": spec_file(

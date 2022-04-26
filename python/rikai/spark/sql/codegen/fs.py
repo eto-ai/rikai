@@ -81,7 +81,8 @@ class FileModelSpec(ModelSpec):
     ) -> dict:
         """Merge `overwrite` spec into `base_spec`.
 
-        All the values presented in `overwrite` will change the value in `base_spec`.
+        All the values presented in `overwrite` will change the value in
+        the `base_spec`.
 
         Parameters
         ----------
@@ -90,15 +91,13 @@ class FileModelSpec(ModelSpec):
         overwrite : dict
             The spec used to overwrite the base values
         """
-        base_spec = base_spec.copy()
+        spec = base_spec.copy()
         for key, value in overwrite.items():
             if isinstance(value, dict):
-                base_spec[key] = FileModelSpec._merge_spec(
-                    base_spec.get(key, {}), value
-                )
+                spec[key] = FileModelSpec._merge_spec(spec.get(key, {}), value)
             elif value is not None:
-                base_spec[key] = value
-        return base_spec
+                spec[key] = value
+        return spec
 
     def load_model(self):
         if self.flavor == "pytorch":

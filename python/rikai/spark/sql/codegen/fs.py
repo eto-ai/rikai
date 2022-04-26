@@ -14,7 +14,7 @@
 
 import os
 from pathlib import Path
-from typing import Optional, Union
+from typing import Dict, Any, Union
 from urllib.parse import urlparse
 
 import yaml
@@ -27,32 +27,77 @@ __all__ = ["FileSystemRegistry"]
 
 
 class FileModelSpec(ModelSpec):
-    """Model Spec.
+    """File-based Model Spec.
 
     Parameters
     ----------
-    spec_uri : str or Path
-        Spec file URI
-    options : Dict[str, Any], optional
-        Additionally options. If the same option exists in spec already,
-        it will be overridden.
+    raw_spec : dict
+        The RAW dict passed from SparkSession
     validate : bool, default True.
         Validate the spec during construction. Default ``True``.
+
+    Raises
+    ------
+    SpecError
+        If the spec is not correct.
     """
+
+    VERSION = "1.0"
 
     def __init__(
         self,
-        spec_uri: Union[str, Path],
-        options: Optional[dict] = None,
+        raw_spec: Dict,
         validate: bool = True,
     ):
-        with open_uri(spec_uri) as fobj:
-            spec = yaml.load(fobj, Loader=yaml.FullLoader)
-        self.base_dir = os.path.dirname(spec_uri)
-        spec.setdefault("options", {})
-        if options:
-            spec["options"].update(options)
+        spec = {
+            "name": raw_spec.get("name"),
+            "options": raw_spec.get("options", {}),
+            "model": {
+                "flavor": raw_spec.get("flavor"),
+                "type": raw_spec.get("modelType"),
+                "uri": raw_spec.get("uri"),
+            },
+        }
+        uri = spec["model"]["uri"]
+        if not uri:
+            raise SpecError("Model URI is missing")
+        if Path(uri).suffix in [".yml", ".yaml"]:
+            with open_uri(uri) as fobj:
+                yaml_spec = yaml.load(fobj, Loader=yaml.FullLoader)
+                spec = self._merge_spec(yaml_spec, spec)
+                model_uri_from_yaml = yaml_spec.get("model", {}).get("uri")
+                if model_uri_from_yaml is not None:
+                    spec["model"]["uri"] = model_uri_from_yaml
+            self.base_dir = os.path.dirname(uri)
+        else:
+            spec["version"] = self.VERSION
+
+        print("Final spec: ", spec)
         super().__init__(spec, validate=validate)
+
+    @staticmethod
+    def _merge_spec(
+        base_spec: Dict[str, Any], overwrite: Dict[str, Any]
+    ) -> dict:
+        """Merge `overwrite` spec into `base_spec`.
+
+        All the values presented in `overwrite` will change the value in
+        the `base_spec`.
+
+        Parameters
+        ----------
+        base_spec : dict
+            The base spec to be overwrite
+        overwrite : dict
+            The spec used to overwrite the base values
+        """
+        spec = base_spec.copy()
+        for key, value in overwrite.items():
+            if isinstance(value, dict):
+                spec[key] = FileModelSpec._merge_spec(spec.get(key, {}), value)
+            elif value is not None:
+                spec[key] = value
+        return spec
 
     def load_model(self):
         if self.flavor == "pytorch":
@@ -83,7 +128,4 @@ class FileSystemRegistry(Registry):
         return "FileSystemRegistry"
 
     def make_model_spec(self, raw_spec: dict):
-        uri = raw_spec.get("uri")
-        options = raw_spec.get("options", {})
-        spec = FileModelSpec(uri, options=options)
-        return spec
+        return FileModelSpec(raw_spec)

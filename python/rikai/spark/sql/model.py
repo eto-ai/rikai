@@ -129,6 +129,8 @@ class ModelSpec(ABC):
             validate(instance=self._spec, schema=schema)
         except ValidationError as e:
             raise SpecError(e.message) from e
+        if not self.flavor or not self.model_type:
+            raise SpecError("Missing model flavor or model type")
 
     @property
     def version(self) -> str:

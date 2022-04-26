@@ -23,8 +23,9 @@ from pyspark.sql.types import BinaryType
 from torch.utils.data import DataLoader
 
 from rikai.io import open_uri
+from rikai.pytorch.models.torch import TorchModelType
 from rikai.pytorch.pandas import PandasDataset
-from rikai.spark.sql.model import ModelSpec
+from rikai.spark.sql.model import ModelSpec, ModelType
 
 DEFAULT_NUM_WORKERS = 8
 DEFAULT_BATCH_SIZE = 4
@@ -53,9 +54,13 @@ def _generate(spec: ModelSpec, is_udf: bool = True):
     -------
     A Spark Pandas UDF.
     """
-    model = spec.model_type
+    model: ModelType = spec.model_type
     if model is None:
         raise ValueError(f"Model not found with spec: {spec}")
+    if not isinstance(ModelType, TorchModelType):
+        raise ValueError(f"Model type is not Pytorch Model: {spec}")
+    assert hasattr(model, "collate_fn")
+
     default_device = "gpu" if torch.cuda.is_available() else "cpu"
     options = spec.options
     use_gpu = options.get("device", default_device) == "gpu"
@@ -86,6 +91,7 @@ def _generate(spec: ModelSpec, is_udf: bool = True):
                         dataset,
                         batch_size=batch_size,
                         num_workers=num_workers,
+                        collate_fn=model.collate_fn,
                     ):
                         batch = move_tensor_to_device(batch, device)
                         predictions = model(batch)

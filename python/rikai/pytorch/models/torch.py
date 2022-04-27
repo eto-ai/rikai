@@ -58,9 +58,10 @@ class TorchModelType(ModelType, Pretrained, ABC):
         pretrained_fn : Callable, optional
             The callable to be called if loading pretrained models.
         label_fn: Callable, optional
-            Maps label_id to human readable string label
+            Maps label_id to human-readable string label
         collate_fn : Callable, optional
-            Customized collate fn to be called with PyTorch :py:class:`DataLoader`.
+            Customized collate fn to be called with PyTorch
+            :py:class:`DataLoader`.
         register : bool
             Register the model to be discoverable via SQL
         """

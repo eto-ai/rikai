@@ -57,7 +57,7 @@ def _generate(spec: ModelSpec, is_udf: bool = True):
     model: ModelType = spec.model_type
     if model is None:
         raise ValueError(f"Model not found with spec: {spec}")
-    if not isinstance(ModelType, TorchModelType):
+    if not isinstance(model, TorchModelType):
         raise ValueError(f"Model type is not Pytorch Model: {spec}")
     assert hasattr(model, "collate_fn")
 

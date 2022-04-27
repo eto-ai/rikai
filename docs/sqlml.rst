@@ -1,27 +1,21 @@
 .. toctree::
    :maxdepth: 1
 
-ML-enabled SQL
-==============
+Machine Learning SQL
+====================
 
-``Rikai`` extends Spark SQL to offer Machine Learning(**ML**)-enabled analytics.
+``Rikai`` extends `Spark SQL`_ to conduct SQL queries using Machine Learning(**ML**) models.
 
     Make your Data Warehouse as Smart as your ML models
 
-Rikai SQL ML is extensible to any Model Registry, no matter it is ``on-prem`` or ``cloud-native``,
-``open-source`` or ``proprietary``.
+Rikai SQL ML is extensible to any **Model Registry**, so it can be easily integrated
+to use existing machine learning infrastructure.
 
-As a result, ``Rikai SQL-ML`` can be easily integrated into existing machine learning infrastructure,
-and allow your Data Warehouse to be as smart as your ML models.
-
-.. warning::
-
-    Rikai SQL-ML is still under heavily development. The syntax and implementation have not been stabilized yet.
 
 Setup
 -----
 
-Before we can use ``Rikai SQL-ML``, we need to configure SparkSession:
+First, let us configure a ``SparkSession`` with Rikai extension.
 
 .. code-block:: python
 
@@ -29,18 +23,10 @@ Before we can use ``Rikai SQL-ML``, we need to configure SparkSession:
         SparkSession
         .builder
         .appName("spark-app")
-        .config("spark.jars.packages", "ai.eto:rikai_2.12:0.0.21")
+        .config("spark.jars.packages", "ai.eto:rikai_2.12:0.1.8")
         .config(
             "spark.sql.extensions",
             "ai.eto.rikai.sql.spark.RikaiSparkSessionExtensions",
-        )
-        .config(
-            "spark.driver.extraJavaOptions",
-            "-Dio.netty.tryReflectionSetAccessible=true",
-        )
-        .config(
-            "spark.executor.extraJavaOptions",
-            "-Dio.netty.tryReflectionSetAccessible=true",
         )
         .master("local[*]")
         .getOrCreate()
@@ -55,7 +41,9 @@ Rikai extends Spark SQL with four more SQL statements:
 
         -- Create model
         CREATE [OR REPLACE] MODEL model_name
-        [OPTIONS key1=value1,key2=value2,...]
+        [FLAVOR flavor]
+        [MODEL_TYPE model_type]
+        [OPTIONS (key1=value1,key2=value2,...)]
         USING "uri";
 
         -- Describe model
@@ -68,40 +56,17 @@ Rikai extends Spark SQL with four more SQL statements:
         DROP MODEL model_name;
 
 
-Rikai uses URL schema to decide which Model Registry to be used to resolve a
-ML Model. Once one ML model is via ``CREATE MODEL``,
-it can be used in Spark SQL directly:
+Once a ML model is created via ``CREATE MODEL``, it can be used in Spark SQL:
 
     .. code-block:: sql
 
-        CERATE MODEL model_foo USING "s3://bucket/to/spec.yaml";
+        CERATE MODEL my_resnet
+        FLAVOR pytorch
+        MODEL_TYPE resnet50
+        USING "s3://bucket/to/resnet.pth";
 
-        SELECT id, ML_PREDICT(model_foo, image) FROM df;
+        SELECT id, ML_PREDICT(my_resnet, image) FROM imagenet;
 
-
-A :py:class:`~rikai.spark.sql.codegen.fs.FileSystemRegistry` is implemented as the default
-model registry. It supports using a YAML spec to describe a model, for example,
-the content of "s3://bucket/to/spec.yaml" can be:
-
-    .. code-block:: yaml
-
-        version: 1.0
-        name: resnet
-        model:
-            uri: s3://bucket/path/to/model.pt
-            flavor: pytorch
-        schema: struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>
-        transforms:
-            pre: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing
-            post: rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing
-        options:
-            batch_size: 16
-            resize: 640
-            min_confidence: 0.3
-            use_tensorrt: true
-    .. warning::
-
-        YAML-based model spec is still under heavy development.
 
 
 TorchHub Integration
@@ -118,12 +83,10 @@ It could be expanded to the equivalent and complete SQL:
 
     .. code-block:: sql
 
-        CREATE MODEL resnet50
+        CREATE MODEL my_resnet
         FLAVOR pytorch
+        MODEL_TYPE resnet50
         OPTIONS (device="cpu")
-        PREPROCESSOR 'rikai.contrib.torchhub.pytorch.vision.resnet50.pre_processing'
-        POSTPROCESSOR 'rikai.contrib.torchhub.pytorch.vision.resnet50.post_processing'
-        RETURNS array<float>
         USING "torchhub:///pytorch/vision:v0.9.1/resnet50";
 
 
@@ -233,3 +196,4 @@ you can always specify flavor, schema, and pre/post-processing classes as run ta
 
 
 .. _TorchHub: https://pytorch.org/hub/
+.. _Spark SQL: https://spark.apache.org/sql/

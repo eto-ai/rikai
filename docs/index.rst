@@ -46,7 +46,7 @@ to help you visualize and inspect your AI data without having to remember compli
 For more details, please read :doc:`quickstart`.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 3
 
    quickstart
    types

@@ -270,7 +270,7 @@ def detection_collate_fn(batch: torch.Tensor) -> torch.Tensor:
     """TorchVision's models expect a list of `Tensor[C, H, W]`.
 
     https://pytorch.org/vision/stable/models.html#object-detection-instance-segmentation-and-person-keypoint-detection
-    """  # noqa
+    """  # noqa: E501
     return batch
 
 

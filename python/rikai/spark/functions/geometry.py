@@ -93,6 +93,12 @@ def box2d_from_top_left(coords) -> Box2d:
 
 
 @udf(returnType=FloatType())
-def area(bbox: Box2d) -> float:
-    """A UDF to calculate the area of a bounding box."""
-    return bbox.area
+def area(box: Box2d) -> float:
+    """A UDF to calculate the area of a bounding box.
+
+    Example
+    -------
+
+    >>> spark.sql("SELECT * FROM dataset WHERE area(prediction.box) > 15")
+    """
+    return box.area

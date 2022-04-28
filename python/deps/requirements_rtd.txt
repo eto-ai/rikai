@@ -11,3 +11,4 @@ torchvision>=0.9.1
 pyyaml
 semver
 jsonschema
+sphinx-material

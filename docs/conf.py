@@ -31,7 +31,7 @@ def setup(app):
 # -- Project information -----------------------------------------------------
 
 project = "Rikai"
-copyright = "2021, Rikai Authors"
+copyright = "2022, Rikai Authors"
 author = "Rikai Authors"
 
 
@@ -67,7 +67,27 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "alabaster"
+# html_theme = "alabaster"
+html_theme = "sphinx_material"
+
+html_theme_options = {
+    "nav_title": "Rikai",
+    "base_url": "https://github.com/eto-ai/rikai",
+    "color_primary": "blue",
+    "color_accent": "light-blue",
+    "repo_url": "https://github.com/eto-ai/rikai/",
+    "repo_name": "rikai",
+    "globaltoc_depth": 2,
+}
+
+html_sidebars = {
+    "**": [
+        "logo-text.html",
+        "globaltoc.html",
+        "localtoc.html",
+        "searchbox.html",
+    ]
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

@@ -190,7 +190,15 @@ class ModelSpec(ABC):
 
 
 class ModelType(ABC):
-    """Declare a Rikai-compatible Model Type."""
+    """Base-class for a Model Type.
+
+    A Model Type defines the functionalities which is required to run
+    an arbitrary ML models in SQL ML, including:
+
+    - Result schema: :py:meth:`schema`.
+    - :py:meth:`transform`, pre-processing routine.
+    - :py:meth:`predict`, inference **AND** post-processing routine.
+    """
 
     @abstractmethod
     def load_model(self, spec: ModelSpec, **kwargs):
@@ -210,14 +218,15 @@ class ModelType(ABC):
         pass
 
     def dataType(self) -> "pyspark.sql.types.DataType":
+        """Returns schema as :py:class:`pyspark.sql.types.DataType`."""
         return parse_schema(self.schema())
 
     @abstractmethod
     def transform(self) -> Callable:
         """A callable to pre-process the data before calling inference.
 
-        It will be feed into :class:`torch.data.DataLoader` or
-        :class:`tensorflow.data.Dataset.map`.
+        It will be feed into :py:class:`torch.data.DataLoader` or
+        :py:meth:`tensorflow.data.Dataset.map`.
 
         """
         pass

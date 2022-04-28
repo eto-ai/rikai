@@ -5,7 +5,7 @@ Quickstart
 ==========
 
 In this quickstart, we illustrate a user journey from data cleaning to
-model training to model evaluation using `Pytorch`_ and Rikai.
+model training to model evaluation using `PyTorch`_ and Rikai.
 
 Installation
 ------------
@@ -65,7 +65,6 @@ When it is ready, we can submit the script via ``spark-submit``
 
     spark-submit \
       --master yarn \
-      --packages ai.eto:rikai_0.12:0.0.21 \
       script.py
 
 
@@ -132,12 +131,10 @@ to SQL ML directly.
                 ...
 
         rikai.mlflow.pytorch.log_model(model, "model",
-            schema=OUTPUT_SCHEMA,
-            pre_processing="rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing",
-            post_processing="rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing",
-            registered_model_name="my_ssd_model")
+            model_type="ssd"
+            registered_model_name="my_ssd")
 
-Once the training finishes, Model ``my_ssd_model`` is available for :doc:`SQL ML <sqlml>` to use.
+Once the training finishes, Model ``my_ssd`` is available for :doc:`SQL ML <sqlml>` to use.
 
 .. code-block:: SQL
 

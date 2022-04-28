@@ -46,6 +46,7 @@ class TorchModelType(ModelType, Pretrained, ABC):
         name: str,
         pretrained_fn: Optional[Callable] = None,
         label_fn: Optional[Callable[[int], str]] = None,
+        collate_fn: Optional[Callable] = None,
         register: bool = True,
     ):
         """Initialize a TorchModelType
@@ -57,7 +58,10 @@ class TorchModelType(ModelType, Pretrained, ABC):
         pretrained_fn : Callable, optional
             The callable to be called if loading pretrained models.
         label_fn: Callable, optional
-            Maps label_id to human readable string label
+            Maps label_id to human-readable string label
+        collate_fn : Callable, optional
+            Customized collate fn to be called with PyTorch
+            :py:class:`DataLoader`.
         register : bool
             Register the model to be discoverable via SQL
         """
@@ -67,6 +71,7 @@ class TorchModelType(ModelType, Pretrained, ABC):
         self.name = name
         self.pretrained_fn = pretrained_fn
         self.label_fn = label_fn
+        self.collate_fn = collate_fn
 
         if register:
             MODEL_TYPES[name] = self
@@ -125,7 +130,10 @@ class ClassificationModelType(TorchModelType):
         register: bool = True,
     ):
         super(ClassificationModelType, self).__init__(
-            name, pretrained_fn, label_fn, register
+            name,
+            pretrained_fn=pretrained_fn,
+            label_fn=label_fn,
+            register=register,
         )
 
     def schema(self) -> str:
@@ -259,6 +267,14 @@ def detection_label_fn(label_id: int) -> str:
     return COCO_INSTANCE_CATEGORY_NAMES[label_id]
 
 
+def detection_collate_fn(batch: torch.Tensor) -> torch.Tensor:
+    """TorchVision's models expect a list of `Tensor[C, H, W]`.
+
+    https://pytorch.org/vision/stable/models.html#object-detection-instance-segmentation-and-person-keypoint-detection
+    """  # noqa: E501
+    return batch
+
+
 class ObjectDetectionModelType(TorchModelType):
     """Shared ModelType for object detections in Torchvision
 
@@ -270,10 +286,17 @@ class ObjectDetectionModelType(TorchModelType):
         name: str,
         pretrained_fn: Optional[Callable] = None,
         label_fn: Optional[Callable[[int], str]] = detection_label_fn,
+        collate_fn: Optional[
+            Callable[[torch.Tensor], torch.Tensor]
+        ] = detection_collate_fn,
         register: bool = True,
     ):
         super(ObjectDetectionModelType, self).__init__(
-            name, pretrained_fn, label_fn, register
+            name,
+            pretrained_fn=pretrained_fn,
+            label_fn=label_fn,
+            collate_fn=collate_fn,
+            register=register,
         )
 
     def __repr__(self):

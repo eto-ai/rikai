@@ -78,13 +78,16 @@ html_theme_options = {
     "repo_url": "https://github.com/eto-ai/rikai/",
     "repo_name": "rikai",
     "globaltoc_depth": 2,
-    # If False, expand all TOC entries
-    "globaltoc_collapse": True,
-    # If True, show hidden TOC entries
-    "globaltoc_includehidden": False,
 }
 
-html_sidebars = {"**": ["globaltoc.html"]}
+html_sidebars = {
+    "**": [
+        "logo-text.html",
+        "globaltoc.html",
+        "localtoc.html",
+        "searchbox.html",
+    ]
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

@@ -4,12 +4,11 @@
 Machine Learning SQL
 ====================
 
-``Rikai`` extends `Spark SQL`_ to conduct SQL queries using Machine Learning(**ML**) models.
-
     Make your Data Warehouse as Smart as your ML models
 
-Rikai SQL ML is extensible to any **Model Registry**, so it can be easily integrated
-to use existing machine learning infrastructure.
+**Rikai** extends `Spark SQL`_ to conduct queries using Machine Learning (**ML**)
+models. It is extensible to any **Model Registry**, allowing easy integration
+with the existing ML infrastructures.
 
 
 Setup
@@ -56,7 +55,7 @@ Rikai extends Spark SQL with four more SQL statements:
         DROP MODEL model_name;
 
 
-Once a ML model is created via ``CREATE MODEL``, it can be used in Spark SQL:
+Once a ML model is loaded via ``CREATE MODEL``, it can be used in Spark SQL:
 
     .. code-block:: sql
 
@@ -71,14 +70,37 @@ Once a ML model is created via ``CREATE MODEL``, it can be used in Spark SQL:
 How to Use Customized ML Models
 --------------------------------
 
-Rikai loads a ML model into the system via a combination of **Flavor** and **Model Type**.
+Rikai loads a ML model via a combination of **Flavor** and **Model Type**.
 
 * A **Flavor** describe the framework upon which the model was built. For example,
   Rikai offiially supports ``Tensorflow``, ``PyTorch`` and ``Sklearn`` flavors.
 * A **Model Type** encaptures the interfaces and schema of a concrete ML model. It
   acts as an adaptor between the raw ML model input/output Tensors and
-  Rikai / Spark / Pandas. For instance, Rikai has implemented model types
-  for all the ``torchvision`` classification and object detections models.
+  Rikai / Spark / Pandas.
+
+Offically supported model types:
+
+* **PyTorch**
+
+  * ResNet: ``resnet{18/34/50/101/152}`` and ``resnet`` (alias to ``resnet50``).
+  * EfficientNet: ``efficientnet_b{0/1/2/3/4/5/6/7}``
+  * FasterRCNN: ``fasterrcnn`` (alias to ``fasterrcnn_resnet50_fpn``), ``fasterrcnn_resnet50_fpn``,
+    ``fasterrcnn_mobilenet_v3_large_fpn``, ``fasterrcnn_mobilenet_v3_large_320_fpn``.
+  * MaskRCNN: ``maskrcnn``.
+  * RetinaNet: ``retinanet``.
+  * SSD: ``ssd`` and ``ssdlite``.
+  * KeypointRCNN: ``keypointrcnn``.
+
+* **Tensorflow**
+
+  * TBD
+
+* **Sklearn**
+
+  * Regression: ``linear_regression``, ``logistic_regression``, ``random_forest_regression``.
+  * Classification: ``random_forest_classification``
+  * Dimensionality Reduction: ``pca``.
+
 
 Rikai's SQL ML engine automatically looks up the following python modules for an
 ``(flavor, model_type)`` input.
@@ -88,11 +110,70 @@ Rikai's SQL ML engine automatically looks up the following python modules for an
     rikai.{flavor}.models.{model_type}  # Official support
     rikai.contrib.{flavor}.models.{model_type}  # Third-party integration
 
+Users can create their new model types by inherenting :py:class:`~rikai.spark.sql.model.ModelType`.
 
-It is easy to create a new model type by inherenting :py:class:`~rikai.spark.sql.model.ModelType`:
 
-.. autoclass:: rikai.spark.sql.model.ModelType
-    :members: schema, transform, predict
+
+
+MLflow Integration
+------------------
+
+Rikai supports creating models from a MLflow model registry as long as a few custom tags are set
+when the model is logged. To make this easier, Rikai comes with a custom model logger to add
+attributes required by Rikai. This requires a simple change from your usual mlflow model logging
+workflow:
+
+    .. code-block:: python
+
+        import rikai
+        import mlflow
+
+        with mlflow.start_run():
+            # Training loop that results in a model instance
+
+            # Rikai's logger adds output_schema, pre_pocessing, and post_processing as additional
+            # arguments and automatically adds the flavor / rikai model spec version
+            rikai.mlflow.pytorch.log_model(
+                trained_model,
+                "path_to_log_artifact_to",
+                model_type="resnet50",
+                registered_model_name="my_resnet_model")
+
+Once models are trained, you can add the model to the Rikai model catalog and query it via SparkSQL:
+
+    .. code-block:: sql
+
+        CREATE MODEL model_foo USING 'mlflow:///my_resnet_model';
+
+        SELECT id, ML_PREDICT(model_foo, image) FROM df;
+
+There are several options to refer to a mlflow model. If you specify only the mlflow model name as
+in the above example (i.e., my_resnet_model), Rikai will automatically use the latest version. If
+you have models in different stages as supported by mlflow, you can specify the stage like
+`mlflow://my_resnet_model/production` and Rikai will select the latest version whose
+`current_stage` is "production". Rikai also supports referencing a particular version number like
+`mlflow://my_resnet_model/1` (Rikai distinguishes the stage and version by checking whether the
+path component is a number).
+
+If you have existing models already in mlflow model registry that didn't use Rikai's custom logger,
+you can always specify flavor, schema, and pre/post-processing classes as run tags. For example:
+
+    .. code-block:: python
+
+        from mlflow.tracking import MlflowClient
+
+        client = MlflowClient(<tracking_uri>)
+        run_id = client.get_latest_versions("my_resnet_model", stages=['none'])
+        new_tags = {
+         'rikai.model.flavor': 'pytorch',
+         'rikai.model.type': 'resnet50',
+         }
+        [client.set_tag(run_id, k, v) for k, v in new_tags.items()]
+
+    .. warning::
+
+        The Rikai model spec and SQL-ML API are still under heavy development so expect breaking changes!
+
 
 TorchHub Integration
 --------------------
@@ -149,75 +230,6 @@ be adopted as the `RETURNS` schema if available.
         download the pretrained model specified by `hubconf.py` in the downloaded repo. Please be
         aware of the possible network latency and security vulnerability. In the meantime, the
         downloaded repo will be imported. It might hijack the installed Python packages.
-
-
-MLflow Integration
-------------------
-
-Rikai supports creating models from a MLflow model registry as long as a few custom tags are set
-when the model is logged. To make this easier, Rikai comes with a custom model logger to add
-attributes required by Rikai. This requires a simple change from your usual mlflow model logging
-workflow:
-
-    .. code-block:: python
-
-        import rikai
-        import mlflow
-
-        with mlflow.start_run():
-            # Training loop that results in a model instance
-
-            schema = "struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>"
-            pre = "rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing"
-            post = "rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing"
-
-            # Rikai's logger adds output_schema, pre_pocessing, and post_processing as additional
-            # arguments and automatically adds the flavor / rikai model spec version
-            rikai.mlflow.pytorch.log_model(
-                trained_model,
-                "path_to_log_artifact_to",
-                schema,
-                pre,
-                post,
-                registered_model_name="my_resnet_model")
-
-Once models are trained, you can add the model to the Rikai model catalog and query it via SparkSQL:
-
-    .. code-block:: sql
-
-        CREATE MODEL model_foo USING 'mlflow:///my_resnet_model';
-
-        SELECT id, ML_PREDICT(model_foo, image) FROM df;
-
-There are several options to refer to a mlflow model. If you specify only the mlflow model name as
-in the above example (i.e., my_resnet_model), Rikai will automatically use the latest version. If
-you have models in different stages as supported by mlflow, you can specify the stage like
-`mlflow://my_resnet_model/production` and Rikai will select the latest version whose
-`current_stage` is "production". Rikai also supports referencing a particular version number like
-`mlflow://my_resnet_model/1` (Rikai distinguishes the stage and version by checking whether the
-path component is a number).
-
-If you have existing models already in mlflow model registry that didn't use Rikai's custom logger,
-you can always specify flavor, schema, and pre/post-processing classes as run tags. For example:
-
-    .. code-block:: python
-
-        from mlflow.tracking import MlflowClient
-
-        client = MlflowClient(<tracking_uri>)
-        run_id = client.get_latest_versions("my_resnet_model", stages=['none'])
-        new_tags = {
-         'rikai.model.flavor': 'pytorch',
-         'rikai.output.schema': 'struct<boxes:array<array<float>>, scores:array<float>, labels:array<int>>',
-         'rikai.transforms.pre': 'rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.pre_processing',
-         'rikai.transforms.post': 'rikai.contrib.torch.transforms.fasterrcnn_resnet50_fpn.post_processing'
-         }
-        [client.set_tag(run_id, k, v) for k, v in new_tags.items()]
-
-    .. warning::
-
-        The Rikai model spec and SQL-ML API are still under heavy development so expect breaking changes!
-
 
 
 .. _TorchHub: https://pytorch.org/hub/

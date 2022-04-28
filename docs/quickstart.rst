@@ -5,7 +5,7 @@ Quickstart
 ==========
 
 In this quickstart, we illustrate a user journey from data cleaning to
-model training to model evaluation using `Pytorch`_ and Rikai.
+model training to model evaluation using `PyTorch`_ and Rikai.
 
 Installation
 ------------
@@ -65,7 +65,6 @@ When it is ready, we can submit the script via ``spark-submit``
 
     spark-submit \
       --master yarn \
-      --packages ai.eto:rikai_0.12:0.1.8 \
       script.py
 
 

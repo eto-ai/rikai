@@ -216,14 +216,15 @@ class ModelType(ABC):
         pass
 
     def dataType(self) -> "pyspark.sql.types.DataType":
+        """Returns schema as :py:class:`pyspark.sql.types.DataType`."""
         return parse_schema(self.schema())
 
     @abstractmethod
     def transform(self) -> Callable:
         """A callable to pre-process the data before calling inference.
 
-        It will be feed into :class:`torch.data.DataLoader` or
-        :class:`tensorflow.data.Dataset.map`.
+        It will be feed into :py:class:`torch.data.DataLoader` or
+        :py:meth:`tensorflow.data.Dataset.map`.
 
         """
         pass

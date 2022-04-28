@@ -55,7 +55,7 @@ Rikai extends Spark SQL with four more SQL statements:
         DROP MODEL model_name;
 
 
-Once a ML model is loaded via ``CREATE MODEL``, it can be used in Spark SQL:
+Once a ML model is created via ``CREATE MODEL``, we can use it in Spark SQL:
 
     .. code-block:: sql
 
@@ -70,11 +70,11 @@ Once a ML model is loaded via ``CREATE MODEL``, it can be used in Spark SQL:
 How to Use Customized ML Models
 --------------------------------
 
-Rikai loads a ML model via a combination of **Flavor** and **Model Type**.
+Rikai creates a ML model via a combination of **Flavor** and **Model Type**.
 
-* A **Flavor** describe the framework upon which the model was built. For example,
+* A **Flavor** describes the framework upon which the model was built. For example,
   Rikai offiially supports ``Tensorflow``, ``PyTorch`` and ``Sklearn`` flavors.
-* A **Model Type** encaptures the interfaces and schema of a concrete ML model. It
+* A **Model Type** encaptures the interface and schema of a concrete ML model. It
   acts as an adaptor between the raw ML model input/output Tensors and
   Rikai / Spark / Pandas.
 
@@ -102,8 +102,8 @@ Offically supported model types:
   * Dimensionality Reduction: ``pca``.
 
 
-Rikai's SQL ML engine automatically looks up the following python modules for an
-``(flavor, model_type)`` input.
+Rikai's SQL ML engine automatically looks up the python modules for an
+``(flavor, model_type)`` combination.
 
 .. code-block:: python
 
@@ -170,10 +170,6 @@ you can always specify flavor, schema, and pre/post-processing classes as run ta
          }
         [client.set_tag(run_id, k, v) for k, v in new_tags.items()]
 
-    .. warning::
-
-        The Rikai model spec and SQL-ML API are still under heavy development so expect breaking changes!
-
 
 TorchHub Integration
 --------------------
@@ -210,15 +206,6 @@ In this case, here is the corresponding Python snippets to load the model:
     .. code-block:: python
 
         model = torch.hub.load('pytorch/vision:v0.9.1', 'resnet50', pretrained=True)
-
-
-Given the `repo_owner`, `repo_name` and `model_name`, here is how default PREPROCESSOR and
-POSTPROCESSOR are generated:
-
-    .. code-block:: SQL
-
-        PREPROCESSOR 'rikai.contrib.torchhub.{repo_owner}.{repo_name}.{model_name}.pre_processing'
-        POSTPROCESSOR 'rikai.contrib.torchhub.{repo_owner}.{repo_name}.{model_name}.post_processing'
 
 
 And the value of `rikai.contrib.torchhub.{repo_owner}.{repo_name}.{model_name}.OUTPUT_SCHEMA` will

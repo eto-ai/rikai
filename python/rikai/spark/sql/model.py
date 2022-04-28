@@ -188,7 +188,15 @@ class ModelSpec(ABC):
 
 
 class ModelType(ABC):
-    """Declare a Rikai-compatible Model Type."""
+    """Base-class for a Model Type.
+
+    A Model Type defines the functionalities which is required to run
+    an arbitrary ML models in SQL ML, including:
+
+    - Result schema: :py:meth:`schema`.
+    - :py:meth:`transform`, pre-processing routine.
+    - :py:meth:`predict`, inference **AND** post-processing routine.
+    """
 
     @abstractmethod
     def load_model(self, spec: ModelSpec, **kwargs):

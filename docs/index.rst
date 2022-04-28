@@ -34,7 +34,7 @@ SQL-ML Engine
 ^^^^^^^^^^^^^
 
 Rikai extends Spark SQL with ML capability which allows users to analyze Rikai datasets using own models with SQL
-(*"Bring your own model"*)
+(**"Bring your own model"**)
 
 Visualization
 ^^^^^^^^^^^^^
@@ -42,18 +42,17 @@ Visualization
 Carefully crafted data-visualization embedded with semantic types, especially in Jupyter notebooks,
 to help you visualize and inspect your AI data without having to remember complicated raw image manipulations.
 
-
 For more details, please read :doc:`quickstart`.
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
 
    quickstart
+   sqlml
    types
+   functions
    numpy
    spark
-   functions
-   sqlml
    release
    API References <./api/modules>
 

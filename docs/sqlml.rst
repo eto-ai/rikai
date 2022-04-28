@@ -68,6 +68,31 @@ Once a ML model is created via ``CREATE MODEL``, it can be used in Spark SQL:
         SELECT id, ML_PREDICT(my_resnet, image) FROM imagenet;
 
 
+How to Use Customized ML Models
+--------------------------------
+
+Rikai loads a ML model into the system via a combination of **Flavor** and **Model Type**.
+
+* A **Flavor** describe the framework upon which the model was built. For example,
+  Rikai offiially supports ``Tensorflow``, ``PyTorch`` and ``Sklearn`` flavors.
+* A **Model Type** encaptures the interfaces and schema of a concrete ML model. It
+  acts as an adaptor between the raw ML model input/output Tensors and
+  Rikai / Spark / Pandas. For instance, Rikai has implemented model types
+  for all the ``torchvision`` classification and object detections models.
+
+Rikai's SQL ML engine automatically looks up the following python modules for an
+``(flavor, model_type)`` input.
+
+.. code-block:: python
+
+    rikai.{flavor}.models.{model_type}  # Official support
+    rikai.contrib.{flavor}.models.{model_type}  # Third-party integration
+
+
+It is easy to create a new model type by inherenting :py:class:`~rikai.spark.sql.model.ModelType`:
+
+.. autoclass:: rikai.spark.sql.model.ModelType
+    :members: schema, transform, predict
 
 TorchHub Integration
 --------------------

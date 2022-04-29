@@ -28,3 +28,17 @@ def test_fasterrcnn_resnet50_fpn(spark: SparkSession, two_flickr_rows: list):
             MODEL_TYPE fasterrcnn_resnet50_fpn"""
     )
     check_ml_predict(spark, name, two_flickr_rows)
+
+
+def test_ssdlite_with_option(spark: SparkSession):
+    uri = "https://i.scdn.co/image/ab67616d0000b273466def3ce70d94dcacb13c8d"
+    model = "ssdlite"
+    spark.sql(
+        f"""CREATE OR REPLACE MODEL {model}
+        FLAVOR pytorch
+        MODEL_TYPE {model}
+        OPTIONS (min_score=1.0)
+        """
+    )
+    df = spark.sql(f"select explode(ML_PREDICT({model}, to_image('{uri}')))")
+    assert df.count() == 0

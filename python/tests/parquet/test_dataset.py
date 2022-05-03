@@ -18,9 +18,11 @@ from urllib.parse import urlparse
 
 # Third Party
 import numpy as np
+import pandas as pd
 import pyarrow.parquet as pq
 import pytest
 from pyspark.sql import Row, SparkSession
+from pyspark.sql.types import *
 
 # Rikai
 from rikai.exceptions import ColumnNotFoundError
@@ -171,3 +173,32 @@ def test_select_columns_on_gcs(spark: SparkSession, gcs_tmpdir: str):
 
 def test_select_over_s3(spark: SparkSession, s3_tmpdir: str):
     _select_columns(spark, s3_tmpdir)
+
+
+def test_nested_struct(spark: SparkSession, tmp_path: Path):
+    schema = StructType(
+        fields=[
+            StructField(
+                "foo",
+                ArrayType(
+                    elementType=StructType(
+                        fields=[
+                            StructField(
+                                "bar",
+                                StructType(
+                                    fields=[StructField("fizz", IntegerType())]
+                                ),
+                            )
+                        ]
+                    )
+                ),
+            )
+        ]
+    )
+    expected = [{"bar": {"fizz": 5}}]
+    pdf = pd.DataFrame([[expected]], columns=["foo"])
+    df = spark.createDataFrame(pdf, schema=schema)
+    df.write.format("rikai").save(str(tmp_path / "dataset"))
+    d = Dataset(tmp_path / "dataset")
+    row = next(iter(d))
+    assert json.dumps(row) == json.dumps({"foo": expected})

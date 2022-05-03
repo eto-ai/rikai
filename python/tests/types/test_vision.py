@@ -224,7 +224,11 @@ def test_draw_box_with_label_matmul():
 
     box1 = Box2d(1, 2, 10, 12)
     box2 = Box2d(20, 20, 40, 40)
-    draw_boxes = img | box1.with_label("label1") @ {"color": "green"} | box2.with_label("label2") @ {"color": "yellow"}
+    draw_boxes = (
+        img
+        | box1.with_label("label1") @ {"color": "green"}
+        | box2.with_label("label2") @ {"color": "yellow"}
+    )
     pil_image = draw_boxes.to_image()
 
     expected = Image.from_array(data).to_pil()
@@ -237,6 +241,7 @@ def test_draw_box_with_label_matmul():
     # pil_image.to_pil().show()
     # expected.show()
     assert np.array_equal(pil_image.to_numpy(), expected)
+
 
 def test_draw_styled_images():
     data = np.random.randint(0, 255, size=(100, 100, 3), dtype=np.uint8)

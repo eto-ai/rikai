@@ -412,6 +412,7 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
         box_with_label
             rikai.viz.Draw
         """
+        # TODO add font size
         return Draw(
             [self, Text(text, (int(self.xmin), int(self.ymin)), color)]
         )

@@ -16,11 +16,10 @@
 """
 
 # Standard Library
-import functools
 import importlib
 import json
 import os
-from functools import partial
+from functools import partial, lru_cache
 from multiprocessing import Pool
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Union
@@ -347,8 +346,10 @@ def convert_tensor(row, use_pil: bool = False):
     return tensors
 
 
-@functools.cache
+@lru_cache(maxsize=1)
 def _get_pool(processes: int = 4):
+    # TODO: use functools.cache once bumping the minimal
+    #  python versio to 3.9.
     return Pool(processes=processes)
 
 

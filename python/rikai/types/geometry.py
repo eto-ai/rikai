@@ -22,8 +22,10 @@ from numbers import Real
 from typing import List, Optional, Sequence, Tuple, Union
 
 import numpy as np
+from pandas import get_option
 from PIL import Image, ImageDraw
 
+from rikai import CONF_RIKAI_VIZ_COLOR
 from rikai.mixin import Drawable, ToDict, ToNumpy
 from rikai.spark.types.geometry import (
     Box2dType,
@@ -391,6 +393,28 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
         if isinstance(other, Box2d):
             return iou_arr[0]
         return iou_arr
+
+    def with_label(
+        self, text: str, color: str = get_option(CONF_RIKAI_VIZ_COLOR)
+    ) -> "rikai.viz.Draw":
+        from rikai.viz import Draw, Text
+
+        """return a `rikai.viz.Draw`, which contains a label,
+         used as a convenient tool to give a box a label in visualization.
+        Parameters
+        ----------
+        text: str
+            The text content of that label
+        color: str
+            The color of the text, will have a default value if not given.
+        Returns
+        -------
+        box_with_label
+            rikai.viz.Draw
+        """
+        return Draw(
+            [self, Text(text, (int(self.xmin), int(self.ymin)), color)]
+        )
 
 
 class Box3d(ToNumpy, ToDict):

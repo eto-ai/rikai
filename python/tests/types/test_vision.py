@@ -217,6 +217,7 @@ def test_draw_box_with_label():
     # expected.show()
     assert np.array_equal(pil_image.to_numpy(), expected)
 
+
 def test_draw_styled_images():
     data = np.random.randint(0, 255, size=(100, 100, 3), dtype=np.uint8)
     img = Image.from_array(data)

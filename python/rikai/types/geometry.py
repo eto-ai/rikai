@@ -400,13 +400,15 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
         from rikai.viz import Draw, Text
 
         """return a `rikai.viz.Draw`, which contains a label,
-         used as a convenient tool to give a box a label in visualization.
+        used as a convenient tool to give a box a label
+        in visualization.
         Parameters
         ----------
         text: str
             The text content of that label
         color: str
-            The color of the text, will have a default value if not given.
+            The color of the text,
+            will have a default value if not given.
         Returns
         -------
         box_with_label

@@ -182,7 +182,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
                 url = f"data:image;base64,{encoded}"
                 return Image(url=url, format=inferred_format)
 
-    def draw(self, drawable: Union[Drawable, list[Drawable]]) -> Draw:
+    def draw(self, drawable: Union[Drawable, list[Drawable], Draw]) -> Draw:
         return ImageDraw(self).draw(drawable)
 
     def __repr__(self) -> str:
@@ -199,7 +199,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
     def __eq__(self, other) -> bool:
         return isinstance(other, Image) and super().__eq__(other)
 
-    def __or__(self, other: Drawable) -> Draw:
+    def __or__(self, other: Union[Drawable, Draw]) -> Draw:
         """Override ``|`` operator to chain images with
         visualization components.
         """

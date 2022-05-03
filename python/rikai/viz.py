@@ -85,11 +85,13 @@ class Draw(Displayable, ABC):
             include=include, exclude=exclude
         )
 
-    def draw(self, layer: Union[Drawable, list[Drawable]]) -> Draw:
+    def draw(self, layer: Union[Drawable, list[Drawable], Draw]) -> Draw:
         # layer can not be checked against typing.Sequence or typing.Iterable,
         # because many of the Drawables are iterables (i.e., Box2d).
         if isinstance(layer, Drawable):
             layer = [layer]
+        if isinstance(layer, Draw):
+            layer = layer.layers
         elif not isinstance(layer, (Drawable, list)):
             raise ValueError(
                 f"{layer} must be one Drawable or a list of Drawable"

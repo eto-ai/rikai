@@ -194,10 +194,7 @@ class Dataset:
                     raw_row[name], field_type["elementType"]
                 )
             elif field_type["type"] == "struct":
-                converted[name] = {
-                    f["name"]: self._convert(raw_row[f["name"]], f["type"])
-                    for f in field_type["type"]["fields"]
-                }
+                converted[name] = self._convert(raw_row[name], field_type)
             else:
                 converted[name] = raw_row[name]
 

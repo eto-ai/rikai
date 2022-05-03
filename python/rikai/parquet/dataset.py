@@ -143,6 +143,14 @@ class Dataset:
         with open_uri(metadata_path) as fobj:
             return json.load(fobj)
 
+    def count(self) -> int:
+        """Count the number of records in the datasets."""
+        dataset = pq.ParquetDataset(self.uri, use_legacy_dataset=False)
+        return sum([f.metadata.num_rows for f in dataset.fragments])
+
+    def __len__(self) -> int:
+        return self.count()
+
     @classmethod
     def _find_udt(cls, pyclass: str) -> UserDefinedType:
         """Find UDT class specified by the python class path."""

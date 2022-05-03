@@ -75,6 +75,15 @@ def test_offset(spark: SparkSession, tmp_path: Path):
         next(iter(Dataset(dest, offset=2000)))  # off the edge
 
 
+def test_dataset_count(spark: SparkSession, tmp_path: Path):
+    dest = str(tmp_path)
+    df = spark.createDataFrame([Row(id=i, val=f"val-{i}") for i in range(20)])
+    df.write.format("rikai").save(dest)
+
+    dataset = Dataset(tmp_path)
+    assert len(dataset) == 20
+
+
 def test_select_no_existed_columns(spark: SparkSession, tmp_path: Path):
     dest = str(tmp_path)
     df = spark.createDataFrame([Row(id=i, val=f"val-{i}") for i in range(20)])

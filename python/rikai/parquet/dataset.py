@@ -16,10 +16,12 @@
 """
 
 # Standard Library
+import functools
 import importlib
 import json
 import os
 from functools import partial
+from multiprocessing import Pool
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Union
 
@@ -29,6 +31,7 @@ import pandas as pd
 import pyarrow.dataset as ds
 import pyarrow.parquet as pq
 from pyarrow import fs
+from pyarrow._dataset_parquet import ParquetFileFragment
 from pyspark.ml.linalg import Matrix, Vector
 from pyspark.sql import Row
 from pyspark.sql.types import UserDefinedType
@@ -146,7 +149,7 @@ class Dataset:
     def count(self) -> int:
         """Count the number of records in the datasets."""
         dataset = pq.ParquetDataset(self.uri, use_legacy_dataset=False)
-        return sum([fragment.metadata.num_rows for fragment in dataset.fragments])
+        return sum(_get_pool().map(_get_num_rows, dataset.fragments))
 
     def __len__(self) -> int:
         return self.count()
@@ -342,3 +345,12 @@ def convert_tensor(row, use_pil: bool = False):
         else:
             tensors[key] = value
     return tensors
+
+
+@functools.cache
+def _get_pool(processes: int = 4):
+    return Pool(processes=processes)
+
+
+def _get_num_rows(fragment: ParquetFileFragment):
+    return fragment.metadata.num_rows

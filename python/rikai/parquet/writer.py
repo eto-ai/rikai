@@ -16,17 +16,26 @@
 """
 
 import json
+from typing import Union
+
+import pandas as pd
 import pyarrow as pa
+import pyarrow.dataset as ds
 import pyarrow.parquet as pq
+
 from rikai.mixin import ToDict
 from rikai.parquet.dataset import Dataset as RikaiDataset
-import pandas as pd
 
 __all__ = ["df_to_rikai"]
 
 
 def df_to_rikai(
-    df: pd.DataFrame, dest_path: str, schema: "pyspark.sql.types.StructType"
+    df: pd.DataFrame,
+    dest_path: str,
+    schema: "pyspark.sql.types.StructType",
+    partition_cols: Union[str, list] = None,
+    max_rows_per_file: int = None,
+    mode: str = None,
 ):
     """Write the given pandas dataframe to the given location using the
     specified (pyspark) schema
@@ -40,6 +49,15 @@ def df_to_rikai(
     schema: StructType
         The pyspark schema required to convert Rikai types and make the
         resulting rikai dataset readable by spark
+    partition_cols: str or list, default None
+        Columns to partition on
+    max_rows_per_file: int, default None
+        passed to Arrow Dataset.write_dataset
+    mode: str, default None
+        This controls `existing_data_behavior` in pyarrow.
+        {'error', 'overwrite_or_ignore', 'delete_matching'}
+        None will default to Pyarrow's current default ('error')
+        https://arrow.apache.org/docs/python/generated/pyarrow.dataset.write_dataset.html
     """
     schema_json_str = schema.json()
     converted_df = conv(df, json.loads(schema_json_str))  # convert Rikai types
@@ -47,7 +65,20 @@ def df_to_rikai(
     table = pa.Table.from_pandas(converted_df).replace_schema_metadata(
         {RikaiDataset.SPARK_PARQUET_ROW_METADATA: schema_json_str}
     )
-    pq.write_to_dataset(table, dest_path, use_legacy_dataset=False)
+    kwds = {}
+    if partition_cols is not None:
+        if isinstance(partition_cols, str):
+            partition_cols = [partition_cols]
+        kwds["partitioning"] = partition_cols
+        kwds["partitioning_flavor"] = "hive"
+    if max_rows_per_file is not None:
+        kwds["max_rows_per_file"] = max_rows_per_file
+        if max_rows_per_file < 1024 * 1024:  # default max_rows_per_group
+            # set max_rows_per_group to be equal or smaller
+            kwds["max_rows_per_group"] = max_rows_per_file
+    if mode is not None:
+        kwds["existing_data_behavior"] = mode
+    ds.write_dataset(table, dest_path, format="parquet", **kwds)
 
 
 def conv(df: pd.DataFrame, schema: dict):

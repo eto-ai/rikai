@@ -72,6 +72,11 @@ class Style(Drawable):
 class Draw(Displayable, ABC):
     """Draw is a container that contain the elements for visualized lazily."""
 
+    def display(self, **kwargs) -> "IPython.display.DisplayObject":
+        """We need to instantiate Draw, so we need to make it a concrete class, but we should
+        not call Draw's display method directly"""
+        raise NotImplemented
+
     def __init__(self, layers=None):
         if layers is None:
             layers = []

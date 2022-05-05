@@ -60,20 +60,20 @@ class Box2dType(UserDefinedType):
 
     def serialize(self, obj: "rikai.types.geometry.Box2d"):
         """Serialize a Box2d into a PySpark Row"""
-        return (
-            obj.xmin,
-            obj.ymin,
-            obj.xmax,
-            obj.ymax,
+        return Row(
+            xmin=obj.xmin,
+            ymin=obj.ymin,
+            xmax=obj.xmax,
+            ymax=obj.ymax,
         )
 
     def deserialize(self, datum: Row) -> "rikai.types.geometry.Box2d":
         from rikai.types.geometry import Box2d
 
-        if len(datum) < 4:
+        if len(datum) != 4:
             logger.error(f"Deserialize box2d: not sufficient data: {datum}")
 
-        return Box2d(*datum[:4])
+        return Box2d(**datum.asDict())
 
     def simpleString(self) -> str:
         return "box2d"

@@ -14,7 +14,7 @@
 
 import os
 from pathlib import Path
-from typing import Dict, Any, Union
+from typing import Any, Dict, Union
 from urllib.parse import urlparse
 
 import yaml

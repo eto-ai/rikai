@@ -28,12 +28,14 @@ import org.apache.spark.sql.rikai.Image
 import org.scalatest.concurrent.Eventually.eventually
 import org.scalatest.concurrent.Waiters.{interval, timeout}
 import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.tags.Network
 
 import java.sql.{DriverManager, Statement}
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.DurationInt
 
 /** Test running Rikai with ThriftServer (HiveServer2) over JDBC connection. */
+@Network
 class ThriftServerTest
     extends AnyFunSuite
     with SparkSessionWithMlflow

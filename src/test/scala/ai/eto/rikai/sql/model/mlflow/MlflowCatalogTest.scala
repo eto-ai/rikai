@@ -23,9 +23,11 @@ import org.apache.spark.sql.types._
 import org.mlflow.api.proto.ModelRegistry.{CreateModelVersion, ModelVersionTag}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.tags.Network
 
 import scala.util.Random
 
+@Network
 class MlflowCatalogTest
     extends AnyFunSuite
     with SparkSessionWithMlflow

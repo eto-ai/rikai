@@ -1,34 +1,48 @@
+-- Create Schema to contain all Rikai functionality
+CREATE SCHEMA IF NOT EXISTS ml;
+
+-- Semantic Types
 CREATE TYPE image AS (uri TEXT);
-
-
-CREATE FUNCTION ml_version()
-RETURNS TEXT
-AS $$
-	import rikai
-	return rikai.__version__.version
-$$ LANGUAGE plpython3u;
-
 
 CREATE TYPE detection AS (label TEXT, box box, score real);
 
-CREATE FUNCTION ssd(img image)
-RETURNS SETOF detection
-AS $$
-	plpy.info("Image is:", img)
-	return [{"label": "ssd", "box": ((1, 2), (3, 4)), "score": 0.85}]
-$$ LANGUAGE plpython3u;
 
-CREATE TABLE models (
+-- Tables for ML metadata
+CREATE TABLE ml.models (
 	name VARCHAR(128) PRIMARY KEY,
 	flavor VARCHAR(128),
 	model_type VARCHAR(128),
 	options JSONB
 );
 CREATE INDEX IF NOT EXISTS model_flavor_idx
-ON models (flavor, model_type);
+ON ml.models (flavor, model_type);
 
-CREATE FUNCTION ml_detection(model TEXT, img image)
-RETURNS SETOF detection
+-- Functions
+CREATE FUNCTION ml.version()
+RETURNS TEXT
 AS $$
-	return []
+	import rikai
+	return rikai.__version__.version
 $$ LANGUAGE plpython3u;
+
+CREATE FUNCTION ml.create_model_trigger()
+RETURNS TRIGGER
+AS $$
+	plpy.info("Creating model: ", TD)
+	model_name = TD["new"]["name"]
+	flavor = TD["new"]["flavor"]
+	stmt = (
+		"CREATE FUNCTION ml.{}(img image) ".format(model_name) +
+		"RETURNS detection[] " +
+		"AS $BODY$ " +
+		"	return None " +
+		"$BODY$ LANGUAGE plpython3u;"
+	)
+	plpy.execute(stmt)
+	return None
+$$ LANGUAGE plpython3u;
+
+CREATE TRIGGER create_model
+AFTER INSERT ON ml.models
+FOR EACH ROW
+EXECUTE FUNCTION ml.create_model_trigger();

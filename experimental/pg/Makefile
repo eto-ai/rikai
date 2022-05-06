@@ -6,6 +6,13 @@ PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
 
 
-build:
+docker:
 	docker build -t rikai-pg .
-PHONY: build
+.PHONY: docker
+
+run: docker
+	docker run -v ${PWD}/tools/init.sql:/docker-entrypoint-initdb.d/0.sql \
+		-e POSTGRES_HOST_AUTH_METHOD=trust \
+		-p 5432:5432 rikai-pg
+.PHONY: run
+

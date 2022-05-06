@@ -55,3 +55,7 @@ release:
 patch:
 	cd python && bumpversion patch
 .PHONY: patch
+
+test:
+	sbt "testOnly -- -l org.scalatest.tags.Network"
+.PHONY: test

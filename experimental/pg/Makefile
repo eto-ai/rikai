@@ -7,6 +7,8 @@ include $(PGXS)
 
 
 docker:
+	rm -rf dist
+	python3 setup.py bdist_wheel
 	docker build -t rikai-pg .
 .PHONY: docker
 

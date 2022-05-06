@@ -137,6 +137,22 @@ scalacOptions ++= {
 
 Test / parallelExecution := false
 Test / fork := true
+import Tests._
+{
+  def groupByFirst(tests: Seq[TestDefinition]) =
+    tests groupBy (_.name) map {
+      case (name, tests) =>
+        val options = ForkOptions()
+        // RegistryTest changes the mutable field of the Registry singleton
+        // Let us put it in the `group_0` JVM instance
+        if (name.endsWith("RegistryTest"))
+          new Group("group_0", tests, SubProcess(options))
+        else
+          new Group("group_1", tests, SubProcess(options))
+    } toSeq
+
+  Test / testGrouping := groupByFirst( (Test / definedTests).value )
+}
 
 Antlr4 / antlr4PackageName := Some("ai.eto.rikai.sql.spark.parser")
 Antlr4 / antlr4GenVisitor := true

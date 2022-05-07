@@ -416,7 +416,16 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
         """
         # TODO add font size
         return Draw(
-            [self, Text(text, (int(self.xmin), int(self.ymin)), color)]
+            [
+                self,
+                Text(
+                    # `ymin - 10` to let the label don't overlap
+                    # with box by default find a better way later
+                    text,
+                    (int(self.xmin), int(min(self.ymin - 10, 0))),
+                    color,
+                ),
+            ]
         )
 
 

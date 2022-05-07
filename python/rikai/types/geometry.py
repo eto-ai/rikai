@@ -422,7 +422,7 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
                     # `ymin - 10` to let the label don't overlap
                     # with box by default find a better way later
                     text,
-                    (int(self.xmin), int(min(self.ymin - 10, 0))),
+                    (int(self.xmin), int(max(self.ymin - 10, 0))),
                     color,
                 ),
             ]

@@ -19,6 +19,7 @@ from __future__ import annotations
 
 from enum import Enum
 from numbers import Real
+from types import MappingProxyType
 from typing import List, Optional, Sequence, Tuple, Union
 
 import numpy as np
@@ -75,7 +76,7 @@ class Point(ToNumpy, ToDict):
         return {"x": self.x, "y": self.y, "z": self.z}
 
 
-class Box2d(ToNumpy, Sequence, ToDict, Drawable):
+class Box2d(ToNumpy, Sequence, ToDict, Drawable, dict):
     """2-D Bounding Box, defined by ``(xmin, ymin, xmax, ymax)``
 
     Attributes
@@ -115,6 +116,12 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable):
         self.ymin = float(ymin)
         self.xmax = float(xmax)
         self.ymax = float(ymax)
+        dict.__init__(self, {
+            'xmin': self.xmin,
+            'ymin': self.ymin,
+            'xmax': self.xmax,
+            'ymax': self.ymax
+        })
 
     @classmethod
     def from_center(

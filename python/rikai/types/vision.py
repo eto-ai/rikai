@@ -41,7 +41,7 @@ from rikai.viz import Draw, PILRenderer
 __all__ = ["Image"]
 
 
-class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
+class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict, dict):
     """An external Image Asset.
 
     It contains a reference URI to an image stored on the remote system.
@@ -59,12 +59,17 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
         image: Union[bytes, bytearray, IOBase, str, Path],
     ):
         data, uri = None, None
+        self['data'] = None
+        self['uri'] = None
         if isinstance(image, IOBase):
             data = image.read()
+            self['data'] = data
         elif isinstance(image, (bytes, bytearray)):
             data = image
+            self['data'] = data
         else:
             uri = image
+            self['uri'] = uri
         super().__init__(data=data, uri=uri)
 
     @classmethod

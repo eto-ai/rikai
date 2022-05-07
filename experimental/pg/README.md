@@ -37,6 +37,13 @@ Show all registered models
 SELECT * FROM ml.models;
 ```
 
+## Local development
+
+```
+# Build and run docker image, prepare testing data and load a model.
+make run
+```
+
 ## Limitations
 
 - `rikai` needs to be installed with the system python.

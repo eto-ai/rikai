@@ -30,22 +30,30 @@ class PgModel:
         return f"PgModel({self.model})"
 
     def predict(self, img):
-        tensor = torch.tensor(self.model.transform()(Image(img["uri"]).to_numpy()))
+        tensor = torch.tensor(
+            self.model.transform()(Image(img["uri"]).to_numpy())
+        )
         preds = self.model.predict([tensor])[0]
 
-        return [{
-            "label": pred["label"],
-            "label_id": pred["label_id"],
-            "score": pred["score"],
-            "box": ((pred["box"].xmin, pred["box"].ymin), (pred["box"].xmax, pred["box"].ymax))
-        } for pred in preds]
+        return [
+            {
+                "label": pred["label"],
+                "label_id": pred["label_id"],
+                "score": pred["score"],
+                "box": (
+                    (pred["box"].xmin, pred["box"].ymin),
+                    (pred["box"].xmax, pred["box"].ymax),
+                ),
+            }
+            for pred in preds
+        ]
 
 
 def load_model(
-        flavor: str,
-        model_type: str,
-        uri: Optional[str] = None,
-        options: Optional[dict[str, str]] = None,
+    flavor: str,
+    model_type: str,
+    uri: Optional[str] = None,
+    options: Optional[dict[str, str]] = None,
 ) -> PgModel:
     # TODO: move load model into rikai core.
     conf = {

@@ -59,17 +59,17 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict, dict):
         image: Union[bytes, bytearray, IOBase, str, Path],
     ):
         data, uri = None, None
-        self['data'] = None
-        self['uri'] = None
+        self["data"] = None
+        self["uri"] = None
         if isinstance(image, IOBase):
             data = image.read()
-            self['data'] = data
+            self["data"] = data
         elif isinstance(image, (bytes, bytearray)):
             data = image
-            self['data'] = data
+            self["data"] = data
         else:
             uri = image
-            self['uri'] = uri
+            self["uri"] = uri
         super().__init__(data=data, uri=uri)
 
     @classmethod

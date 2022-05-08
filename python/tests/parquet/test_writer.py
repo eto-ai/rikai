@@ -12,15 +12,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from pathlib import Path
 import random
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 from pyarrow.lib import ArrowInvalid
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
-import pytest
 
 from rikai.parquet.dataset import Dataset
 from rikai.parquet.writer import df_to_rikai

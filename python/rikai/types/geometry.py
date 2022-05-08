@@ -33,6 +33,7 @@ from rikai.spark.types.geometry import (
     PointType,
 )
 from rikai.types import rle
+
 from .arrow import box2d_arrow_type
 
 __all__ = ["Point", "Box3d", "Box2d", "Mask"]
@@ -118,12 +119,15 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable, dict):
         self.ymin = float(ymin)
         self.xmax = float(xmax)
         self.ymax = float(ymax)
-        dict.__init__(self, {
-            'xmin': self.xmin,
-            'ymin': self.ymin,
-            'xmax': self.xmax,
-            'ymax': self.ymax
-        })
+        dict.__init__(
+            self,
+            {
+                "xmin": self.xmin,
+                "ymin": self.ymin,
+                "xmax": self.xmax,
+                "ymax": self.ymax,
+            },
+        )
 
     @classmethod
     def from_center(

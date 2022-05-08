@@ -18,7 +18,13 @@ from abc import ABC
 
 import pyarrow as pa
 
-__all__ = ['ImageArrowType', 'Box2dArrowType', 'RikaiExtensionType', 'image_arrow_type', 'box2d_arrow_type']
+__all__ = [
+    "ImageArrowType",
+    "Box2dArrowType",
+    "RikaiExtensionType",
+    "image_arrow_type",
+    "box2d_arrow_type",
+]
 
 
 class RikaiExtensionType(pa.ExtensionType, ABC):
@@ -26,15 +32,18 @@ class RikaiExtensionType(pa.ExtensionType, ABC):
 
 
 class ImageArrowType(RikaiExtensionType):
-
     def __init__(self):
-        super().__init__(pa.struct([pa.field('uri', pa.string()), pa.field('data', pa.binary())]),
-                         "rikai.image")
+        super().__init__(
+            pa.struct(
+                [pa.field("uri", pa.string()), pa.field("data", pa.binary())]
+            ),
+            "rikai.image",
+        )
 
     def __arrow_ext_serialize__(self):
         # since we don't have a parameterized type, we don't need extra
         # metadata to be deserialized
-        return b''
+        return b""
 
     @classmethod
     def __arrow_ext_deserialize__(cls, storage_type, serialized):
@@ -42,8 +51,9 @@ class ImageArrowType(RikaiExtensionType):
         # metadata.
         return ImageArrowType()
 
-    def to_pandas_dtype(self) -> 'rikai.types.pandas.RikaiExtensionDtype':
+    def to_pandas_dtype(self) -> "rikai.types.pandas.RikaiExtensionDtype":
         from rikai.types.pandas import ImageDtype
+
         return ImageDtype()
 
 
@@ -52,20 +62,23 @@ pa.register_extension_type(image_arrow_type)
 
 
 class Box2dArrowType(RikaiExtensionType):
-
     def __init__(self):
-        super().__init__(pa.struct([
-                             pa.field('xmax', pa.float64()),
-                             pa.field('xmin', pa.float64()),
-                             pa.field('ymax', pa.float64()),
-                             pa.field('ymin', pa.float64())
-                         ]),
-                         "rikai.box2d")
+        super().__init__(
+            pa.struct(
+                [
+                    pa.field("xmax", pa.float64()),
+                    pa.field("xmin", pa.float64()),
+                    pa.field("ymax", pa.float64()),
+                    pa.field("ymin", pa.float64()),
+                ]
+            ),
+            "rikai.box2d",
+        )
 
     def __arrow_ext_serialize__(self):
         # since we don't have a parameterized type, we don't need extra
         # metadata to be deserialized
-        return b''
+        return b""
 
     @classmethod
     def __arrow_ext_deserialize__(cls, storage_type, serialized):
@@ -75,6 +88,7 @@ class Box2dArrowType(RikaiExtensionType):
 
     def to_pandas_dtype(self):
         from rikai.types.pandas import Box2dDtype
+
         return Box2dDtype()
 
 

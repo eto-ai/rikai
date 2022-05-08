@@ -15,10 +15,12 @@
 import numpy as np
 import pandas as pd
 import pyarrow as pa
+import pyarrow.dataset as ds
 import pyarrow.parquet as pq
+import pytest
 
 from rikai.types import Image, Box2d
-from rikai.types.pandas import ImageDtype
+from rikai.types.pandas import ImageDtype, Box2dDtype
 
 
 def test_image(tmp_path):
@@ -74,15 +76,20 @@ def test_nested(tmp_path):
         'annotations': s2
     })
 
-    t = pa.Table.from_pandas(df)
     table = df.rikai.to_table()
-    df_rt = table.to_pandas()
+    assert table.field('image').type.extension_name == 'rikai.image'
+    box = table.field('annotations').type.value_type['box']
+    assert box.type.extension_name == 'rikai.box2d'
+
+    df.rikai.save(str(tmp_path))
+
+    df_rt = pd.DataFrame.rikai.load(str(tmp_path))
+
     assert df_rt.image.dtype == 'image'
-    # TODO read path doesn't work yet
     assert isinstance(df_rt.annotations[0][0]['box'], Box2d)
 
 
-# TODO add NA handling so should fail right now
+@pytest.mark.skip("TODO add NA handling")
 def test_handle_na():
     arr = pd.Series(['s3://bucket/path/to/image.jpg', None], dtype='image')
     pa.array(arr)  # raises ArrowTypeError

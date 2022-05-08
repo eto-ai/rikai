@@ -44,6 +44,7 @@ from pandas.api.extensions import (
     register_series_accessor
 )
 import pyarrow as pa
+import pyarrow.dataset as ds
 import pyarrow.parquet as pq
 
 import rikai.types as T
@@ -51,8 +52,16 @@ import rikai.types as T
 __all__ = ['ImageDtype', 'ImageArray']
 
 
+class RikaiExtensionDtype(ExtensionDtype, ABC):
+
+    @abstractmethod
+    def from_storage(self, storage_value):
+        pass
+
+
 @register_extension_dtype
-class ImageDtype(ExtensionDtype):
+class ImageDtype(RikaiExtensionDtype):
+
     type = T.Image
     name = T.Image.__name__.lower()
     na_value = None
@@ -80,9 +89,16 @@ class ImageDtype(ExtensionDtype):
     def __repr__(self):
         return "dtype('image')"
 
+    def from_storage(self, storage_value):
+        value = storage_value.get('uri', storage_value.get('data', None))
+        if value is None:
+            raise ValueError('Empty image')
+        return T.Image(value)
+
 
 @register_extension_dtype
-class Box2dDtype(ExtensionDtype):
+class Box2dDtype(RikaiExtensionDtype):
+
     type = T.Box2d
     name = T.Box2d.__name__.lower()
     na_value = None
@@ -109,6 +125,9 @@ class Box2dDtype(ExtensionDtype):
 
     def __repr__(self):
         return "dtype('box2d')"
+
+    def from_storage(self, storage_value):
+        return T.Box2d(**storage_value)
 
 
 # TODO I think we may want two Image subtypes for inlined vs external
@@ -308,8 +327,7 @@ class RikaiDataFrameAccessor:
             i = table.schema.get_field_index(name)
             arr = table.column(i)
             # If we find a list of struct column, maybe convert it
-            if (isinstance(arr.type, pa.ListType) and
-                    isinstance(arr.type.value_type, pa.StructType)):
+            if _is_list_of_struct(arr):
                 c = self._conv_list_of_struct(name, arr)
                 if c:
                     converted[name] = c
@@ -344,6 +362,23 @@ class RikaiDataFrameAccessor:
             was_converted, c = _maybe_convert_ext(self._obj[name], arr)
             if was_converted:
                 return c
+
+    @classmethod
+    def read_table(cls, path):
+        table = ds.dataset(path).to_table()
+        return table
+
+    @classmethod
+    def load(cls, path):
+        table = cls.read_table(path)
+        df = table.to_pandas()
+        for name in table.column_names:
+            i = table.schema.get_field_index(name)
+            arr = table.column(i)
+            # If we find a list of struct column, maybe convert it
+            extensions = _get_nested_ext_types(arr)
+            df[name] = _box_nested_extensions(df[name], extensions)
+        return df
 
 
 def _sub(table: pa.Table, sub_cols: dict) -> pa.Table:
@@ -392,3 +427,30 @@ def _get_rikai_type(v):
 def _conv_arrow_array(arr, ext_type):
     # TODO order of fields matter in struct types
     return pa.ExtensionArray.from_storage(ext_type, arr)
+
+
+def _is_list_of_struct(arr):
+    return (isinstance(arr.type, pa.ListType) and
+            isinstance(arr.type.value_type, pa.StructType))
+
+
+def _get_nested_ext_types(arr):
+    from rikai.types.arrow import RikaiExtensionType
+    if _is_list_of_struct(arr):
+        return {
+            field.name: field.type.to_pandas_dtype()
+            for field in arr.type.value_type
+            if isinstance(field.type, RikaiExtensionType)
+        }
+    return {}
+
+
+# TODO SLOWWWWWWWWWWWWWWWWWWWWWWWWWWw
+def _box_nested_extensions(
+        ser: pd.Series, extensions: dict[str, RikaiExtensionDtype]) -> pd.Series:
+    if extensions:
+        for row in ser.values:
+            for obj in row:
+                for name, dtype in extensions.items():
+                    obj[name] = dtype.from_storage(obj[name])
+    return ser

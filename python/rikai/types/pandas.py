@@ -32,17 +32,21 @@ References:
 """
 
 import operator
-from typing import Union, Any
+from abc import ABC, abstractmethod
+from typing import Union, Any, Optional
 
 import numpy as np
 import pandas as pd
 from pandas.api.extensions import (
-    ExtensionArray, ExtensionDtype, register_extension_dtype
+    ExtensionArray, ExtensionDtype,
+    register_extension_dtype,
+    register_dataframe_accessor,
+    register_series_accessor
 )
 import pyarrow as pa
+import pyarrow.parquet as pq
 
 import rikai.types as T
-
 
 __all__ = ['ImageDtype', 'ImageArray']
 
@@ -77,17 +81,40 @@ class ImageDtype(ExtensionDtype):
         return "dtype('image')"
 
 
-class ImageArray(ExtensionArray):
-
-    _dtype = ImageDtype()
-
-    @classmethod
-    def _from_sequence_of_strings(cls, strings, *, dtype = None, copy=False):
-        return cls(np.apply_along_axis(to_img, 0, np.array(strings)))
+@register_extension_dtype
+class Box2dDtype(ExtensionDtype):
+    type = T.Box2d
+    name = T.Box2d.__name__.lower()
+    na_value = None
 
     @classmethod
-    def from_dict(cls, arr):
-        return cls(np.apply_along_axis(dict_to_img, 0, arr))
+    def construct_from_string(cls, string):
+        if not isinstance(string, str):
+            raise TypeError(
+                "'construct_from_string' expects a string, got {}".format(type(string))
+            )
+        elif string == cls.name:
+            return cls()
+        else:
+            raise TypeError(
+                "Cannot construct a '{}' from '{}'".format(cls.__name__, string)
+            )
+
+    @classmethod
+    def construct_array_type(cls):
+        return Box2dArray
+
+    def __from_arrow__(self, array: Union[pa.Array, pa.ChunkedArray]) -> ExtensionArray:
+        return Box2dArray.from_dict(array.to_numpy())
+
+    def __repr__(self):
+        return "dtype('box2d')"
+
+
+# TODO I think we may want two Image subtypes for inlined vs external
+#      so we don't need to deal with unpacking/packing structs etc
+#      and performance can also be much better
+class RikaiExtensionArray(ExtensionArray):
 
     def __init__(self, data):
         if isinstance(data, self.__class__):
@@ -95,8 +122,9 @@ class ImageArray(ExtensionArray):
         self.data = np.array(data)
 
     @property
+    @abstractmethod
     def dtype(self):
-        return self._dtype
+        pass
 
     def __len__(self):
         return self.shape[0]
@@ -115,10 +143,10 @@ class ImageArray(ExtensionArray):
 
     def take(self, indices, allow_fill=False, fill_value=None):
         from pandas.api.extensions import take
-        return ImageArray(take(self.data, indices, allow_fill=allow_fill, fill_value=fill_value))
+        return self.__class__(take(self.data, indices, allow_fill=allow_fill, fill_value=fill_value))
 
     def copy(self):
-        return ImageArray(self.data.copy())
+        return self.__class__(self.data.copy())
 
     def isna(self):
         return np.array([g is None for g in self.data], dtype="bool")
@@ -126,23 +154,6 @@ class ImageArray(ExtensionArray):
     @property
     def nbytes(self):
         return self.data.nbytes
-
-    @classmethod
-    def _from_sequence(cls, scalars, dtype=None, copy=False):
-        if isinstance(scalars, np.ndarray):
-            # support converting from PIL / ndarray as well
-            if scalars.dtype.kind == 'U':
-                return cls._from_sequence_of_strings(
-                    scalars, dtype=dtype, copy=copy)
-            if copy:
-                scalars = scalars.copy()
-        elif isinstance(scalars, list):
-            scalars = np.array(scalars)
-        return cls(scalars)
-
-    @classmethod
-    def _from_factorized(cls, values, original):
-        pass
 
     def __getitem__(self, item):
         return self.data[item]
@@ -183,7 +194,46 @@ class ImageArray(ExtensionArray):
     @classmethod
     def _concat_same_type(self, to_concat):
         data = np.concatenate([ga.data for ga in to_concat])
-        return ImageArray(data)
+        return self.__class__(data)
+
+
+class ImageArray(RikaiExtensionArray):
+    _dtype = ImageDtype()
+
+    def __init__(self, data):
+        super().__init__(data)
+
+    @property
+    def dtype(self):
+        return self._dtype
+
+    @classmethod
+    def _from_sequence_of_strings(cls, strings, *, dtype=None, copy=False):
+        # TODO eager boxing might be slow
+        return cls(np.apply_along_axis(to_img, 0, np.array(strings)))
+
+    @classmethod
+    def from_dict(cls, arr):
+        return cls(np.apply_along_axis(dict_to_img, 0, arr))
+
+    @classmethod
+    def _from_sequence(cls, scalars, dtype=None, copy=False):
+        if isinstance(scalars, np.ndarray):
+            # support converting from PIL / ndarray as well
+            if scalars.dtype.kind == 'U':
+                return cls._from_sequence_of_strings(
+                    scalars, dtype=dtype, copy=copy)
+            if copy:
+                scalars = scalars.copy()
+        elif isinstance(scalars, list):
+            scalars = cls._from_sequence(np.array(scalars),
+                                         dtype=dtype,
+                                         copy=False)
+        return cls(scalars)
+
+    @classmethod
+    def _from_factorized(cls, values, original):
+        pass
 
     def __arrow_array__(self, type=None):
         # convert the underlying array values to a pyarrow Array
@@ -195,3 +245,150 @@ class ImageArray(ExtensionArray):
 
 to_img = np.vectorize(T.Image)
 dict_to_img = np.vectorize(lambda d: T.Image(d.get('uri', d.get('data'))))
+
+
+class Box2dArray(RikaiExtensionArray):
+    _dtype = Box2dDtype()
+
+    def __init__(self, data):
+        super().__init__(data)
+
+    @property
+    def dtype(self):
+        return self._dtype
+
+    @classmethod
+    def from_dict(cls, arr):
+        return cls(np.apply_along_axis(dict_to_box, 0, arr))
+
+    @classmethod
+    def _from_sequence(cls, scalars, dtype=None, copy=False):
+        if isinstance(scalars, np.ndarray):
+            # support converting from PIL / ndarray as well
+            if scalars.dtype.kind == 'U':
+                return cls._from_sequence_of_strings(
+                    scalars, dtype=dtype, copy=copy)
+            if copy:
+                scalars = scalars.copy()
+        elif isinstance(scalars, list):
+            scalars = cls._from_sequence(np.array(scalars),
+                                         dtype=dtype,
+                                         copy=False)
+        return cls(scalars)
+
+    @classmethod
+    def _from_factorized(cls, values, original):
+        pass
+
+    def __arrow_array__(self, type=None):
+        # convert the underlying array values to a pyarrow Array
+        from rikai.types.arrow import image_arrow_type
+        dtype = image_arrow_type
+        storage = pa.array(self.data, type=dtype.storage_type)
+        return pa.ExtensionArray.from_storage(dtype, storage)
+
+
+dict_to_box = np.vectorize(lambda d: T.Box2d(**d))
+
+
+@register_dataframe_accessor('rikai')
+class RikaiDataFrameAccessor:
+    """support custom functionality via `df.rikai.to_table()` or `df.rikai.save()`
+    """
+
+    def __init__(self, pandas_obj):
+        # TODO validation
+        self._obj = pandas_obj
+
+    def to_table(self) -> pa.Table:
+        # TODO handle deeper levels of nesting
+        table = pa.Table.from_pandas(self._obj)
+        converted = {}
+        for name in table.column_names:
+            i = table.schema.get_field_index(name)
+            arr = table.column(i)
+            # If we find a list of struct column, maybe convert it
+            if (isinstance(arr.type, pa.ListType) and
+                    isinstance(arr.type.value_type, pa.StructType)):
+                c = self._conv_list_of_struct(name, arr)
+                if c:
+                    converted[name] = c
+        # replace converted columns
+        table = _sub(table, converted)
+        return table
+
+    def save(self, path):
+        table = self.to_table()
+        pq.write_to_dataset(table, str(path))
+
+    def _conv_list_of_struct(
+            self, name: str,
+            arr: Union[pa.ListArray, pa.ChunkedArray]) \
+            -> Optional[Union[pa.ListArray, pa.ChunkedArray]]:
+        """Convert a list of struct column if needed. Return None
+        if no conversion was performed
+        """
+        if isinstance(arr, pa.ChunkedArray):
+            # TODO for now assume all chunks are converted or none are
+            offset = 0
+            conv_chunks = []
+            for chunk in arr.iterchunks():
+                subser = self._obj[name][offset:len(chunk)]
+                was_converted, c = _maybe_convert_ext(subser, chunk)
+                if was_converted:
+                    conv_chunks.append(c)
+                offset += len(subser)
+            if len(conv_chunks) == arr.num_chunks:
+                return pa.chunked_array(conv_chunks)
+        else:
+            was_converted, c = _maybe_convert_ext(self._obj[name], arr)
+            if was_converted:
+                return c
+
+
+def _sub(table: pa.Table, sub_cols: dict) -> pa.Table:
+    for name, arr in sub_cols.items():
+        idx = table.schema.get_field_index(name)
+        table = table.set_column(idx, name, arr)
+    return table
+
+
+# input must be a list of struct
+def _maybe_convert_ext(ser: pd.Series, arr: pa.ListArray) \
+        -> (bool, pa.ListArray):
+    values_arr = arr.values
+    has_rikai = False
+    converted = {}
+    for lst in ser.values:
+        for obj in lst:
+            for k, v in obj.items():
+                idx = values_arr.type.get_field_index(k)
+                subarr = values_arr.field(idx)
+                if v is not None:
+                    rikai_type = _get_rikai_type(v)
+                    if rikai_type:
+                        has_rikai = True
+                        converted[k] = _conv_arrow_array(
+                            subarr, rikai_type)
+                    else:
+                        converted[k] = subarr
+            if len(converted) == values_arr.type.num_fields:
+                break
+        if len(converted) == values_arr.type.num_fields:
+            break
+    if has_rikai:
+        values_conv = pa.StructArray.from_arrays(converted.values(),
+                                                 converted.keys())
+        list_conv = pa.ListArray.from_arrays(arr.offsets, values_conv)
+        return True, list_conv
+    return False, arr
+
+
+def _get_rikai_type(v):
+    if hasattr(v, '__ARROW__'):
+        return v.__ARROW__
+
+
+def _conv_arrow_array(arr, ext_type):
+    # TODO order of fields matter in struct types
+    return pa.ExtensionArray.from_storage(ext_type, arr)

@@ -16,7 +16,7 @@
 """
 import pyarrow as pa
 
-__all__ = ['ImageArrowType']
+__all__ = ['ImageArrowType', 'Box2dArrowType', 'image_arrow_type', 'box2d_arrow_type']
 
 
 class ImageArrowType(pa.ExtensionType):
@@ -44,3 +44,34 @@ class ImageArrowType(pa.ExtensionType):
 image_arrow_type = ImageArrowType()
 pa.register_extension_type(image_arrow_type)
 
+
+class Box2dArrowType(pa.ExtensionType):
+
+    def __init__(self):
+        pa.ExtensionType.__init__(self,
+                                  pa.struct([
+                                      pa.field('xmax', pa.float64()),
+                                      pa.field('xmin', pa.float64()),
+                                      pa.field('ymax', pa.float64()),
+                                      pa.field('ymin', pa.float64())
+                                  ]),
+                                  "rikai.box2d")
+
+    def __arrow_ext_serialize__(self):
+        # since we don't have a parameterized type, we don't need extra
+        # metadata to be deserialized
+        return b''
+
+    @classmethod
+    def __arrow_ext_deserialize__(cls, storage_type, serialized):
+        # return an instance of this subclass given the serialized
+        # metadata.
+        return Box2dArrowType()
+
+    def to_pandas_dtype(self):
+        from rikai.types.pandas import Box2dDtype
+        return Box2dDtype()
+
+
+box2d_arrow_type = Box2dArrowType()
+pa.register_extension_type(box2d_arrow_type)

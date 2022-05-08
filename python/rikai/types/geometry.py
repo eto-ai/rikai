@@ -33,6 +33,7 @@ from rikai.spark.types.geometry import (
     PointType,
 )
 from rikai.types import rle
+from .arrow import box2d_arrow_type
 
 __all__ = ["Point", "Box3d", "Box2d", "Mask"]
 
@@ -104,6 +105,7 @@ class Box2d(ToNumpy, Sequence, ToDict, Drawable, dict):
     """
 
     __UDT__ = Box2dType()
+    __ARROW__ = box2d_arrow_type
 
     def __init__(self, xmin: float, ymin: float, xmax: float, ymax: float):
         assert (

@@ -17,7 +17,7 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from rikai.types import Image
+from rikai.types import Image, Box2d
 from rikai.types.pandas import ImageDtype
 
 
@@ -53,3 +53,36 @@ def test_image(tmp_path):
     assert len(df_from_parquet) == len(s)
     assert df_from_parquet.c.dtype == 'image'
     assert isinstance(df_from_parquet.c[0], Image)
+
+
+def test_nested(tmp_path):
+    s1 = pd.Series(['s3://bucket/path/to/image.jpg'], dtype='image')
+    assert s1.dtype.name == 'image'
+
+    s2 = pd.Series([[{
+        'label': 'foo',
+        'box': Box2d(0, 0, 100, 100),
+        'score': 0.8
+    }, {
+        'label': 'bar',
+        'box': Box2d(0, 0, 100, 200),
+        'score': 0.7
+    }]])
+
+    df = pd.DataFrame({
+        'image': s1,
+        'annotations': s2
+    })
+
+    t = pa.Table.from_pandas(df)
+    table = df.rikai.to_table()
+    df_rt = table.to_pandas()
+    assert df_rt.image.dtype == 'image'
+    # TODO read path doesn't work yet
+    assert isinstance(df_rt.annotations[0][0]['box'], Box2d)
+
+
+# TODO add NA handling so should fail right now
+def test_handle_na():
+    arr = pd.Series(['s3://bucket/path/to/image.jpg', None], dtype='image')
+    pa.array(arr)  # raises ArrowTypeError

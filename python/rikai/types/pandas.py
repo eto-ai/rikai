@@ -338,7 +338,9 @@ dict_to_box = np.vectorize(lambda d: T.Box2d(**d))
 
 @register_dataframe_accessor("rikai")
 class RikaiDataFrameAccessor:
-    """support custom functionality via `df.rikai.to_table()` or `df.rikai.save()`"""
+    """support custom functionality via `df.rikai.to_table()`
+    or `df.rikai.save()`
+    """
 
     def __init__(self, pandas_obj):
         # TODO validation
@@ -388,7 +390,7 @@ class RikaiDataFrameAccessor:
             # If it's chunked then convert each chunk
             for chunk in arr.iterchunks():
                 # find the corresponding Series section
-                subser = self._obj[name][offset : len(chunk)]
+                subser = self._obj[name][offset:len(chunk)]
                 was_converted, c = _maybe_convert_ext(subser, chunk)
                 if was_converted:
                     conv_chunks.append(c)

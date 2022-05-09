@@ -17,5 +17,8 @@ from rikai.experimental.pg.model import load_model
 
 def test_load_model():
     model = load_model("pytorch", "ssd")
-    model.predict({"uri": "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"})
-
+    model.predict(
+        {
+            "uri": "http://farm2.staticflickr.com/1129/4726871278_4dd241a03a_z.jpg"
+        }
+    )

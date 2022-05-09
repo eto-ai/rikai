@@ -23,7 +23,7 @@ VALUES
 ('cat_detector', 'pytorch', 'ssd', 's3://bucket/to/cat.pth')
 ```
 
-A function `ml.<model_name>` will be created.
+A function `ml.<model_name>` will be created after model insertation.
 
 To use the registered model for inference:
 
@@ -31,7 +31,7 @@ To use the registered model for inference:
 SELECT ml.cat_detector(image) FROM cat_dataset
 ```
 
-Show all registered models
+Show all registered models:
 
 ```sql
 SELECT * FROM ml.models;
@@ -39,10 +39,21 @@ SELECT * FROM ml.models;
 
 ## Local development
 
-```
+```sh
 # Build and run docker image, prepare testing data and load a model.
-make run
+$ make run
+
+# Connect to postgres
+
+$ psql -h localhost -U postgres
 ```
+
+## TODOs
+
+- [ ] Drop model
+- [ ] Support classification models
+- [ ] CI / CD
+- [ ] Release and installation
 
 ## Limitations
 

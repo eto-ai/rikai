@@ -33,7 +33,7 @@ import org.apache.spark.sql.catalyst.expressions.{
 }
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.catalyst.rules.Rule
-import org.apache.spark.sql.rikai.expressions.{Area, IOU, ToStruct}
+import org.apache.spark.sql.rikai.expressions.{Area, IOU, Image, ToStruct}
 import org.apache.spark.sql.{SparkSession, SparkSessionExtensions}
 
 private class MlPredictRule(val session: SparkSession)
@@ -131,6 +131,12 @@ class RikaiSparkSessionExtensions extends (SparkSessionExtensions => Unit) {
       new FunctionIdentifier("to_struct"),
       new ExpressionInfo("org.apache.spark.sql.rikai.expressions", "ToStruct"),
       (exprs: Seq[Expression]) => ToStruct(exprs.head)
+    )
+
+    extensions.injectFunction(
+      new FunctionIdentifier("image"),
+      new ExpressionInfo("org.apache.spark.sql.rikai.expressions", "Image"),
+      (exprs: Seq[Expression]) => Image(exprs.head)
     )
 
     extensions.injectResolutionRule(session => {

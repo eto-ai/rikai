@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, Mapping
 
 import numpy as np
 from PIL import Image as PILImage
@@ -72,8 +72,15 @@ class Style(Drawable):
 class Draw(Displayable, ABC):
     """Draw is a container that contain the elements for visualized lazily."""
 
-    def __init__(self):
-        self.layers = []
+    def display(self, **kwargs) -> "IPython.display.DisplayObject":
+        """We need to instantiate Draw, so we need to make it a concrete class,
+        but we should not call Draw's display method directly"""
+        raise NotImplemented
+
+    def __init__(self, layers=None):
+        if layers is None:
+            layers = []
+        self.layers = layers
 
     def __repr__(self):
         first_layer = self.layers[0] if self.layers else "N/A"
@@ -85,11 +92,13 @@ class Draw(Displayable, ABC):
             include=include, exclude=exclude
         )
 
-    def draw(self, layer: Union[Drawable, list[Drawable]]) -> Draw:
+    def draw(self, layer: Union[Drawable, list[Drawable], Draw]) -> Draw:
         # layer can not be checked against typing.Sequence or typing.Iterable,
         # because many of the Drawables are iterables (i.e., Box2d).
         if isinstance(layer, Drawable):
             layer = [layer]
+        if isinstance(layer, Draw):
+            layer = layer.layers
         elif not isinstance(layer, (Drawable, list)):
             raise ValueError(
                 f"{layer} must be one Drawable or a list of Drawable"
@@ -99,6 +108,10 @@ class Draw(Displayable, ABC):
 
     def __or__(self, other: Union[Drawable, list[Drawable]]) -> Draw:
         return self.draw(other)
+
+    def __matmul__(self, style: Union[dict, "rikai.viz.Style"]) -> Draw:
+        new_layers = [x @ style for x in self.layers]
+        return Draw(new_layers)
 
 
 class Renderer(ABC):

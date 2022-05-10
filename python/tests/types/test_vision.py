@@ -197,6 +197,52 @@ def test_draw_image():
     assert np.array_equal(pil_image.to_numpy(), expected)
 
 
+def test_draw_box_with_label():
+    data = np.random.randint(0, 255, size=(100, 100, 3), dtype=np.uint8)
+    img = Image.from_array(data)
+
+    box1 = Box2d(1, 2, 10, 12)
+    box2 = Box2d(20, 20, 40, 40)
+    draw_boxes = img | box1.with_label("label1") | box2.with_label("label2")
+    pil_image = draw_boxes.to_image()
+
+    expected = Image.from_array(data).to_pil()
+    draw = PILImageDraw.Draw(expected)
+    draw.rectangle((1.0, 2.0, 10.0, 12.0), outline="red")
+    draw.text((1, 0), "label1", fill="red")
+    draw.rectangle((20, 20, 40, 40), outline="red")
+    draw.text((20, 10), "label2", fill="red")
+    # If you need to see the pics in your local computer.
+    # pil_image.to_pil().show()
+    # expected.show()
+    assert np.array_equal(pil_image.to_numpy(), expected)
+
+
+def test_draw_box_with_label_matmul():
+    data = np.random.randint(0, 255, size=(100, 100, 3), dtype=np.uint8)
+    img = Image.from_array(data)
+
+    box1 = Box2d(1, 2, 10, 12)
+    box2 = Box2d(20, 20, 40, 40)
+    draw_boxes = (
+        img
+        | box1.with_label("label1") @ {"color": "green"}
+        | box2.with_label("label2") @ {"color": "yellow"}
+    )
+    pil_image = draw_boxes.to_image()
+
+    expected = Image.from_array(data).to_pil()
+    draw = PILImageDraw.Draw(expected)
+    draw.rectangle((1.0, 2.0, 10.0, 12.0), outline="green")
+    draw.text((1, 0), "label1", fill="green")
+    draw.rectangle((20, 20, 40, 40), outline="yellow")
+    draw.text((20, 10), "label2", fill="yellow")
+    # If you need to see the pics in your local computer.
+    # pil_image.to_pil().show()
+    # expected.show()
+    assert np.array_equal(pil_image.to_numpy(), expected)
+
+
 def test_draw_styled_images():
     data = np.random.randint(0, 255, size=(100, 100, 3), dtype=np.uint8)
     img = Image.from_array(data)

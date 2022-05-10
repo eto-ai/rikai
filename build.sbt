@@ -137,6 +137,8 @@ scalacOptions ++= {
 
 Test / parallelExecution := false
 Test / fork := true
+
+// https://www.scala-sbt.org/1.x/docs/Testing.html#Forking+tests
 import Tests._
 {
   def groupByFirst(tests: Seq[TestDefinition]) =

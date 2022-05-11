@@ -390,7 +390,7 @@ class RikaiDataFrameAccessor:
             # If it's chunked then convert each chunk
             for chunk in arr.iterchunks():
                 # find the corresponding Series section
-                subser = self._obj[name][offset: len(chunk)]
+                subser = self._obj[name][offset : len(chunk)]
                 was_converted, c = _maybe_convert_ext(subser, chunk)
                 if was_converted:
                     conv_chunks.append(c)

@@ -681,7 +681,7 @@ class Mask(ToNumpy, ToDict, Drawable):
 
     def to_dict(self) -> dict:
         ret = {
-            "type": self.type.value,
+            "type": self.type.name.lower(),
             "width": self.width,
             "height": self.height,
             "data": self.data,

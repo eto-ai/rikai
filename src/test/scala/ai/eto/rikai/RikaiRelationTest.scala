@@ -67,8 +67,19 @@ class RikaiRelationTest extends AnyFunSuite with SparkTestSession {
     assert(partitions == Set("label=car", "label=people", "label=tree"))
   }
 
-  test("test default block size") {
-    val options = new RikaiOptions(Map.empty)
-    assert(options.blockSize == RikaiOptions.defaultBlockSize)
+  test("Use partitions in saveAsTable") {
+    import scala.reflect.io.Directory
+
+    examples.write.format("rikai").partitionBy("label").saveAsTable("test_table")
+    val path = spark.sql("desc formatted test_table").filter($"col_name" === "Location").collect().head.getAs[String]("data_type")
+    val dir = new File(path.substring(path.indexOf("/")))
+
+    println(dir.list().toSeq)
+    val partitions =
+      Set(dir.list().toSeq.filter(_.startsWith("label=")): _*)
+
+    new Directory(dir).deleteRecursively()
+
+    assert(partitions == Set("label=car", "label=people", "label=tree"))
   }
 }

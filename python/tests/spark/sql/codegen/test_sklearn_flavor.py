@@ -1,4 +1,4 @@
-#  Copyright (c) 2021 Rikai Authors
+#  Copyright (c) 2022 Rikai Authors
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -11,6 +11,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+import pickle
+from pathlib import Path
 
 import mlflow
 import numpy as np
@@ -145,3 +148,31 @@ def test_sklearn_pca(mlflow_tracking_uri: str, spark: SparkSession):
         assert (
             pytest.approx(result.head().pred) == model.transform([[3, 2]])[0]
         )
+
+
+def test_sklearn_pca_fs(spark: SparkSession, tmp_path: Path):
+    X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
+    model = PCA(n_components=2)
+
+    model.fit(X)
+    uri = tmp_path / "model.pt"
+    with uri.open("wb") as fobj:
+        pickle.dump(model, fobj)
+
+    model_name = "pca_fs"
+    spark.sql(
+        f"""
+        CREATE OR REPLACE MODEL {model_name}
+        FLAVOR sklearn
+        MODEL_TYPE pca
+        USING '{str(uri)}';
+        """
+    )
+    result = spark.sql(
+        f"""
+        select ML_PREDICT({model_name}, array(3, 2)) as pred
+        """
+    )
+    assert (
+        pytest.approx(result.head().pred) == model.transform([[3, 2]])[0]
+    )

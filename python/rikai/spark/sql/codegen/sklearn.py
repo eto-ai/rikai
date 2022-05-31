@@ -1,4 +1,4 @@
-#  Copyright 2021 Rikai Authors
+#  Copyright 2022 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import pickle
 from typing import Iterator
 
 import numpy as np
@@ -20,6 +21,7 @@ from pyspark.serializers import CloudPickleSerializer
 from pyspark.sql.functions import pandas_udf
 from pyspark.sql.types import BinaryType
 
+from rikai.io import open_uri
 from rikai.spark.sql.codegen.base import ModelSpec
 
 __all__ = ["generate_udf"]
@@ -51,3 +53,14 @@ def generate_udf(spec: ModelSpec):
             yield pd.Series(y)
 
     return pandas_udf(sklearn_inference_udf, returnType=BinaryType())
+
+
+def load_model_from_uri(uri: str):
+    """Load a Sklearn model from URL.
+
+    Assuming model is persisted via pickle following the instruction:
+    https://scikit-learn.org/stable/model_persistence.html
+
+    """
+    with open_uri(uri) as fobj:
+        return pickle.load(fobj)

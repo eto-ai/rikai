@@ -173,6 +173,4 @@ def test_sklearn_pca_fs(spark: SparkSession, tmp_path: Path):
         select ML_PREDICT({model_name}, array(3, 2)) as pred
         """
     )
-    assert (
-        pytest.approx(result.head().pred) == model.transform([[3, 2]])[0]
-    )
+    assert pytest.approx(result.head().pred) == model.transform([[3, 2]])[0]

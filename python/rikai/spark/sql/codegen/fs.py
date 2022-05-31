@@ -1,4 +1,4 @@
-#  Copyright 2021 Rikai Authors
+#  Copyright 2022 Rikai Authors
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 import os
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict
 from urllib.parse import urlparse
 
 import yaml
@@ -106,6 +106,10 @@ class FileModelSpec(ModelSpec):
             return load_model_from_uri(self.model_uri)
         elif self.flavor == "tensorflow":
             from rikai.spark.sql.codegen.tensorflow import load_model_from_uri
+
+            return load_model_from_uri(self.model_uri)
+        elif self.flavor == "sklearn":
+            from rikai.spark.sql.codegen.sklearn import load_model_from_uri
 
             return load_model_from_uri(self.model_uri)
         else:

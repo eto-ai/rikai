@@ -34,7 +34,7 @@ gcp = ["gcsfs"]
 docs = ["sphinx", "sphinx-material"]
 video = ["ffmpeg-python", "scenedetect<0.6"]
 youtube = ["pafy", "youtube_dl"]
-mlflow = ["mlflow==1.24"]
+mlflow = ["mlflow==1.26.1"]
 all = (
     sklearn
     + torch

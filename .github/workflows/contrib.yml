@@ -29,11 +29,11 @@ jobs:
       - name: Install Dependencies
         working-directory: python
         run: |
-          python -m pip install -q --use-feature=in-tree-build . wheel
+          python -m pip install -q . wheel
       - name: Install rikai-ros
         working-directory: contrib/ros
         run: |
-          python -m pip install --extra-index-url https://rospypi.github.io/simple/ --use-feature=in-tree-build .[dev]
+          python -m pip install --extra-index-url https://rospypi.github.io/simple/ .[dev]
       - name: Test rikai-ros
         working-directory: contrib/ros
         run: pytest
@@ -59,11 +59,11 @@ jobs:
       - name: Install Dependencies
         working-directory: python
         run: |
-          python -m pip install -q --use-feature=in-tree-build . wheel pycocotools
+          python -m pip install -q . wheel pycocotools
       - name: Install rikai-coco
         working-directory: contrib/coco
         run: |
-          python -m pip install --use-feature=in-tree-build .[dev]
+          python -m pip install .[dev]
       - name: Test rikai-coco
         working-directory: contrib/coco
         run: pytest

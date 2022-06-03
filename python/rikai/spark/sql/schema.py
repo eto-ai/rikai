@@ -67,7 +67,7 @@ class SchemaError(Exception):
         self.message = message
 
 
-class SchemaBuilder(RikaiModelSchemaVisitor):
+class SparkDataTypeVisitor(RikaiModelSchemaVisitor):
     def visitStructType(
         self, ctx: RikaiModelSchemaParser.StructTypeContext
     ) -> StructType:
@@ -108,14 +108,16 @@ class SchemaBuilder(RikaiModelSchemaVisitor):
             raise SchemaError(f'Can not recognize type: "{name}"') from e
 
 
-def parse_schema(schema_str: str) -> DataType:
+def parse_schema(
+    schema_str: str, visitor: RikaiModelSchemaVisitor = SparkDataTypeVisitor()
+):
+    """Parse schema and returns the data type for the runtime"""
     # input_stream = InputStream(schema_str)
     upper = CaseChangingStream(InputStream(schema_str), True)
     lexer = RikaiModelSchemaLexer(upper)
     stream = CommonTokenStream(lexer)
     parser = RikaiModelSchemaParser(stream)
 
-    visitor = SchemaBuilder()
     schema = visitor.visit(parser.schema())
     # TODO(GH#112) we should add error listener to Antlr Parser.
     if schema is None:

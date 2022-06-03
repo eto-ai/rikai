@@ -14,7 +14,7 @@
 
 import os
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from urllib.parse import urlparse
 
 import yaml
@@ -49,6 +49,8 @@ class FileModelSpec(ModelSpec):
         raw_spec: Dict,
         validate: bool = True,
     ):
+        self.base_dir: Optional[str] = None
+
         spec = {
             "name": raw_spec.get("name"),
             "options": raw_spec.get("options", {}),
@@ -72,7 +74,6 @@ class FileModelSpec(ModelSpec):
         else:
             spec["version"] = self.VERSION
 
-        print("Final spec: ", spec)
         super().__init__(spec, validate=validate)
 
     @staticmethod
@@ -122,7 +123,9 @@ class FileModelSpec(ModelSpec):
         parsed = urlparse(origin_uri)
         if parsed.scheme or os.path.isabs(origin_uri):
             return origin_uri
-        return os.path.join(self.base_dir, origin_uri)
+        if self.base_dir is not None:
+            return os.path.join(self.base_dir, origin_uri)
+        return origin_uri
 
 
 class FileSystemRegistry(Registry):

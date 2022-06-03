@@ -109,8 +109,7 @@ class SparkDataTypeVisitor(RikaiModelSchemaVisitor):
 
 
 def parse_schema(
-    schema_str: str,
-    visitor: RikaiModelSchemaVisitor = SparkDataTypeVisitor()
+    schema_str: str, visitor: RikaiModelSchemaVisitor = SparkDataTypeVisitor()
 ):
     """Parse schema and returns the data type for the runtime"""
     # input_stream = InputStream(schema_str)

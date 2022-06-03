@@ -39,9 +39,9 @@ object MaskTypeEnum extends Enumeration {
 @SerialVersionUID(1L)
 class Mask(
     val maskType: MaskTypeEnum.Type,
+    val width: Int,
+    val height: Int,
     val polygon: Option[Array[Array[Float]]] = None,
-    val height: Option[Int] = None,
-    val width: Option[Int] = None,
     val rle: Option[Array[Int]] = None
 ) extends Serializable {
 
@@ -53,15 +53,20 @@ class Mask(
 object Mask {
 
   /** Construct a Mask from polygon array */
-  def fromPolygon(data: Array[Array[Float]]): Mask = {
-    new Mask(MaskTypeEnum.Polygon, polygon = Some(data))
+  def fromPolygon(data: Array[Array[Float]], width: Int, height: Int): Mask = {
+    new Mask(
+      MaskTypeEnum.Polygon,
+      width,
+      height,
+      polygon = Some(data)
+    )
   }
 
   def fromRLE(data: Array[Int], height: Int, width: Int): Mask = {
     new Mask(
       MaskTypeEnum.Rle,
-      height = Some(height),
-      width = Some(width),
+      width,
+      height,
       rle = Some(data)
     )
   }
@@ -69,8 +74,8 @@ object Mask {
   def fromCocoRLE(data: Array[Int], height: Int, width: Int): Mask = {
     new Mask(
       MaskTypeEnum.CocoRle,
-      height = Some(height),
-      width = Some(width),
+      width,
+      height,
       rle = Some(data)
     )
   }
@@ -96,20 +101,18 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
   override def serialize(m: Mask): InternalRow = {
     val row = new GenericInternalRow(5)
     row.setInt(0, m.maskType.id)
+    row.setInt(1, m.height)
+    row.setInt(2, m.width)
+
     m.maskType match {
       case MaskTypeEnum.Rle | MaskTypeEnum.CocoRle =>
-        row.setInt(1, m.height.get)
-        row.setInt(2, m.width.get)
         row.setNullAt(3)
         row.update(4, UnsafeArrayData.fromPrimitiveArray(m.rle.get))
       case MaskTypeEnum.Polygon =>
         val arrayData = new GenericArrayData(
           m.polygon.get.map(arr => UnsafeArrayData.fromPrimitiveArray(arr))
         )
-        row.update(
-          3,
-          arrayData
-        )
+        row.update(3, arrayData)
         row.setNullAt(4)
       case _ => throw new NotImplementedError()
     }
@@ -120,29 +123,26 @@ private[spark] class MaskType extends UserDefinedType[Mask] {
     datum match {
       case row: InternalRow =>
         val maskType: MaskTypeEnum.Type = MaskTypeEnum(row.getInt(0))
-
+        val height = row.getInt(1)
+        val width = row.getInt(2)
         maskType match {
           case MaskTypeEnum.Polygon =>
             val data = row.getArray(3)
             val polygon = (0 until data.numElements())
               .map(idx => data.getArray(idx).toFloatArray())
               .toArray
-            Mask.fromPolygon(polygon)
+            Mask.fromPolygon(polygon, width = width, height = height)
           case MaskTypeEnum.Rle =>
-            val height = row.getInt(1)
-            val width = row.getInt(2)
             Mask.fromRLE(
               row.getArray(4).toArray[Int](IntegerType),
-              height,
-              width
+              width = width,
+              height = height
             )
           case MaskTypeEnum.CocoRle =>
-            val height = row.getInt(1)
-            val width = row.getInt(2)
             Mask.fromCocoRLE(
               row.getArray(4).toArray[Int](IntegerType),
-              height,
-              width
+              width = width,
+              height = height
             )
         }
     }

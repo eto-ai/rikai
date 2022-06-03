@@ -27,6 +27,7 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+        cache: 'pip'
     - name: cache SBT
       uses: actions/cache@v2
       with:
@@ -48,13 +49,6 @@ jobs:
     - name: Start docker-compose
       run: |
         docker-compose -f .github/docker-compose.yml up -d
-    - name: cache pip
-      uses: actions/cache@v2
-      with:
-        path: /opt/hostedtoolcache/rikai/${{ matrix.python-version }}
-        key: ${{ runner.os }}-pip-${{ matrix.spark-version }}-${{ hashFiles('**/setup.py') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
     - name: apt update and install
       run: |
         sudo apt update
@@ -62,15 +56,11 @@ jobs:
     - name: Pip install
       working-directory: python
       run: |
-        PYTHONUSERBASE=/opt/hostedtoolcache/rikai/${{ matrix.python-version }} \
-        python -m pip install --user -e .[all,dev]
-    - name: Extra bin path
-      run: |
-        echo /opt/hostedtoolcache/rikai/${{ matrix.python-version }}/bin >> $GITHUB_PATH
+        python -m pip install -e .[all,dev]
     - name: Run python tests
       working-directory: python
       run: |
-        PYTHONUSERBASE=/opt/hostedtoolcache/rikai/${{ matrix.python-version }} pytest -x -v --durations=10 --ignore=tests/parquet/internal
+        pytest -x -v --durations=10 --ignore=tests/parquet/internal
       env:
         SPARK_LOCAL_IP: "127.0.0.1"
         TEST_MLFLOW_TRACKING_URI: "http://localhost:15000"

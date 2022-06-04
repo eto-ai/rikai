@@ -21,7 +21,7 @@ from rikai.spark.functions import init
 
 def df_to_rikai(df: "pyspark.sql.DataFrame", uri: str):
     (
-        df.write.format("rikai")
+        df.write.format("rikai").mode("overwrite")
         .option(CONF_PARQUET_BLOCK_SIZE, rikai.options.parquet.block.size)
         .save(uri)
     )

@@ -17,6 +17,7 @@
 
 package ai.eto.rikai
 
+import org.apache.spark.sql.SaveMode
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.io.File
@@ -36,7 +37,7 @@ class RikaiRelationTest extends AnyFunSuite with SparkTestSession {
     new File(Files.createTempDirectory("rikai").toFile, "dataset")
 
   test("Use rikai registered as the sink of spark") {
-    examples.write.format("rikai").save(testDir.toString)
+    examples.write.format("rikai").mode(SaveMode.Overwrite).save(testDir.toString)
 
     val numParquetFileds =
       testDir.list().count(_.endsWith(".parquet"))
@@ -48,7 +49,7 @@ class RikaiRelationTest extends AnyFunSuite with SparkTestSession {
 
   test("Use rikai reader and writer") {
     import ai.eto.rikai._
-    examples.write.rikai(testDir.toString)
+    examples.write.mode(SaveMode.Overwrite).rikai(testDir.toString)
 
     val numParquetFiles =
       testDir.list().count(_.endsWith(".parquet"))
@@ -59,7 +60,7 @@ class RikaiRelationTest extends AnyFunSuite with SparkTestSession {
   }
 
   test("Use partitions") {
-    examples.write.partitionBy("label").rikai(testDir.toString)
+    examples.write.partitionBy("label").mode(SaveMode.Overwrite).rikai(testDir.toString)
 
     val partitions =
       Set(testDir.list().toSeq.filter(_.startsWith("label=")): _*)
@@ -70,7 +71,7 @@ class RikaiRelationTest extends AnyFunSuite with SparkTestSession {
   test("Use partitions in saveAsTable") {
     import scala.reflect.io.Directory
 
-    examples.write.format("rikai").partitionBy("label").saveAsTable("test_table")
+    examples.write.format("rikai").partitionBy("label").mode(SaveMode.Overwrite).saveAsTable("test_table")
     val path = spark.sql("desc formatted test_table").filter($"col_name" === "Location").collect().head.getAs[String]("data_type")
     val dir = new File(path.substring(path.indexOf("/")))
 

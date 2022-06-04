@@ -26,8 +26,6 @@ class RikaiFileFormat extends ParquetFileFormat {
       options: RikaiOptions
   ): Unit = {
     implicit val formats: Formats = Serialization.formats(NoTypeHints)
-    println("ctx ctx ctx" + sparkSession.sparkContext)
-    println("hdp hdp hdp" + sparkSession.sparkContext.hadoopConfiguration)
     val fs = metadataFile.getFileSystem(
       sparkSession.sparkContext.hadoopConfiguration
     )
@@ -54,9 +52,6 @@ class RikaiFileFormat extends ParquetFileFormat {
 
     /** Metadata file name */
     val metadataFile = new Path(rikaiDir, "metadata.json")
-    println("file file file" + metadataFile)
-    println("sess sess sess" + sparkSession)
-    println("ooooo" + rikaiOptions)
     writeMetadataFile(metadataFile, sparkSession, rikaiOptions)
 
     super.prepareWrite(sparkSession, job, options, dataSchema)

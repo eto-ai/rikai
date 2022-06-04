@@ -47,6 +47,24 @@ class RikaiFileFormat extends ParquetFileFormat {
         val parquetWriter: OutputWriter =
           parquetFactory.newInstance(path, dataSchema, context)
 
+        def writeMetadataFile(
+            metadataFile: Path,
+            sparkSession: SparkSession,
+            options: RikaiOptions
+        ): Unit = {
+          implicit val formats: Formats = Serialization.formats(NoTypeHints)
+          val fs = metadataFile.getFileSystem(
+            sparkSession.sparkContext.hadoopConfiguration
+          )
+
+          val outStream = fs.create(metadataFile, true)
+          try {
+            Serialization.write(Map("options" -> options.options), outStream)
+          } finally {
+            outStream.close()
+          }
+        }
+
         override def write(row: InternalRow): Unit = parquetWriter.write(row)
 
         override def close(): Unit = {
@@ -61,24 +79,6 @@ class RikaiFileFormat extends ParquetFileFormat {
           parquetWriter.close()
         }
       }
-    }
-  }
-
-  private def writeMetadataFile(
-      metadataFile: Path,
-      sparkSession: SparkSession,
-      options: RikaiOptions
-  ): Unit = {
-    implicit val formats: Formats = Serialization.formats(NoTypeHints)
-    val fs = metadataFile.getFileSystem(
-      sparkSession.sparkContext.hadoopConfiguration
-    )
-
-    val outStream = fs.create(metadataFile, true)
-    try {
-      Serialization.write(Map("options" -> options.options), outStream)
-    } finally {
-      outStream.close()
     }
   }
 }

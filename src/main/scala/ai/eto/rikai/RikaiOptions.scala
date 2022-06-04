@@ -16,7 +16,7 @@
 
 package ai.eto.rikai
 
-private[rikai] class RikaiOptions(parameters: Map[String, String]) {
+private[rikai] case class RikaiOptions(parameters: Map[String, String]) {
 
   /** Base path for the feature dataset
     */

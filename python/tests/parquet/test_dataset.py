@@ -96,7 +96,7 @@ def test_select_no_existed_columns(spark: SparkSession, tmp_path: Path):
 def test_read_metadata(spark: SparkSession, tmp_path: Path):
     dest = str(tmp_path)
     df = spark.createDataFrame([Row(id=i, col=f"val-{i}") for i in range(50)])
-    df.write.format("rikai").option("metadata1", 1).option(
+    df.write.format("rikai").mode("overwrite").option("metadata1", 1).option(
         "metadata2", "value-2"
     ).save(dest)
 
@@ -118,7 +118,7 @@ def test_read_metadata(spark: SparkSession, tmp_path: Path):
 def test_save_as_table_metadata(spark: SparkSession):
     df = spark.createDataFrame([Row(id=i, col=f"val-{i}") for i in range(50)])
     spark.sql("DROP TABLE IF EXISTS test_table_metadata")
-    df.write.option("metadata1", 1).option("metadata2", "value-2").saveAsTable(
+    df.write.option("metadata1", 1).option("metadata2", "value-2").mode("overwrite").saveAsTable(
         "test_table_metadata", format="rikai"
     )
     table_path = spark.sql("DESC FORMATTED test_table_metadata").filter(

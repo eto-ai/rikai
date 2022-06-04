@@ -31,7 +31,7 @@ def test_tf_dataset(spark, tmp_path):
 
         data.append(Row(id=i, image=image))
     df = spark.createDataFrame(data)
-    df.write.format("rikai").save(str(dataset_dir))
+    df.write.format("rikai").mode("overwrite").save(str(dataset_dir))
 
     dataset = from_rikai(
         dataset_dir,

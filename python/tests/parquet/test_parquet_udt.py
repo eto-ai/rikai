@@ -74,7 +74,7 @@ def test_spark_ml_matrix(spark: SparkSession, tmp_path: Path):
             {"name": 2, "mat": DenseMatrix(3, 3, range(9))},
         ]
     )
-    df.write.mode("overwrite").format("rikai").save(test_dir)
+    df.write.mode("overwrite").format("rikai").mode("overwrite").save(test_dir)
     df.show()
 
     records = sorted(_read_parquets(test_dir), key=lambda x: x["name"])
@@ -126,7 +126,7 @@ def test_numpy(spark: SparkSession, tmp_path, data_type):
         expected,
         schema=StructType([StructField("n", NDArrayType(), False)]),
     )
-    df.write.mode("overwrite").format("rikai").save(test_dir)
+    df.write.mode("overwrite").format("rikai").mode("overwrite").save(test_dir)
 
     records = _read_parquets(test_dir)
     assert np.array_equal(np.array(range(4), dtype=data_type), records[0]["n"])
@@ -173,7 +173,7 @@ def test_list_of_structs(spark: SparkSession, tmp_path: Path):
         ],
         schema=schema,
     )
-    df.repartition(1).write.mode("overwrite").format("rikai").save(test_dir)
+    df.repartition(1).write.mode("overwrite").format("rikai").mode("overwrite").save(test_dir)
 
     records = _read_parquets(test_dir)
     for expect, actual in zip(
@@ -221,7 +221,7 @@ def test_list_of_structs(spark: SparkSession, tmp_path: Path):
 def test_bbox(spark: SparkSession, tmp_path: Path):
     test_dir = str(tmp_path)
     df = spark.createDataFrame([Row(b=Box2d(1, 2, 3, 4))])
-    df.write.mode("overwrite").format("rikai").save(test_dir)
+    df.write.mode("overwrite").format("rikai").mode("overwrite").save(test_dir)
 
     records = _read_parquets(test_dir)
 
@@ -233,7 +233,7 @@ def test_bbox_list(spark: SparkSession, tmp_path: Path):
     df = spark.createDataFrame(
         [Row(bboxes=[Row(b=Box2d(1, 2, 3, 4)), Row(b=Box2d(3, 4, 5, 6))])]
     )
-    df.write.mode("overwrite").format("rikai").save(test_dir)
+    df.write.mode("overwrite").format("rikai").mode("overwrite").save(test_dir)
 
     records = _read_parquets(test_dir)
     assert_count_equal(
@@ -247,7 +247,7 @@ def test_to_pandas(spark: SparkSession, tmp_path: Path):
     spark_df = spark.createDataFrame(
         [Row(bboxes=[Row(b=Box2d(1, 2, 3, 4)), Row(b=Box2d(3, 4, 5, 6))])]
     )
-    spark_df.write.mode("overwrite").format("rikai").save(test_dir)
+    spark_df.write.mode("overwrite").format("rikai").mode("overwrite").save(test_dir)
     pandas_df = Dataset(test_dir).to_pandas()
     assert all([isinstance(row["b"], Box2d) for row in pandas_df.bboxes[0]])
 
@@ -294,7 +294,7 @@ def test_struct(spark: SparkSession, tmp_path: Path):
         ],
         schema=schema,
     )
-    df.repartition(1).write.mode("overwrite").format("rikai").save(test_dir)
+    df.repartition(1).write.mode("overwrite").format("rikai").mode("overwrite").save(test_dir)
 
     pdf = Dataset(test_dir).to_pandas()
     for expect, actual in zip(

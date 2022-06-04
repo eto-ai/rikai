@@ -55,7 +55,7 @@ def test_readme_example(spark: SparkSession, tmp_path: Path):
             }
         ]
     )
-    df.write.format("rikai").save(str(tmp_path))
+    df.write.format("rikai").mode("overwrite").save(str(tmp_path))
 
 
 def test_numpy_in_udf(spark: SparkSession, tmp_path: Path):
@@ -70,4 +70,4 @@ def test_numpy_in_udf(spark: SparkSession, tmp_path: Path):
     df = df.withColumn("resized", resize_mask("data"))
     df.show()
 
-    df.write.format("rikai").save(str(tmp_path))
+    df.write.format("rikai").mode("overwrite").save(str(tmp_path))

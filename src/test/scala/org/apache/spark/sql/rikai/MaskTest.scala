@@ -17,6 +17,7 @@
 package org.apache.spark.sql.rikai
 
 import ai.eto.rikai.SparkTestSession
+import org.apache.spark.sql.SaveMode
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.io.File
@@ -36,7 +37,7 @@ class MaskTest extends AnyFunSuite with SparkTestSession {
         (2, Mask.fromPolygon(Array(Array(1, 1, 5, 5, 10, 10))))
       ).toDF("id", "segmentation")
 
-    df.write.format("rikai").save(testDir.toString)
+    df.write.mode(SaveMode.Overwrite).format("rikai").save(testDir.toString)
 
     val actualDf = spark.read.load(testDir.toString)
     assert(df.count() == actualDf.count())

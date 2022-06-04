@@ -39,9 +39,9 @@ def _select_columns(spark: SparkSession, tmpdir: str):
         ]
     )
     if tmpdir.startswith("s3://"):
-        df.write.format("rikai").save("s3a" + tmpdir[2:])
+        df.write.format("rikai").mode("overwrite").save("s3a" + tmpdir[2:])
     else:
-        df.write.format("rikai").save(tmpdir)
+        df.write.format("rikai").mode("overwrite").save(tmpdir)
 
     dataset = Dataset(tmpdir, columns=["id", "col1"])
     actual = sorted(list(dataset), key=lambda x: x["id"])
@@ -61,7 +61,7 @@ def test_offset(spark: SparkSession, tmp_path: Path):
     df = spark.createDataFrame(
         [Row(id=i, col=f"val-{i}") for i in range(1000)]
     )
-    df.write.format("rikai").save(dest)
+    df.write.format("rikai").mode("overwrite").save(dest)
 
     data1 = Dataset(dest)
     row = next(iter(data1))
@@ -78,7 +78,7 @@ def test_offset(spark: SparkSession, tmp_path: Path):
 def test_dataset_count(spark: SparkSession, tmp_path: Path):
     dest = str(tmp_path)
     df = spark.createDataFrame([Row(id=i, val=f"val-{i}") for i in range(20)])
-    df.write.format("rikai").save(dest)
+    df.write.format("rikai").mode("overwrite").save(dest)
 
     dataset = Dataset(tmp_path)
     assert len(dataset) == 20
@@ -87,7 +87,7 @@ def test_dataset_count(spark: SparkSession, tmp_path: Path):
 def test_select_no_existed_columns(spark: SparkSession, tmp_path: Path):
     dest = str(tmp_path)
     df = spark.createDataFrame([Row(id=i, val=f"val-{i}") for i in range(20)])
-    df.write.format("rikai").save(dest)
+    df.write.format("rikai").mode("overwrite").save(dest)
 
     with pytest.raises(ColumnNotFoundError):
         Dataset(dest, columns=["id", "image"])
@@ -164,7 +164,7 @@ def test_group_size(spark: SparkSession, tmp_path: Path):
             for i in range(10000)
         ]
     )
-    df.write.format("rikai").save(dest)
+    df.write.format("rikai").mode("overwrite").save(dest)
     _verify_group_size(tmp_path, 32 * 1024 * 1024)  # Default group size
 
     (
@@ -207,7 +207,7 @@ def test_nested_struct(spark: SparkSession, tmp_path: Path):
     expected = [{"bar": {"fizz": 5}}]
     pdf = pd.DataFrame([[expected]], columns=["foo"])
     df = spark.createDataFrame(pdf, schema=schema)
-    df.write.format("rikai").save(str(tmp_path / "dataset"))
+    df.write.format("rikai").mode("overwrite").save(str(tmp_path / "dataset"))
     d = Dataset(tmp_path / "dataset")
     row = next(iter(d))
     assert json.dumps(row) == json.dumps({"foo": expected})

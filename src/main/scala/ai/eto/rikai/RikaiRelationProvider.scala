@@ -35,7 +35,7 @@ class RikaiRelationProvider
     * spark.read.format("rikai").load("s3://path/to/featurestore")
     * }}}
     */
-  override def shortName(): String = "rikai"
+  override def shortName(): String = "rikaiold"
 
   private def setSparkOptions(
       sqlContext: SQLContext,

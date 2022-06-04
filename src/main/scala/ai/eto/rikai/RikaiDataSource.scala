@@ -8,5 +8,5 @@ class RikaiDataSource extends ParquetDataSourceV2 {
   override def fallbackFileFormat: Class[_ <: FileFormat] =
     classOf[RikaiFileFormat]
 
-  override def shortName(): String = "rikai2"
+  override def shortName(): String = "rikai"
 }

@@ -1,16 +1,12 @@
 package ai.eto.rikai
-import org.apache.hadoop.mapreduce.{Job, TaskAttemptContext}
-import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.{SQLContext, SparkSession}
-import org.apache.spark.sql.execution.datasources.{
-  OutputWriter,
-  OutputWriterFactory
-}
+import org.apache.hadoop.fs.Path
+import org.apache.hadoop.mapreduce.Job
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.execution.datasources.OutputWriterFactory
 import org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat
 import org.apache.spark.sql.types.StructType
-import org.apache.hadoop.fs.Path
-import org.json4s.jackson.Serialization
 import org.json4s._
+import org.json4s.jackson.Serialization
 
 class RikaiFileFormat extends ParquetFileFormat {
   private def setSparkOptions(

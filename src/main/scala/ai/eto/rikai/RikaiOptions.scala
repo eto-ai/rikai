@@ -16,27 +16,27 @@
 
 package ai.eto.rikai
 
-private[rikai] case class RikaiOptions(parameters: Map[String, String]) {
+private[rikai] case class RikaiOptions(parameters: Seq[(String, String)]) {
 
   /** Base path for the feature dataset
     */
-  val path: String = parameters.getOrElse("path", "")
+  lazy val path: String = parameters.toMap.getOrElse("path", "")
 
   /** Parquet block size. */
-  val blockSize: Int =
-    parameters
+  lazy val blockSize: Int =
+    parameters.toMap
       .getOrElse("rikai.block.size", s"${RikaiOptions.defaultBlockSize}")
       .toInt
 
   /** Extract options */
-  val options: Map[String, String] =
-    parameters
+  lazy val options: Map[String, String] =
+    parameters.toMap
       .filterKeys(k => !RikaiOptions.excludedKeys(k))
       .toMap
 
   /** Columns specified via df.partitionBy() */
-  val partitionColumns: Option[Seq[String]] =
-    parameters.get("__partition_columns") match {
+  lazy val partitionColumns: Option[Seq[String]] =
+    parameters.toMap.get("__partition_columns") match {
       case Some(cols) =>
         Some(
           cols

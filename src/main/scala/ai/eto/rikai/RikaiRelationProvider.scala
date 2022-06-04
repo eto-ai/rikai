@@ -63,7 +63,7 @@ class RikaiRelationProvider
       parameters: Map[String, String],
       data: org.apache.spark.sql.DataFrame
   ): BaseRelation = {
-    val options = new RikaiOptions(parameters);
+    val options = new RikaiOptions(parameters.toSeq)
     setSparkOptions(sqlContext, options)
 
     val relation = new RikaiRelation(options)(sqlContext)
@@ -76,7 +76,7 @@ class RikaiRelationProvider
       sqlContext: SQLContext,
       parameters: Map[String, String]
   ): BaseRelation = {
-    val options = new RikaiOptions(parameters);
+    val options = new RikaiOptions(parameters.toSeq)
     setSparkOptions(sqlContext, options)
     new RikaiRelation(options)(sqlContext)
   }

@@ -24,61 +24,45 @@ class RikaiFileFormat extends ParquetFileFormat {
     conf.setInt("parquet.block.size", options.blockSize)
   }
 
+  def writeMetadataFile(
+      metadataFile: Path,
+      sparkSession: SparkSession,
+      options: RikaiOptions
+  ): Unit = {
+    implicit val formats: Formats = Serialization.formats(NoTypeHints)
+    println("ctx ctx ctx" + sparkSession.sparkContext)
+    println("hdp hdp hdp" + sparkSession.sparkContext.hadoopConfiguration)
+    val fs = metadataFile.getFileSystem(
+      sparkSession.sparkContext.hadoopConfiguration
+    )
+
+    val outStream = fs.create(metadataFile, true)
+    try {
+      Serialization.write(Map("options" -> options.options), outStream)
+    } finally {
+      outStream.close()
+    }
+  }
+
   override def prepareWrite(
       sparkSession: SparkSession,
       job: Job,
       options: Map[String, String],
       dataSchema: StructType
   ): OutputWriterFactory = {
-    val rikaiOptions = new RikaiOptions(options)
+    val rikaiOptions = new RikaiOptions(options.toSeq)
     setSparkOptions(sparkSession, rikaiOptions)
-    val parquetFactory =
-      super.prepareWrite(sparkSession, job, options, dataSchema)
 
-    new OutputWriterFactory {
-      override def getFileExtension(context: TaskAttemptContext): String =
-        parquetFactory.getFileExtension(context)
+    /** Rikai metadata directory. */
+    val rikaiDir = new Path(rikaiOptions.path, "_rikai")
 
-      override def newInstance(
-          path: String,
-          dataSchema: StructType,
-          context: TaskAttemptContext
-      ): OutputWriter = new OutputWriter {
-        val parquetWriter: OutputWriter =
-          parquetFactory.newInstance(path, dataSchema, context)
+    /** Metadata file name */
+    val metadataFile = new Path(rikaiDir, "metadata.json")
+    println("file file file" + metadataFile)
+    println("sess sess sess" + sparkSession)
+    println("ooooo" + rikaiOptions)
+    writeMetadataFile(metadataFile, sparkSession, rikaiOptions)
 
-        def writeMetadataFile(
-            metadataFile: Path,
-            sparkSession: SparkSession,
-            options: RikaiOptions
-        ): Unit = {
-          implicit val formats: Formats = Serialization.formats(NoTypeHints)
-          val fs = metadataFile.getFileSystem(
-            sparkSession.sparkContext.hadoopConfiguration
-          )
-
-          val outStream = fs.create(metadataFile, true)
-          try {
-            Serialization.write(Map("options" -> options.options), outStream)
-          } finally {
-            outStream.close()
-          }
-        }
-
-        override def write(row: InternalRow): Unit = parquetWriter.write(row)
-
-        override def close(): Unit = {
-
-          /** Rikai metadata directory. */
-          val rikaiDir = new Path(rikaiOptions.path, "_rikai")
-
-          /** Metadata file name */
-          val metadataFile = new Path(rikaiDir, "metadata.json")
-
-          writeMetadataFile(metadataFile, sparkSession, rikaiOptions)
-          parquetWriter.close()
-        }
-      }
-    }
+    super.prepareWrite(sparkSession, job, options, dataSchema)
   }
 }

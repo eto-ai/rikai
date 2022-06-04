@@ -61,7 +61,9 @@ def test_torch_dataset(spark, tmp_path, num_workers):
         )
 
     df = spark.createDataFrame(data)
-    df.write.mode("overwrite").format("rikai").mode("overwrite").save(str(dataset_dir))
+    df.write.mode("overwrite").format("rikai").mode("overwrite").save(
+        str(dataset_dir)
+    )
     dataset = Dataset(dataset_dir)
     loader = torchDataLoader(
         dataset,

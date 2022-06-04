@@ -173,7 +173,9 @@ def test_list_of_structs(spark: SparkSession, tmp_path: Path):
         ],
         schema=schema,
     )
-    df.repartition(1).write.mode("overwrite").format("rikai").mode("overwrite").save(test_dir)
+    df.repartition(1).write.mode("overwrite").format("rikai").mode(
+        "overwrite"
+    ).save(test_dir)
 
     records = _read_parquets(test_dir)
     for expect, actual in zip(
@@ -247,7 +249,9 @@ def test_to_pandas(spark: SparkSession, tmp_path: Path):
     spark_df = spark.createDataFrame(
         [Row(bboxes=[Row(b=Box2d(1, 2, 3, 4)), Row(b=Box2d(3, 4, 5, 6))])]
     )
-    spark_df.write.mode("overwrite").format("rikai").mode("overwrite").save(test_dir)
+    spark_df.write.mode("overwrite").format("rikai").mode("overwrite").save(
+        test_dir
+    )
     pandas_df = Dataset(test_dir).to_pandas()
     assert all([isinstance(row["b"], Box2d) for row in pandas_df.bboxes[0]])
 
@@ -294,7 +298,9 @@ def test_struct(spark: SparkSession, tmp_path: Path):
         ],
         schema=schema,
     )
-    df.repartition(1).write.mode("overwrite").format("rikai").mode("overwrite").save(test_dir)
+    df.repartition(1).write.mode("overwrite").format("rikai").mode(
+        "overwrite"
+    ).save(test_dir)
 
     pdf = Dataset(test_dir).to_pandas()
     for expect, actual in zip(

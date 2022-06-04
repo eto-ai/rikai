@@ -34,7 +34,7 @@ class MaskTest extends AnyFunSuite with SparkTestSession {
     val df =
       Seq(
         (1, Mask.fromRLE(Array(1, 2, 3), 10, 5)),
-        (2, Mask.fromPolygon(Array(Array(1, 1, 5, 5, 10, 10))))
+        (2, Mask.fromPolygon(Array(Array(1, 1, 5, 5, 10, 10)), 5, 20))
       ).toDF("id", "segmentation")
 
     df.write.mode(SaveMode.Overwrite).format("rikai").save(testDir.toString)
@@ -43,5 +43,9 @@ class MaskTest extends AnyFunSuite with SparkTestSession {
     assert(df.count() == actualDf.count())
     assert(df.exceptAll(actualDf).isEmpty)
     df.show()
+
+    val polygon = actualDf.filter("id = 2").first()
+    assert(polygon.getAs[Mask]("segmentation").width == 5);
+    assert(polygon.getAs[Mask]("segmentation").height == 20);
   }
 }

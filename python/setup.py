@@ -34,7 +34,7 @@ gcp = ["gcsfs"]
 docs = ["sphinx", "sphinx-material"]
 video = ["ffmpeg-python", "scenedetect<0.6"]
 youtube = ["pafy", "youtube_dl"]
-mlflow = ["mlflow==1.24"]
+mlflow = ["mlflow==1.26.1"]
 all = (
     sklearn
     + torch
@@ -64,7 +64,7 @@ setup(
     url="https://github.com/eto-ai/rikai",
     packages=find_packages(),
     include_package_data=True,
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     install_requires=[
         "antlr4-python3-runtime==4.8",
         "ipython>=7.31.1,!=8.0.0",

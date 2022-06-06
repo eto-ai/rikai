@@ -62,6 +62,7 @@ class FeatureExtractorType(TorchModelType):
 
         SELECT ML_PREDICT(resnet_features, image) AS embedding FROM images
     """
+
     def __init__(self):
         super().__init__("feature_extractor")
         self.original_model_type: Optional[TorchModelType] = None
@@ -69,7 +70,9 @@ class FeatureExtractorType(TorchModelType):
     def load_model(self, spec: ModelSpec, **kwargs):
         self.spec = spec
         self.model = self.spec.load_model()
-        self.original_model_type = parse_model_type("pytorch", self.spec.options["model_type"])
+        self.original_model_type = parse_model_type(
+            "pytorch", self.spec.options["model_type"]
+        )
         self.model.eval()
         if "device" in kwargs:
             self.model.to(kwargs.get("device"))

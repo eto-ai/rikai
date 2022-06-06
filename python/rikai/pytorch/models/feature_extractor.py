@@ -48,6 +48,21 @@ class FeatureExtractor(torch.nn.Module):
 
 
 class FeatureExtractorType(TorchModelType):
+    """(Experimental) Generic Feature Extractor
+
+    Examples
+    --------
+
+    .. code-block:: sql
+
+        CREATE MODEL resnet_features
+        FLAVOR pytorch
+        MODEL_TYPE feature_extractors
+        OPTIONS (model_type = 'resnet')  # Only resnet is tested
+        USING '<uri to resnet model>'
+
+        SELECT ML_PREDICT(resnet_features, image) AS embedding FROM images
+    """
     def __init__(self):
         super().__init__("feature_extractor")
         self.original_model_type: Optional[TorchModelType] = None

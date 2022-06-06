@@ -16,6 +16,7 @@
 
 import rikai.pytorch.models.efficientnet
 import rikai.pytorch.models.fasterrcnn
+import rikai.pytorch.models.feature_extractor
 import rikai.pytorch.models.keypointrcnn
 import rikai.pytorch.models.maskrcnn
 import rikai.pytorch.models.resnet

@@ -32,7 +32,6 @@ class FeatureExtractor(torch.nn.Module):
 
     def __init__(self, model: torch.nn.Module, node: str):
         super().__init__()
-        self._original_model = model
         self._node = node
         self.model = create_feature_extractor(
             model, {node: self._OUTPUT_FIELD}

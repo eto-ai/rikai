@@ -41,7 +41,9 @@ def test_resnet_features(
     """
     )
     df = spark.sql(
-        f"SELECT ML_PREDICT(resnet_features, image('{asset_path / 'cat.jpg'}')) as embedding"
+        f"""SELECT ML_PREDICT(
+            resnet_features, image('{asset_path / 'cat.jpg'}')
+        ) as embedding"""
     )
 
     assert df.schema == StructType(

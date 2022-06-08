@@ -25,6 +25,7 @@ def test_df_to_rikai(spark: SparkSession, tmp_path: Path):
     df = spark.createDataFrame(
         [Row(Box2d(1, 2, 3, 4)), Row(Box2d(23, 33, 44, 88))], ["bbox"]
     )
-    df_to_rikai(df, str(tmp_path))
-    actual_df = spark.read.format("rikai").load(str(tmp_path))
+    write_path = str(tmp_path) + 'df'
+    df_to_rikai(df, write_path)
+    actual_df = spark.read.format("rikai").load(write_path)
     assert_count_equal(df.collect(), actual_df.collect())

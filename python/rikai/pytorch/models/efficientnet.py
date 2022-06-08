@@ -20,7 +20,6 @@ https://arxiv.org/abs/1905.11946
 import torchvision
 
 from rikai.pytorch.models.torch import (
-    classification_label_fn,
     ClassificationModelType,
 )
 

@@ -14,6 +14,7 @@
 
 """Rikai-implemented PyTorch models and executors."""
 
+import rikai.pytorch.models.convnext
 import rikai.pytorch.models.efficientnet
 import rikai.pytorch.models.fasterrcnn
 import rikai.pytorch.models.feature_extractor

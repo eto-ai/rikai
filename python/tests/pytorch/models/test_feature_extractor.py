@@ -17,11 +17,13 @@ from typing import Callable
 
 import pytest
 import torch
+import torchvision.transforms as T
 from pyspark.sql import SparkSession
 from pyspark.sql.types import ArrayType, FloatType, StructField, StructType
 from torchvision.models import convnext_base, efficientnet_b0, resnet50
 
 from rikai.pytorch.models.feature_extractor import FeatureExtractor
+from rikai.types import Image
 
 
 @pytest.mark.parametrize(
@@ -65,3 +67,24 @@ def test_torch_classification(
         [StructField("embedding", ArrayType(FloatType()))]
     )
     assert len(df.first().embedding) == dimension
+
+
+def test_compile_to_torchscript(asset_path: Path, tmp_path: Path):
+    resnet = resnet50(pretrained=True)
+    extractor = torch.jit.script(FeatureExtractor(resnet, "avgpool"))
+
+    with (tmp_path / "model.pth").open("wb") as fobj:
+        torch.jit.save(extractor, fobj)
+
+    loaded = torch.jit.load(str(tmp_path / "model.pth"))
+
+    transform = T.Compose(
+        [
+            T.ToTensor(),
+            T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ]
+    )
+
+    img = Image(asset_path / "cat.jpg")
+    out = loaded(transform(img.to_pil()).unsqueeze(0))
+    assert out.shape == (1, 2048, 1, 1)

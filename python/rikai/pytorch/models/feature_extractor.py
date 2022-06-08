@@ -28,14 +28,16 @@ __all__ = ["FeatureExtractor", "FeatureExtractorType"]
 class FeatureExtractor(torch.nn.Module):
     """Extract features"""
 
-    _OUTPUT_FIELD = "_rikai_out"
-
-    def __init__(self, model: torch.nn.Module, node: str):
+    def __init__(
+        self,
+        model: torch.nn.Module,
+        node: str,
+        output_field: str = "_rikai_out",
+    ):
         super().__init__()
         self._node = node
-        self.model = create_feature_extractor(
-            model, {node: self._OUTPUT_FIELD}
-        )
+        self.model = create_feature_extractor(model, {node: output_field})
+        self._output_field = output_field
 
     def eval(self: FeatureExtractor) -> FeatureExtractor:
         self.model.eval()
@@ -43,7 +45,7 @@ class FeatureExtractor(torch.nn.Module):
 
     def forward(self, images: torch.Tensor) -> torch.Tensor:
         preds = self.model(images)
-        return preds[self._OUTPUT_FIELD]
+        return preds[self._output_field]
 
 
 class FeatureExtractorType(TorchModelType):

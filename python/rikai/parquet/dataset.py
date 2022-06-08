@@ -289,7 +289,9 @@ class Dataset:
             return col.apply(partial(_convert_udt_value, udt=udt))
         elif field_type["type"] == "struct":
             return col.apply(lambda d: self._convert(d, field_type))
-        elif field_type["type"] == "array":
+        elif field_type["type"] == "array" and isinstance(
+            field_type["elementType"], dict
+        ):
             return col.apply(
                 lambda d: self._convert_array(d, field_type["elementType"])
             )

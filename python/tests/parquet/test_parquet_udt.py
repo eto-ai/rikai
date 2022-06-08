@@ -11,11 +11,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import json
 from pathlib import Path
 
 # Third Party
 import numpy as np
+import pandas as pd
 import pytest
 from pyspark.ml.linalg import DenseMatrix, Vectors
 from pyspark.sql import Row
@@ -34,6 +35,8 @@ from rikai.parquet import Dataset
 from rikai.spark.types import Box2dType, NDArrayType
 from rikai.testing.asserters import assert_count_equal
 from rikai.types import Box2d, Image
+
+from pandas.testing import assert_frame_equal
 
 
 def _read_parquets(base_dir):
@@ -253,6 +256,18 @@ def test_to_pandas(spark: SparkSession, tmp_path: Path):
 
     pandas_df = Dataset(test_dir).to_pandas(1)
     assert all([isinstance(row["b"], Box2d) for row in pandas_df.bboxes[0]])
+
+
+def test_to_pandas_complex_types(spark: SparkSession, tmp_path: Path):
+    schema = StructType(
+        fields=[StructField("foo", ArrayType(elementType=StringType()))]
+    )
+    expected = ["v1", "v2"]
+    pdf = pd.DataFrame([[expected]], columns=["foo"])
+    df = spark.createDataFrame(pdf, schema=schema)
+    df.write.format("rikai").save(str(tmp_path / "dataset"))
+    rt = Dataset(tmp_path / "dataset").to_pandas()
+    assert_frame_equal(rt, pdf)
 
 
 def test_struct(spark: SparkSession, tmp_path: Path):

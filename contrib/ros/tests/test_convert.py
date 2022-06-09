@@ -111,8 +111,7 @@ def test_std_msgs_header(spark: SparkSession, tmp_path):
     )
     df.show()
     df.printSchema()
-    df_path = str(tmp_path) + "df"
-    df.write.format("rikai").save(df_path)
+    df.write.format("rikai").save(str(tmp_path) + "df")
 
 
 def test_simple_spark_schema():

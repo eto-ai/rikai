@@ -98,4 +98,26 @@ class RikaiRelationTest extends AnyFunSuite with SparkTestSession {
 
     assert(partitions == Set("label=car", "label=people", "label=tree"))
   }
+
+  test("Have metadata in saveAsTable") {
+    import scala.reflect.io.Directory
+
+    examples.write
+      .format("rikai")
+      .partitionBy("label")
+      .mode(SaveMode.Overwrite)
+      .saveAsTable("test_table")
+    val path = spark
+      .sql("desc formatted test_table")
+      .filter($"col_name" === "Location")
+      .collect()
+      .head
+      .getAs[String]("data_type")
+    val dir = new File(path.substring(path.indexOf("/")))
+    val rikaiPath = new File(dir, "_rikai/metadata.json")
+    println(dir.list().toSeq)
+    val rikaiExists = rikaiPath.exists()
+    new Directory(dir).deleteRecursively()
+    assert(rikaiExists)
+  }
 }

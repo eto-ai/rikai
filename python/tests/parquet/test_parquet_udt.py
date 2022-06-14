@@ -296,7 +296,7 @@ def test_struct(spark: SparkSession, tmp_path: Path):
         ],
         schema=schema,
     )
-    df.repartition(1).write.format("rikai").mode("overwrite").save(test_dir)
+    df.repartition(1).write.mode("overwrite").format("rikai").save(test_dir)
 
     pdf = Dataset(test_dir).to_pandas()
     for expect, actual in zip(

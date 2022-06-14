@@ -39,11 +39,11 @@ def _select_columns(spark: SparkSession, tmpdir: str):
         ]
     )
     if tmpdir.startswith("s3://"):
-        df.write.format("rikai").mode("overwrite").save("s3a" + tmpdir[2:])
+        df.write.format("rikai").save("s3a" + tmpdir[2:] + "/data")
     else:
-        df.write.format("rikai").mode("overwrite").save(tmpdir)
+        df.write.format("rikai").save(tmpdir + "/data")
 
-    dataset = Dataset(tmpdir, columns=["id", "col1"])
+    dataset = Dataset(tmpdir + "/data", columns=["id", "col1"])
     actual = sorted(list(dataset), key=lambda x: x["id"])
 
     assert_count_equal(
@@ -57,11 +57,11 @@ def test_select_columns(spark: SparkSession, tmp_path: Path):
 
 
 def test_offset(spark: SparkSession, tmp_path: Path):
-    dest = str(tmp_path)
+    dest = str(tmp_path / "data")
     df = spark.createDataFrame(
         [Row(id=i, col=f"val-{i}") for i in range(1000)]
     )
-    df.write.format("rikai").mode("overwrite").save(dest)
+    df.write.format("rikai").save(dest)
 
     data1 = Dataset(dest)
     row = next(iter(data1))
@@ -76,27 +76,27 @@ def test_offset(spark: SparkSession, tmp_path: Path):
 
 
 def test_dataset_count(spark: SparkSession, tmp_path: Path):
-    dest = str(tmp_path)
+    dest = str(tmp_path / "data")
     df = spark.createDataFrame([Row(id=i, val=f"val-{i}") for i in range(20)])
-    df.write.format("rikai").mode("overwrite").save(dest)
+    df.write.format("rikai").save(dest)
 
     dataset = Dataset(tmp_path)
     assert len(dataset) == 20
 
 
 def test_select_no_existed_columns(spark: SparkSession, tmp_path: Path):
-    dest = str(tmp_path)
+    dest = str(tmp_path / "data")
     df = spark.createDataFrame([Row(id=i, val=f"val-{i}") for i in range(20)])
-    df.write.format("rikai").mode("overwrite").save(dest)
+    df.write.format("rikai").save(dest)
 
     with pytest.raises(ColumnNotFoundError):
         Dataset(dest, columns=["id", "image"])
 
 
 def test_read_metadata(spark: SparkSession, tmp_path: Path):
-    dest = str(tmp_path)
+    dest = str(tmp_path / "data")
     df = spark.createDataFrame([Row(id=i, col=f"val-{i}") for i in range(50)])
-    df.write.format("rikai").mode("overwrite").option("metadata1", 1).option(
+    df.write.format("rikai").option("metadata1", 1).option(
         "metadata2", "value-2"
     ).save(dest)
 
@@ -118,9 +118,7 @@ def test_read_metadata(spark: SparkSession, tmp_path: Path):
 def test_save_as_table_metadata(spark: SparkSession):
     df = spark.createDataFrame([Row(id=i, col=f"val-{i}") for i in range(50)])
     spark.sql("DROP TABLE IF EXISTS test_table_metadata")
-    df.write.option("metadata1", 1).option("metadata2", "value-2").mode(
-        "overwrite"
-    ).saveAsTable("test_table_metadata", format="rikai")
+    df.write.option("metadata1", 1).option("metadata2", "value-2").saveAsTable("test_table_metadata", format="rikai")
     table_path = spark.sql("DESC FORMATTED test_table_metadata").filter(
         "col_name = 'Location'"
     )
@@ -149,7 +147,7 @@ def _verify_group_size(dest: Path, group_size: int):
 
 
 def test_group_size(spark: SparkSession, tmp_path: Path):
-    dest = str(tmp_path)
+    dest = str(tmp_path / "data")
     df = spark.createDataFrame(
         [
             Row(
@@ -164,7 +162,7 @@ def test_group_size(spark: SparkSession, tmp_path: Path):
             for i in range(10000)
         ]
     )
-    df.write.format("rikai").mode("overwrite").save(dest)
+    df.write.format("rikai").save(dest)
     _verify_group_size(tmp_path, 32 * 1024 * 1024)  # Default group size
 
     (
@@ -207,7 +205,7 @@ def test_nested_struct(spark: SparkSession, tmp_path: Path):
     expected = [{"bar": {"fizz": 5}}]
     pdf = pd.DataFrame([[expected]], columns=["foo"])
     df = spark.createDataFrame(pdf, schema=schema)
-    df.write.format("rikai").mode("overwrite").save(str(tmp_path / "dataset"))
+    df.write.format("rikai").save(str(tmp_path / "dataset"))
     d = Dataset(tmp_path / "dataset")
     row = next(iter(d))
     assert json.dumps(row) == json.dumps({"foo": expected})

@@ -100,9 +100,13 @@ def conv(df: pd.DataFrame, schema: dict):
         elif is_udt_type(typ):
             converted[name] = ser.apply(lambda x: _conv_udt(x, typ))
         elif typ["type"] == "array":
-            converted[name] = ser.apply(
-                lambda arr: [conv_elm(x, typ["elementType"]) for x in arr]
-            )
+            elm_type = typ["elementType"]
+            if isinstance(elm_type, dict):
+                converted[name] = ser.apply(
+                    lambda arr: [conv_elm(x, typ["elementType"]) for x in arr]
+                )
+            else:
+                converted[name] = ser
         elif typ["type"] == "struct":
             converted[name] = ser.apply(lambda d: conv_elm(d, typ))
         else:

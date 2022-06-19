@@ -101,7 +101,7 @@ def _make_df(nrows=1):
         fields=[
             StructField("image_id", StringType()),
             StructField("image", ImageType()),
-            StructField('image_labels', ArrayType(elementType=StringType())),
+            StructField("image_labels", ArrayType(elementType=StringType())),
             StructField("split", StringType()),
             StructField(
                 "annotations",
@@ -124,7 +124,7 @@ def _make_df(nrows=1):
             {
                 "image_id": str(i),
                 "image": Image(f"s3://bucket/path_{i}.jpg"),
-                "image_labels": ['foo', 'bar'],
+                "image_labels": ["foo", "bar"],
                 "split": splits[random.randint(0, len(splits) - 1)],
                 "annotations": [
                     {

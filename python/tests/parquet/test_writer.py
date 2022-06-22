@@ -27,6 +27,8 @@ from rikai.parquet.writer import df_to_rikai
 from rikai.spark.types import *
 from rikai.types import *
 
+IMG_ARR = np.random.randint(0, 255, size=(100, 100, 3), dtype=np.uint8)
+
 
 def test_roundtrip(spark: SparkSession, tmp_path: Path):
     df, schema = _make_df()
@@ -34,6 +36,8 @@ def test_roundtrip(spark: SparkSession, tmp_path: Path):
 
     pandas_df = pd.DataFrame(Dataset(str(tmp_path)))
     assert isinstance(pandas_df.image[0], Image)
+    assert isinstance(pandas_df.embedded_image[0], Image)
+    assert (pandas_df.embedded_image[0].to_numpy() == IMG_ARR).all()
     spark_df = spark.read.format("rikai").load(str(tmp_path))
     assert schema.json() == spark_df.schema.json()
 
@@ -101,6 +105,7 @@ def _make_df(nrows=1):
         fields=[
             StructField("image_id", StringType()),
             StructField("image", ImageType()),
+            StructField("embedded_image", ImageType()),
             StructField("image_labels", ArrayType(elementType=StringType())),
             StructField("split", StringType()),
             StructField(
@@ -124,6 +129,7 @@ def _make_df(nrows=1):
             {
                 "image_id": str(i),
                 "image": Image(f"s3://bucket/path_{i}.jpg"),
+                "embedded_image": Image.from_array(IMG_ARR),
                 "image_labels": ["foo", "bar"],
                 "split": splits[random.randint(0, len(splits) - 1)],
                 "annotations": [

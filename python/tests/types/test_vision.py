@@ -174,7 +174,7 @@ def test_to_dict():
     data = np.random.randint(0, 255, size=(100, 100, 3), dtype=np.uint8)
     img = Image.from_array(data)
     assert (
-        base64.decodebytes(img.to_dict()["data"].encode("utf-8")) == img.data
+        img.to_dict()["data"] == img.data
     )
     img = Image("foo")
     assert img.to_dict() == {"uri": "foo"}

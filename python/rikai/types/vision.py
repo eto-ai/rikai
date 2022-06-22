@@ -222,7 +222,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
 
     def to_dict(self) -> dict:
         if self.is_embedded:
-            return {"data": base64.b64encode(self.data).decode("ascii")}
+            return {"data": self.data}
         return {"uri": self.uri}
 
     def to_embedded(self) -> Image:

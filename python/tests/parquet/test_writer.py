@@ -36,6 +36,7 @@ def test_roundtrip(spark: SparkSession, tmp_path: Path):
 
     pandas_df = pd.DataFrame(Dataset(str(tmp_path)))
     assert isinstance(pandas_df.image[0], Image)
+    assert pandas_df.image[0].uri == 's3://bucket/path_0.jpg'
     assert isinstance(pandas_df.embedded_image[0], Image)
     assert (pandas_df.embedded_image[0].to_numpy() == IMG_ARR).all()
     spark_df = spark.read.format("rikai").load(str(tmp_path))

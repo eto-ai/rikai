@@ -17,6 +17,7 @@
 package org.apache.spark.sql.rikai
 
 import ai.eto.rikai.SparkTestSession
+import org.apache.spark.sql.SaveMode
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.io.File
@@ -44,7 +45,7 @@ class Box3dTest extends AnyFunSuite with SparkTestSession {
       )
     ).toDF()
 
-    df.write.format("rikai").save(testDir.toString())
+    df.write.mode(SaveMode.Overwrite).format("rikai").save(testDir.toString())
 
     val actualDf = spark.read.format("rikai").load(testDir.toString())
     assert(df.count() == actualDf.count())

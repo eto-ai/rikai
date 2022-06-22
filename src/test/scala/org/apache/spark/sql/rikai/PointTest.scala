@@ -17,6 +17,7 @@
 package org.apache.spark.sql.rikai
 
 import ai.eto.rikai.SparkTestSession
+import org.apache.spark.sql.SaveMode
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.io.File
@@ -38,7 +39,7 @@ class PointTest extends AnyFunSuite with SparkTestSession {
 
     val df = Seq((1, new Point(1, 2, 3))).toDF()
 
-    df.write.format("rikai").save(testDir.toString())
+    df.write.format("rikai").mode(SaveMode.Overwrite).save(testDir.toString())
     df.show()
 
     val actualDf = spark.read.format("rikai").load(testDir.toString())

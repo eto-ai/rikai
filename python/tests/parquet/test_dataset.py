@@ -39,11 +39,11 @@ def _select_columns(spark: SparkSession, tmpdir: str):
         ]
     )
     if tmpdir.startswith("s3://"):
-        df.write.format("rikai").save("s3a" + tmpdir[2:])
+        df.write.format("rikai").save("s3a" + tmpdir[2:] + "/data")
     else:
-        df.write.format("rikai").save(tmpdir)
+        df.write.format("rikai").save(tmpdir + "/data")
 
-    dataset = Dataset(tmpdir, columns=["id", "col1"])
+    dataset = Dataset(tmpdir + "/data", columns=["id", "col1"])
     actual = sorted(list(dataset), key=lambda x: x["id"])
 
     assert_count_equal(
@@ -57,7 +57,7 @@ def test_select_columns(spark: SparkSession, tmp_path: Path):
 
 
 def test_offset(spark: SparkSession, tmp_path: Path):
-    dest = str(tmp_path)
+    dest = str(tmp_path / "data")
     df = spark.createDataFrame(
         [Row(id=i, col=f"val-{i}") for i in range(1000)]
     )
@@ -76,7 +76,7 @@ def test_offset(spark: SparkSession, tmp_path: Path):
 
 
 def test_dataset_count(spark: SparkSession, tmp_path: Path):
-    dest = str(tmp_path)
+    dest = str(tmp_path / "data")
     df = spark.createDataFrame([Row(id=i, val=f"val-{i}") for i in range(20)])
     df.write.format("rikai").save(dest)
 
@@ -85,7 +85,7 @@ def test_dataset_count(spark: SparkSession, tmp_path: Path):
 
 
 def test_select_no_existed_columns(spark: SparkSession, tmp_path: Path):
-    dest = str(tmp_path)
+    dest = str(tmp_path / "data")
     df = spark.createDataFrame([Row(id=i, val=f"val-{i}") for i in range(20)])
     df.write.format("rikai").save(dest)
 
@@ -94,22 +94,23 @@ def test_select_no_existed_columns(spark: SparkSession, tmp_path: Path):
 
 
 def test_read_metadata(spark: SparkSession, tmp_path: Path):
-    dest = str(tmp_path)
+    data_path = tmp_path / "data"
+    dest = str(data_path)
     df = spark.createDataFrame([Row(id=i, col=f"val-{i}") for i in range(50)])
     df.write.format("rikai").option("metadata1", 1).option(
         "metadata2", "value-2"
     ).save(dest)
 
-    metadata_path = tmp_path / "_rikai" / "metadata.json"
+    metadata_path = data_path / "_rikai" / "metadata.json"
     assert metadata_path.exists()
     with metadata_path.open() as fobj:
         metadata = json.load(fobj)
         assert metadata == {
             "options": {"metadata1": "1", "metadata2": "value-2"}
         }
-    assert len(list(tmp_path.glob("**/*.json"))) > 0
+    assert len(list((data_path).glob("**/*.json"))) > 0
 
-    data = Dataset(tmp_path)
+    data = Dataset(data_path)
     assert data.metadata == {
         "options": {"metadata1": "1", "metadata2": "value-2"}
     }
@@ -149,7 +150,7 @@ def _verify_group_size(dest: Path, group_size: int):
 
 
 def test_group_size(spark: SparkSession, tmp_path: Path):
-    dest = str(tmp_path)
+    dest = str(tmp_path / "data")
     df = spark.createDataFrame(
         [
             Row(

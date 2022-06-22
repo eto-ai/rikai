@@ -16,7 +16,12 @@
 
 package ai.eto
 
-import org.apache.spark.sql.{DataFrame, DataFrameReader, DataFrameWriter}
+import org.apache.spark.sql.{
+  DataFrame,
+  DataFrameReader,
+  DataFrameWriter,
+  SaveMode
+}
 
 package object rikai {
   implicit class RikaiReader(reader: DataFrameReader) {
@@ -27,7 +32,7 @@ package object rikai {
 
   implicit class RikaiWriter[T](writer: DataFrameWriter[T]) {
     def rikai(path: String): Unit = {
-      writer.format("rikai").save(path)
+      writer.mode(SaveMode.Overwrite).format("rikai").save(path)
     }
   }
 }

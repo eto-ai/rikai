@@ -44,14 +44,14 @@ def _read_parquets(base_dir):
 
 
 def test_spark_ml_vectors(spark: SparkSession, tmp_path: Path):
-    test_dir = str(tmp_path)
+    test_dir = str(tmp_path / "data")
     df = spark.createDataFrame(
         [
             {"name": "a", "vec": Vectors.dense([1, 2])},
             {"name": "b", "vec": Vectors.dense([10])},
         ]
     )
-    df.write.mode("overwrite").parquet(str(tmp_path))
+    df.write.parquet(test_dir)
 
     d = spark.read.parquet(test_dir)
     d.show()
@@ -70,14 +70,14 @@ def test_spark_ml_vectors(spark: SparkSession, tmp_path: Path):
 
 
 def test_spark_ml_matrix(spark: SparkSession, tmp_path: Path):
-    test_dir = str(tmp_path)
+    test_dir = str(tmp_path / "data")
     df = spark.createDataFrame(
         [
             {"name": 1, "mat": DenseMatrix(2, 2, range(4))},
             {"name": 2, "mat": DenseMatrix(3, 3, range(9))},
         ]
     )
-    df.write.mode("overwrite").format("rikai").save(test_dir)
+    df.write.format("rikai").save(test_dir)
     df.show()
 
     records = sorted(_read_parquets(test_dir), key=lambda x: x["name"])
@@ -109,9 +109,11 @@ def test_images(spark: SparkSession, tmp_path):
         },
     ]
     df = spark.createDataFrame(expected)
-    df.write.mode("overwrite").parquet(str(tmp_path))
+    df.write.parquet(str(tmp_path / "data"))
 
-    records = sorted(_read_parquets(str(tmp_path)), key=lambda x: x["id"])
+    records = sorted(
+        _read_parquets(str(tmp_path / "data")), key=lambda x: x["id"]
+    )
     assert_count_equal(expected, records)
 
 
@@ -122,21 +124,21 @@ def test_images(spark: SparkSession, tmp_path):
 def test_numpy(spark: SparkSession, tmp_path, data_type):
     import rikai
 
-    test_dir = str(tmp_path)
+    test_dir = str(tmp_path / "data")
     expected = [{"n": rikai.numpy.array(range(4), dtype=data_type)}]
 
     df = spark.createDataFrame(
         expected,
         schema=StructType([StructField("n", NDArrayType(), False)]),
     )
-    df.write.mode("overwrite").format("rikai").save(test_dir)
+    df.write.format("rikai").save(test_dir)
 
     records = _read_parquets(test_dir)
     assert np.array_equal(np.array(range(4), dtype=data_type), records[0]["n"])
 
 
 def test_list_of_structs(spark: SparkSession, tmp_path: Path):
-    test_dir = str(tmp_path)
+    test_dir = str(tmp_path / "data")
     schema = StructType(
         [
             StructField("id", IntegerType(), False),
@@ -176,7 +178,7 @@ def test_list_of_structs(spark: SparkSession, tmp_path: Path):
         ],
         schema=schema,
     )
-    df.repartition(1).write.mode("overwrite").format("rikai").save(test_dir)
+    df.repartition(1).write.format("rikai").save(test_dir)
 
     records = _read_parquets(test_dir)
     for expect, actual in zip(
@@ -222,7 +224,7 @@ def test_list_of_structs(spark: SparkSession, tmp_path: Path):
 
 
 def test_bbox(spark: SparkSession, tmp_path: Path):
-    test_dir = str(tmp_path)
+    test_dir = str(tmp_path / "data")
     df = spark.createDataFrame([Row(b=Box2d(1, 2, 3, 4))])
     df.write.mode("overwrite").format("rikai").save(test_dir)
 
@@ -232,7 +234,7 @@ def test_bbox(spark: SparkSession, tmp_path: Path):
 
 
 def test_bbox_list(spark: SparkSession, tmp_path: Path):
-    test_dir = str(tmp_path)
+    test_dir = str(tmp_path / "data")
     df = spark.createDataFrame(
         [Row(bboxes=[Row(b=Box2d(1, 2, 3, 4)), Row(b=Box2d(3, 4, 5, 6))])]
     )
@@ -246,11 +248,11 @@ def test_bbox_list(spark: SparkSession, tmp_path: Path):
 
 
 def test_to_pandas(spark: SparkSession, tmp_path: Path):
-    test_dir = str(tmp_path)
+    test_dir = str(tmp_path / "data")
     spark_df = spark.createDataFrame(
         [Row(bboxes=[Row(b=Box2d(1, 2, 3, 4)), Row(b=Box2d(3, 4, 5, 6))])]
     )
-    spark_df.write.mode("overwrite").format("rikai").save(test_dir)
+    spark_df.write.format("rikai").save(test_dir)
     pandas_df = Dataset(test_dir).to_pandas()
     assert all([isinstance(row["b"], Box2d) for row in pandas_df.bboxes[0]])
 
@@ -271,7 +273,7 @@ def test_to_pandas_complex_types(spark: SparkSession, tmp_path: Path):
 
 
 def test_struct(spark: SparkSession, tmp_path: Path):
-    test_dir = str(tmp_path)
+    test_dir = str(tmp_path / "data")
     schema = StructType(
         [
             StructField("id", IntegerType(), False),

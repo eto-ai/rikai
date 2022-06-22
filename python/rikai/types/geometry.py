@@ -681,13 +681,15 @@ class Mask(ToNumpy, ToDict, Drawable):
 
     def to_dict(self) -> dict:
         ret = {
-            "type": self.type.name.lower(),
+            "type": self.type.value,
             "width": self.width,
             "height": self.height,
-            "points": self.data if self.type == Mask.Type.POLYGON else None,
-            "rle": (self.data if self.type in (
-                Mask.Type.RLE, Mask.Type.COCO_RLE
-            ) else None),
+            "polygon": self.data if self.type == Mask.Type.POLYGON else None,
+            "rle": (
+                self.data
+                if self.type in (Mask.Type.RLE, Mask.Type.COCO_RLE)
+                else None
+            ),
         }
         return ret
 

@@ -53,10 +53,11 @@ class ImageType(UserDefinedType):
 
     def serialize(self, obj: "Image"):
         """Serialize an Image to a Spark Row?"""
-        return {'data': obj.data, 'uri': obj.uri}
+        return {"data": obj.data, "uri": obj.uri}
 
     def deserialize(self, datum) -> "Image":
         from rikai.types.vision import Image
+
         return Image(datum[0] or datum[1])
 
     def simpleString(self) -> str:

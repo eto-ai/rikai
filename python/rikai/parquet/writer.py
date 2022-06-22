@@ -157,4 +157,5 @@ def _conv_udt(v, typ):
     else:
         assert typ["type"] == "udt"
         udt = RikaiDataset._find_udt(typ["pyClass"])
-        return udt.serialize(v)
+        data = udt.serialize(v)
+        return data

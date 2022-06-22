@@ -127,18 +127,18 @@ def test_mask_from_rle():
 def test_mask_to_dict():
     mask = Mask.from_polygon([[12, 23]], width=10, height=20)
     value = mask.to_dict()
-    assert value["type"] == "polygon"
+    assert value["type"] == Mask.Type.POLYGON.value
     assert value["height"] == 20
     assert value["width"] == 10
 
     mask = Mask.from_rle([100 * 100], height=100, width=80)
     value = mask.to_dict()
-    assert value["type"] == "rle"
+    assert value["type"] == Mask.Type.RLE.value
     assert value["height"] == 100
     assert value["width"] == 80
 
     mask = Mask.from_coco_rle([100 * 100], height=100, width=80)
     value = mask.to_dict()
-    assert value["type"] == "coco_rle"
+    assert value["type"] == Mask.Type.COCO_RLE.value
     assert value["height"] == 100
     assert value["width"] == 80

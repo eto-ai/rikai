@@ -18,6 +18,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
+from pandas.testing import assert_frame_equal
 from pyspark.ml.linalg import DenseMatrix, Vectors
 from pyspark.sql import Row
 from pyspark.sql.session import SparkSession
@@ -34,9 +35,7 @@ import rikai.numpy
 from rikai.parquet import Dataset
 from rikai.spark.types import Box2dType, NDArrayType
 from rikai.testing.asserters import assert_count_equal
-from rikai.types import Box2d, Image
-
-from pandas.testing import assert_frame_equal
+from rikai.types import Box2d, Image, Mask
 
 
 def _read_parquets(base_dir):
@@ -245,6 +244,16 @@ def test_bbox_list(spark: SparkSession, tmp_path: Path):
         [{"bboxes": [{"b": Box2d(1, 2, 3, 4)}, {"b": Box2d(3, 4, 5, 6)}]}],
         records,
     )
+
+
+def test_mask(spark: SparkSession, tmp_path: Path):
+    test_dir = str(tmp_path / "data")
+    expected = Mask.from_polygon([[0.0, 0.0]], 100, 200)
+    df = spark.createDataFrame([Row(mask=expected)])
+    df.write.mode("overwrite").format("rikai").save(test_dir)
+
+    records = _read_parquets(test_dir)
+    assert expected == records[0]["mask"]
 
 
 def test_to_pandas(spark: SparkSession, tmp_path: Path):

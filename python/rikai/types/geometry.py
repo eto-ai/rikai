@@ -684,7 +684,10 @@ class Mask(ToNumpy, ToDict, Drawable):
             "type": self.type.name.lower(),
             "width": self.width,
             "height": self.height,
-            "data": self.data,
+            "points": self.data if self.type == Mask.Type.POLYGON else None,
+            "rle": (self.data if self.type in (
+                Mask.Type.RLE, Mask.Type.COCO_RLE
+            ) else None),
         }
         return ret
 

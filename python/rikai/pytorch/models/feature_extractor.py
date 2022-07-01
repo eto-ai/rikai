@@ -36,7 +36,11 @@ class FeatureExtractor(torch.nn.Module):
     ):
         super().__init__()
         self._node = node
-        from torchvision.models.feature_extraction import create_feature_extractor
+
+        from torchvision.models.feature_extraction import (
+            create_feature_extractor,
+        )
+
         self.model = create_feature_extractor(model, {node: output_field})
         self._output_field = output_field
 

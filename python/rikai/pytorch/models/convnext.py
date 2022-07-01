@@ -18,18 +18,19 @@ from rikai.pytorch.models.torch import (
     ClassificationModelType,
 )
 
-convnext = ClassificationModelType(
-    "convnext", pretrained_fn=torchvision.models.convnext_base
-)
-convnext_base = ClassificationModelType(
-    "convnext_base", pretrained_fn=torchvision.models.convnext_base
-)
-convnext_tiny = ClassificationModelType(
-    "convnext_tiny", pretrained_fn=torchvision.models.convnext_tiny
-)
-convnext_small = ClassificationModelType(
-    "convnext_small", pretrained_fn=torchvision.models.convnext_small
-)
-convnext_large = ClassificationModelType(
-    "convnext_large", pretrained_fn=torchvision.models.convnext_large
-)
+if torchvision.__version__ >= "0.12.0":
+    convnext = ClassificationModelType(
+        "convnext", pretrained_fn=torchvision.models.convnext_base
+    )
+    convnext_base = ClassificationModelType(
+        "convnext_base", pretrained_fn=torchvision.models.convnext_base
+    )
+    convnext_tiny = ClassificationModelType(
+        "convnext_tiny", pretrained_fn=torchvision.models.convnext_tiny
+    )
+    convnext_small = ClassificationModelType(
+        "convnext_small", pretrained_fn=torchvision.models.convnext_small
+    )
+    convnext_large = ClassificationModelType(
+        "convnext_large", pretrained_fn=torchvision.models.convnext_large
+    )

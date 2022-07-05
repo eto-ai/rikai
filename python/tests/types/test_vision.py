@@ -326,3 +326,33 @@ def test_draw_without_annotations(test_image):
     img = Image.from_pil(test_image)
     rendered = (img | []).to_image()
     assert np.array_equal(rendered.to_numpy(), np.array(test_image))
+
+
+def test_image_resize(test_image):
+    width = test_image.width
+    height = test_image.height
+    img = Image.from_pil(test_image)
+    img1 = img * 2
+    img2 = img * 0.5
+    img3 = img * (1, 2)
+    img4 = img * (2, 1)
+    img5 = img * (1, 0.5)
+    img6 = img * (0.5, 1)
+    with img1.to_pil() as im:
+        assert im.width == width * 2
+        assert im.height == height * 2
+    with img2.to_pil() as im:
+        assert im.width == width * 0.5
+        assert im.height == height * 0.5
+    with img3.to_pil() as im:
+        assert im.width == width
+        assert im.height == height * 2
+    with img4.to_pil() as im:
+        assert im.width == width * 2
+        assert im.height == height
+    with img5.to_pil() as im:
+        assert im.width == width
+        assert im.height == height * 0.5
+    with img6.to_pil() as im:
+        assert im.width == width * 0.5
+        assert im.height == height

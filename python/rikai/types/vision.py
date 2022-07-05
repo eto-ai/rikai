@@ -22,7 +22,7 @@ import base64
 from io import BytesIO, IOBase
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import List, Optional, Sequence, Union
+from typing import List, Optional, Sequence, Union, Tuple
 from urllib.parse import urlparse
 
 # Third-party libraries
@@ -185,6 +185,19 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
     def draw(self, drawable: Union[Drawable, list[Drawable], Draw]) -> Draw:
         return ImageDraw(self).draw(drawable)
 
+    def resize(self, size: Union[int, Tuple]) -> Image:
+        if isinstance(size, Tuple):
+            assert len(size) == 2, "len of the size Tuple must be 2"
+        elif isinstance(size, (int, float)):
+            size = (size, size)
+        else:
+            raise ValueError(
+                f"size is expected to be int or Tuple but got {size}"
+            )
+
+        with self.to_pil() as im:
+            return im.resize(size)
+
     def __repr__(self) -> str:
         if self.is_embedded:
             return "Image(<embedded>)"
@@ -198,6 +211,9 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
 
     def __eq__(self, other) -> bool:
         return isinstance(other, Image) and super().__eq__(other)
+
+    def __mul__(self, other: Union[int, Tuple]) -> Image:
+        return self.resize(other)
 
     def __or__(self, other: Union[Drawable, Draw]) -> Draw:
         """Override ``|`` operator to chain images with

@@ -185,18 +185,15 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
     def draw(self, drawable: Union[Drawable, list[Drawable], Draw]) -> Draw:
         return ImageDraw(self).draw(drawable)
 
-    def resize(self, size: Union[int, Tuple]) -> Image:
-        if isinstance(size, Tuple):
-            assert len(size) == 2, "len of the size Tuple must be 2"
-        elif isinstance(size, (int, float)):
-            size = (size, size)
+    def scale(self, factor: Union[int, float, Tuple]) -> Image:
+        if isinstance(factor, Tuple):
+            assert len(factor) == 2, "len of the size Tuple must be 2"
         else:
-            raise ValueError(
-                f"size is expected to be int or Tuple but got {size}"
-            )
+            factor = (factor, factor)
 
         with self.to_pil() as im:
-            return im.resize(size)
+            size = (int(im.width * factor[0]), int(im.height * factor[1]))
+            return Image.from_pil(im.resize(size))
 
     def __repr__(self) -> str:
         if self.is_embedded:
@@ -213,7 +210,7 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
         return isinstance(other, Image) and super().__eq__(other)
 
     def __mul__(self, other: Union[int, Tuple]) -> Image:
-        return self.resize(other)
+        return self.scale(other)
 
     def __or__(self, other: Union[Drawable, Draw]) -> Draw:
         """Override ``|`` operator to chain images with

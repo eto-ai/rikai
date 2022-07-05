@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 from pathlib import Path
 from typing import List
 
@@ -22,6 +23,8 @@ from pyspark.sql.types import (
     StructField,
     StructType,
 )
+import pytest
+import torchvision
 
 
 def _check_object_detection_models(spark: SparkSession, models: List[str]):
@@ -108,5 +111,7 @@ def test_resnet(spark: SparkSession, asset_path: Path):
 
 
 def test_efficientnet(spark: SparkSession, asset_path: Path):
+    if torchvision.__version__ < "0.11.0":
+        pytest.skip("torchvision >= 0.11.0 is required")
     models = [f"efficientnet_b{scale}" for scale in range(8)]
     _check_classification_models(spark, asset_path, models)

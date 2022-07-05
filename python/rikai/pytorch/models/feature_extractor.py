@@ -17,7 +17,7 @@ from __future__ import annotations
 from typing import Any, Callable, Optional
 
 import torch
-from torchvision.models.feature_extraction import create_feature_extractor
+import torchvision
 
 from rikai.pytorch.models.torch import TorchModelType
 from rikai.spark.sql.model import ModelSpec, parse_model_type
@@ -36,6 +36,11 @@ class FeatureExtractor(torch.nn.Module):
     ):
         super().__init__()
         self._node = node
+
+        from torchvision.models.feature_extraction import (
+            create_feature_extractor,
+        )
+
         self.model = create_feature_extractor(model, {node: output_field})
         self._output_field = output_field
 
@@ -96,4 +101,5 @@ class FeatureExtractorType(TorchModelType):
         return batch
 
 
-feature_extractor = FeatureExtractorType()
+if torchvision.__version__ >= "0.11.0":
+    feature_extractor = FeatureExtractorType()

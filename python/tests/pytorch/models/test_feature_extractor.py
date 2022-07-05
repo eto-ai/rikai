@@ -17,13 +17,19 @@ from typing import Callable
 
 import pytest
 import torch
-import torchvision.transforms as T
 from pyspark.sql import SparkSession
 from pyspark.sql.types import ArrayType, FloatType, StructField, StructType
-from torchvision.models import convnext_base, efficientnet_b0, resnet50
 
 from rikai.pytorch.models.feature_extractor import FeatureExtractor
 from rikai.types import Image
+
+
+import torchvision  # noqa
+
+if torchvision.__version__ < "0.12.0":
+    pytest.skip("torchvision >= 0.12.0 is required", allow_module_level=True)
+import torchvision.transforms as T  # noqa
+from torchvision.models import convnext_base, efficientnet_b0, resnet50  # noqa
 
 
 @pytest.mark.parametrize(

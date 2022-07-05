@@ -15,6 +15,7 @@
 """Rikai-implemented PyTorch models and executors."""
 
 import importlib
+
 torchvision_found = importlib.util.find_spec("torchvision") is not None
 
 if torchvision_found:

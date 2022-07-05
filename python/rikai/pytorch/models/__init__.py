@@ -30,6 +30,6 @@ if torchvision_found:
     import rikai.pytorch.models.ssd
     import rikai.pytorch.models.ssd_class_scores
 
-from rikai.pytorch.models.torch import MODEL_TYPES
+from rikai.pytorch.models.torch import MODEL_TYPES  # noqa
 
 __all__ = ["MODEL_TYPES"]

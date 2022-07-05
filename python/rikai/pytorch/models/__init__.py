@@ -14,16 +14,21 @@
 
 """Rikai-implemented PyTorch models and executors."""
 
-import rikai.pytorch.models.convnext
-import rikai.pytorch.models.efficientnet
-import rikai.pytorch.models.fasterrcnn
-import rikai.pytorch.models.feature_extractor
-import rikai.pytorch.models.keypointrcnn
-import rikai.pytorch.models.maskrcnn
-import rikai.pytorch.models.resnet
-import rikai.pytorch.models.retinanet
-import rikai.pytorch.models.ssd
-import rikai.pytorch.models.ssd_class_scores
+import importlib
+torchvision_found = importlib.util.find_spec("torchvision") is not None
+
+if torchvision_found:
+    import rikai.pytorch.models.convnext
+    import rikai.pytorch.models.efficientnet
+    import rikai.pytorch.models.fasterrcnn
+    import rikai.pytorch.models.feature_extractor
+    import rikai.pytorch.models.keypointrcnn
+    import rikai.pytorch.models.maskrcnn
+    import rikai.pytorch.models.resnet
+    import rikai.pytorch.models.retinanet
+    import rikai.pytorch.models.ssd
+    import rikai.pytorch.models.ssd_class_scores
+
 from rikai.pytorch.models.torch import MODEL_TYPES
 
 __all__ = ["MODEL_TYPES"]

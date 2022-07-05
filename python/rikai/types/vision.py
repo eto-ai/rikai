@@ -188,8 +188,12 @@ class Image(ToNumpy, ToPIL, Asset, Displayable, ToDict):
     def scale(self, factor: Union[int, float, Tuple]) -> Image:
         if isinstance(factor, Tuple):
             assert len(factor) == 2, "len of the size Tuple must be 2"
-        else:
+        elif isinstance(factor, (int, float)):
             factor = (factor, factor)
+        else:
+            raise ValueError(
+                f"factor is expected to be int/float/Tuple but got {factor}"
+            )
 
         with self.to_pil() as im:
             size = (int(im.width * factor[0]), int(im.height * factor[1]))

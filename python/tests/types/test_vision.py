@@ -356,3 +356,6 @@ def test_image_resize(test_image):
     with img6.to_pil() as im:
         assert im.width == width * 0.5
         assert im.height == height
+
+    with pytest.raises(ValueError, match=r".*factor.*"):
+        img * "not a number"

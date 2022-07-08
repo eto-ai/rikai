@@ -142,7 +142,7 @@ For more details on the model spec, see [SQL-ML documentation](https://rikai.rea
 
 ## Getting Started
 
-Currently Rikai is maintained for <a name="VersionMatrix"></a>Scala 2.12 and Python 3.8, 3.9, 3.10
+Currently Rikai is maintained for <a name="VersionMatrix"></a>Scala 2.12 and Python 3.7, 3.8, 3.9
 
 There are multiple ways to install Rikai:
 
@@ -206,7 +206,7 @@ pip install -e . # pip install -e .[all] to install all optional extras (see "In
 
 ### Utilities
 
-[pre-commit](https://pre-commit.com/) can be helpful in keep consistent code format with the repository.
+[pre-commit](https://pre-commit.com/) can be helpful in keep consistent code format with the repository. 
 It can trigger reformat and extra things in your local machine before the CI force you to do it.
 
 If you want it, install and enable `pre-commit`

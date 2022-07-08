@@ -92,6 +92,6 @@ def init_spark_session(
     conf = conf or {}
     for k, v in conf.items():
         builder = builder.config(k, v)
-    session = builder.master("local[2]").getOrCreate()
+    session = builder.master("local[*]").getOrCreate()
     init(session)
     return session

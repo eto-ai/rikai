@@ -1,0 +1,10 @@
+services:
+  quickstart:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        RIKAI_VERSION: 0.1.12
+    user: root
+    ports:
+      - "8888:8888"

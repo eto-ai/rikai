@@ -13,30 +13,24 @@ Join the community:
 
 # Rikai
 
-Rikai is a framework specifically designed for AI workflows focused around large scale unstructured datasets
-(e.g., images, videos, sensor data (future), text (future), and more).
-Through every stage of the AI modeling workflow,
-Rikai strives to offer a great developer experience when working with real-world AI datasets.
+Rikai is the easiest way to work with computer vision datasets at scale for data prep, model deployment, and
+model inferencing that's integrated with your data warehouse. 
 
-The quality of an AI dataset can make or break an AI project, but tooling for AI data is sorely lacking in ergonomics.
-As a result, practitioners must spend most of their time and effort wrestling with their data instead of innovating on the models and use cases.
-Rikai alleviates the pain that AI practitioners experience on a daily basis dealing with the myriad of tedious data tasks,
-so they can focus again on model-building and problem solving.
+If you have docker, you can easily try out the Rikai quickstart docker image by cloning this repo and then running:
 
-To start trying Rikai right away, checkout the [Quickstart Guide](https://rikai.readthedocs.io/en/latest/quickstart.html).
+```bash
+docker compose up quickstart
+```
+
+It should print out a link to jupyter lab server. Once opened you'll find quickstart notebooks that you can step 
+through.
 
 ## Main Features
 
 ### Data format
 
-The core of Rikai is a data format ("rikai format") based on [Apache Parquet](https://parquet.apache.org/).
-Rikai augments parquet with a rich collection of semantic types design specifically for unstructured data and annotations.
-
-### Integrations
-
-Rikai comes with an extensive set of I/O connectors. For ETL, Rikai is able to consume popular formats like ROS bags and Coco.
-For analysis, it's easy to read Rikai data into pandas/spark DataFrames (Rikai handles serde for the semantic types).
-And for training, Rikai allows direct creation of Pytorch/Tensorflow datasets without manual conversion.
+Rikai adds semantic types for computer vision on [Apache Parquet](https://parquet.apache.org/) like Image, Box2d,
+Mask, and more.
 
 ### SQL-ML Engine
 
@@ -48,13 +42,12 @@ Rikai extends Spark SQL with ML capability which allows users to analyze Rikai d
 Carefully crafted data-visualization embedded with semantic types, especially in Jupyter notebooks,
 to help you visualize and inspect your AI data without having to remember complicated raw image manipulations.
 
-## Roadmap
-1. Improved video support
-2. Text / sensors / geospatial support
-3. Versioning support built into the dataset
-4. Better Rikai UDT-support
-5. Declarative annotation API (think vega-lite for annotating images/videos)
-6. Integrations into dbt and BI tools
+### Integrations
+
+Rikai comes with an extensive set of I/O connectors. For ETL, Rikai is able to consume popular formats like ROS bags and Coco.
+For analysis, it's easy to read Rikai data into pandas/spark DataFrames (Rikai handles serde for the semantic types).
+And for training, Rikai allows direct creation of Pytorch/Tensorflow datasets without manual conversion.
+
 
 ## Example
 
@@ -146,32 +139,13 @@ Currently Rikai is maintained for <a name="VersionMatrix"></a>Scala 2.12 and Pyt
 
 There are multiple ways to install Rikai:
 
-1. Try it using the included [Dockerfile](#Docker).
-2. Install via pip `pip install rikai`, with
-   [extras for gcp, pytorch/tf, and others](#Extras).
+1. Try it using the included docker image (`docker compose up`).
+2. Install via pip `pip install rikai` (with
+   [extras for gcp, pytorch/tf, and others](#Extras)).
 3. Install from [source](#Source)
 
 Note: if you want to use Rikai with your own pyspark, please consult
 [rikai documentation](https://rikai.readthedocs.io/en/latest/spark.html) for tips.
-
-### <a name="Docker"></a>Docker
-
-The included Dockerfile creates a standalone demo image with
-Jupyter, Pytorch, Spark, and rikai preinstalled with notebooks for you
-to play with the capabilities of the rikai feature store.
-
-To build and run the docker image from the current directory:
-```bash
-# Clone the repo
-git clone git@github.com:eto-ai/rikai rikai
-# Build the docker image
-docker build --tag rikai --network host .
-# Run the image
-docker run -p 0.0.0.0:8888:8888/tcp rikai:latest jupyter lab -ip 0.0.0.0 --port 8888
-```
-
-If successful, the console should then print out a clickable link to JupyterLab. You can also
-open a browser tab and go to `localhost:8888`.
 
 ### <a name="Extras"></a>Install from pypi
 

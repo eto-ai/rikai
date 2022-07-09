@@ -47,7 +47,7 @@ def get_default_jar_version(use_snapshot=True):
 
 
 def init_spark_session(
-    conf: dict = None, app_name="rikai", rikai_version=None
+    conf: dict = None, app_name="rikai", rikai_version=None, num_cores=2
 ):
     from pyspark.sql import SparkSession
 
@@ -92,6 +92,6 @@ def init_spark_session(
     conf = conf or {}
     for k, v in conf.items():
         builder = builder.config(k, v)
-    session = builder.master("local[2]").getOrCreate()
+    session = builder.master(f"local[{num_cores}]").getOrCreate()
     init(session)
     return session

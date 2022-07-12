@@ -13,7 +13,7 @@ sparkVersion := {
   sys.env.get("SPARK_VERSION") match {
     case Some(sparkVersion) => sparkVersion
     case None =>
-      if (scalaVersion.value.compareTo("2.12.15") >= 0) "3.2.1" else "3.1.2"
+      if (scalaVersion.value.compareTo("2.12.15") >= 0) "3.2.1" else "3.1.3"
   }
 }
 sparkVerStr := s"spark${sparkVersion.value.replace(".", "")}"

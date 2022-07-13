@@ -33,3 +33,5 @@ python/rikai/jars/
 .antlr
 
 python/test-artifact
+
+*.iml

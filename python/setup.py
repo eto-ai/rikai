@@ -51,7 +51,7 @@ all = (
 if os.environ.get("SPARK_VERSION", None):
     spark_version = os.environ["SPARK_VERSION"]
 else:
-    spark_version = "3.1.2"
+    spark_version = "3.2"
 
 setup(
     name="rikai",

@@ -2,7 +2,7 @@ FROM apache/spark-py:v3.1.3 AS builder
 
 USER root
 ARG RIKAI_VERSION
-ENV SPARK_VERSION="3.1.3"
+ENV SPARK_VERSION="3.2.1"
 RUN apt -y -qq update && apt install -y -qq sudo curl aria2 && yes | pip install rikai[jupyter,pytorch]==${RIKAI_VERSION}
 
 RUN mkdir -p /opt/rikai/notebooks

@@ -72,7 +72,7 @@ def init_spark_session(
             "spark.jars.packages",
             ",".join(
                 [
-                    "ai.eto:rikai_2.12:{}".format(rikai_version),
+                    "ai.eto:rikai_2.1:{}".format(rikai_version),
                 ]
             ),
         )

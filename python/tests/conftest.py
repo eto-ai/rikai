@@ -114,7 +114,7 @@ def gcs_spark(mlflow_tracking_uri: str) -> SparkSession:
                     "spark.jars.packages",
                     ",".join(
                         [
-                            "ai.eto:rikai_2.12:{}".format(rikai_version),
+                            "ai.eto:rikai_2.1:{}".format(rikai_version),
                         ]
                     ),
                 ),
@@ -166,7 +166,7 @@ def aws_spark(mlflow_tracking_uri: str) -> SparkSession:
                     ",".join(
                         [
                             f"org.apache.hadoop:hadoop-aws:{hadoop_version}",
-                            "ai.eto:rikai_2.12:{}".format(rikai_version),
+                            "ai.eto:rikai_2.13:{}".format(rikai_version),
                         ]
                     ),
                 ),
@@ -217,7 +217,7 @@ def spark(mlflow_tracking_uri: str, tmp_path_factory) -> SparkSession:
                     "spark.jars.packages",
                     ",".join(
                         [
-                            "ai.eto:rikai_2.12:{}".format(rikai_version),
+                            "ai.eto:rikai_2.13:{}".format(rikai_version),
                         ]
                     ),
                 ),

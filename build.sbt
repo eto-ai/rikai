@@ -2,8 +2,8 @@ import java.io.File
 import scala.reflect.io.Directory
 
 name := "rikai"
-crossScalaVersions := List("2.12.10", "2.13.7")
-scalaVersion := "2.12.10"
+crossScalaVersions := List("2.12.16", "2.13.8")
+scalaVersion := "2.12.16"
 scalaBinaryVersion := scalaVersion.value.split('.').slice(0, 2).mkString(".")
 
 val sparkVersion = settingKey[String]("Apache Spark version")
@@ -12,8 +12,7 @@ val sparkVerStr =
 sparkVersion := {
   sys.env.get("SPARK_VERSION") match {
     case Some(sparkVersion) => sparkVersion
-    case None =>
-      if (scalaVersion.value.compareTo("2.12.15") >= 0) "3.2.1" else "3.1.2"
+    case None => "3.2.1"
   }
 }
 sparkVerStr := s"spark${sparkVersion.value.replace(".", "")}"

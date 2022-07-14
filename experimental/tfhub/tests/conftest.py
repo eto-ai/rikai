@@ -29,7 +29,7 @@ def spark() -> SparkSession:
                     "spark.jars.packages",
                     ",".join(
                         [
-                            "ai.eto:rikai_2.13:{}".format(rikai_version),
+                            "ai.eto:rikai_2.12:{}".format(rikai_version),
                         ]
                     ),
                 ),

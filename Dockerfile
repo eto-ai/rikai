@@ -1,6 +1,6 @@
 ARG SPARK_VERSION="3.2.1"
-
 FROM hseeberger/scala-sbt:11.0.14.1_1.6.2_2.12.15 AS jar_builder
+# This builder just produces the jar that we'll copy into the final image later
 
 COPY ./src /opt/rikai/src
 COPY ./project /opt/rikai/project
@@ -10,6 +10,7 @@ WORKDIR /opt/rikai
 RUN sbt clean publishLocal
 
 FROM apache/spark-py:v${SPARK_VERSION} AS whl_builder
+# BUild wheels for rikai and dependencies
 
 USER root
 
@@ -28,12 +29,14 @@ RUN apt -y -qq update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# copy the wheels over and install all of them
 RUN mkdir -p /opt/rikai/wheels
 COPY --from=whl_builder /opt/rikai/python/dist/rikai-*.whl /opt/rikai/wheels/
 COPY --from=whl_builder /opt/rikai/python/*.whl /opt/rikai/wheels/
 RUN pip3 install --no-cache /opt/rikai/wheels/*.whl && \
     rm -rf /tmp/* /var/tmp/* /opt/rikai/wheels
 
+# Copy the jar to the class path
 COPY --from=jar_builder /root/.ivy2/local/ai.eto/rikai_2.12/*/jars/rikai_2.12.jar /opt/spark/jars/
 
 RUN mkdir -p /opt/rikai/notebooks

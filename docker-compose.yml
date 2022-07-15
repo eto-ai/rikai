@@ -3,8 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        RIKAI_VERSION: 0.1.13
+      target: jupyter
     user: root
     ports:
       - "8888:8888"

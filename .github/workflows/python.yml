@@ -46,10 +46,10 @@ jobs:
       run: |
         echo "SPARK_VERSION=${{matrix.spark-version}}" >> $GITHUB_ENV
         export SPARK_VERSION=${{matrix.spark-version}}
-        sbt publishLocal
+        sbt publishLocal &
     - name: Start docker-compose
       run: |
-        docker-compose -f .github/docker-compose.yml up -d
+        docker-compose -f .github/docker-compose.yml up -d &
     - name: apt update and install
       run: |
         sudo apt update
@@ -61,7 +61,8 @@ jobs:
     - name: Run python tests
       working-directory: python
       run: |
-        pytest -x -v --durations=10 --ignore=tests/parquet/internal
+        pip install pytest-xdist
+        pytest -n auto -x -v --durations=10 --ignore=tests/parquet/internal
       env:
         SPARK_LOCAL_IP: "127.0.0.1"
         TEST_MLFLOW_TRACKING_URI: "http://localhost:15000"

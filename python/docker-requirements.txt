@@ -1,0 +1,5 @@
+# move major requirements to a builder docker image
+torch>=1.8.1
+torchvision>=0.10.0
+jupyterlab
+matplotlib

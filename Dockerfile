@@ -7,24 +7,34 @@ COPY ./project /opt/rikai/project
 COPY ./build.sbt /opt/rikai/build.sbt
 
 WORKDIR /opt/rikai
-RUN sbt clean compile package && cp $(ls ./target/scala-2.12/rikai_2.12-*.jar | sort | tail -n 1) /opt/rikai/
+RUN sbt clean publishLocal
 
+FROM apache/spark-py:v${SPARK_VERSION} AS whl_builder
+
+USER root
+
+COPY ./python /opt/rikai/python
+COPY ./README.md /opt/rikai/README.md
+WORKDIR /opt/rikai/python
+RUN python3 setup.py bdist_wheel
+RUN pip3 wheel -r /opt/rikai/python/docker-requirements.txt
 
 FROM apache/spark-py:v${SPARK_VERSION} AS jupyter
 
 USER root
 
-RUN apt -y -qq update && apt install -y -qq sudo curl aria2
+RUN apt -y -qq update && \
+    apt install -y -qq sudo curl aria2 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-#RUN mkdir -p /opt/rikai/wheels
-#COPY --from=whl_builder /opt/rikai/dist/rikai-*.whl /opt/rikai/wheels/
-#RUN pip3 install /opt/rikai/wheels/rikai-*.whl
-COPY ./python /opt/rikai/python
-COPY ./README.md /opt/rikai/README.md
-WORKDIR /opt/rikai/python
-RUN pip3 install -e ".[jupyter,pytorch]"
+RUN mkdir -p /opt/rikai/wheels
+COPY --from=whl_builder /opt/rikai/python/dist/rikai-*.whl /opt/rikai/wheels/
+COPY --from=whl_builder /opt/rikai/python/*.whl /opt/rikai/wheels/
+RUN pip3 install --no-cache /opt/rikai/wheels/*.whl && \
+    rm -rf /tmp/* /var/tmp/* /opt/rikai/wheels
 
-COPY --from=jar_builder /opt/rikai/rikai_2.12-*.jar /opt/spark/jars/
+COPY --from=jar_builder /root/.ivy2/local/ai.eto/rikai_2.12/*/jars/rikai_2.12.jar /opt/spark/jars/
 
 RUN mkdir -p /opt/rikai/notebooks
 COPY ./notebooks/Coco.ipynb /opt/rikai/notebooks/Coco.ipynb

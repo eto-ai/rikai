@@ -58,8 +58,7 @@ jobs:
         docker-compose -f .github/docker-compose.yml up -d &
     - name: apt update and install
       run: |
-        sudo apt update
-        sudo apt-get -y -qq install libsnappy-dev ffmpeg &
+        (sudo apt update && sudo apt-get -y -qq install libsnappy-dev ffmpeg) &
     - name: Pip install
       working-directory: python
       run: |

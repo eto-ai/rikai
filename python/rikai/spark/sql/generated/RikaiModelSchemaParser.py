@@ -1,4 +1,4 @@
-# Generated from src/main/antlr4/org/apache/spark/sql/ml/parser/RikaiModelSchema.g4 by ANTLR 4.8
+# Generated from src/main/antlr4/org/apache/spark/sql/ml/parser/RikaiModelSchema.g4 by ANTLR 4.11.1
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
@@ -8,26 +8,21 @@ if sys.version_info[1] > 5:
 else:
 	from typing.io import TextIO
 
-
 def serializedATN():
-    with StringIO() as buf:
-        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\n")
-        buf.write("-\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\3\2")
-        buf.write("\3\2\3\3\3\3\3\4\3\4\3\4\3\4\3\4\7\4\30\n\4\f\4\16\4\33")
-        buf.write("\13\4\3\4\3\4\3\5\3\5\3\5\3\5\3\5\3\6\3\6\3\6\5\6\'\n")
-        buf.write("\6\3\7\3\7\3\7\3\7\3\7\2\2\b\2\4\6\b\n\f\2\2\2)\2\16\3")
-        buf.write("\2\2\2\4\20\3\2\2\2\6\22\3\2\2\2\b\36\3\2\2\2\n&\3\2\2")
-        buf.write("\2\f(\3\2\2\2\16\17\5\n\6\2\17\3\3\2\2\2\20\21\7\t\2\2")
-        buf.write("\21\5\3\2\2\2\22\23\7\7\2\2\23\24\7\3\2\2\24\31\5\f\7")
-        buf.write("\2\25\26\7\4\2\2\26\30\5\f\7\2\27\25\3\2\2\2\30\33\3\2")
-        buf.write("\2\2\31\27\3\2\2\2\31\32\3\2\2\2\32\34\3\2\2\2\33\31\3")
-        buf.write("\2\2\2\34\35\7\5\2\2\35\7\3\2\2\2\36\37\7\b\2\2\37 \7")
-        buf.write("\3\2\2 !\5\n\6\2!\"\7\5\2\2\"\t\3\2\2\2#\'\5\6\4\2$\'")
-        buf.write("\5\b\5\2%\'\5\4\3\2&#\3\2\2\2&$\3\2\2\2&%\3\2\2\2\'\13")
-        buf.write("\3\2\2\2()\5\4\3\2)*\7\6\2\2*+\5\n\6\2+\r\3\2\2\2\4\31")
-        buf.write("&")
-        return buf.getvalue()
-
+    return [
+        4,1,8,43,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,1,0,1,0,
+        1,1,1,1,1,2,1,2,1,2,1,2,1,2,5,2,22,8,2,10,2,12,2,25,9,2,1,2,1,2,
+        1,3,1,3,1,3,1,3,1,3,1,4,1,4,1,4,3,4,37,8,4,1,5,1,5,1,5,1,5,1,5,0,
+        0,6,0,2,4,6,8,10,0,0,39,0,12,1,0,0,0,2,14,1,0,0,0,4,16,1,0,0,0,6,
+        28,1,0,0,0,8,36,1,0,0,0,10,38,1,0,0,0,12,13,3,8,4,0,13,1,1,0,0,0,
+        14,15,5,7,0,0,15,3,1,0,0,0,16,17,5,5,0,0,17,18,5,1,0,0,18,23,3,10,
+        5,0,19,20,5,2,0,0,20,22,3,10,5,0,21,19,1,0,0,0,22,25,1,0,0,0,23,
+        21,1,0,0,0,23,24,1,0,0,0,24,26,1,0,0,0,25,23,1,0,0,0,26,27,5,3,0,
+        0,27,5,1,0,0,0,28,29,5,6,0,0,29,30,5,1,0,0,30,31,3,8,4,0,31,32,5,
+        3,0,0,32,7,1,0,0,0,33,37,3,4,2,0,34,37,3,6,3,0,35,37,3,2,1,0,36,
+        33,1,0,0,0,36,34,1,0,0,0,36,35,1,0,0,0,37,9,1,0,0,0,38,39,3,2,1,
+        0,39,40,5,4,0,0,40,41,3,8,4,0,41,11,1,0,0,0,2,23,36
+    ]
 
 class RikaiModelSchemaParser ( Parser ):
 
@@ -67,7 +62,7 @@ class RikaiModelSchemaParser ( Parser ):
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
-        self.checkVersion("4.8")
+        self.checkVersion("4.11.1")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
 
@@ -75,6 +70,7 @@ class RikaiModelSchemaParser ( Parser ):
 
 
     class SchemaContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -114,6 +110,7 @@ class RikaiModelSchemaParser ( Parser ):
 
 
     class IdentifierContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -165,6 +162,7 @@ class RikaiModelSchemaParser ( Parser ):
 
 
     class StructContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -220,7 +218,7 @@ class RikaiModelSchemaParser ( Parser ):
             self.state = 23
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==RikaiModelSchemaParser.T__1:
+            while _la==2:
                 self.state = 19
                 self.match(RikaiModelSchemaParser.T__1)
                 self.state = 20
@@ -241,6 +239,7 @@ class RikaiModelSchemaParser ( Parser ):
 
 
     class ArrayContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -301,6 +300,7 @@ class RikaiModelSchemaParser ( Parser ):
 
 
     class FieldTypeContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -376,19 +376,19 @@ class RikaiModelSchemaParser ( Parser ):
             self.state = 36
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [RikaiModelSchemaParser.STRUCT]:
+            if token in [5]:
                 localctx = RikaiModelSchemaParser.NestedStructTypeContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
                 self.state = 33
                 self.struct()
                 pass
-            elif token in [RikaiModelSchemaParser.ARRAY]:
+            elif token in [6]:
                 localctx = RikaiModelSchemaParser.NestedArrayTypeContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 34
                 self.array()
                 pass
-            elif token in [RikaiModelSchemaParser.IDENTIFIER]:
+            elif token in [7]:
                 localctx = RikaiModelSchemaParser.PlainFieldTypeContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
                 self.state = 35
@@ -407,6 +407,7 @@ class RikaiModelSchemaParser ( Parser ):
 
 
     class FieldContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)

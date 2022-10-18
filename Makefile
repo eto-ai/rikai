@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 
-ANTLR_VERSION=4.8
+ANTLR_VERSION=4.11.1
 ANTLR_JAR=antlr-$(ANTLR_VERSION)-complete.jar
 
 all: antlr

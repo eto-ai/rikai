@@ -42,18 +42,23 @@ jobs:
         path: |
           ~/.cache/torch/hub/checkpoints
         key: ${{ runner.os }}-pt-${{ hashFiles('**/setup.py') }}
+    - name: cache official pretrained TFHub models
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cache/tfhub_modules
+        key: ${{ runner.os }}-tfhub-${{ hashFiles('**/setup.py') }}
     - name: sbt install
       run: |
         echo "SPARK_VERSION=${{matrix.spark-version}}" >> $GITHUB_ENV
         export SPARK_VERSION=${{matrix.spark-version}}
-        sbt publishLocal
+        sbt publishLocal &
     - name: Start docker-compose
       run: |
-        docker-compose -f .github/docker-compose.yml up -d
+        docker-compose -f .github/docker-compose.yml up -d &
     - name: apt update and install
       run: |
-        sudo apt update
-        sudo apt-get -y -qq install libsnappy-dev ffmpeg
+        (sudo apt update && sudo apt-get -y -qq install libsnappy-dev ffmpeg) &
     - name: Pip install
       working-directory: python
       run: |
@@ -61,6 +66,7 @@ jobs:
     - name: Run python tests
       working-directory: python
       run: |
+        export TFHUB_CACHE_DIR=$HOME/.cache/tfhub_modules
         pytest -x -v --durations=10 --ignore=tests/parquet/internal
       env:
         SPARK_LOCAL_IP: "127.0.0.1"

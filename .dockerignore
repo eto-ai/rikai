@@ -1,0 +1,12 @@
+.git
+.idea
+.github
+**/*.class
+**/__pycache__
+.*
+docs/
+target/
+project/project
+project/target
+notebooks/.ipynb_checkpoints
+notebooks/coco_sample

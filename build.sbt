@@ -158,7 +158,7 @@ import Tests._
 Antlr4 / antlr4PackageName := Some("ai.eto.rikai.sql.spark.parser")
 Antlr4 / antlr4GenVisitor := true
 Antlr4 / antlr4Version := {
-  if ("3.1.2".equals(sparkVersion.value)) "4.8-1"
+  if ("3.1.3".equals(sparkVersion.value)) "4.8-1"
   else "4.8"
 }
 Antlr4 / antlr4RuntimeDependency := "org.antlr" % "antlr4-runtime" % (Antlr4 / antlr4Version).value % Provided

@@ -24,6 +24,7 @@ project/project
 
 python/rikai/jars/
 
+*.iml
 .idea/
 .vscode/
 .DS_Store

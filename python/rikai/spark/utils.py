@@ -53,8 +53,8 @@ def init_spark_session(
     import os
     import sys
 
-    os.environ['PYSPARK_PYTHON'] = sys.executable
-    os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
+    os.environ["PYSPARK_PYTHON"] = sys.executable
+    os.environ["PYSPARK_DRIVER_PYTHON"] = sys.executable
 
     # Avoid reused session polluting configs
     active_session = SparkSession.getActiveSession()

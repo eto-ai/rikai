@@ -50,6 +50,11 @@ def init_spark_session(
     conf: dict = None, app_name="rikai", rikai_version=None, num_cores=2
 ):
     from pyspark.sql import SparkSession
+    import os
+    import sys
+
+    os.environ['PYSPARK_PYTHON'] = sys.executable
+    os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 
     # Avoid reused session polluting configs
     active_session = SparkSession.getActiveSession()

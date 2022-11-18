@@ -17,6 +17,9 @@ jobs:
         python-version: [3.9]
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        lfs: true
     - name: Setup Scala
       uses: olafurpg/setup-scala@v10
       with:
@@ -39,7 +42,7 @@ jobs:
         path: |
           ~/.ivy2/cache
           ~/.sbt
-        key: ${{ runner.os }}-pants-${{ hashFiles('**/build.sbt') }}
+        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
     - name: cache official pretrained Torch models
       uses: actions/cache@v2
       with:

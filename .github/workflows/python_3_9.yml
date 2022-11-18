@@ -31,7 +31,7 @@ jobs:
           ~/.cache/pants/setup
           ~/.cache/pants/lmdb_store
           ~/.cache/pants/named_caches
-        key: ${{ runner.os }}-${{ matrix.python-version }}
+        key: ${{ runner.os }}-pants-${{ hashFiles('python/rikai/BUILD.pants') }}
     - name: Setup Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
@@ -48,7 +48,7 @@ jobs:
       with:
         path: |
           ~/.cache/torch/hub/checkpoints
-        key: ${{ runner.os }}-pt-${{ hashFiles('**/setup.py') }}
+        key: ${{ runner.os }}-pt-${{ hashFiles('python/rikai/BUILD.pants') }}
     - name: sbt install
       run: |
         sbt publishLocal
@@ -66,7 +66,7 @@ jobs:
         ./pants --version
     - name: Run python tests
       run: |
-        ./pants test ::
+        ./pants test python/tests/test_io.py
       env:
         SPARK_LOCAL_IP: "127.0.0.1"
         TEST_MLFLOW_TRACKING_URI: "http://localhost:15000"

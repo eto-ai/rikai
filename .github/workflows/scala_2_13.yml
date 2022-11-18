@@ -1,4 +1,4 @@
-name: Scala
+name: Scala 2.13.x
 
 on:
   push:

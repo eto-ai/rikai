@@ -25,3 +25,11 @@ enable_resolves = true
   version = "black==22.1.0"
   extra_requirements.add = ["click<8.1"]
   lockfile = "3rdparty/python/black.lock"
+
+[pytest]
+  version = "pytest==7.0.1"
+  extra_requirements.add = [
+    "pytest-timeout",
+    "requests-mock",
+  ]
+  lockfile = "3rdpaty/python/pytest.lock"

@@ -13,7 +13,7 @@ jobs:
       matrix:
         scala-version: [2.12.16]
         java-version: ['8', '11']
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
     - uses: actions/checkout@v2
       with:

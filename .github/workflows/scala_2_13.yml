@@ -37,12 +37,9 @@ jobs:
       - name: Run Scala tests
         run: sbt ++${{matrix.scala-version}} test
         env:
-          SPARK_VERSION: "3.3.1"
           SPARK_LOCAL_IP: "127.0.0.1"
           TEST_MLFLOW_TRACKING_URI: "http://localhost:15000"
       - name: Build Scala Jar
         run: sbt package
-        env:
-          SPARK_VERSION: "3.3.1"
       - name: Stop docker-compose
         run: docker-compose -f .github/docker-compose.yml down

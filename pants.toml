@@ -1,2 +1,27 @@
+[anonymous-telemetry]
+enabled = true
+repo_id = "a8cdb096-9b8c-4e8c-934a-4f582c591f04"
+
 [GLOBAL]
 pants_version = "2.14.0"
+
+backend_packages.add = [
+  "pants.backend.python",
+  'pants.backend.python.lint.black',
+]
+
+[source]
+root_patterns = ["python"]
+
+[python]
+interpreter_constraints = [">=3.7"]
+enable_resolves = true
+
+[python.resolves]
+  lab = "3rdparty/python/lab.lock"
+  default = "3rdparty/python/default.lock"
+
+[black]
+  version = "black==22.1.0"
+  extra_requirements.add = ["click<8.1"]
+  lockfile = "3rdparty/python/black.lock"

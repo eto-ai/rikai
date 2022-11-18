@@ -35,3 +35,6 @@ python/rikai/jars/
 python/test-artifact
 
 *.iml
+
+.pants.d/
+.pids/

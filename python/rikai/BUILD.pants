@@ -36,11 +36,16 @@ python_requirement(
         # Scikit Learn
         "scikit-learn",
 
-        # MISC
+        # Jupyter
+        "jupyterlab",
         "ipython>=7.31.1,!=8.0.0",
+        "matplotlib",
+
+        # MISC
         "jsonschema",
         "pyyaml",
         "requests",
+        "fsspec==2022.1.0",
     ],
     resolve=parametrize("default", "lab")
 )

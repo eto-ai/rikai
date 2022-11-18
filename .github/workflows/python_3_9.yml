@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.9]
-        spark-version: [3.3.0]
+        spark-version: [3.3.1]
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v2

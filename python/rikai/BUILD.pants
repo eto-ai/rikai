@@ -1,0 +1,17 @@
+python_sources(name = "sources",
+    sources=["**/*.py"],
+    overrides={
+        (
+            "spark/sql/generated/*.py",
+        ): {"skip_black": True},
+    },
+    resolve=parametrize("default", "lab"))
+
+python_requirement(
+    name="requirements",
+    requirements=[
+        "mlflow==1.26.1",
+        "pyspark==3.2.1"
+    ],
+    resolve=parametrize("default", "lab")
+)

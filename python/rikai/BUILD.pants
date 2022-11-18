@@ -11,7 +11,7 @@ python_requirement(
     name="requirements",
     requirements=[
         # Apache Spark
-        "pyspark==3.2.1",
+        "pyspark==3.3.1",
         "antlr4-python3-runtime==4.11.1",
         "numpy",
         "pyarrow>=6.0",

@@ -1,0 +1,14 @@
+python_sources(
+    name="sources",
+    sources=["**/conftest.py"],
+    resolve="default",
+)
+
+python_tests(name = "tests",
+    sources=["**/*.py", "!**/conftest.py"],
+    dependencies=[
+        "//python/rikai:sources",
+        "//python/tests:sources"
+    ],
+    resolve="default"
+)

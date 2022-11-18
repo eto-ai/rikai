@@ -17,6 +17,8 @@
 package ai.eto.rikai.sql.spark.parser
 
 import ai.eto.rikai.sql.model.Registry
+import com.thoughtworks.enableIf
+import com.thoughtworks.enableIf.classpathMatches
 import org.antlr.v4.runtime._
 import org.antlr.v4.runtime.atn.PredictionMode
 import org.antlr.v4.runtime.misc.{Interval, ParseCancellationException}
@@ -138,6 +140,9 @@ private[spark] class RikaiExtSqlParser(
   override def parseDataType(sqlText: String): DataType =
     delegate.parseDataType(sqlText)
 
+  @enableIf(classpathMatches(".*spark-catalyst_2\\.\\d+-3\\.[^012]\\..*".r))
+  override def parseQuery(sqlText: String): LogicalPlan =
+    delegate.parseQuery(sqlText)
 }
 
 private[spark] object RikaiExtSqlParser {

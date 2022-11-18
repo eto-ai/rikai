@@ -39,7 +39,7 @@ jobs:
         path: |
           ~/.ivy2/cache
           ~/.sbt
-        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+        key: ${{ runner.os }}-pants-${{ hashFiles('**/build.sbt') }}
     - name: cache official pretrained Torch models
       uses: actions/cache@v2
       with:

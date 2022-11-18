@@ -10,18 +10,37 @@ python_sources(name = "sources",
 python_requirement(
     name="requirements",
     requirements=[
-        "mlflow==1.26.1",
+        # Apache Spark
         "pyspark==3.2.1",
         "antlr4-python3-runtime==4.11.1",
         "numpy",
         "pyarrow>=6.0",
         "pandas",
+        "py4j",
+
+        # MLflow
+        "mlflow==1.26.1",
+
+        # Image Processing
+        "opencv-python-headless",
+        "Pillow",
+
+        # Torch
         "torch>=1.8.1",
         "torchvision>=0.10.0",
-        "opencv-python-headless",
+
+        # Tensorflow
+        "tensorflow>=2.5.0",
+        "tensorflow_hub",
+
+        # Scikit Learn
+        "scikit-learn",
+
+        # MISC
         "ipython>=7.31.1,!=8.0.0",
         "jsonschema",
-        "Pillow",
+        "pyyaml",
+        "requests",
     ],
     resolve=parametrize("default", "lab")
 )

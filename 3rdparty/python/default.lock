@@ -28,7 +28,7 @@
 //     "scikit-learn",
 //     "tensorflow>=2.5.0",
 //     "tensorflow_hub",
-//     "torch>=1.8.1",
+//     "torch<1.13.0,>=1.8.1",
 //     "torchvision>=0.10.0"
 //   ],
 //   "manylinux": "manylinux2014",
@@ -5965,97 +5965,91 @@
           "artifacts": [
             {
               "algorithm": "sha256",
-              "hash": "47fe6228386bff6d74319a2ffe9d4ed943e6e85473d78e80502518c607d644d2",
-              "url": "https://files.pythonhosted.org/packages/28/ac/286c2b0639b838c27b8a13ba660d0141b055d9e5694a18c685692e9acd6e/torch-1.13.0-cp39-none-macosx_11_0_arm64.whl"
+              "hash": "69fe2cae7c39ccadd65a123793d30e0db881f1c1927945519c5c17323131437e",
+              "url": "https://files.pythonhosted.org/packages/c8/74/fd7d90bb7c589a695417e6922149dc3eb29fe0c9a97b6fb28ae851f1c19f/torch-1.12.1-cp39-none-macosx_11_0_arm64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "fa768432ce4b8ffa29184c79a3376ab3de4a57b302cdf3c026a6be4c5a8ab75b",
-              "url": "https://files.pythonhosted.org/packages/06/3d/19b2090f3f01751e816d409edcc808c82c2973348713186ac153e735d49f/torch-1.13.0-cp38-cp38-manylinux1_x86_64.whl"
+              "hash": "03e31c37711db2cd201e02de5826de875529e45a55631d317aadce2f1ed45aa8",
+              "url": "https://files.pythonhosted.org/packages/0a/c7/edde1dc87e3ec5f3ffed8019fb399948d82f40d71db092d395c8179e782c/torch-1.12.1-cp38-none-macosx_11_0_arm64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "43db0723fc66ad6486f86dc4890c497937f7cd27429f28f73fb7e4d74b7482e2",
-              "url": "https://files.pythonhosted.org/packages/08/e3/30098859059f08e9f842518afb6475db5c7fc48120d02f7e88f516d5da92/torch-1.13.0-cp311-cp311-manylinux1_x86_64.whl"
+              "hash": "9b356aea223772cd754edb4d9ecf2a025909b8615a7668ac7d5130f86e7ec421",
+              "url": "https://files.pythonhosted.org/packages/1e/2f/06d30fbc76707f14641fe737f0715f601243e039d676be487d0340559c86/torch-1.12.1-cp39-cp39-manylinux1_x86_64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "f01a9ae0d4b69d2fc4145e8beab45b7877342dddbd4838a7d3c11ca7f6680745",
-              "url": "https://files.pythonhosted.org/packages/24/86/3ba3dc76d4cdf7074afea3f32b5971fd4fedc0c8419b9e480bfd7ce8fec8/torch-1.13.0-cp38-none-macosx_11_0_arm64.whl"
+              "hash": "b5dbcca369800ce99ba7ae6dee3466607a66958afca3b740690d88168752abcf",
+              "url": "https://files.pythonhosted.org/packages/26/0d/be61ecd639ecd4d7d285c3c415f3c7273dc10e69789acd041888c0b5605d/torch-1.12.1-cp37-cp37m-manylinux2014_aarch64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "635dbb99d981a6483ca533b3dc7be18ef08dd9e1e96fb0bb0e6a99d79e85a130",
-              "url": "https://files.pythonhosted.org/packages/2a/5e/a6859a5dfac9f4925707d5837d90ffcc9071677ca4a6392e9405d6bf432b/torch-1.13.0-cp38-cp38-manylinux2014_aarch64.whl"
+              "hash": "68104e4715a55c4bb29a85c6a8d57d820e0757da363be1ba680fa8cc5be17b52",
+              "url": "https://files.pythonhosted.org/packages/2f/17/8b557dde1cdb5fbe82f90a3f192046c8e508f106456e12f17c87543e6a42/torch-1.12.1-cp310-none-macosx_11_0_arm64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "cd1e67db6575e1b173a626077a54e4911133178557aac50683db03a34e2b636a",
-              "url": "https://files.pythonhosted.org/packages/41/3d/680befd296b07e7963d637f945cfe4e7fe0d217045a2f50158cc2448a2b2/torch-1.13.0-cp37-none-macosx_10_9_x86_64.whl"
+              "hash": "4e1b9c14cf13fd2ab8d769529050629a0e68a6fc5cb8e84b4a3cc1dd8c4fe541",
+              "url": "https://files.pythonhosted.org/packages/36/b0/4857929aa28dfe26f7de909ebf002b60499edcd7566441a7433df865f9ba/torch-1.12.1-cp310-cp310-manylinux2014_aarch64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "bb33a911460475d1594a8c8cb73f58c08293211760796d99cae8c2509b86d7f1",
-              "url": "https://files.pythonhosted.org/packages/4f/78/0e87938c508f8b50b429c34234932fb1556c62a2f0a3774ee78652aef707/torch-1.13.0-cp37-cp37m-manylinux2014_aarch64.whl"
+              "hash": "976c3f997cea38ee91a0dd3c3a42322785414748d1761ef926b789dfa97c6134",
+              "url": "https://files.pythonhosted.org/packages/37/72/ef80d39a371a9b4a8aadfb22b141972cc67a7075dae69a9d5b8116505ec0/torch-1.12.1-cp310-none-macosx_10_9_x86_64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "9197ec216833b836b67e4d68e513d31fb38d9789d7cd998a08fba5b499c38454",
-              "url": "https://files.pythonhosted.org/packages/51/dc/53ec2d915f485c3b23f650011d9fec44a5263c8b3ae273e71f207b4dc2eb/torch-1.13.0-cp37-none-macosx_11_0_arm64.whl"
+              "hash": "42f639501928caabb9d1d55ddd17f07cd694de146686c24489ab8c615c2871f2",
+              "url": "https://files.pythonhosted.org/packages/41/d9/0e5f898e7a5257b1dd4f1b51926f342b92d2cd53d2b544d2e91fb3b0238c/torch-1.12.1-cp37-none-macosx_11_0_arm64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "d2d2753519415d154de4d3e64d2eaaeefdba6b6fd7d69d5ffaef595988117700",
-              "url": "https://files.pythonhosted.org/packages/5c/61/b0303b8810c1300e75e8e665d043f6c2b272a4da60e9cc33416cde8edb76/torch-1.13.0-cp310-cp310-manylinux2014_aarch64.whl"
+              "hash": "0b44601ec56f7dd44ad8afc00846051162ef9c26a8579dda0a02194327f2d55e",
+              "url": "https://files.pythonhosted.org/packages/50/5e/ad5fc13e43dc6bb964f68e2284ef36fac63b018efecf4a35c381c4668b71/torch-1.12.1-cp38-cp38-manylinux1_x86_64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "922a4910613b310fbeb87707f00cb76fec328eb60cc1349ed2173e7c9b6edcd8",
-              "url": "https://files.pythonhosted.org/packages/68/13/62f70eaa7f0785841e4df6d31c2e5027eca589040854b34ad8eba154eea8/torch-1.13.0-cp39-none-macosx_10_9_x86_64.whl"
+              "hash": "cd26d8c5640c3a28c526d41ccdca14cf1cbca0d0f2e14e8263a7ac17194ab1d2",
+              "url": "https://files.pythonhosted.org/packages/5c/9e/108882bb53f8a105424c3aa3f73425e0f1ce142a6a7cfceb807bde28e363/torch-1.12.1-cp38-cp38-manylinux2014_aarch64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "0fdd38c96230947b1ed870fed4a560252f8d23c3a2bf4dab9d2d42b18f2e67c8",
-              "url": "https://files.pythonhosted.org/packages/79/b3/eaea3fc35d0466b9dae1e3f9db08467939347b3aaa53c0fd81953032db33/torch-1.13.0-cp310-none-macosx_11_0_arm64.whl"
+              "hash": "6cf6f54b43c0c30335428195589bd00e764a6d27f3b9ba637aaa8c11aaf93073",
+              "url": "https://files.pythonhosted.org/packages/65/53/368e6cc70870ec65a520f20d9d55e52de38c2130aa8f90fe51d5c08a1dc6/torch-1.12.1-cp39-cp39-manylinux2014_aarch64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "e643ac8d086706e82f77b5d4dfcf145a9dd37b69e03e64177fc23821754d2ed7",
-              "url": "https://files.pythonhosted.org/packages/7a/fb/b1b11ae95ffa7099ca2e60ed5945e56130cc8740208f42aa77f17e03ab3c/torch-1.13.0-cp37-cp37m-manylinux1_x86_64.whl"
+              "hash": "8a34a2fbbaa07c921e1b203f59d3d6e00ed379f2b384445773bd14e328a5b6c8",
+              "url": "https://files.pythonhosted.org/packages/70/95/8de7cb231239fbac6f045bdee308ae0eb3ba89cf7c4f27b82bf3720b1a7c/torch-1.12.1-cp37-none-macosx_10_9_x86_64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "e20df14d874b024851c58e8bb3846249cb120e677f7463f60c986e3661f88680",
-              "url": "https://files.pythonhosted.org/packages/80/46/54fe9ff17de407bb661b9eec4ca9806e98416412c8345b7691334cc53d68/torch-1.13.0-cp39-cp39-manylinux2014_aarch64.whl"
+              "hash": "bfec2843daa654f04fda23ba823af03e7b6f7650a873cdb726752d0e3718dada",
+              "url": "https://files.pythonhosted.org/packages/71/08/dc7e078f035d17c7cecc8cae81cc450827eb95cd59785346663aafb17d90/torch-1.12.1-cp39-none-macosx_10_9_x86_64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "ef934a21da6f6a516d0a9c712a80d09c56128abdc6af8dc151bee5199b4c3b4e",
-              "url": "https://files.pythonhosted.org/packages/81/5f/2bae5eb478d65ce7e1dfbe58353c744bfe519c55cd862d85d64b478e5528/torch-1.13.0-cp38-none-macosx_10_9_x86_64.whl"
+              "hash": "743784ccea0dc8f2a3fe6a536bec8c4763bd82c1352f314937cb4008d4805de1",
+              "url": "https://files.pythonhosted.org/packages/b9/af/23c13cd340cd333f42de225ba3da3b64e1a70425546d1a59bfa42d465a5d/torch-1.12.1-cp37-cp37m-manylinux1_x86_64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "f68edfea71ade3862039ba66bcedf954190a2db03b0c41a9b79afd72210abd97",
-              "url": "https://files.pythonhosted.org/packages/83/4b/f71a84a44192ff5fc57c2a82b9b015876c3244d3ef478a8910b701515ed0/torch-1.13.0-cp310-cp310-manylinux1_x86_64.whl"
+              "hash": "a8320ba9ad87e80ca5a6a016e46ada4d1ba0c54626e135d99b2129a4541c509d",
+              "url": "https://files.pythonhosted.org/packages/c6/3d/458fd09b2c9f6a4192682b767b62394018711f5c44f366bfce6c3d250aca/torch-1.12.1-cp38-none-macosx_10_9_x86_64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "9ac382cedaf2f70afea41380ad8e7c06acef6b5b7e2aef3971cdad666ca6e185",
-              "url": "https://files.pythonhosted.org/packages/9b/65/9bfeaa7b08a727f07b617c036c4fc52e28e5aef88d890c857c1f33850aa0/torch-1.13.0-cp39-cp39-manylinux1_x86_64.whl"
-            },
-            {
-              "algorithm": "sha256",
-              "hash": "49a949b8136b32b2ec0724cbf4c6678b54e974b7d68f19f1231eea21cde5c23b",
-              "url": "https://files.pythonhosted.org/packages/b6/79/ead6840368f294497591af143980372ff956fc4c982c457a8b5610a5a1f3/torch-1.13.0-cp310-none-macosx_10_9_x86_64.whl"
+              "hash": "9c038662db894a23e49e385df13d47b2a777ffd56d9bcd5b832593fab0a7e286",
+              "url": "https://files.pythonhosted.org/packages/ca/74/7342c7f21449557a8263c925071a55081edd7e9b641404cfe31d6fb71d3b/torch-1.12.1-cp310-cp310-manylinux1_x86_64.whl"
             }
           ],
           "project_name": "torch",
           "requires_dists": [
-            "opt-einsum>=3.3; extra == \"opt-einsum\"",
             "typing-extensions"
           ],
           "requires_python": ">=3.7.0",
-          "version": "1.13"
+          "version": "1.12.1"
         },
         {
           "artifacts": [
@@ -6453,7 +6447,7 @@
     "scikit-learn",
     "tensorflow>=2.5.0",
     "tensorflow_hub",
-    "torch>=1.8.1",
+    "torch<1.13.0,>=1.8.1",
     "torchvision>=0.10.0"
   ],
   "requires_python": [

@@ -17,6 +17,10 @@ jobs:
         python-version: [3.9]
     steps:
     - uses: actions/checkout@v2
+    - name: Setup Scala
+      uses: olafurpg/setup-scala@v10
+      with:
+        java-version: adopt@1.11
     - uses: actions/cache@v2
       id: cache
       with:

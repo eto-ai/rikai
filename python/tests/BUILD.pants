@@ -1,6 +1,6 @@
 python_sources(
     name="sources",
-    sources=["**/conftest.py"],
+    sources=["**/conftest.py", "spark/sql/codegen/utils.py"],
     resolve="default",
 )
 

@@ -32,4 +32,4 @@ enable_resolves = true
     "pytest-timeout",
     "requests-mock",
   ]
-  lockfile = "3rdpaty/python/pytest.lock"
+  lockfile = "3rdparty/python/pytest.lock"

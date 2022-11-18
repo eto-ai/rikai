@@ -11,7 +11,17 @@ python_requirement(
     name="requirements",
     requirements=[
         "mlflow==1.26.1",
-        "pyspark==3.2.1"
+        "pyspark==3.2.1",
+        "antlr4-python3-runtime==4.11.1",
+        "numpy",
+        "pyarrow>=6.0",
+        "pandas",
+        "torch>=1.8.1",
+        "torchvision>=0.10.0",
+        "opencv-python-headless",
+        "ipython>=7.31.1,!=8.0.0",
+        "jsonschema",
+        "Pillow",
     ],
     resolve=parametrize("default", "lab")
 )

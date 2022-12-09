@@ -39,6 +39,7 @@ from rikai.spark.sql.codegen.mlflow_logger import (
     MlflowLogger,
 )
 from rikai.spark.sql.exceptions import SpecError
+from rikai.spark.sql.model import is_fully_qualified_name
 
 __all__ = ["MlflowRegistry"]
 
@@ -86,6 +87,10 @@ class MlflowModelSpec(ModelSpec):
                 return mlflow.pyfunc.load_model(
                     self.model_uri
                 )._model_impl.model
+            elif is_fully_qualified_name(self.flavor):
+                return getattr(mlflow, self.flavor.split(".")[-1]).load_model(
+                    self.model_uri
+                )
             else:
                 return getattr(mlflow, self.flavor).load_model(self.model_uri)
         finally:

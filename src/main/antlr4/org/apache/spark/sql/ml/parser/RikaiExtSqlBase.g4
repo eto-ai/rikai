@@ -21,7 +21,7 @@ singleStatement
 
 statement
     : CREATE (OR REPLACE)? MODEL (IF NOT EXISTS)? model=qualifiedName
-      (FLAVOR flavor=identifier)?
+      (FLAVOR flavor=qualifiedName)?
       (MODEL_TYPE modeltype=qualifiedName)?
       (OPTIONS optionList)?
       (RETURNS datatype=dataType)?

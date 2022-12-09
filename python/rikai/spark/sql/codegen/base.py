@@ -73,10 +73,10 @@ def codegen_from_spec(spec: ModelSpec):
     ModuleType
         The imported module for the specific flavor codegen
     """
-    if spec.flavor in KNOWN_FLAVORS:
-        codegen_module = f"rikai.spark.sql.codegen.{spec.flavor}"
-    elif is_fully_qualified_name(spec.flavor):
+    if is_fully_qualified_name(spec.flavor):
         codegen_module = f"{spec.flavor}.codegen"
+    elif spec.flavor in KNOWN_FLAVORS:
+        codegen_module = f"rikai.spark.sql.codegen.{spec.flavor}"
     else:
         codegen_module = f"rikai.contrib.{spec.flavor}.codegen"
 

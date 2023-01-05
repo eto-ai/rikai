@@ -1,8 +1,0 @@
-FROM python:3.9-slim
-
-RUN pip install mlflow==1.26.1
-
-CMD ["mlflow", "server", "--host", "0.0.0.0", "--workers", "1", \
-     "--backend-store-uri", "sqlite:///tmp/mlflow.db", \
-     "--default-artifact-root", "file:/tmp/mlflow/artifact" \
-     ]

@@ -1,8 +1,0 @@
-version: "3.9"
-services:
-  mlflow:
-    build:
-      context: .
-      dockerfile: Dockerfile.mlflow
-    ports:
-      - 15000:5000

@@ -37,7 +37,6 @@ python/rikai/spark/sql/generated/RikaiModelSchemaParser.py: src/main/antlr4/org/
 lint:
 	sbt scalafmtCheckAll
 	black --check python contrib experimental
-	pycodestyle python contrib/
 .PHONY: lint
 
 # Fix code style
